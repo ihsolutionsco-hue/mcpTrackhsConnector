@@ -1,0 +1,36 @@
+{
+  "name": "trackhs-mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MCP Server para integración con Track HS API",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "clean": "rm -rf dist",
+    "setup": "node scripts/setup.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "mcp",
+    "trackhs",
+    "api",
+    "reviews",
+    "reservations",
+    "contacts"
+  ],
+  "author": "Track HS Team",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
