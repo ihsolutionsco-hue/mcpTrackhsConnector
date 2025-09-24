@@ -1,10 +1,9 @@
 /**
  * Servidor MCP remoto para Track HS
- * Implementa transporte SSE según especificaciones MCP
+ * Implementa transporte HTTP simple para Cloudflare Workers
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -31,9 +30,8 @@ interface Env {
 export class TrackHSMCPServer {
   private server: Server;
   private tools: BaseTrackHSTool[];
-  private transport: SSEServerTransport;
 
-  constructor(private env: any) {
+  constructor(private env: Env) {
     // Validar variables de entorno
     this.validateEnvironment();
 
@@ -73,7 +71,7 @@ export class TrackHSMCPServer {
    * Valida que las variables de entorno estén configuradas
    */
   private validateEnvironment(): void {
-    const requiredVars = ['TRACKHS_API_URL', 'TRACKHS_USERNAME', 'TRACKHS_PASSWORD'];
+    const requiredVars: (keyof Env)[] = ['TRACKHS_API_URL', 'TRACKHS_USERNAME', 'TRACKHS_PASSWORD'];
     
     for (const varName of requiredVars) {
       if (!this.env[varName]) {
@@ -147,7 +145,7 @@ export class TrackHSMCPServer {
   }
 
   /**
-   * Maneja las peticiones HTTP entrantes con transporte SSE
+   * Maneja las peticiones HTTP entrantes
    */
   async handleRequest(request: Request): Promise<Response> {
     try {
@@ -166,23 +164,90 @@ export class TrackHSMCPServer {
         return new Response(null, { headers: corsHeaders });
       }
 
-      // Endpoint MCP con transporte SSE
+      // Endpoint MCP
       if (url.pathname === '/mcp' && request.method === 'POST') {
-        // Crear transporte SSE
-        this.transport = new SSEServerTransport('/mcp', this.server);
-        
-        // Conectar el servidor al transporte
-        await this.server.connect(this.transport);
-        
-        // Retornar respuesta SSE
-        return new Response(this.transport.getReadableStream(), {
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive'
+        try {
+          const body = await request.json();
+          
+          // Procesar petición MCP
+          let response;
+          
+          if (body.method === 'initialize') {
+            response = {
+              jsonrpc: '2.0',
+              id: body.id,
+              result: {
+                protocolVersion: '2024-11-05',
+                capabilities: {
+                  tools: {},
+                  prompts: {},
+                  resources: {}
+                },
+                serverInfo: {
+                  name: 'trackhs-mcp-server',
+                  version: '1.0.0'
+                }
+              }
+            };
+          } else if (body.method === 'tools/list') {
+            response = {
+              jsonrpc: '2.0',
+              id: body.id,
+              result: {
+                tools: this.tools.map(tool => ({
+                  name: tool.name,
+                  description: tool.description,
+                  inputSchema: tool.inputSchema
+                }))
+              }
+            };
+          } else if (body.method === 'tools/call') {
+            const { name, arguments: args } = body.params;
+            
+            const tool = this.tools.find(t => t.name === name);
+            if (!tool) {
+              throw new Error(`Herramienta desconocida: ${name}`);
+            }
+
+            const result = await tool.execute(args || {});
+            response = {
+              jsonrpc: '2.0',
+              id: body.id,
+              result: {
+                content: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2)
+                  }
+                ]
+              }
+            };
+          } else {
+            throw new Error(`Método no soportado: ${body.method}`);
           }
-        });
+          
+          return new Response(JSON.stringify(response), {
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            }
+          });
+        } catch (error) {
+          return new Response(JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            error: {
+              code: -32603,
+              message: error instanceof Error ? error.message : 'Error interno del servidor'
+            }
+          }), {
+            status: 500,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            }
+          });
+        }
       }
 
       // Health check

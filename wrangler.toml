@@ -1,0 +1,15 @@
+name = "trackhs-mcp-remote"
+main = "dist/cloudflare/worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# Variables secretas (configurar con wrangler secret put)
+# TRACKHS_API_URL
+# TRACKHS_USERNAME  
+# TRACKHS_PASSWORD
+
+[env.development]
+vars = { ENVIRONMENT = "development" }
