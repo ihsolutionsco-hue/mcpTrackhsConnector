@@ -1,8 +1,9 @@
 /**
- * Servidor MCP principal para Track HS
+ * Servidor MCP remoto para Track HS
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema
@@ -17,19 +18,27 @@ import { GetUnitsTool } from './tools/get-units.js';
 import { GetFoliosCollectionTool } from './tools/get-folios-collection.js';
 import { GetContactsTool } from './tools/get-contacts.js';
 
+// Tipos para variables de entorno
+interface Env {
+  TRACKHS_API_URL: string;
+  TRACKHS_USERNAME: string;
+  TRACKHS_PASSWORD: string;
+  ENVIRONMENT?: string;
+}
+
 export class TrackHSMCPServer {
   private server: Server;
   private tools: BaseTrackHSTool[];
 
-  constructor() {
+  constructor(private env: any) {
     // Validar variables de entorno
     this.validateEnvironment();
 
     // Configuración desde variables de entorno
     const apiClient = new TrackHSApiClient({
-      baseUrl: process.env.TRACKHS_API_URL!,
-      username: process.env.TRACKHS_USERNAME!,
-      password: process.env.TRACKHS_PASSWORD!
+      baseUrl: this.env.TRACKHS_API_URL,
+      username: this.env.TRACKHS_USERNAME,
+      password: this.env.TRACKHS_PASSWORD
     });
 
     // Registrar herramientas
@@ -59,17 +68,17 @@ export class TrackHSMCPServer {
    * Valida que las variables de entorno estén configuradas
    */
   private validateEnvironment(): void {
-    const requiredEnvVars = ['TRACKHS_API_URL', 'TRACKHS_USERNAME', 'TRACKHS_PASSWORD'];
+    const requiredVars = ['TRACKHS_API_URL', 'TRACKHS_USERNAME', 'TRACKHS_PASSWORD'];
     
-    for (const envVar of requiredEnvVars) {
-      if (!process.env[envVar]) {
-        throw new Error(`Variable de entorno requerida no configurada: ${envVar}`);
+    for (const varName of requiredVars) {
+      if (!this.env[varName]) {
+        throw new Error(`Variable de entorno requerida no configurada: ${varName}`);
       }
     }
 
     // Validar formato de URL
     try {
-      new URL(process.env.TRACKHS_API_URL!);
+      new URL(this.env.TRACKHS_API_URL);
     } catch {
       throw new Error('TRACKHS_API_URL debe ser una URL válida');
     }
@@ -117,32 +126,102 @@ export class TrackHSMCPServer {
   }
 
   /**
-   * Inicia el servidor MCP
+   * Maneja las peticiones HTTP entrantes
    */
-  async start(): Promise<void> {
+  async handleRequest(request: Request): Promise<Response> {
     try {
-      // Determinar tipo de transporte basado en el entorno
-      const transport = process.stdin.readable 
-        ? await import('@modelcontextprotocol/sdk/server/stdio.js').then(m => new m.StdioServerTransport())
-        : await import('@modelcontextprotocol/sdk/server/stdio.js').then(m => new m.StdioServerTransport());
+      const url = new URL(request.url);
+      
+      // Headers CORS
+      const corsHeaders = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Content-Type': 'application/json'
+      };
 
-      await this.server.connect(transport);
-      console.error('Track HS MCP Server iniciado correctamente');
+      // Manejar preflight
+      if (request.method === 'OPTIONS') {
+        return new Response(null, { headers: corsHeaders });
+      }
+
+      // Obtener herramientas disponibles
+      if (url.pathname === '/mcp/tools' && request.method === 'GET') {
+        const tools = this.tools.map(tool => ({
+          name: tool.name,
+          description: tool.description,
+          inputSchema: tool.inputSchema
+        }));
+        
+        return new Response(JSON.stringify({ tools }), { headers: corsHeaders });
+      }
+
+      // Ejecutar herramienta
+      if (url.pathname === '/mcp/call' && request.method === 'POST') {
+        const body = await request.json();
+        const { name, arguments: args } = body;
+        
+        const tool = this.tools.find(t => t.name === name);
+        if (!tool) {
+          return new Response(JSON.stringify({ 
+            error: `Herramienta desconocida: ${name}` 
+          }), { 
+            status: 404, 
+            headers: corsHeaders 
+          });
+        }
+
+        try {
+          const result = await tool.execute(args || {});
+          return new Response(JSON.stringify({ result }), { headers: corsHeaders });
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+          return new Response(JSON.stringify({ 
+            error: `Error en ejecución: ${errorMessage}` 
+          }), { 
+            status: 500, 
+            headers: corsHeaders 
+          });
+        }
+      }
+
+      // Endpoint por defecto
+      return new Response(JSON.stringify({ 
+        message: 'TrackHS MCP Server',
+        endpoints: ['/mcp/tools', '/mcp/call'],
+        tools: this.tools.map(t => t.name)
+      }), { headers: corsHeaders });
+      
     } catch (error) {
-      console.error('Error al iniciar Track HS MCP Server:', error);
-      process.exit(1);
+      console.error('Error en servidor MCP:', error);
+      
+      return new Response(JSON.stringify({ 
+        error: 'Error interno del servidor',
+        message: error instanceof Error ? error.message : 'Error desconocido'
+      }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
   }
 
   /**
-   * Detiene el servidor
+   * Obtiene información sobre las herramientas disponibles
    */
-  async stop(): Promise<void> {
-    try {
-      await this.server.close();
-      console.error('Track HS MCP Server detenido');
-    } catch (error) {
-      console.error('Error al detener el servidor:', error);
-    }
+  getToolsInfo(): Array<{name: string, description: string}> {
+    return this.tools.map(tool => ({
+      name: tool.name,
+      description: tool.description
+    }));
+  }
+
+  /**
+   * Obtiene estadísticas del servidor
+   */
+  getStats(): {toolsCount: number, environment: string} {
+    return {
+      toolsCount: this.tools.length,
+      environment: this.env.ENVIRONMENT || 'production'
+    };
   }
 }

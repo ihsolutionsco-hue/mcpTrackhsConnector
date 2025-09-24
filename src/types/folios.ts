@@ -98,91 +98,21 @@ export interface FolioCompany {
 export interface FolioRule {
   id: number;
   name: string;
-  code: string;
-  isActive: boolean;
-  type: 'percent' | 'breakdown';
-  percentAmount?: number;
-  breakdownRentMode?: 'percent' | 'nights';
-  breakdownRentIncludeTax?: boolean;
-  breakdownRentPercent?: number;
-  breakdownRentNights?: number;
-  breakdownFeeMode?: 'percent' | 'required';
-  breakdownFeeIncludeTax?: boolean;
-  breakdownFeePercent?: number;
-  breakdownChargesMode?: 'percent' | 'required';
-  breakdownChargesIncludeTax?: boolean;
-  _links: {
-    self: { href: string };
-  };
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-}
-
-export interface MasterFolioRule {
-  id: number;
-  ruleId: number;
-  startDate?: string;
-  endDate?: string;
-  minNights?: number;
-  maxNights?: number;
-  maxSpend?: number;
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  _embedded?: {
-    rule: FolioRule;
-  };
-  _links: {
-    self: { href: string };
-  };
-}
-
-export interface Folio {
-  id: number;
+  type: 'guest' | 'master' | 'guest-sub-folio' | 'master-sub-folio';
   status: 'open' | 'closed';
-  type: 'guest' | 'master';
-  currentBalance: number;
-  realizedBalance: number;
-  closedDate?: string;
-  endDate?: string;
-  startDate?: string;
-  taxEmpty: boolean;
-  companyId?: number;
-  contactId: number;
-  
-  // Campos opcionales según tipo de folio
-  masterFolioRuleId?: number;
-  masterFolioId?: number;
-  agentCommission?: number;
-  ownerCommission?: number;
-  ownerRevenue?: number;
-  checkOutDate?: string;
-  checkInDate?: string;
-  exceptionMessage?: string;
-  hasException?: boolean;
-  travelAgentId?: number;
+  startDate: string;
+  endDate: string;
+  contactName: string;
+  companyName?: string;
   reservationId?: number;
-  name?: string;
-  
+  currentBalance: string;
+  realizedBalance: string;
+  masterFolioRule?: number;
   _links: {
     self: { href: string };
-    logs?: { href: string };
   };
   updatedAt: string;
-  updatedBy: string;
   createdAt: string;
-  createdBy: string;
-  
-  _embedded?: {
-    contact?: FolioContact;
-    travelAgent?: FolioCompany;
-    company?: FolioCompany;
-    masterFolioRule?: MasterFolioRule;
-    masterFolio?: Folio;
-  };
 }
 
 export interface GetFoliosCollectionParams {
@@ -209,7 +139,7 @@ export interface GetFoliosCollectionParams {
 
 export interface GetFoliosCollectionResponse {
   _embedded: {
-    folios: Folio[];
+    folios: FolioRule[];
   };
   page: number;
   page_count: number;
@@ -222,4 +152,14 @@ export interface GetFoliosCollectionResponse {
     next?: { href: string };
     prev?: { href: string };
   };
+}
+
+export interface FolioFilters {
+  type?: 'guest' | 'master' | 'guest-sub-folio' | 'master-sub-folio';
+  status?: 'open' | 'closed';
+  masterFolioId?: number;
+  contactId?: number;
+  companyId?: number;
+  dateFrom?: string;
+  dateTo?: string;
 }

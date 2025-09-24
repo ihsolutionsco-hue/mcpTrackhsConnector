@@ -8,7 +8,7 @@ export class TrackHSAuth {
   private credentials: string;
 
   constructor(config: TrackHSConfig) {
-    this.credentials = Buffer.from(`${config.username}:${config.password}`).toString('base64');
+    this.credentials = btoa(`${config.username}:${config.password}`);
   }
 
   /**

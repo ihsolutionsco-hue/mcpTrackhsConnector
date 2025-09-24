@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * Script de configuración para Track HS MCP Server
+ * Script de configuración para Track HS MCP Remote Server
  */
 
 import { execSync } from 'child_process';
 import { existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-console.log('🚀 Configurando Track HS MCP Server...\n');
+console.log('🚀 Configurando Track HS MCP Remote Server...\n');
 
 // Verificar Node.js
 try {
@@ -64,5 +64,9 @@ TRACKHS_PASSWORD=your_password
 console.log('\n🎉 ¡Configuración completada!');
 console.log('\n📋 Próximos pasos:');
 console.log('1. Edita el archivo .env con tus credenciales de Track HS');
-console.log('2. Ejecuta: npm start');
-console.log('3. Configura Claude Desktop con este servidor MCP');
+console.log('2. Configura las variables secretas en Cloudflare:');
+console.log('   wrangler secret put TRACKHS_API_URL');
+console.log('   wrangler secret put TRACKHS_USERNAME');
+console.log('   wrangler secret put TRACKHS_PASSWORD');
+console.log('3. Despliega: npm run deploy');
+console.log('4. Configura Claude Desktop con la URL del conector');

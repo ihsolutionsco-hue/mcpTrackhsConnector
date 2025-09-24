@@ -255,15 +255,10 @@ export class SearchReservationsTool extends BaseTrackHSTool {
 
     const endpoint = `/v2/pms/reservations?${queryParams.toString()}`;
     
-    // Debug: Log the endpoint being called
-    console.error(`[DEBUG] Calling endpoint: ${endpoint}`);
-    console.error(`[DEBUG] Query params:`, Object.fromEntries(queryParams.entries()));
-    
     try {
       const result = await this.apiClient.get<SearchReservationsResponse>(endpoint);
       return result;
     } catch (error) {
-      console.error(`[DEBUG] Error details:`, error);
       throw new Error(`Error al buscar reservaciones: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   }
