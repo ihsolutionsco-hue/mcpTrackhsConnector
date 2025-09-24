@@ -1,5 +1,5 @@
 name = "trackhs-mcp-remote"
-main = "dist/cloudflare/worker.js"
+main = "cloudflare/worker.js"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
@@ -10,6 +10,8 @@ vars = { ENVIRONMENT = "production" }
 # TRACKHS_API_URL
 # TRACKHS_USERNAME  
 # TRACKHS_PASSWORD
+# OAUTH_CLIENT_ID (opcional, por defecto: trackhs-mcp-client)
+# OAUTH_CLIENT_SECRET (opcional, por defecto: trackhs-mcp-secret)
 
 [env.development]
 vars = { ENVIRONMENT = "development" }

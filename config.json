@@ -1,0 +1,7 @@
+{
+  "trackhs": {
+    "apiUrl": "https://api-integration-example.tracksandbox.io/api",
+    "username": "test_user",
+    "password": "test_password"
+  }
+}
