@@ -1,6 +1,6 @@
-# Track HS MCP Server
+# Track HS MCP Remote Connector
 
-Un servidor Model Context Protocol (MCP) para integración con la API de Track HS, permitiendo a asistentes de IA acceder a datos de propiedades, reservas y reseñas.
+Un conector MCP remoto para integración con la API de Track HS, permitiendo a asistentes de IA acceder a datos de propiedades, reservas y reseñas a través de internet. Desplegado en Cloudflare Workers para máxima escalabilidad y disponibilidad.
 
 ## Características
 
@@ -9,7 +9,8 @@ Un servidor Model Context Protocol (MCP) para integración con la API de Track H
 - ✅ **Gestión de Reservas** - Acceso a detalles completos de reservaciones
 - ✅ **Gestión de Unidades** - Consulta avanzada de unidades de alojamiento
 - ✅ **Gestión de Folios** - Consulta de facturas y recibos con filtros avanzados
-- ✅ **Gestión de Contactos** - Acceso completo al CRM de contactos (huéspedes, propietarios, empleados)
+- ✅ **Gestión de Contactos** - Acceso completo al CRM de contactos
+- ✅ **Hosting en Cloudflare Workers** - Escalable y gratuito
 - ✅ **Arquitectura Escalable** - Fácil adición de nuevos endpoints
 - ✅ **Manejo de Errores** - Gestión robusta de errores de API
 
@@ -129,74 +130,103 @@ Obtener todos los contactos del sistema CRM de Track HS. Incluye huéspedes, pro
 - `size` (number, opcional): Tamaño de página (máximo 100)
 - `updatedSince` (string, opcional): Fecha en formato ISO 8601 para filtrar contactos actualizados desde esa fecha
 
-## Instalación
+## Instalación y Configuración
 
 ### Prerrequisitos
 
 - Node.js 18+ 
+- Cuenta de Cloudflare (gratuita)
 - Credenciales de Track HS (usuario y contraseña)
 - Acceso a la API de Track HS
 
-### Configuración
+### Configuración Rápida
 
 1. **Clonar e instalar dependencias:**
 ```bash
 git clone <repository-url>
-cd trackhs-mcp-server
+cd trackhs-mcp-remote
 npm install
 ```
 
-2. **Compilar el proyecto:**
+2. **Configurar Cloudflare:**
 ```bash
+# Instalar Wrangler CLI
+npm install -g wrangler
+
+# Autenticar con Cloudflare (usar token predefinido "Edit Cloudflare Workers")
+wrangler login
+
+# Configurar variables secretas
+wrangler secret put TRACKHS_API_URL --name trackhs-mcp-remote
+wrangler secret put TRACKHS_USERNAME --name trackhs-mcp-remote  
+wrangler secret put TRACKHS_PASSWORD --name trackhs-mcp-remote
+```
+
+3. **Compilar y desplegar:**
+```bash
+# Compilar el código
 npm run build
+
+# Desplegar a Cloudflare Workers
+wrangler deploy --name trackhs-mcp-remote
 ```
 
-3. **Configurar variables de entorno:**
+### Configuración de Variables Secretas
+
+**Importante:** Necesitas configurar estas variables secretas en Cloudflare:
+
+- `TRACKHS_API_URL`: URL base de tu API de Track HS (ej: `https://api.trackhs.com/api`)
+- `TRACKHS_USERNAME`: Tu usuario de Track HS
+- `TRACKHS_PASSWORD`: Tu contraseña de Track HS
+
+**Comando para configurar cada variable:**
 ```bash
-export TRACKHS_API_URL="https://api-integration-example.tracksandbox.io/api"
-export TRACKHS_USERNAME="your_username"
-export TRACKHS_PASSWORD="your_password"
+wrangler secret put TRACKHS_API_URL --name trackhs-mcp-remote
+# Luego pegar la URL cuando te lo pida
+
+wrangler secret put TRACKHS_USERNAME --name trackhs-mcp-remote  
+# Luego pegar tu usuario cuando te lo pida
+
+wrangler secret put TRACKHS_PASSWORD --name trackhs-mcp-remote
+# Luego pegar tu contraseña cuando te lo pida
 ```
 
-## Uso con Claude Desktop
+## Uso con Claude
 
-Agregar la siguiente configuración a tu archivo de configuración de Claude Desktop:
+### Obtener URL del Conector
 
-### Configuración Manual
-
-```json
-{
-  "mcpServers": {
-    "trackhs": {
-      "command": "node",
-      "args": ["path/to/trackhs-mcp-server/dist/index.js"],
-      "env": {
-        "TRACKHS_API_URL": "https://api-integration-example.tracksandbox.io/api",
-        "TRACKHS_USERNAME": "your_username", 
-        "TRACKHS_PASSWORD": "your_password"
-      }
-    }
-  }
-}
+Una vez desplegado, tu conector estará disponible en:
+```
+https://trackhs-mcp-remote.tu-subdomain.workers.dev
 ```
 
-### Configuración con NPX (Próximamente)
+**Endpoints disponibles:**
+- `https://trackhs-mcp-remote.tu-subdomain.workers.dev/health` - Health check
+- `https://trackhs-mcp-remote.tu-subdomain.workers.dev/mcp/tools` - Listar herramientas
+- `https://trackhs-mcp-remote.tu-subdomain.workers.dev/mcp/call` - Ejecutar herramientas
 
-```json
-{
-  "mcpServers": {
-    "trackhs": {
-      "command": "npx",
-      "args": ["trackhs-mcp-server"],
-      "env": {
-        "TRACKHS_API_URL": "https://api-integration-example.tracksandbox.io/api",
-        "TRACKHS_USERNAME": "your_username",
-        "TRACKHS_PASSWORD": "your_password"
-      }
-    }
-  }
-}
+### Configuración en Claude Desktop
+
+1. Ir a **Settings > Connectors**
+2. Hacer clic en **"Add custom connector"**
+3. Pegar la URL del conector: `https://trackhs-mcp-remote.tu-subdomain.workers.dev`
+4. Hacer clic en **"Add"**
+
+### Configuración en Claude Web
+
+1. Ir a **Settings > Connectors**
+2. Hacer clic en **"Add custom connector"**
+3. Pegar la URL del conector: `https://trackhs-mcp-remote.tu-subdomain.workers.dev`
+4. Hacer clic en **"Add"**
+
+### Verificar Funcionamiento
+
+Puedes verificar que el conector funciona visitando:
 ```
+https://trackhs-mcp-remote.tu-subdomain.workers.dev/health
+```
+
+Deberías ver una respuesta JSON con `{"status": "ok"}`.
 
 ## Ejemplos de Uso
 
@@ -272,36 +302,43 @@ Agregar la siguiente configuración a tu archivo de configuración de Claude Des
 ### Estructura del Proyecto
 
 ```
-trackhs-mcp-server/
+trackhs-mcp-remote/
 ├── src/
 │   ├── index.ts                # Entry point
-│   ├── server.ts               # Configuración del servidor MCP
+│   ├── server.ts               # Servidor MCP
 │   ├── core/                   # Componentes base
 │   │   ├── api-client.ts       # Cliente HTTP para Track HS
-│   │   ├── base-tool.ts        # Clase base para herramientas
-│   │   └── types.ts            # Tipos compartidos
+│   │   ├── auth.ts            # Autenticación
+│   │   ├── base-tool.ts       # Clase base para herramientas
+│   │   └── types.ts           # Tipos compartidos
 │   ├── tools/                  # Herramientas MCP
-│   │   ├── get-reviews.ts      # Herramienta de reseñas
-│   │   ├── get-reservation.ts  # Herramienta de reservaciones
+│   │   ├── get-reviews.ts     # Herramienta de reseñas
+│   │   ├── get-reservation.ts # Herramienta de reservaciones
 │   │   ├── search-reservations.ts # Búsqueda de reservaciones
-│   │   ├── get-units.ts        # Herramienta de unidades
+│   │   ├── get-units.ts       # Herramienta de unidades
 │   │   ├── get-folios-collection.ts # Herramienta de folios
-│   │   └── get-contacts.ts     # Herramienta de contactos
+│   │   └── get-contacts.ts    # Herramienta de contactos
 │   └── types/                  # Tipos específicos de Track HS
-│       ├── reviews.ts          # Tipos de API de reseñas
-│       ├── reservations.ts     # Tipos de API de reservaciones
-│       ├── units.ts            # Tipos de API de unidades
-│       ├── folios.ts           # Tipos de API de folios
-│       └── contacts.ts         # Tipos de API de contactos
-└── dist/                       # Archivos compilados
+│       ├── reviews.ts         # Tipos de API de reseñas
+│       ├── reservations.ts    # Tipos de API de reservaciones
+│       ├── units.ts           # Tipos de API de unidades
+│       ├── folios.ts          # Tipos de API de folios
+│       └── contacts.ts        # Tipos de API de contactos
+├── cloudflare/
+│   ├── worker.ts              # Worker principal
+│   └── wrangler.toml          # Configuración Cloudflare
+└── scripts/
+    └── setup.js               # Script de configuración
 ```
 
 ### Scripts Disponibles
 
 ```bash
 npm run build      # Compilar TypeScript
-npm run start      # Ejecutar servidor compilado
-npm run dev        # Desarrollo con recarga automática
+npm run deploy     # Desplegar a Cloudflare
+npm run dev        # Desarrollo local
+npm run test       # Testing local
+npm run setup      # Configuración inicial
 ```
 
 ### Agregar Nuevos Endpoints
@@ -329,18 +366,40 @@ this.tools = [
 
 ## Seguridad
 
-- Las credenciales se manejan exclusivamente via variables de entorno
+- Las credenciales se manejan exclusivamente via variables de entorno de Cloudflare
 - Comunicación HTTPS con la API de Track HS
 - Validación de parámetros de entrada
 - Manejo seguro de errores sin exposición de datos sensibles
+- CORS configurado para Claude
 
 ## Solución de Problemas
 
-### Error de Autenticación
+### Error de Autenticación con Cloudflare
+```
+Authentication error [code: 10000]
+```
+**Solución:** 
+1. Usar el token predefinido "Edit Cloudflare Workers" en lugar de token personalizado
+2. Ir a: https://dash.cloudflare.com/profile/api-tokens
+3. Buscar "Edit Cloudflare Workers" y hacer clic en "Use"
+4. Configurar el nuevo token: `$env:CLOUDFLARE_API_TOKEN="nuevo_token"`
+
+### Error de Variables Secretas
+```
+Variable de entorno requerida no configurada: TRACKHS_API_URL
+```
+**Solución:** Configurar las variables secretas:
+```bash
+wrangler secret put TRACKHS_API_URL --name trackhs-mcp-remote
+wrangler secret put TRACKHS_USERNAME --name trackhs-mcp-remote  
+wrangler secret put TRACKHS_PASSWORD --name trackhs-mcp-remote
+```
+
+### Error de Autenticación con Track HS
 ```
 Track HS API Error: 401 Unauthorized
 ```
-**Solución:** Verificar que `TRACKHS_USERNAME` y `TRACKHS_PASSWORD` sean correctos.
+**Solución:** Verificar que las credenciales de Track HS sean correctas en las variables secretas.
 
 ### Error de Conexión
 ```
@@ -348,29 +407,29 @@ Track HS API Error: 500 Internal Server Error
 ```
 **Solución:** Verificar que `TRACKHS_API_URL` sea correcto y que el servicio esté disponible.
 
-### Herramienta No Encontrada
+### Error de Despliegue
 ```
-Unknown tool: tool_name
+Error: Failed to deploy
 ```
-**Solución:** Verificar que la herramienta esté registrada en `server.ts`.
+**Solución:** 
+1. Verificar autenticación: `wrangler whoami`
+2. Usar token predefinido "Edit Cloudflare Workers"
+3. Verificar que el código esté compilado: `npm run build`
 
 ## Roadmap
 
 ### Próximas Funcionalidades
-- [x] Gestión de Propiedades (Units/Properties)
-- [x] Gestión de Folios (Bills/Receipts)
-- [x] Gestión de Huéspedes (Contacts)
-- [ ] Autenticación HMAC
+- [ ] Autenticación OAuth 2.0
 - [ ] Cache inteligente
 - [ ] Rate limiting
 - [ ] Webhooks support
+- [ ] Métricas de uso
 
 ### Mejoras Técnicas
 - [ ] Tests automatizados
-- [ ] Documentación de API completa
 - [ ] Logging estructurado
-- [ ] Métricas de performance
 - [ ] Docker support
+- [ ] CI/CD pipeline
 
 ## Contribuir
 
@@ -391,6 +450,28 @@ Para soporte técnico:
 - Contactar: support@trackhs.com
 - Documentación API: https://support.trackhs.com
 
+## Estado Actual del Proyecto
+
+### ✅ Completado
+- [x] Arquitectura del conector MCP remoto
+- [x] Implementación de 6 herramientas Track HS
+- [x] Configuración para Cloudflare Workers
+- [x] Autenticación Basic Auth
+- [x] Documentación completa
+- [x] Manejo de errores robusto
+
+### 🔄 En Progreso
+- [ ] Despliegue exitoso en Cloudflare Workers
+- [ ] Configuración de variables secretas
+- [ ] Pruebas de funcionalidad
+
+### 📋 Próximos Pasos
+1. **Completar autenticación con Cloudflare** usando token predefinido
+2. **Configurar variables secretas** de Track HS
+3. **Desplegar el worker** y obtener URL
+4. **Probar conectividad** con Claude
+5. **Documentar URL final** del conector
+
 ---
 
-**Nota:** Este servidor MCP está en desarrollo activo. Las funcionalidades pueden cambiar entre versiones.
+**Nota:** Este conector MCP remoto está en desarrollo activo. Las funcionalidades pueden cambiar entre versiones.
