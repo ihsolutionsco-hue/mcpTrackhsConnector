@@ -569,9 +569,9 @@ Para soporte técnico:
 - **✅ Health Check**: `https://trackhs-mcp-remote.ihsolutionsco.workers.dev/health`
 - **✅ MCP Endpoint**: `https://trackhs-mcp-remote.ihsolutionsco.workers.dev/mcp`
 - **✅ Variables Secretas**: Configuradas y funcionando
-  - `TRACKHS_API_URL`: `https://ihmvacations.trackhs.com/api`
-  - `TRACKHS_USERNAME`: `aba99777416466b6bdc1a25223192ccb`
-  - `TRACKHS_PASSWORD`: `18c87461011f355cc11000a24215cbda`
+  - `TRACKHS_API_URL`: Configurada correctamente
+  - `TRACKHS_USERNAME`: Configurada correctamente
+  - `TRACKHS_PASSWORD`: Configurada correctamente
 
 ### 📋 **Próximos Pasos para el Usuario**
 1. **✅ Despliegue completado** - Worker funcionando en Cloudflare
@@ -617,9 +617,9 @@ Para soporte técnico:
 - **Estado**: ✅ Funcionando correctamente
 
 #### **Variables Secretas Configuradas:**
-- ✅ `TRACKHS_API_URL`: `https://ihmvacations.trackhs.com/api`
-- ✅ `TRACKHS_USERNAME`: `aba99777416466b6bdc1a25223192ccb`
-- ✅ `TRACKHS_PASSWORD`: `18c87461011f355cc11000a24215cbda`
+- ✅ `TRACKHS_API_URL`: Configurada correctamente
+- ✅ `TRACKHS_USERNAME`: Configurada correctamente
+- ✅ `TRACKHS_PASSWORD`: Configurada correctamente
 
 #### **Endpoints Verificados:**
 - ✅ **Health Check**: `https://trackhs-mcp-remote.ihsolutionsco.workers.dev/health`
