@@ -7,3 +7,7 @@ tests
 src
 tsconfig.json
 jest.config.mjs
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js

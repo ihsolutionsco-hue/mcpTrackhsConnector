@@ -22,5 +22,7 @@
   "env": {
     "NODE_ENV": "production"
   },
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }
