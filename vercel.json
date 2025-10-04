@@ -24,5 +24,6 @@
   },
   "regions": ["iad1"],
   "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "_comment": "Workflow actualizado - Vercel maneja despliegue automáticamente"
 }
