@@ -399,6 +399,10 @@ export interface SearchReservationsParams {
   // Filtros especiales
   inHouseToday?: 0 | 1;
   status?: 'Hold' | 'Confirmed' | 'Checked Out' | 'Checked In' | 'Cancelled' | string[];
+  
+  // Parámetros adicionales de la API
+  groupId?: number;
+  checkinOfficeId?: number;
 }
 
 export interface SearchReservationsResponse {

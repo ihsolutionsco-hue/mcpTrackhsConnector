@@ -29,6 +29,14 @@ export abstract class BaseTrackHSTool {
   protected validateParams(params: any): boolean {
     const schema = this.inputSchema;
     
+    // Verificar que params no sea null o undefined
+    if (params === null || params === undefined) {
+      if (schema.required && schema.required.length > 0) {
+        throw new Error(`Parámetro requerido faltante: ${schema.required[0]}`);
+      }
+      return true;
+    }
+    
     // Verificar propiedades requeridas
     if (schema.required) {
       for (const requiredProp of schema.required) {
@@ -44,14 +52,17 @@ export abstract class BaseTrackHSTool {
         const value = params[prop];
         const expectedType = propSchema.type;
         
-        if (expectedType === 'string' && typeof value !== 'string') {
-          throw new Error(`Parámetro '${prop}' debe ser string`);
-        }
-        if (expectedType === 'number' && typeof value !== 'number') {
-          throw new Error(`Parámetro '${prop}' debe ser number`);
-        }
-        if (expectedType === 'boolean' && typeof value !== 'boolean') {
-          throw new Error(`Parámetro '${prop}' debe ser boolean`);
+        // Solo validar si el valor no es undefined
+        if (value !== undefined) {
+          if (expectedType === 'string' && typeof value !== 'string') {
+            throw new Error(`Parámetro '${prop}' debe ser string`);
+          }
+          if (expectedType === 'number' && typeof value !== 'number') {
+            throw new Error(`Parámetro '${prop}' debe ser number`);
+          }
+          if (expectedType === 'boolean' && typeof value !== 'boolean') {
+            throw new Error(`Parámetro '${prop}' debe ser boolean`);
+          }
         }
       }
     }

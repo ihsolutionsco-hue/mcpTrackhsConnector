@@ -170,6 +170,16 @@ export class SearchReservationsTool extends BaseTrackHSTool {
           { type: 'array', items: { type: 'string' }, title: 'Multiple Statuses' }
         ],
         description: 'Return all reservations that are of the specific status(es). Can be single value or array. {Hold, Confirmed, Checked Out, Checked In, and Cancelled}'
+      },
+      
+      // Parámetros adicionales de la API
+      groupId: {
+        type: 'number',
+        description: 'Return all reservations that are connected to the specified groupId'
+      },
+      checkinOfficeId: {
+        type: 'number',
+        description: 'Return all reservations that are connected to the specified checkin office'
       }
     },
     required: []
@@ -178,6 +188,9 @@ export class SearchReservationsTool extends BaseTrackHSTool {
   async execute(params: SearchReservationsParams = {}): Promise<SearchReservationsResponse> {
     // Validar parámetros básicos
     this.validateParams(params);
+    
+    // Validar fechas si están presentes
+    this.validateDateParams(params);
 
     // Construir query parameters de forma más conservadora
     const queryParams = new URLSearchParams();
@@ -189,6 +202,15 @@ export class SearchReservationsTool extends BaseTrackHSTool {
     
     if (params.size !== undefined) {
       queryParams.append('size', params.size.toString());
+    }
+    
+    // Manejar scroll parameter (Elasticsearch scrolling)
+    if (params.scroll !== undefined) {
+      if (typeof params.scroll === 'number') {
+        queryParams.append('scroll', params.scroll.toString());
+      } else {
+        queryParams.append('scroll', params.scroll);
+      }
     }
     
     if (params.sortColumn) {
@@ -253,12 +275,26 @@ export class SearchReservationsTool extends BaseTrackHSTool {
       this.addStatusFilter(queryParams, params.status);
     }
 
+    // Agregar parámetros adicionales de la API
+    if (params.groupId !== undefined) {
+      queryParams.append('groupId', params.groupId.toString());
+    }
+    
+    if (params.checkinOfficeId !== undefined) {
+      queryParams.append('checkinOfficeId', params.checkinOfficeId.toString());
+    }
+
     const endpoint = `/v2/pms/reservations?${queryParams.toString()}`;
+    
+    // Debug: Log the endpoint being called
+    console.error(`[DEBUG] Calling endpoint: ${endpoint}`);
+    console.error(`[DEBUG] Query params:`, Object.fromEntries(queryParams.entries()));
     
     try {
       const result = await this.apiClient.get<SearchReservationsResponse>(endpoint);
       return result;
     } catch (error) {
+      console.error(`[DEBUG] Error details:`, error);
       throw new Error(`Error al buscar reservaciones: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   }
@@ -286,6 +322,40 @@ export class SearchReservationsTool extends BaseTrackHSTool {
       } else {
         queryParams.append('status', status);
       }
+    }
+  }
+
+  /**
+   * Valida el formato de fechas ISO 8601
+   */
+  private validateDateParams(params: SearchReservationsParams): void {
+    const dateParams = [
+      'bookedStart', 'bookedEnd', 'arrivalStart', 'arrivalEnd', 
+      'departureStart', 'departureEnd', 'updatedSince'
+    ];
+
+    for (const paramName of dateParams) {
+      const value = params[paramName as keyof SearchReservationsParams];
+      if (value && typeof value === 'string') {
+        if (!this.isValidISODate(value)) {
+          throw new Error(`Parámetro '${paramName}' debe tener formato ISO 8601 válido (YYYY-MM-DDTHH:mm:ss.sssZ)`);
+        }
+      }
+    }
+  }
+
+  /**
+   * Valida si una fecha tiene formato ISO 8601 válido
+   */
+  private isValidISODate(dateString: string): boolean {
+    try {
+      const date = new Date(dateString);
+      // Aceptar tanto formato completo ISO 8601 como formato de fecha simple
+      return date.toISOString() === dateString || 
+             /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/.test(dateString) ||
+             /^\d{4}-\d{2}-\d{2}$/.test(dateString); // Aceptar formato YYYY-MM-DD
+    } catch {
+      return false;
     }
   }
 }

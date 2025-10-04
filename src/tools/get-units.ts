@@ -347,10 +347,15 @@ export class GetUnitsTool extends BaseTrackHSTool {
 
     const endpoint = `/pms/units?${queryParams.toString()}`;
     
+    // Debug: Log the endpoint being called
+    console.error(`[DEBUG] Calling endpoint: ${endpoint}`);
+    console.error(`[DEBUG] Query params:`, Object.fromEntries(queryParams.entries()));
+    
     try {
       const result = await this.apiClient.get<GetUnitsResponse>(endpoint);
       return result;
     } catch (error) {
+      console.error(`[DEBUG] Error details:`, error);
       throw new Error(`Error al obtener unidades: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   }

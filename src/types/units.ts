@@ -98,43 +98,24 @@ export interface Node {
   longitude: number;
   petsFriendly: boolean;
   maxPets?: number;
-  eventsAllowed: boolean;
   smokingAllowed: boolean;
   childrenAllowed: boolean;
   minimumAgeLimit?: number;
   isAccessible: boolean;
-  area?: number;
-  floors?: number;
-  maxOccupancy: number;
-  securityDeposit: string;
-  bedrooms: number;
-  fullBathrooms: number;
-  threeQuarterBathrooms: number;
-  halfBathrooms: number;
-  bedTypes: BedType[];
-  rooms: Room[];
   amenities: Amenity[];
-  amenityDescription: string;
-  coverImage: string;
-  taxId: number;
-  localOffice: LocalOffice;
-  regulations: Regulation[];
-  updated: {
-    availability: string;
-    content: string;
-    pricing: string;
-  };
+  custom: any[];
   updatedAt: string;
-  createdAt: string;
-  isActive: boolean;
+  _embedded?: {
+    parent?: {
+      _links: {
+        self: { href: string };
+      };
+    };
+  };
   _links: {
     self: { href: string };
+    images?: { href: string };
   };
-}
-
-export interface Regulation {
-  body: string;
-  params: string;
 }
 
 export interface Unit {
@@ -143,8 +124,8 @@ export interface Unit {
   shortName: string;
   unitCode: string;
   headline?: string;
-  shortDescription: string;
-  longDescription: string;
+  shortDescription?: string;
+  longDescription?: string;
   houseRules?: string;
   nodeId: number;
   unitType: UnitType;
@@ -166,12 +147,12 @@ export interface Unit {
   extendedAddress?: string;
   locality: string;
   region: string;
-  postalCode: string;
+  postal: string;
   country: string;
-  longitude: number;
-  latitude: number;
+  latitude?: number;
+  longitude?: number;
   petsFriendly: boolean;
-  maxPets: number;
+  maxPets?: number;
   eventsAllowed: boolean;
   smokingAllowed: boolean;
   childrenAllowed: boolean;
@@ -180,29 +161,35 @@ export interface Unit {
   area?: number;
   floors?: number;
   maxOccupancy: number;
-  securityDeposit: string;
+  securityDeposit?: string;
   bedrooms: number;
   fullBathrooms: number;
-  threeQuarterBathrooms: number;
+  threeQuarterBathrooms?: number;
   halfBathrooms: number;
   bedTypes: BedType[];
   rooms: Room[];
   amenities: Amenity[];
-  amenityDescription: string;
-  coverImage: string;
-  taxId: number;
-  localOffice: LocalOffice;
-  regulations: Regulation[];
-  updated: {
+  amenityDescription?: string;
+  custom?: Record<string, any>;
+  coverImage?: string;
+  taxId?: string;
+  localOffice?: LocalOffice;
+  regulations?: any[];
+  updated?: {
     availability: string;
     content: string;
     pricing: string;
   };
   updatedAt: string;
-  createdAt: string;
-  isActive: boolean;
+  customData?: Record<string, any>;
+  _embedded?: {
+    node?: Node[];
+  };
   _links: {
     self: { href: string };
+    images?: { href: string };
+    policies?: { href: string };
+    type?: { href: string };
   };
 }
 
@@ -215,18 +202,16 @@ export interface GetUnitsParams {
   sortColumn?: 'id' | 'name' | 'nodeName' | 'unitTypeName';
   sortDirection?: 'asc' | 'desc';
   
+  // Filtros por ID (soportan single value o array)
+  nodeId?: number | number[];
+  unitTypeId?: number | number[];
+  amenityId?: number | number[];
+  
   // Búsqueda
   search?: string;
   term?: string;
   unitCode?: string;
   shortName?: string;
-  contentUpdatedSince?: string;
-  updatedSince?: string;
-  
-  // Filtros por ID
-  nodeId?: number | number[];
-  unitTypeId?: number | number[];
-  amenityId?: number | number[];
   
   // Filtros físicos
   bedrooms?: number;
@@ -252,6 +237,8 @@ export interface GetUnitsParams {
   unitStatus?: 'clean' | 'dirty' | 'occupied' | 'inspection' | 'inprogress';
   
   // Filtros adicionales
+  contentUpdatedSince?: string;
+  updatedSince?: string;
   computed?: 0 | 1;
   inherited?: 0 | 1;
   limited?: 0 | 1;
@@ -279,12 +266,17 @@ export interface GetUnitsResponse {
   };
 }
 
+export interface GetUnitParams {
+  unitId: number;
+  computed?: 0 | 1;
+  inherited?: 0 | 1;
+  includeDescriptions?: 0 | 1;
+}
+
 export interface UnitFilters {
   nodeId?: number;
   unitTypeId?: number;
   amenityId?: number;
-  bedrooms?: number;
-  bathrooms?: number;
   petsFriendly?: boolean;
   eventsAllowed?: boolean;
   smokingAllowed?: boolean;
@@ -294,4 +286,6 @@ export interface UnitFilters {
   unitStatus?: string;
   arrival?: string;
   departure?: string;
+  bedrooms?: number;
+  bathrooms?: number;
 }

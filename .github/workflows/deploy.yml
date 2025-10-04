@@ -1,0 +1,107 @@
+name: Deploy Track HS MCP Connector to Vercel
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run unit tests
+      run: npm run test:unit
+      env:
+        TRACKHS_API_URL: ${{ secrets.TRACKHS_API_URL }}
+        TRACKHS_USERNAME: ${{ secrets.TRACKHS_USERNAME }}
+        TRACKHS_PASSWORD: ${{ secrets.TRACKHS_PASSWORD }}
+
+    - name: Run integration tests
+      run: npm run test:integration
+      env:
+        TRACKHS_API_URL: ${{ secrets.TRACKHS_API_URL }}
+        TRACKHS_USERNAME: ${{ secrets.TRACKHS_USERNAME }}
+        TRACKHS_PASSWORD: ${{ secrets.TRACKHS_PASSWORD }}
+
+    - name: Build project
+      run: npm run build
+
+    - name: Test build output
+      run: |
+        if [ -d "dist" ]; then
+          echo "✅ Build exitoso - dist/ creado"
+          ls -la dist/
+        else
+          echo "❌ Error - dist/ no encontrado"
+          exit 1
+        fi
+
+  deploy-preview:
+    name: Deploy Preview
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Vercel CLI
+      run: npm install -g vercel@latest
+
+    - name: Deploy Preview to Vercel
+      run: vercel --token ${{ secrets.VERCEL_TOKEN }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+  deploy-production:
+    name: Deploy to Production
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Vercel CLI
+      run: npm install -g vercel@latest
+
+    - name: Deploy to Vercel Production
+      run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+      env:
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    - name: Notify deployment success
+      run: |
+        echo "🚀 Despliegue exitoso a Vercel"
+        echo "URL: https://${{ secrets.VERCEL_PROJECT_ID }}.vercel.app"

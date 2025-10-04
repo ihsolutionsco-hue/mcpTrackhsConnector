@@ -1,13 +1,11 @@
 /**
- * Servidor MCP remoto para Track HS
- * Implementa transporte HTTP simple para Cloudflare Workers
+ * Servidor MCP principal para Track HS
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
-  ListToolsRequestSchema,
-  InitializeRequestSchema
+  ListToolsRequestSchema
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { TrackHSApiClient } from './core/api-client.js';
@@ -18,28 +16,27 @@ import { SearchReservationsTool } from './tools/search-reservations.js';
 import { GetUnitsTool } from './tools/get-units.js';
 import { GetFoliosCollectionTool } from './tools/get-folios-collection.js';
 import { GetContactsTool } from './tools/get-contacts.js';
-
-// Tipos para variables de entorno
-interface Env {
-  TRACKHS_API_URL: string;
-  TRACKHS_USERNAME: string;
-  TRACKHS_PASSWORD: string;
-  ENVIRONMENT?: string;
-}
+import { GetLedgerAccountsTool } from './tools/get-ledger-accounts.js';
+import { GetLedgerAccountTool } from './tools/get-ledger-account.js';
+import { GetReservationNotesTool } from './tools/get-reservation-notes.js';
+import { GetNodesTool } from './tools/get-nodes.js';
+import { GetNodeTool } from './tools/get-node.js';
+import { GetUnitTool } from './tools/get-unit.js';
+import { GetMaintenanceWorkOrdersTool } from './tools/get-maintenance-work-orders.js';
 
 export class TrackHSMCPServer {
   private server: Server;
-  private tools: BaseTrackHSTool[];
+  public tools: BaseTrackHSTool[];
 
-  constructor(private env: Env) {
+  constructor() {
     // Validar variables de entorno
     this.validateEnvironment();
 
     // Configuración desde variables de entorno
     const apiClient = new TrackHSApiClient({
-      baseUrl: this.env.TRACKHS_API_URL,
-      username: this.env.TRACKHS_USERNAME,
-      password: this.env.TRACKHS_PASSWORD
+      baseUrl: process.env.TRACKHS_API_URL!,
+      username: process.env.TRACKHS_USERNAME!,
+      password: process.env.TRACKHS_PASSWORD!
     });
 
     // Registrar herramientas
@@ -48,19 +45,24 @@ export class TrackHSMCPServer {
       new GetReservationTool(apiClient),
       new SearchReservationsTool(apiClient),
       new GetUnitsTool(apiClient),
+      new GetUnitTool(apiClient),
       new GetFoliosCollectionTool(apiClient),
-      new GetContactsTool(apiClient)
+      new GetContactsTool(apiClient),
+      new GetLedgerAccountsTool(apiClient),
+      new GetLedgerAccountTool(apiClient),
+      new GetReservationNotesTool(apiClient),
+      new GetNodesTool(apiClient),
+      new GetNodeTool(apiClient),
+      new GetMaintenanceWorkOrdersTool(apiClient)
     ];
 
-    // Configurar servidor MCP con capacidades completas
+    // Configurar servidor MCP
     this.server = new Server({
       name: 'trackhs-mcp-server',
       version: '1.0.0'
     }, {
       capabilities: {
-        tools: {},
-        prompts: {},
-        resources: {}
+        tools: {}
       }
     });
 
@@ -71,17 +73,17 @@ export class TrackHSMCPServer {
    * Valida que las variables de entorno estén configuradas
    */
   private validateEnvironment(): void {
-    const requiredVars: (keyof Env)[] = ['TRACKHS_API_URL', 'TRACKHS_USERNAME', 'TRACKHS_PASSWORD'];
+    const requiredEnvVars = ['TRACKHS_API_URL', 'TRACKHS_USERNAME', 'TRACKHS_PASSWORD'];
     
-    for (const varName of requiredVars) {
-      if (!this.env[varName]) {
-        throw new Error(`Variable de entorno requerida no configurada: ${varName}`);
+    for (const envVar of requiredEnvVars) {
+      if (!process.env[envVar]) {
+        throw new Error(`Variable de entorno requerida no configurada: ${envVar}`);
       }
     }
 
     // Validar formato de URL
     try {
-      new URL(this.env.TRACKHS_API_URL);
+      new URL(process.env.TRACKHS_API_URL!);
     } catch {
       throw new Error('TRACKHS_API_URL debe ser una URL válida');
     }
@@ -91,22 +93,6 @@ export class TrackHSMCPServer {
    * Configura los manejadores de peticiones MCP
    */
   private setupHandlers(): void {
-    // Inicialización del servidor
-    this.server.setRequestHandler(InitializeRequestSchema, async () => {
-      return {
-        protocolVersion: '2024-11-05',
-        capabilities: {
-          tools: {},
-          prompts: {},
-          resources: {}
-        },
-        serverInfo: {
-          name: 'trackhs-mcp-server',
-          version: '1.0.0'
-        }
-      };
-    });
-
     // Listar herramientas disponibles
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
@@ -145,186 +131,32 @@ export class TrackHSMCPServer {
   }
 
   /**
-   * Maneja las peticiones HTTP entrantes
+   * Inicia el servidor MCP
    */
-  async handleRequest(request: Request): Promise<Response> {
+  async start(): Promise<void> {
     try {
-      const url = new URL(request.url);
-      
-      // Headers CORS
-      const corsHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept',
-        'Access-Control-Allow-Credentials': 'true'
-      };
+      // Determinar tipo de transporte basado en el entorno
+      const transport = process.stdin.readable 
+        ? await import('@modelcontextprotocol/sdk/server/stdio.js').then(m => new m.StdioServerTransport())
+        : await import('@modelcontextprotocol/sdk/server/stdio.js').then(m => new m.StdioServerTransport());
 
-      // Manejar preflight
-      if (request.method === 'OPTIONS') {
-        return new Response(null, { headers: corsHeaders });
-      }
-
-      // Endpoint MCP
-      if (url.pathname === '/mcp' && request.method === 'POST') {
-        try {
-          const body = await request.json();
-          
-          // Procesar petición MCP
-          let response;
-          
-          if (body.method === 'initialize') {
-            response = {
-              jsonrpc: '2.0',
-              id: body.id,
-              result: {
-                protocolVersion: '2024-11-05',
-                capabilities: {
-                  tools: {},
-                  prompts: {},
-                  resources: {}
-                },
-                serverInfo: {
-                  name: 'trackhs-mcp-server',
-                  version: '1.0.0'
-                }
-              }
-            };
-          } else if (body.method === 'tools/list') {
-            response = {
-              jsonrpc: '2.0',
-              id: body.id,
-              result: {
-                tools: this.tools.map(tool => ({
-                  name: tool.name,
-                  description: tool.description,
-                  inputSchema: tool.inputSchema
-                }))
-              }
-            };
-          } else if (body.method === 'tools/call') {
-            const { name, arguments: args } = body.params;
-            
-            const tool = this.tools.find(t => t.name === name);
-            if (!tool) {
-              throw new Error(`Herramienta desconocida: ${name}`);
-            }
-
-            const result = await tool.execute(args || {});
-            response = {
-              jsonrpc: '2.0',
-              id: body.id,
-              result: {
-                content: [
-                  {
-                    type: 'text',
-                    text: JSON.stringify(result, null, 2)
-                  }
-                ]
-              }
-            };
-          } else {
-            throw new Error(`Método no soportado: ${body.method}`);
-          }
-          
-          return new Response(JSON.stringify(response), {
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json'
-            }
-          });
-        } catch (error) {
-          return new Response(JSON.stringify({
-            jsonrpc: '2.0',
-            id: null,
-            error: {
-              code: -32603,
-              message: error instanceof Error ? error.message : 'Error interno del servidor'
-            }
-          }), {
-            status: 500,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json'
-            }
-          });
-        }
-      }
-
-      // Health check
-      if (url.pathname === '/health' && request.method === 'GET') {
-        return new Response(JSON.stringify({ 
-          status: 'ok',
-          server: 'trackhs-mcp-server',
-          version: '1.0.0',
-          tools: this.tools.length
-        }), { 
-          headers: { 
-            ...corsHeaders, 
-            'Content-Type': 'application/json' 
-          } 
-        });
-      }
-
-      // Información del servidor
-      if (url.pathname === '/' && request.method === 'GET') {
-        return new Response(JSON.stringify({ 
-          name: 'TrackHS MCP Server',
-          version: '1.0.0',
-          description: 'Servidor MCP remoto para integración con Track HS API',
-          endpoints: {
-            mcp: '/mcp',
-            health: '/health'
-          },
-          tools: this.tools.map(t => ({
-            name: t.name,
-            description: t.description
-          }))
-        }), { 
-          headers: { 
-            ...corsHeaders, 
-            'Content-Type': 'application/json' 
-          } 
-        });
-      }
-
-      return new Response('Not Found', { 
-        status: 404, 
-        headers: corsHeaders 
-      });
-      
+      await this.server.connect(transport);
+      console.error('Track HS MCP Server iniciado correctamente');
     } catch (error) {
-      console.error('Error en servidor MCP:', error);
-      
-      return new Response(JSON.stringify({ 
-        error: 'Error interno del servidor',
-        message: error instanceof Error ? error.message : 'Error desconocido'
-      }), { 
-        status: 500,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        }
-      });
+      console.error('Error al iniciar Track HS MCP Server:', error);
+      process.exit(1);
     }
   }
 
   /**
-   * Obtiene información sobre las herramientas disponibles
+   * Detiene el servidor
    */
-  getToolsInfo(): Array<{name: string, description: string}> {
-    return this.tools.map(tool => ({
-      name: tool.name,
-      description: tool.description
-    }));
-  }
-
-  /**
-   * Obtiene estadísticas del servidor
-   */
-  getStats(): {toolsCount: number, environment: string} {
-    return {
-      toolsCount: this.tools.length,
-      environment: this.env.ENVIRONMENT || 'production'
-    };
+  async stop(): Promise<void> {
+    try {
+      await this.server.close();
+      console.error('Track HS MCP Server detenido');
+    } catch (error) {
+      console.error('Error al detener el servidor:', error);
+    }
   }
 }

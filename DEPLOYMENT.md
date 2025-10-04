@@ -96,6 +96,12 @@ El servidor MCP expone las siguientes herramientas:
 
 - `get_reviews`: Obtener reseñas de propiedades
 - `get_reservation`: Obtener detalles de reservación
+- `search_reservations`: Búsqueda avanzada de reservaciones
+- `get_units`: Obtener unidades de alojamiento
+- `get_folios_collection`: Obtener folios/facturas
+- `get_contacts`: Obtener contactos del CRM
+- `get_ledger_accounts`: Obtener cuentas contables (colección) ⭐ **NUEVO**
+- `get_ledger_account`: Obtener cuenta contable individual ⭐ **NUEVO**
 
 ## Solución de Problemas
 
@@ -139,10 +145,20 @@ trackhs-mcp-server/
 │   │   └── types.ts           # Tipos compartidos
 │   ├── tools/                 # Herramientas MCP
 │   │   ├── get-reviews.ts     # Reseñas
-│   │   └── get-reservation.ts # Reservaciones
+│   │   ├── get-reservation.ts # Reservaciones
+│   │   ├── search-reservations.ts # Búsqueda de reservaciones
+│   │   ├── get-units.ts       # Unidades
+│   │   ├── get-folios-collection.ts # Folios
+│   │   ├── get-contacts.ts    # Contactos
+│   │   ├── get-ledger-accounts.ts # Cuentas contables (colección) ⭐ NUEVO
+│   │   └── get-ledger-account.ts  # Cuenta contable individual ⭐ NUEVO
 │   └── types/                 # Tipos específicos
 │       ├── reviews.ts         # Tipos de reseñas
-│       └── reservations.ts    # Tipos de reservaciones
+│       ├── reservations.ts    # Tipos de reservaciones
+│       ├── units.ts           # Tipos de unidades
+│       ├── folios.ts          # Tipos de folios
+│       ├── contacts.ts        # Tipos de contactos
+│       └── ledger-accounts.ts # Tipos de cuentas contables ⭐ NUEVO
 ├── dist/                      # Archivos compilados
 ├── scripts/                   # Scripts de utilidad
 └── package.json

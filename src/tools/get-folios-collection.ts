@@ -128,10 +128,15 @@ export class GetFoliosCollectionTool extends BaseTrackHSTool {
 
     const endpoint = `/pms/folios?${queryParams.toString()}`;
     
+    // Debug: Log the endpoint being called
+    console.error(`[DEBUG] Calling endpoint: ${endpoint}`);
+    console.error(`[DEBUG] Query params:`, Object.fromEntries(queryParams.entries()));
+    
     try {
       const result = await this.apiClient.get<GetFoliosCollectionResponse>(endpoint);
       return result;
     } catch (error) {
+      console.error(`[DEBUG] Error details:`, error);
       throw new Error(`Error al obtener folios: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   }
