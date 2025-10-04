@@ -1,20 +1,19 @@
 /**
- * Servidor MCP Remoto para Track HS - Vercel API
+ * Servidor MCP Remoto para Track HS - Vercel API (JavaScript)
  * 
  * Este archivo implementa el servidor API para Vercel que expone
  * las herramientas MCP de Track HS como endpoints REST.
  */
 
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { TrackHSMCPServer } from '../src/server.js';
+const { TrackHSMCPServer } = require('../dist/server.js');
 
 // Instancia global del servidor MCP
-let mcpServer: TrackHSMCPServer | null = null;
+let mcpServer = null;
 
 /**
  * Inicializa el servidor MCP si no existe
  */
-function getMCPServer(): TrackHSMCPServer {
+function getMCPServer() {
   if (!mcpServer) {
     try {
       mcpServer = new TrackHSMCPServer();
@@ -29,7 +28,7 @@ function getMCPServer(): TrackHSMCPServer {
 /**
  * Maneja las peticiones CORS
  */
-function handleCORS(res: VercelResponse) {
+function handleCORS(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -38,7 +37,7 @@ function handleCORS(res: VercelResponse) {
 /**
  * Endpoint principal - Health Check
  */
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+module.exports = async function handler(req, res) {
   // Manejar CORS
   handleCORS(res);
 
@@ -77,12 +76,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       timestamp: new Date().toISOString()
     });
   }
-}
+};
 
 /**
  * Health Check - Verifica el estado del servidor
  */
-async function handleHealth(req: VercelRequest, res: VercelResponse) {
+async function handleHealth(req, res) {
   try {
     const server = getMCPServer();
     const tools = server.tools.map(tool => tool.name);
@@ -113,7 +112,7 @@ async function handleHealth(req: VercelRequest, res: VercelResponse) {
 /**
  * Listar herramientas disponibles
  */
-async function handleListTools(req: VercelRequest, res: VercelResponse) {
+async function handleListTools(req, res) {
   if (req.method !== 'GET') {
     res.status(405).json({ 
       error: 'Método no permitido',
@@ -149,7 +148,7 @@ async function handleListTools(req: VercelRequest, res: VercelResponse) {
 /**
  * Ejecutar herramienta específica
  */
-async function handleExecuteTool(req: VercelRequest, res: VercelResponse) {
+async function handleExecuteTool(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ 
       error: 'Método no permitido',
@@ -208,7 +207,7 @@ async function handleExecuteTool(req: VercelRequest, res: VercelResponse) {
 /**
  * Endpoint por defecto - Información del servicio
  */
-async function handleDefault(req: VercelRequest, res: VercelResponse) {
+async function handleDefault(req, res) {
   res.status(200).json({
     service: 'Track HS MCP Connector',
     version: '1.0.0',
