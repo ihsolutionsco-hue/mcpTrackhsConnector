@@ -4,7 +4,7 @@
 
 // Configurar variables de entorno para testing
 process.env.NODE_ENV = 'test';
-process.env.TRACKHS_API_URL = process.env.TRACKHS_API_URL || 'https://api.trackhs.test';
+process.env.TRACKHS_API_URL = process.env.TRACKHS_API_URL || 'https://api-integration-example.tracksandbox.io/api';
 process.env.TRACKHS_USERNAME = process.env.TRACKHS_USERNAME || 'test_user';
 process.env.TRACKHS_PASSWORD = process.env.TRACKHS_PASSWORD || 'test_password';
 
