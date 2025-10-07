@@ -12,9 +12,21 @@
     "api/remote-mcp.js": {
       "maxDuration": 30,
       "memory": 1024
+    },
+    "api/mcp-sse.js": {
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
   "rewrites": [
+    {
+      "source": "/api/mcp-sse/(.*)",
+      "destination": "/api/mcp-sse.js"
+    },
+    {
+      "source": "/mcp-sse/(.*)",
+      "destination": "/api/mcp-sse.js"
+    },
     {
       "source": "/api/remote-mcp/(.*)",
       "destination": "/api/remote-mcp.js"
