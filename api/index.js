@@ -4,8 +4,8 @@
  */
 
 // Importar dependencias necesarias
-const https = require('https');
-const http = require('http');
+import https from 'https';
+import http from 'http';
 
 // Configuración de la API de Track HS
 const TRACKHS_CONFIG = {
@@ -667,7 +667,7 @@ async function handleDefault(req, res) {
 }
 
 // Handler principal
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Manejar CORS
   handleCORS(res);
 
