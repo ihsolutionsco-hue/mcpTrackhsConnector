@@ -8,7 +8,14 @@
  * estén configuradas correctamente para el despliegue en Vercel.
  */
 
-const https = require('https');
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Colores para output
 const colors = {
@@ -169,9 +176,6 @@ async function testTrackHSConnection() {
 function checkVercelConfig() {
   log('\n⚙️  Verificando configuración de Vercel...', 'cyan');
   
-  const fs = require('fs');
-  const path = require('path');
-  
   const vercelJsonPath = path.join(process.cwd(), 'vercel.json');
   
   if (!fs.existsSync(vercelJsonPath)) {
@@ -222,9 +226,6 @@ function checkVercelConfig() {
 // Verificar archivo API
 function checkApiFile() {
   log('\n📁 Verificando archivo API...', 'cyan');
-  
-  const fs = require('fs');
-  const path = require('path');
   
   const apiFilePath = path.join(process.cwd(), 'api', 'index.js');
   
@@ -352,14 +353,14 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // Ejecutar si es llamado directamente
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main().catch((error) => {
     logError(`Error en verificación: ${error.message}`);
     process.exit(1);
   });
 }
 
-module.exports = {
+export {
   checkEnvironmentVariables,
   checkApiUrl,
   testTrackHSConnection,

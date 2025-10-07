@@ -76,6 +76,20 @@ Node Version: 18.x
 
 ## ✅ Paso 5: Verificar el Despliegue
 
+### Verificar Configuración:
+
+```bash
+# Ejecutar script de verificación
+npm run verify:vercel
+```
+
+Este script verificará:
+- ✅ Variables de entorno configuradas
+- ✅ URL de API válida
+- ✅ Conectividad con Track HS
+- ✅ Configuración de Vercel
+- ✅ Archivo API implementado
+
 ### Probar el Health Check:
 
 ```bash
@@ -91,6 +105,9 @@ curl https://tu-proyecto.vercel.app/api/health
   "tools": {
     "count": 13,
     "available": ["get_reviews", "get_contacts", ...]
+  },
+  "environment": {
+    "trackhsConfigured": true
   }
 }
 ```
@@ -207,17 +224,53 @@ Vercel detectará el cambio y desplegará automáticamente en ~2 minutos.
 
 ### Error: "Variables de entorno no configuradas"
 
+**Diagnóstico:**
+```bash
+npm run verify:vercel
+```
+
 **Solución:**
 1. Ve a Vercel Dashboard → Tu Proyecto → Settings → Environment Variables
-2. Verifica que todas las variables estén configuradas
+2. Verifica que todas las variables estén configuradas:
+   - `TRACKHS_API_URL`
+   - `TRACKHS_USERNAME`
+   - `TRACKHS_PASSWORD`
+   - `NODE_ENV=production`
 3. Re-despliega el proyecto (Deployments → ... → Redeploy)
 
 ### Error: "Build failed"
+
+**Diagnóstico:**
+```bash
+# Verificar build local
+npm run build
+
+# Verificar configuración
+npm run verify:vercel
+```
 
 **Solución:**
 1. Verifica que `npm run build` funcione localmente
 2. Revisa los logs en Vercel Dashboard → Deployments → View Function Logs
 3. Asegúrate de que Node.js versión sea 18.x
+4. Verifica que `api/index.js` esté implementado correctamente
+
+### Error: "FUNCTION_INVOCATION_FAILED"
+
+**Diagnóstico:**
+```bash
+# Verificar implementación
+npm run verify:vercel
+
+# Ver logs de Vercel
+vercel logs --follow
+```
+
+**Solución:**
+1. Verifica que `api/index.js` no esté en modo demostración
+2. Confirma que las variables de entorno estén configuradas
+3. Verifica que la URL de Track HS sea accesible
+4. Re-despliega el proyecto
 
 ### Error: "Tool not found"
 
@@ -225,6 +278,23 @@ Vercel detectará el cambio y desplegará automáticamente en ~2 minutos.
 1. Verifica que el endpoint sea correcto: `/api/tools/{nombre}/execute`
 2. Lista las herramientas disponibles: `GET /api/tools`
 3. Usa el nombre exacto de la herramienta (ej: `get_reviews`, no `getReviews`)
+
+### Error de Conectividad con Track HS
+
+**Diagnóstico:**
+```bash
+# Probar conectividad
+curl -I $TRACKHS_API_URL
+
+# Verificar credenciales
+npm run verify:vercel
+```
+
+**Solución:**
+1. Verifica que la URL de Track HS sea correcta
+2. Confirma que las credenciales sean válidas
+3. Verifica que el servicio de Track HS esté disponible
+4. Revisa los logs de Vercel para errores específicos
 
 ---
 
@@ -240,12 +310,18 @@ Vercel detectará el cambio y desplegará automáticamente en ~2 minutos.
 
 - [ ] Repositorio clonado
 - [ ] Dependencias instaladas
-- [ ] Build exitoso localmente
+- [ ] Build exitoso localmente (`npm run build`)
+- [ ] Verificación de configuración (`npm run verify:vercel`)
 - [ ] Proyecto creado en Vercel
-- [ ] Variables de entorno configuradas
+- [ ] Variables de entorno configuradas:
+  - [ ] `TRACKHS_API_URL`
+  - [ ] `TRACKHS_USERNAME`
+  - [ ] `TRACKHS_PASSWORD`
+  - [ ] `NODE_ENV=production`
 - [ ] Despliegue completado
-- [ ] Health check funciona
-- [ ] Al menos una herramienta probada
+- [ ] Health check funciona (`/api/health`)
+- [ ] Lista de herramientas funciona (`/api/tools`)
+- [ ] Al menos una herramienta probada (`/api/tools/{name}/execute`)
 - [ ] Configurado en Claude Desktop o Make.com
 
 ---
