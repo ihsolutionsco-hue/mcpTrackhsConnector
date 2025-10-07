@@ -1,6 +1,6 @@
 /**
  * Servidor MCP Remoto para Track HS - Vercel API (JavaScript)
- * 
+ *
  * Este archivo implementa el servidor API para Vercel que expone
  * las herramientas MCP de Track HS como endpoints REST.
  */
@@ -35,6 +35,42 @@ function handleCORS(res) {
 }
 
 /**
+ * Parse el body de la request si es JSON
+ */
+async function parseBody(req) {
+  return new Promise((resolve, reject) => {
+    if (req.method !== 'POST') {
+      resolve({});
+      return;
+    }
+
+    // Si Vercel ya parseó el body
+    if (req.body) {
+      resolve(req.body);
+      return;
+    }
+
+    let data = '';
+    req.on('data', chunk => {
+      data += chunk.toString();
+    });
+
+    req.on('end', () => {
+      try {
+        const body = data ? JSON.parse(data) : {};
+        resolve(body);
+      } catch (error) {
+        reject(new Error('Invalid JSON in request body'));
+      }
+    });
+
+    req.on('error', error => {
+      reject(error);
+    });
+  });
+}
+
+/**
  * Endpoint principal - Health Check
  */
 module.exports = async function handler(req, res) {
@@ -53,15 +89,15 @@ module.exports = async function handler(req, res) {
     console.log(`[${method}] ${path}`);
 
     // Routing basado en la URL
-    if (path === '/api/health' || path === '/health') {
+    if (path === '/api/health' || path === '/health' || path === '/api') {
       return handleHealth(req, res);
     }
-    
+
     if (path === '/api/tools' || path === '/tools') {
       return handleListTools(req, res);
     }
-    
-    if (path.startsWith('/api/tools/') && path.includes('/execute')) {
+
+    if (path.startsWith('/api/tools/') || (path.startsWith('/tools/') && path.includes('/execute'))) {
       return handleExecuteTool(req, res);
     }
 
@@ -150,7 +186,7 @@ async function handleListTools(req, res) {
  */
 async function handleExecuteTool(req, res) {
   if (req.method !== 'POST') {
-    res.status(405).json({ 
+    res.status(405).json({
       error: 'Método no permitido',
       allowed: ['POST']
     });
@@ -159,20 +195,27 @@ async function handleExecuteTool(req, res) {
 
   try {
     const server = getMCPServer();
-    const { name, arguments: args } = req.body;
+
+    // Parse body correctamente
+    const body = await parseBody(req);
+    const { name, arguments: args } = body;
 
     if (!name) {
-      res.status(400).json({ 
+      res.status(400).json({
         success: false,
         error: 'Nombre de herramienta requerido',
-        required: ['name']
+        required: ['name'],
+        example: {
+          name: 'get_reviews',
+          arguments: { page: 1, size: 10 }
+        }
       });
       return;
     }
 
     const tool = server.tools.find(t => t.name === name);
     if (!tool) {
-      res.status(404).json({ 
+      res.status(404).json({
         success: false,
         error: `Herramienta '${name}' no encontrada`,
         available: server.tools.map(t => t.name)
@@ -182,23 +225,24 @@ async function handleExecuteTool(req, res) {
 
     console.log(`Ejecutando herramienta: ${name}`, args);
 
+    const startTime = Date.now();
     const result = await tool.execute(args || {});
-    
+    const executionTime = Date.now() - startTime;
+
     res.status(200).json({
       success: true,
       result,
       tool: name,
       timestamp: new Date().toISOString(),
-      executionTime: Date.now()
+      executionTime: `${executionTime}ms`
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-    console.error(`Error ejecutando herramienta ${req.body?.name}:`, error);
-    
+    console.error(`Error ejecutando herramienta:`, error);
+
     res.status(500).json({
       success: false,
       error: `Error en ejecución de herramienta: ${errorMessage}`,
-      tool: req.body?.name,
       timestamp: new Date().toISOString()
     });
   }
