@@ -5,8 +5,6 @@
   "description": "MCP Remote Connector para Track HS API - Desplegado en Vercel",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.vercel.json",
-    "postinstall": "npm run build",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "dev:vercel": "vercel dev",
