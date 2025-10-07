@@ -16,9 +16,21 @@
     "api/mcp-sse.js": {
       "maxDuration": 30,
       "memory": 1024
+    },
+    "api/mcp-sse-real.js": {
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
   "rewrites": [
+    {
+      "source": "/api/mcp-sse-real/(.*)",
+      "destination": "/api/mcp-sse-real.js"
+    },
+    {
+      "source": "/mcp-sse-real/(.*)",
+      "destination": "/api/mcp-sse-real.js"
+    },
     {
       "source": "/api/mcp-sse/(.*)",
       "destination": "/api/mcp-sse.js"
