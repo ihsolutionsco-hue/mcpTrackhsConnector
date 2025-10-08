@@ -15,6 +15,8 @@ scripts/
 *.test.js
 jest.config.mjs
 tsconfig.json
+dist/
+src/
 
 # Archivos temporales
 .tmp/
