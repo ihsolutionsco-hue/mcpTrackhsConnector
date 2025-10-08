@@ -22,7 +22,7 @@ try {
 
   // Compilar TypeScript
   console.log('📦 Compilando TypeScript...');
-  execSync('npx tsc', { stdio: 'inherit' });
+  execSync('npx tsc --project .', { stdio: 'inherit' });
 
   // Verificar que se generaron los archivos
   const mainFile = join(distDir, 'index.js');
