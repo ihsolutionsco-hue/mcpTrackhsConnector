@@ -70,7 +70,12 @@
         
         <div class="endpoint">
             <div class="method">POST</div>
-            <code>/api/tools/{name}/execute</code> - Ejecutar herramienta específica
+            <code>/api/mcp</code> - Endpoint principal MCP
+        </div>
+        
+        <div class="endpoint">
+            <div class="method">GET</div>
+            <code>/api/test-mcp</code> - Página de pruebas MCP
         </div>
 
         <h2>🔧 Configuración en Claude Desktop</h2>
@@ -78,10 +83,28 @@
         <pre><code>{
   "mcpServers": {
     "trackhs-remote": {
-      "url": "https://trackhs-mcp-connector.vercel.app/api"
+      "url": "https://trackhs-mcp-connector.vercel.app/api/mcp"
     }
   }
 }</code></pre>
+
+        <h2>🛠️ Herramientas Disponibles</h2>
+        <p>Este conector proporciona acceso a las siguientes herramientas de Track HS:</p>
+        <ul>
+            <li><strong>get_reviews</strong> - Obtener reseñas de propiedades</li>
+            <li><strong>get_reservation</strong> - Obtener detalles de reservas</li>
+            <li><strong>search_reservations</strong> - Buscar reservas</li>
+            <li><strong>get_units</strong> - Listar unidades disponibles</li>
+            <li><strong>get_unit</strong> - Obtener detalles de una unidad</li>
+            <li><strong>get_contacts</strong> - Obtener contactos</li>
+            <li><strong>get_ledger_accounts</strong> - Listar cuentas contables</li>
+            <li><strong>get_ledger_account</strong> - Obtener cuenta contable específica</li>
+            <li><strong>get_reservation_notes</strong> - Obtener notas de reservas</li>
+            <li><strong>get_nodes</strong> - Listar nodos</li>
+            <li><strong>get_node</strong> - Obtener nodo específico</li>
+            <li><strong>get_maintenance_work_orders</strong> - Obtener órdenes de trabajo</li>
+            <li><strong>get_folios_collection</strong> - Obtener colección de folios</li>
+        </ul>
 
         <h2>📚 Documentación</h2>
         <p>Para más información, consulta la documentación del proyecto.</p>
