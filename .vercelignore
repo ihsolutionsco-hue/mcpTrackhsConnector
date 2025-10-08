@@ -1,13 +1,21 @@
+# Archivos que no deben ser cacheados
 node_modules
 .git
-.env
+.env.local
+.env.*.local
 *.log
-coverage
-tests
-src
-tsconfig.json
-jest.config.mjs
+.DS_Store
+Thumbs.db
+
+# Archivos de desarrollo
+tests/
+docs/
+scripts/
 *.test.ts
 *.test.js
-*.spec.ts
-*.spec.js
+jest.config.mjs
+tsconfig.json
+
+# Archivos temporales
+.tmp/
+.cache/

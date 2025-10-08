@@ -20,9 +20,9 @@ try {
     rmSync(distDir, { recursive: true, force: true });
   }
 
-  // Compilar TypeScript
+  // Compilar TypeScript usando tsconfig.json
   console.log('📦 Compilando TypeScript...');
-  execSync('npx tsc src/index.ts src/server.ts --outDir dist --target ES2022 --module ESNext --moduleResolution bundler --allowSyntheticDefaultImports --esModuleInterop --allowJs --strict --skipLibCheck --forceConsistentCasingInFileNames --declaration --declarationMap --sourceMap --resolveJsonModule --isolatedModules', { stdio: 'inherit' });
+  execSync('npx tsc --project tsconfig.json', { stdio: 'inherit' });
 
   // Verificar que se generaron los archivos
   const mainFile = join(distDir, 'index.js');

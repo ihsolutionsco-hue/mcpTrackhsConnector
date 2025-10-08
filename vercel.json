@@ -1,17 +1,16 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "functions": {
     "api/index.js": {
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     },
     "api/mcp-claude-web.js": {
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     },
     "api/mcp-real.js": {
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     }
   },
   "rewrites": [
@@ -41,7 +40,8 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VERCEL_FORCE_NO_BUILD_CACHE": "1"
   },
   "regions": ["iad1"],
   "headers": [
