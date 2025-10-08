@@ -94,7 +94,7 @@ TRACKHS_PASSWORD=tu_contraseña
 ### **URLs Disponibles**
 
 #### **🎯 URLs Recomendadas para Claude**
-- **Claude Web (MCP Claude Web)**: `https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web` ⭐ **RECOMENDADO**
+- **Claude Web (MCP Claude Web)**: `https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web` ⭐ **RECOMENDADO** ✅
 - **Claude Web (MCP Real)**: `https://trackhs-mcp-connector.vercel.app/api/mcp-real` 🔄 **Alternativo**
 
 #### **📊 URLs de Diagnóstico**
