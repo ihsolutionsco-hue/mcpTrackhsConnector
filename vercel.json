@@ -1,3 +1,66 @@
 {
-  "extends": "./config/vercel.json"
+  "version": 2,
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    },
+    "api/mcp-claude-web.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    },
+    "api/mcp-real.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/mcp-claude-web/(.*)",
+      "destination": "/api/mcp-claude-web.js"
+    },
+    {
+      "source": "/mcp-claude-web/(.*)",
+      "destination": "/api/mcp-claude-web.js"
+    },
+    {
+      "source": "/api/mcp-real/(.*)",
+      "destination": "/api/mcp-real.js"
+    },
+    {
+      "source": "/mcp-real/(.*)",
+      "destination": "/api/mcp-real.js"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "regions": ["iad1"],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        }
+      ]
+    }
+  ]
 }
