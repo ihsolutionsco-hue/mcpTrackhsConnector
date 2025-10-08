@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
-    "build": "node scripts/build.js",
+    "build": "npx tsc --project tsconfig.json",
     "prebuild": "npm run clean",
     "postbuild": "echo 'Build completed successfully'",
     "dev:vercel": "vercel dev",
