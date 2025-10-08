@@ -5,46 +5,14 @@
       "maxDuration": 30,
       "memory": 1024
     },
-    "api/mcp-http.js": {
+    "api/mcp-claude-web.js": {
       "maxDuration": 30,
       "memory": 1024
     },
-    "api/remote-mcp.js": {
+    "api/mcp-real.js": {
       "maxDuration": 30,
       "memory": 1024
-    },
-    "api/mcp-sse.js": {
-      "maxDuration": 30,
-      "memory": 1024
-    },
-    "api/mcp-sse-real.js": {
-      "maxDuration": 30,
-      "memory": 1024
-    },
-    "api/mcp-sse-final.js": {
-      "maxDuration": 30,
-      "memory": 1024
-    },
-    "api/mcp-claude.js": {
-      "maxDuration": 30,
-      "memory": 1024
-    },
-        "api/mcp-sse-claude.js": {
-          "maxDuration": 30,
-          "memory": 1024
-        },
-        "api/mcp-real.js": {
-          "maxDuration": 30,
-          "memory": 1024
-        },
-        "api/mcp-sdk.js": {
-          "maxDuration": 30,
-          "memory": 1024
-        },
-        "api/mcp-claude-web.js": {
-          "maxDuration": 30,
-          "memory": 1024
-        }
+    }
   },
   "rewrites": [
     {
@@ -56,76 +24,12 @@
       "destination": "/api/mcp-claude-web.js"
     },
     {
-      "source": "/api/mcp-sdk/(.*)",
-      "destination": "/api/mcp-sdk.js"
-    },
-    {
-      "source": "/mcp-sdk/(.*)",
-      "destination": "/api/mcp-sdk.js"
-    },
-    {
       "source": "/api/mcp-real/(.*)",
       "destination": "/api/mcp-real.js"
     },
     {
       "source": "/mcp-real/(.*)",
       "destination": "/api/mcp-real.js"
-    },
-    {
-      "source": "/api/mcp-sse-claude/(.*)",
-      "destination": "/api/mcp-sse-claude.js"
-    },
-    {
-      "source": "/mcp-sse-claude/(.*)",
-      "destination": "/api/mcp-sse-claude.js"
-    },
-    {
-      "source": "/api/mcp-claude/(.*)",
-      "destination": "/api/mcp-claude.js"
-    },
-    {
-      "source": "/mcp-claude/(.*)",
-      "destination": "/api/mcp-claude.js"
-    },
-    {
-      "source": "/api/mcp-sse-final/(.*)",
-      "destination": "/api/mcp-sse-final.js"
-    },
-    {
-      "source": "/mcp-sse-final/(.*)",
-      "destination": "/api/mcp-sse-final.js"
-    },
-    {
-      "source": "/api/mcp-sse-real/(.*)",
-      "destination": "/api/mcp-sse-real.js"
-    },
-    {
-      "source": "/mcp-sse-real/(.*)",
-      "destination": "/api/mcp-sse-real.js"
-    },
-    {
-      "source": "/api/mcp-sse/(.*)",
-      "destination": "/api/mcp-sse.js"
-    },
-    {
-      "source": "/mcp-sse/(.*)",
-      "destination": "/api/mcp-sse.js"
-    },
-    {
-      "source": "/api/remote-mcp/(.*)",
-      "destination": "/api/remote-mcp.js"
-    },
-    {
-      "source": "/remote-mcp/(.*)",
-      "destination": "/api/remote-mcp.js"
-    },
-    {
-      "source": "/api/mcp/(.*)",
-      "destination": "/api/mcp-http.js"
-    },
-    {
-      "source": "/mcp/(.*)",
-      "destination": "/api/mcp-http.js"
     },
     {
       "source": "/api/(.*)",
