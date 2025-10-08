@@ -1,50 +1,40 @@
 #!/usr/bin/env node
 
 /**
- * Script de build personalizado para Vercel
- * Soluciona problemas de compilación de TypeScript en Vercel
+ * Script de build para Track HS MCP Connector
  */
 
 import { execSync } from 'child_process';
-import fs from 'fs';
-import path from 'path';
+import { existsSync, rmSync } from 'fs';
+import { join } from 'path';
 
-console.log('🔨 Iniciando build personalizado...');
+const projectRoot = process.cwd();
+const distDir = join(projectRoot, 'dist');
+
+console.log('🚀 Iniciando build de Track HS MCP Connector...\n');
 
 try {
-  // Verificar que tsconfig.json existe
-  if (!fs.existsSync('tsconfig.json')) {
-    console.error('❌ tsconfig.json no encontrado');
-    process.exit(1);
+  // Limpiar directorio dist
+  if (existsSync(distDir)) {
+    console.log('🧹 Limpiando directorio dist...');
+    rmSync(distDir, { recursive: true, force: true });
   }
 
-  console.log('✅ tsconfig.json encontrado');
-
-  // Ejecutar TypeScript compiler con parámetros explícitos
+  // Compilar TypeScript
   console.log('📦 Compilando TypeScript...');
-  
-  const tscCommand = 'npx tsc --noEmit false --declaration --declarationMap --sourceMap --outDir ./dist --rootDir ./src';
-  
-  try {
-    execSync(tscCommand, { stdio: 'inherit' });
-    console.log('✅ Compilación exitosa');
-  } catch (error) {
-    console.error('❌ Error en compilación:', error.message);
-    process.exit(1);
-  }
+  execSync('tsc', { stdio: 'inherit' });
 
   // Verificar que se generaron los archivos
-  if (fs.existsSync('dist')) {
-    const files = fs.readdirSync('dist');
-    console.log(`✅ Se generaron ${files.length} archivos en dist/`);
-  } else {
-    console.error('❌ No se generó el directorio dist/');
-    process.exit(1);
+  const mainFile = join(distDir, 'index.js');
+  if (!existsSync(mainFile)) {
+    throw new Error('Error: No se generó el archivo principal dist/index.js');
   }
 
-  console.log('🎉 Build completado exitosamente');
+  console.log('✅ Build completado exitosamente!');
+  console.log(`📁 Archivos generados en: ${distDir}`);
+  console.log('🎯 Archivo principal: dist/index.js');
 
 } catch (error) {
-  console.error('❌ Error en build:', error.message);
+  console.error('❌ Error durante el build:', error.message);
   process.exit(1);
 }

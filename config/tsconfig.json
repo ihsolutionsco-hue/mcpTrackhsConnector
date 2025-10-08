@@ -26,15 +26,16 @@
     "importHelpers": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "noEmit": false
+    "noEmit": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "**/*.test.ts",
-    "tests/**/*"
+    "**/*.test.ts"
   ]
 }
