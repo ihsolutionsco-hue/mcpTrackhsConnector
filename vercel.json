@@ -6,16 +6,19 @@
     "api/index.js": {
       "maxDuration": 30
     },
-    "api/mcp.js": {
+    "api/mcp-unified.js": {
+      "maxDuration": 30
+    },
+    "api/mcp-claude-web.js": {
+      "maxDuration": 30
+    },
+    "api/mcp-real.js": {
       "maxDuration": 30
     },
     "api/health.js": {
       "maxDuration": 10
     },
     "api/tools.js": {
-      "maxDuration": 10
-    },
-    "api/test-mcp.js": {
       "maxDuration": 10
     }
   },
@@ -30,11 +33,15 @@
     },
     {
       "source": "/api/mcp",
-      "destination": "/api/mcp.js"
+      "destination": "/api/mcp-unified.js"
     },
     {
-      "source": "/api/test-mcp",
-      "destination": "/api/test-mcp.js"
+      "source": "/api/mcp-claude-web",
+      "destination": "/api/mcp-claude-web.js"
+    },
+    {
+      "source": "/api/mcp-real",
+      "destination": "/api/mcp-real.js"
     },
     {
       "source": "/api/(.*)",
