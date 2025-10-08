@@ -1,6 +1,7 @@
 /**
  * Endpoint HTTP para el servidor MCP de Track HS
  * Compatible con Vercel y servidores remotos MCP
+ * Implementa el protocolo MCP completo para Claude Desktop
  */
 
 export default async function handler(req, res) {
@@ -31,10 +32,42 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { method, params } = req.body;
+      const { method, params, id } = req.body;
 
+      // 1. INICIALIZACIÓN MCP - Requerido por Claude Desktop
+      if (method === 'initialize') {
+        res.status(200).json({
+          jsonrpc: '2.0',
+          id: id || 1,
+          result: {
+            protocolVersion: '2025-06-18',
+            capabilities: {
+              tools: {
+                listChanged: true
+              },
+              resources: {},
+              prompts: {}
+            },
+            serverInfo: {
+              name: 'trackhs-mcp-server',
+              version: '1.0.0'
+            }
+          }
+        });
+        return;
+      }
+
+      // 2. NOTIFICACIÓN DE INICIALIZACIÓN COMPLETADA
+      if (method === 'notifications/initialized') {
+        res.status(200).json({
+          jsonrpc: '2.0',
+          result: { success: true }
+        });
+        return;
+      }
+
+      // 3. LISTAR HERRAMIENTAS DISPONIBLES
       if (method === 'tools/list') {
-        // Listar herramientas disponibles
         const tools = [
           {
             name: 'get_reviews',
@@ -177,14 +210,14 @@ export default async function handler(req, res) {
 
         res.status(200).json({
           jsonrpc: '2.0',
-          id: req.body.id || 1,
+          id: id || 1,
           result: { tools }
         });
         return;
       }
 
+      // 4. EJECUTAR HERRAMIENTAS
       if (method === 'tools/call') {
-        // Ejecutar herramienta
         const { name, arguments: args } = params;
         
         // Simular respuesta para herramientas (en producción esto conectaría con la API real)
@@ -205,8 +238,28 @@ export default async function handler(req, res) {
 
         res.status(200).json({
           jsonrpc: '2.0',
-          id: req.body.id || 1,
+          id: id || 1,
           result: mockResponse
+        });
+        return;
+      }
+
+      // 5. RECURSOS (opcional para MCP)
+      if (method === 'resources/list') {
+        res.status(200).json({
+          jsonrpc: '2.0',
+          id: id || 1,
+          result: { resources: [] }
+        });
+        return;
+      }
+
+      // 6. PROMPTS (opcional para MCP)
+      if (method === 'prompts/list') {
+        res.status(200).json({
+          jsonrpc: '2.0',
+          id: id || 1,
+          result: { prompts: [] }
         });
         return;
       }
@@ -214,7 +267,7 @@ export default async function handler(req, res) {
       // Método no soportado
       res.status(400).json({
         jsonrpc: '2.0',
-        id: req.body.id || 1,
+        id: id || 1,
         error: {
           code: -32601,
           message: `Método no soportado: ${method}`

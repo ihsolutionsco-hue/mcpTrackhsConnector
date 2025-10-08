@@ -14,6 +14,9 @@
     },
     "api/tools.js": {
       "maxDuration": 10
+    },
+    "api/test-mcp.js": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
@@ -28,6 +31,10 @@
     {
       "source": "/api/mcp",
       "destination": "/api/mcp.js"
+    },
+    {
+      "source": "/api/test-mcp",
+      "destination": "/api/test-mcp.js"
     },
     {
       "source": "/api/(.*)",
