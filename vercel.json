@@ -40,9 +40,21 @@
         "api/mcp-sdk.js": {
           "maxDuration": 30,
           "memory": 1024
+        },
+        "api/mcp-claude-web.js": {
+          "maxDuration": 30,
+          "memory": 1024
         }
   },
   "rewrites": [
+    {
+      "source": "/api/mcp-claude-web/(.*)",
+      "destination": "/api/mcp-claude-web.js"
+    },
+    {
+      "source": "/mcp-claude-web/(.*)",
+      "destination": "/api/mcp-claude-web.js"
+    },
     {
       "source": "/api/mcp-sdk/(.*)",
       "destination": "/api/mcp-sdk.js"
