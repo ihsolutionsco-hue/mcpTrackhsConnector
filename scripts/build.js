@@ -22,7 +22,7 @@ try {
 
   // Compilar TypeScript
   console.log('📦 Compilando TypeScript...');
-  execSync('npx tsc src/index.ts src/server.ts src/core/*.ts src/tools/*.ts src/types/*.ts --outDir dist --target ES2022 --module ESNext --moduleResolution bundler --allowSyntheticDefaultImports --esModuleInterop --allowJs --strict --skipLibCheck --forceConsistentCasingInFileNames --declaration --declarationMap --sourceMap --resolveJsonModule --isolatedModules', { stdio: 'inherit' });
+  execSync('npx tsc', { stdio: 'inherit' });
 
   // Verificar que se generaron los archivos
   const mainFile = join(distDir, 'index.js');
