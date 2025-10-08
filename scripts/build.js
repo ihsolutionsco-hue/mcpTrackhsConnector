@@ -22,7 +22,7 @@ try {
 
   // Compilar TypeScript
   console.log('📦 Compilando TypeScript...');
-  execSync('tsc', { stdio: 'inherit' });
+  execSync('tsc --project tsconfig.json', { stdio: 'inherit' });
 
   // Verificar que se generaron los archivos
   const mainFile = join(distDir, 'index.js');
