@@ -77,7 +77,7 @@ npm run build
 2. **Haz clic en "Add custom connector"**
 3. **Completa los campos**:
    - **Nombre**: `Track HS MCP Connector`
-   - **URL del servidor MCP remoto**: `https://trackhs-mcp-connector.vercel.app/api/mcp-real` ⭐ **RECOMENDADO**
+   - **URL del servidor MCP remoto**: `https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web` ⭐ **RECOMENDADO**
 4. **Haz clic en "Add"**
 
 ---
@@ -94,9 +94,8 @@ TRACKHS_PASSWORD=tu_contraseña
 ### **URLs Disponibles**
 
 #### **🎯 URLs Recomendadas para Claude**
-- **Claude Web (MCP Real)**: `https://trackhs-mcp-connector.vercel.app/api/mcp-real` ⭐ **RECOMENDADO**
-- **Claude Web (SSE)**: `https://trackhs-mcp-connector.vercel.app/api/mcp-sse-claude`
-- **Claude Web (HTTP)**: `https://trackhs-mcp-connector.vercel.app/api/mcp-claude`
+- **Claude Web (MCP Claude Web)**: `https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web` ⭐ **RECOMENDADO**
+- **Claude Web (MCP Real)**: `https://trackhs-mcp-connector.vercel.app/api/mcp-real` 🔄 **Alternativo**
 
 #### **📊 URLs de Diagnóstico**
 - **Principal**: `https://trackhs-mcp-connector.vercel.app/api`
@@ -113,27 +112,27 @@ TRACKHS_PASSWORD=tu_contraseña
 curl https://trackhs-mcp-connector.vercel.app/api
 ```
 
-### **2. Listar Herramientas (Servidor MCP Real)**
+### **2. Listar Herramientas (Servidor MCP Claude Web)**
 ```bash
-curl https://trackhs-mcp-connector.vercel.app/api/mcp-real/tools
+curl https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web/tools
 ```
 
 ### **3. Probar Protocolo MCP (JSON-RPC 2.0)**
 ```bash
 # Inicializar conexión MCP
-curl -X POST https://trackhs-mcp-connector.vercel.app/api/mcp-real \
+curl -X POST https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{"elicitation":{}},"clientInfo":{"name":"test-client","version":"1.0.0"}}}'
 
 # Listar herramientas MCP
-curl -X POST https://trackhs-mcp-connector.vercel.app/api/mcp-real \
+curl -X POST https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
 ```
 
-### **4. Health Check (Servidor MCP Real)**
+### **4. Health Check (Servidor MCP Claude Web)**
 ```bash
-curl https://trackhs-mcp-connector.vercel.app/api/mcp-real/health
+curl https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web/health
 ```
 
 ---
@@ -254,14 +253,11 @@ Para documentación detallada, consulta:
 
 #### **🎯 URLs Recomendadas**
 ```
-# Claude Web (MCP Real) - RECOMENDADO ⭐
+# Claude Web (MCP Claude Web) - RECOMENDADO ⭐
+https://trackhs-mcp-connector.vercel.app/api/mcp-claude-web
+
+# Claude Web (MCP Real) - Alternativo
 https://trackhs-mcp-connector.vercel.app/api/mcp-real
-
-# Claude Web (SSE) - Alternativo
-https://trackhs-mcp-connector.vercel.app/api/mcp-sse-claude
-
-# Claude Web (HTTP) - Alternativo
-https://trackhs-mcp-connector.vercel.app/api/mcp-claude
 
 # Claude Desktop (Local)
 node dist/index.js
