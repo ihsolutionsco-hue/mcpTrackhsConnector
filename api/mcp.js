@@ -106,19 +106,31 @@ const mcpServer = new McpServer({
 // Inicializar cliente API
 let apiClient = null;
 
+// Logging de variables de entorno para debugging
+console.log('[MCP Server] Verificando variables de entorno:');
+console.log('[MCP Server] TRACKHS_API_URL:', process.env.TRACKHS_API_URL ? '***configurado***' : 'NO CONFIGURADO');
+console.log('[MCP Server] TRACKHS_USERNAME:', process.env.TRACKHS_USERNAME ? '***configurado***' : 'NO CONFIGURADO');
+console.log('[MCP Server] TRACKHS_PASSWORD:', process.env.TRACKHS_PASSWORD ? '***configurado***' : 'NO CONFIGURADO');
+
 try {
   validateEnvironment();
-    apiClient = new TrackHSApiClient({
-      baseUrl: process.env.TRACKHS_API_URL,
-      username: process.env.TRACKHS_USERNAME,
-      password: process.env.TRACKHS_PASSWORD
-    });
+  console.log('[MCP Server] Variables de entorno validadas correctamente');
+  
+  apiClient = new TrackHSApiClient({
+    baseUrl: process.env.TRACKHS_API_URL,
+    username: process.env.TRACKHS_USERNAME,
+    password: process.env.TRACKHS_PASSWORD
+  });
+  
+  console.log('[MCP Server] Cliente API inicializado correctamente');
 } catch (error) {
-  console.error('Error de configuración:', error.message);
+  console.error('[MCP Server] Error de configuración:', error.message);
+  console.error('[MCP Server] Stack trace:', error.stack);
 }
 
 // Registrar herramientas MCP
 if (apiClient) {
+  console.log('[MCP Server] Registrando herramientas MCP...');
   // Herramienta: Obtener contactos
   mcpServer.registerTool(
     'get_contacts',
@@ -511,6 +523,10 @@ if (apiClient) {
       return await apiClient.get(endpoint);
     }
   );
+  
+  console.log('[MCP Server] Todas las herramientas MCP registradas correctamente');
+} else {
+  console.error('[MCP Server] ERROR: No se pudo inicializar el cliente API. Las herramientas MCP no estarán disponibles.');
 }
 
 // Registrar recursos MCP
