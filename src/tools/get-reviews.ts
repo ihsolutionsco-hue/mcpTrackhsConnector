@@ -7,6 +7,7 @@ import { ReviewsResponse, GetReviewsParams } from '../types/reviews.js';
 
 export class GetReviewsTool extends BaseTrackHSTool {
   name = 'get_reviews';
+  override title = 'Obtener Reseñas';
   description = 'Retrieve paginated collection of property reviews from Track HS';
   
   inputSchema = {

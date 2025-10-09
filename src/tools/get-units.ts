@@ -7,6 +7,7 @@ import { GetUnitsParams, GetUnitsResponse } from '../types/units.js';
 
 export class GetUnitsTool extends BaseTrackHSTool {
   name = 'get_units';
+  override title = 'Obtener Unidades';
   description = 'Obtener colección de unidades de alojamiento con filtros avanzados incluyendo paginación, ordenamiento, filtros por ID, búsqueda de texto, filtros físicos, políticas y disponibilidad';
   
   inputSchema = {
@@ -208,6 +209,31 @@ export class GetUnitsTool extends BaseTrackHSTool {
       }
     },
     required: []
+  };
+
+  override outputSchema = {
+    type: 'object' as const,
+    properties: {
+      data: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            name: { type: 'string' },
+            nodeId: { type: 'number' },
+            unitTypeId: { type: 'number' },
+            bedrooms: { type: 'number' },
+            bathrooms: { type: 'number' },
+            isActive: { type: 'boolean' },
+            isBookable: { type: 'boolean' }
+          }
+        }
+      },
+      totalElements: { type: 'number' },
+      totalPages: { type: 'number' },
+      currentPage: { type: 'number' }
+    }
   };
 
   async execute(params: GetUnitsParams = {}): Promise<GetUnitsResponse> {

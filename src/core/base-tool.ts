@@ -21,6 +21,10 @@ export abstract class BaseTrackHSTool {
   abstract description: string;
   abstract inputSchema: MCPToolSchema;
   
+  // Campos adicionales para el nuevo servidor MCP
+  title?: string;
+  outputSchema?: MCPToolSchema;
+  
   abstract execute(params: any): Promise<any>;
 
   /**

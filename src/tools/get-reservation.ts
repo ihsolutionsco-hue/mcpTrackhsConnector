@@ -7,6 +7,7 @@ import { ReservationResponse } from '../types/reservations.js';
 
 export class GetReservationTool extends BaseTrackHSTool {
   name = 'get_reservation';
+  override title = 'Obtener Reservación';
   description = 'Get detailed information for a specific reservation by ID';
   
   inputSchema = {
@@ -18,6 +19,21 @@ export class GetReservationTool extends BaseTrackHSTool {
       }
     },
     required: ['reservationId']
+  };
+
+  override outputSchema = {
+    type: 'object' as const,
+    properties: {
+      id: { type: 'string' },
+      guestName: { type: 'string' },
+      checkIn: { type: 'string', format: 'date' },
+      checkOut: { type: 'string', format: 'date' },
+      status: { type: 'string' },
+      totalAmount: { type: 'number' },
+      unitId: { type: 'string' },
+      nodeId: { type: 'string' },
+      guestId: { type: 'string' }
+    }
   };
 
   async execute(params: { reservationId: string }): Promise<ReservationResponse> {

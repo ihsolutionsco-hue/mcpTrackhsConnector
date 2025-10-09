@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
-    "build": "npx tsc src/index.ts src/server.ts --outDir dist --target ES2022 --module CommonJS --moduleResolution node --allowSyntheticDefaultImports --esModuleInterop --allowJs --strict --skipLibCheck --forceConsistentCasingInFileNames --declaration --declarationMap --sourceMap --resolveJsonModule --isolatedModules",
+    "build": "npx tsc --project tsconfig.json --outDir dist",
     "prebuild": "npm run clean",
     "postbuild": "echo 'Build completed successfully'",
     "dev:vercel": "vercel dev",
@@ -20,7 +20,9 @@
     "test:e2e": "jest --config config/jest.config.mjs tests/e2e/",
     "test:watch": "jest --config config/jest.config.mjs --watch",
     "test:coverage": "jest --config config/jest.config.mjs --coverage",
-    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e"
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "verify:build": "npm run build && node -e \"console.log('Build verification: OK')\"",
+    "verify:deployment": "curl -f https://trackhs-mcp-connector.vercel.app/api/health || echo 'Deployment verification failed'"
   },
   "keywords": [
     "mcp",

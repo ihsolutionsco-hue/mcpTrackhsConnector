@@ -7,6 +7,7 @@ import { ContactsResponse, GetContactsParams } from '../types/contacts.js';
 
 export class GetContactsTool extends BaseTrackHSTool {
   name = 'get_contacts';
+  override title = 'Obtener Contactos';
   description = 'Retrieve all contacts from Track HS CRM system. Contacts include guests, owners, or vendor employees.';
   
   inputSchema = {
@@ -54,6 +55,29 @@ export class GetContactsTool extends BaseTrackHSTool {
       }
     },
     required: []
+  };
+
+  override outputSchema = {
+    type: 'object' as const,
+    properties: {
+      data: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            name: { type: 'string' },
+            email: { type: 'string' },
+            cellPhone: { type: 'string' },
+            homePhone: { type: 'string' },
+            vip: { type: 'boolean' }
+          }
+        }
+      },
+      totalElements: { type: 'number' },
+      totalPages: { type: 'number' },
+      currentPage: { type: 'number' }
+    }
   };
 
   async execute(params: GetContactsParams = {}): Promise<ContactsResponse> {
