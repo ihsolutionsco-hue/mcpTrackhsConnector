@@ -44,6 +44,9 @@ class TrackHSApiClient {
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     
+    console.log(`[TrackHS API] Realizando petición a: ${url}`);
+    console.log(`[TrackHS API] Método: ${options.method || 'GET'}`);
+    
     try {
       const fetchOptions = {
         method: options.method || 'GET',
@@ -60,18 +63,28 @@ class TrackHSApiClient {
       }
       
       const response = await fetch(url, fetchOptions);
+      
+      console.log(`[TrackHS API] Respuesta recibida: ${response.status} ${response.statusText}`);
+      console.log(`[TrackHS API] Headers:`, Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
-        throw new Error(`Track HS API Error: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`[TrackHS API] Error ${response.status}: ${errorText}`);
+        throw new Error(`Track HS API Error: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const contentType = response.headers.get('content-type');
       if (contentType && contentType.includes('application/json')) {
-        return await response.json();
+        const data = await response.json();
+        console.log(`[TrackHS API] Datos JSON recibidos:`, JSON.stringify(data, null, 2));
+        return data;
       } else {
-        return await response.text();
+        const text = await response.text();
+        console.log(`[TrackHS API] Datos de texto recibidos:`, text);
+        return text;
       }
     } catch (error) {
+      console.error(`[TrackHS API] Error en petición:`, error);
       if (error instanceof Error) {
         throw new Error(`Error en petición a Track HS: ${error.message}`);
       }
@@ -135,20 +148,31 @@ if (apiClient) {
       }
     },
     async (params = {}) => {
-      const queryParams = new URLSearchParams();
-      const sortDirection = params.sortDirection || 'asc';
-      
-      if (params.sortColumn) queryParams.append('sortColumn', params.sortColumn);
-      queryParams.append('sortDirection', sortDirection);
-      if (params.search) queryParams.append('search', params.search);
-      if (params.term) queryParams.append('term', params.term);
-      if (params.email) queryParams.append('email', params.email);
-      if (params.page) queryParams.append('page', params.page.toString());
-      if (params.size) queryParams.append('size', params.size.toString());
-      if (params.updatedSince) queryParams.append('updatedSince', params.updatedSince);
+      try {
+        console.log(`[MCP Tool] get_contacts llamado con parámetros:`, params);
+        
+        const queryParams = new URLSearchParams();
+        const sortDirection = params.sortDirection || 'asc';
+        
+        if (params.sortColumn) queryParams.append('sortColumn', params.sortColumn);
+        queryParams.append('sortDirection', sortDirection);
+        if (params.search) queryParams.append('search', params.search);
+        if (params.term) queryParams.append('term', params.term);
+        if (params.email) queryParams.append('email', params.email);
+        if (params.page) queryParams.append('page', params.page.toString());
+        if (params.size) queryParams.append('size', params.size.toString());
+        if (params.updatedSince) queryParams.append('updatedSince', params.updatedSince);
 
-      const endpoint = `/crm/contacts?${queryParams.toString()}`;
-      return await apiClient.get(endpoint);
+        const endpoint = `/crm/contacts?${queryParams.toString()}`;
+        console.log(`[MCP Tool] Endpoint construido: ${endpoint}`);
+        
+        const result = await apiClient.get(endpoint);
+        console.log(`[MCP Tool] get_contacts exitoso, datos recibidos:`, result);
+        return result;
+      } catch (error) {
+        console.error(`[MCP Tool] Error en get_contacts:`, error);
+        throw new Error(`Error obteniendo contactos: ${error.message}`);
+      }
     }
   );
 
@@ -198,16 +222,27 @@ if (apiClient) {
       }
     },
     async (params = {}) => {
-      const queryParams = new URLSearchParams();
-      if (params.checkIn) queryParams.append('checkIn', params.checkIn);
-      if (params.checkOut) queryParams.append('checkOut', params.checkOut);
-      if (params.status) queryParams.append('status', params.status);
-      if (params.guestName) queryParams.append('guestName', params.guestName);
-      if (params.page) queryParams.append('page', params.page.toString());
-      if (params.size) queryParams.append('size', params.size.toString());
+      try {
+        console.log(`[MCP Tool] search_reservations llamado con parámetros:`, params);
+        
+        const queryParams = new URLSearchParams();
+        if (params.checkIn) queryParams.append('checkIn', params.checkIn);
+        if (params.checkOut) queryParams.append('checkOut', params.checkOut);
+        if (params.status) queryParams.append('status', params.status);
+        if (params.guestName) queryParams.append('guestName', params.guestName);
+        if (params.page) queryParams.append('page', params.page.toString());
+        if (params.size) queryParams.append('size', params.size.toString());
 
-      const endpoint = `/v2/pms/reservations/search?${queryParams.toString()}`;
-      return await apiClient.get(endpoint);
+        const endpoint = `/v2/pms/reservations/search?${queryParams.toString()}`;
+        console.log(`[MCP Tool] Endpoint construido: ${endpoint}`);
+        
+        const result = await apiClient.get(endpoint);
+        console.log(`[MCP Tool] search_reservations exitoso, datos recibidos:`, result);
+        return result;
+      } catch (error) {
+        console.error(`[MCP Tool] Error en search_reservations:`, error);
+        throw new Error(`Error buscando reservaciones: ${error.message}`);
+      }
     }
   );
 
@@ -634,8 +669,51 @@ app.get('/health', (req, res) => {
         version: '1.0.0',
         timestamp: new Date().toISOString(),
         capabilities: ['tools', 'resources', 'prompts'],
-        apiUrl: process.env.TRACKHS_API_URL
+        apiUrl: process.env.TRACKHS_API_URL,
+        environment: {
+          trackhsConfigured: !!(process.env.TRACKHS_API_URL && process.env.TRACKHS_USERNAME && process.env.TRACKHS_PASSWORD),
+          hasApiClient: !!apiClient,
+          apiUrl: process.env.TRACKHS_API_URL,
+          username: process.env.TRACKHS_USERNAME ? '***configured***' : 'missing',
+          password: process.env.TRACKHS_PASSWORD ? '***configured***' : 'missing'
+        }
         });
+});
+
+// Test Track HS connectivity endpoint
+app.get('/test-connectivity', async (req, res) => {
+  try {
+    if (!apiClient) {
+      return res.status(500).json({
+        success: false,
+        error: 'API Client no inicializado',
+        environment: {
+          trackhsConfigured: !!(process.env.TRACKHS_API_URL && process.env.TRACKHS_USERNAME && process.env.TRACKHS_PASSWORD),
+          apiUrl: process.env.TRACKHS_API_URL,
+          username: process.env.TRACKHS_USERNAME ? '***configured***' : 'missing',
+          password: process.env.TRACKHS_PASSWORD ? '***configured***' : 'missing'
+        }
+      });
+    }
+
+    // Probar conectividad básica con un endpoint simple
+    const testResult = await apiClient.get('/crm/contacts?page=1&size=1');
+    
+    res.json({
+      success: true,
+      message: 'Conectividad con Track HS exitosa',
+      testResult: testResult,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error en test de conectividad:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      details: error.stack,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Tools list endpoint
@@ -647,6 +725,7 @@ app.get('/tools', (req, res) => {
     endpoints: {
       health: '/health',
       tools: '/tools',
+      testConnectivity: '/test-connectivity',
       mcp: 'POST /mcp (JSON-RPC 2.0)'
     },
     capabilities: ['tools', 'resources', 'prompts'],
