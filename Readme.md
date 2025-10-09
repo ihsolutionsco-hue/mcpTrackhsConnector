@@ -16,8 +16,10 @@
 
 ## 🚀 **Estado: ✅ FUNCIONANDO**
 
-- **URL**: `https://trackhs-mcp-connector.vercel.app`
+- **URL**: `https://trackhs-mcp-connector.vercel.app/api/mcp`
 - **13 herramientas** activas
+- **4 resources** disponibles
+- **5 prompts** para workflows
 - **Conexión real** con Track HS
 - **Tiempo de respuesta**: ~200ms
 
