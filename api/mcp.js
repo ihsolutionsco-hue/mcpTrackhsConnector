@@ -805,30 +805,37 @@ app.post('/api/mcp', async (req, res) => {
   console.log('POST /api/mcp request received:', {
     method: req.method,
     url: req.url,
-    body: req.body
+    body: req.body,
+    headers: req.headers
   });
   
   try {
+    console.log('[MCP Handler] Iniciando manejo de petición MCP');
+    console.log('[MCP Handler] Cliente API disponible:', !!apiClient);
+    
     // Crear transport para cada petición (stateless)
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
       enableJsonResponse: true
     });
 
-    res.on('close', () => {
-      transport.close();
-    });
-
+    console.log('[MCP Handler] Transport creado, conectando con servidor MCP...');
     await mcpServer.connect(transport);
+    
+    console.log('[MCP Handler] Servidor MCP conectado, manejando petición...');
     await transport.handleRequest(req, res, req.body);
+    
+    console.log('[MCP Handler] Petición MCP manejada exitosamente');
   } catch (error) {
-    console.error('Error handling MCP request:', error);
+    console.error('[MCP Handler] Error handling MCP request:', error);
+    console.error('[MCP Handler] Error stack:', error.stack);
     if (!res.headersSent) {
       res.status(500).json({
         jsonrpc: '2.0',
         error: {
           code: -32603,
-          message: 'Internal server error'
+          message: 'Internal server error',
+          details: error.message
         },
         id: null
       });
