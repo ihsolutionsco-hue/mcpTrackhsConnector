@@ -109,8 +109,8 @@ describe('GetReservationTool', () => {
 
       expect(result.data).toHaveProperty('id');
       expect(result.data).toHaveProperty('status');
-      expect(result.data).toHaveProperty('arrivalDate');
-      expect(result.data).toHaveProperty('departureDate');
+      expect(result.data).toHaveProperty('check_in');
+      expect(result.data).toHaveProperty('check_out');
       expect(result.data).toHaveProperty('unitId');
     });
   });
@@ -213,8 +213,8 @@ describe('GetReservationTool', () => {
 
       expect(typeof result.data.id).toBe('number');
       expect(typeof result.data.status).toBe('string');
-      expect(typeof result.data.arrivalDate).toBe('string');
-      expect(typeof result.data.departureDate).toBe('string');
+      expect(typeof result.data.check_in).toBe('string');
+      expect(typeof result.data.check_out).toBe('string');
       expect(typeof result.data.unitId).toBe('number');
     });
   });

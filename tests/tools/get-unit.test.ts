@@ -63,10 +63,10 @@ describe('GetUnitTool', () => {
 
       expect(result).toBeDefined();
       expect(validateApiResponse(result)).toBe(true);
-      expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('name');
-      expect(result).toHaveProperty('unitType');
-      expect(result).toHaveProperty('maxOccupancy');
+      expect(result.data).toHaveProperty('id');
+      expect(result.data).toHaveProperty('name');
+      expect(result.data).toHaveProperty('type');
+      expect(result.data).toHaveProperty('capacity');
     });
 
     it('debe manejar ID numérico', async () => {
@@ -140,10 +140,10 @@ describe('GetUnitTool', () => {
 
       const result = await tool.execute({ unitId });
 
-      expect(result).toHaveProperty('id');
-      expect(result).toHaveProperty('name');
-      expect(result).toHaveProperty('unitType');
-      expect(result).toHaveProperty('maxOccupancy');
+      expect(result.data).toHaveProperty('id');
+      expect(result.data).toHaveProperty('name');
+      expect(result.data).toHaveProperty('type');
+      expect(result.data).toHaveProperty('capacity');
     });
   });
 });

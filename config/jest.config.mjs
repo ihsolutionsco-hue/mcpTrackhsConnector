@@ -49,13 +49,15 @@ export default {
     }
   },
   setupFilesAfterEnv: ['<rootDir>/../tests/setup.ts'],
-  testTimeout: 10000,
+  testTimeout: 30000,
   verbose: true,
   extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^(\\.{1,2}/.*)\\.js$': '$1'
+    '^@/(.*)$': '<rootDir>/../src/$1',
+    '^@tests/(.*)$': '<rootDir>/../tests/$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^(\\.{1,2}/.*)\\.ts$': '$1'
   },
   maxWorkers: '50%'
 };

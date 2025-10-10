@@ -91,28 +91,31 @@ export const mockApiResponses = {
   // Respuestas para get-units
   units: {
     success: {
-      data: [
-        {
-          id: 456,
-          name: "Suite Deluxe",
-          type: "suite",
-          capacity: 4,
-          price_per_night: 150.00,
-          status: "available"
-        },
-        {
-          id: 457,
-          name: "Habitación Estándar",
-          type: "room",
-          capacity: 2,
-          price_per_night: 80.00,
-          status: "available"
-        }
-      ],
-      meta: {
-        total: 2,
-        page: 1,
-        per_page: 10
+      _embedded: {
+        units: [
+          {
+            id: 456,
+            name: "Suite Deluxe",
+            type: "suite",
+            capacity: 4,
+            price_per_night: 150.00,
+            status: "available"
+          },
+          {
+            id: 457,
+            name: "Habitación Estándar",
+            type: "room",
+            capacity: 2,
+            price_per_night: 80.00,
+            status: "available"
+          }
+        ]
+      },
+      page: {
+        size: 10,
+        totalElements: 2,
+        totalPages: 1,
+        number: 0
       }
     }
   },

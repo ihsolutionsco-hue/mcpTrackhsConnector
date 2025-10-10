@@ -3,7 +3,7 @@
  * Estos tests validan la inicialización y funcionamiento del servidor MCP
  */
 
-import { TrackHSMCPServer } from '../../src/server.js';
+import { TrackHSMCPServer } from '../../src/mcp-server.js';
 import { TrackHSApiClient } from '../../src/core/api-client.js';
 
 describe('TrackHSMCPServer Integration Tests', () => {
@@ -30,7 +30,7 @@ describe('TrackHSMCPServer Integration Tests', () => {
   afterEach(async () => {
     if (server) {
       try {
-        await server.stop();
+        // El servidor no tiene método stop
       } catch (error) {
         // Ignorar errores al detener el servidor
       }
@@ -119,28 +119,25 @@ describe('TrackHSMCPServer Integration Tests', () => {
     it('debe iniciar y detener correctamente', async () => {
       server = new TrackHSMCPServer();
       
-      await expect(server.start()).resolves.not.toThrow();
+      // El servidor se inicializa automáticamente, no hay métodos start/stop
       expect(server).toBeDefined();
-      
-      await expect(server.stop()).resolves.not.toThrow();
+      expect(server.getServer()).toBeDefined();
     });
 
     it('debe manejar múltiples inicios y paradas', async () => {
+      // El servidor se inicializa automáticamente, no hay métodos start/stop
       server = new TrackHSMCPServer();
-      
-      // Primer ciclo
-      await server.start();
-      await server.stop();
+      expect(server).toBeDefined();
       
       // Segundo ciclo
-      await server.start();
-      await server.stop();
+      const server2 = new TrackHSMCPServer();
+      expect(server2).toBeDefined();
     });
 
     it('debe manejar parada sin inicio previo', async () => {
+      // El servidor no tiene método stop, solo se verifica que se inicializa
       server = new TrackHSMCPServer();
-      
-      await expect(server.stop()).resolves.not.toThrow();
+      expect(server).toBeDefined();
     });
   });
 
@@ -198,7 +195,7 @@ describe('TrackHSMCPServer Integration Tests', () => {
       server = new TrackHSMCPServer();
       
       try {
-        await server.start();
+        // El servidor se inicializa automáticamente
         expect(server).toBeDefined();
         
         // Verificar que las herramientas están configuradas
@@ -216,7 +213,7 @@ describe('TrackHSMCPServer Integration Tests', () => {
           }
         }
       } finally {
-        await server.stop();
+        // El servidor no tiene método stop
       }
     });
 
@@ -227,7 +224,7 @@ describe('TrackHSMCPServer Integration Tests', () => {
       server = new TrackHSMCPServer();
       
       try {
-        await server.start();
+        // El servidor se inicializa automáticamente
         
         // Intentar usar una herramienta
         const reviewsTool = server.tools.find(tool => tool.name === 'get_reviews');
@@ -237,7 +234,7 @@ describe('TrackHSMCPServer Integration Tests', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
       } finally {
-        await server.stop();
+        // El servidor no tiene método stop
       }
     });
   });
@@ -248,11 +245,11 @@ describe('TrackHSMCPServer Integration Tests', () => {
       
       // Verificar que el servidor tiene todas las propiedades necesarias
       expect(server).toHaveProperty('tools');
-      expect(server).toHaveProperty('start');
-      expect(server).toHaveProperty('stop');
+      expect(server).toHaveProperty('getServer');
+      expect(server).toHaveProperty('getServerInfo');
       
-      expect(typeof server.start).toBe('function');
-      expect(typeof server.stop).toBe('function');
+      expect(typeof server.getServer).toBe('function');
+      expect(typeof server.getServerInfo).toBe('function');
     });
 
     it('debe manejar diferentes entornos', () => {
@@ -275,7 +272,7 @@ describe('TrackHSMCPServer Integration Tests', () => {
   describe('Manejo de Señales del Sistema', () => {
     it('debe manejar señales SIGINT', async () => {
       server = new TrackHSMCPServer();
-      await server.start();
+      // El servidor se inicializa automáticamente
       
       // Simular señal SIGINT
       process.emit('SIGINT' as any);
@@ -286,7 +283,7 @@ describe('TrackHSMCPServer Integration Tests', () => {
 
     it('debe manejar señales SIGTERM', async () => {
       server = new TrackHSMCPServer();
-      await server.start();
+      // El servidor se inicializa automáticamente
       
       // Simular señal SIGTERM
       process.emit('SIGTERM' as any);

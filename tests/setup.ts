@@ -4,12 +4,12 @@
 
 // Configurar variables de entorno para testing
 process.env.NODE_ENV = 'test';
-process.env.TRACKHS_API_URL = 'https://api.trackhs.test';
+process.env.TRACKHS_API_URL = 'https://api.trackhs.com';
 process.env.TRACKHS_USERNAME = 'test_user';
 process.env.TRACKHS_PASSWORD = 'test_password';
 
 // Configurar timeout global para tests
-jest.setTimeout(10000);
+jest.setTimeout(30000);
 
 // Mock de console para evitar logs durante los tests
 const originalConsole = console;

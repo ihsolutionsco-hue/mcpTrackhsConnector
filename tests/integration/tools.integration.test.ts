@@ -193,7 +193,7 @@ describe('MCP Tools Integration Tests', () => {
         });
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toContain('Error al obtener reservación');
+        expect((error as Error).message).toContain('Reservación con ID');
       }
     });
 

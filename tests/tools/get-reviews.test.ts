@@ -65,7 +65,7 @@ describe('GetReviewsTool', () => {
       expect(result).toBeDefined();
       expect(validateApiResponse(result)).toBe(true);
       expect(result.data).toHaveLength(2);
-      expect(result.pagination.total).toBe(2);
+      expect(result.meta.total).toBe(2);
     });
 
     it('debe obtener reseñas con parámetros personalizados', async () => {
@@ -164,11 +164,11 @@ describe('GetReviewsTool', () => {
       const result = await tool.execute();
 
       expect(result).toHaveProperty('data');
-      expect(result).toHaveProperty('pagination');
+      expect(result).toHaveProperty('meta');
       expect(Array.isArray(result.data)).toBe(true);
-      expect(result.pagination).toHaveProperty('total');
-      expect(result.pagination).toHaveProperty('page');
-      expect(result.pagination).toHaveProperty('size');
+      expect(result.meta).toHaveProperty('total');
+      expect(result.meta).toHaveProperty('page');
+      expect(result.meta).toHaveProperty('per_page');
     });
 
     it('debe validar estructura de elementos de reseña', async () => {
