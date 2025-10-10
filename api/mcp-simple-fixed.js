@@ -1,9 +1,9 @@
 /**
- * Endpoint MCP funcional para Vercel
- * Versión ES modules que funciona correctamente
+ * Endpoint MCP simplificado para Vercel
+ * Versión que funciona correctamente según la teoría MCP
  */
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -184,7 +184,7 @@ export default async function handler(req, res) {
             ]
           };
         } else {
-          // Para esta versión, solo retornamos un mensaje de configuración
+          // Para esta versión simplificada, solo retornamos un mensaje de configuración
           result = {
             content: [
               {
@@ -266,4 +266,4 @@ export default async function handler(req, res) {
       id: req.body?.id || null
     });
   }
-}
+};
