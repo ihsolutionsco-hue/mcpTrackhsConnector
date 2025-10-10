@@ -164,25 +164,14 @@ if (apiClient) {
       title: 'Obtener Contactos',
       description: 'Retrieve all contacts from Track HS CRM system',
       inputSchema: {
-        type: 'object',
-        properties: {
-          sortColumn: { 
-            type: 'string', 
-            enum: ['id', 'name', 'email', 'cellPhone', 'homePhone', 'otherPhone', 'vip']
-          },
-          sortDirection: { 
-            type: 'string', 
-            enum: ['asc', 'desc'], 
-            default: 'asc'
-          },
-          search: { type: 'string' },
-          term: { type: 'string' },
-          email: { type: 'string', format: 'email' },
-          page: { type: 'number', minimum: 1 },
-          size: { type: 'number', minimum: 1, maximum: 100 },
-          updatedSince: { type: 'string', format: 'date-time' }
-        },
-        required: []
+        sortColumn: z.enum(['id', 'name', 'email', 'cellPhone', 'homePhone', 'otherPhone', 'vip']).optional(),
+        sortDirection: z.enum(['asc', 'desc']).default('asc'),
+        search: z.string().optional(),
+        term: z.string().optional(),
+        email: z.string().email().optional(),
+        page: z.number().min(1).optional(),
+        size: z.number().min(1).max(100).optional(),
+        updatedSince: z.string().optional()
       }
     },
     async (params = {}) => {
@@ -223,14 +212,7 @@ if (apiClient) {
       title: 'Obtener Reservación',
       description: 'Get detailed information for a specific reservation by ID',
       inputSchema: {
-        type: 'object',
-        properties: {
-          reservationId: { 
-            type: 'string', 
-            description: 'The ID of the reservation to retrieve'
-          }
-        },
-        required: ['reservationId']
+        reservationId: z.string().describe('The ID of the reservation to retrieve')
       }
     },
     async ({ reservationId }) => {
@@ -250,16 +232,12 @@ if (apiClient) {
       title: 'Buscar Reservaciones',
       description: 'Search reservations with various filters',
       inputSchema: {
-        type: 'object',
-        properties: {
-          checkIn: { type: 'string', format: 'date' },
-          checkOut: { type: 'string', format: 'date' },
-          status: { type: 'string' },
-          guestName: { type: 'string' },
-          page: { type: 'number', minimum: 1 },
-          size: { type: 'number', minimum: 1, maximum: 100 }
-        },
-        required: []
+        checkIn: z.string().optional(),
+        checkOut: z.string().optional(),
+        status: z.string().optional(),
+        guestName: z.string().optional(),
+        page: z.number().min(1).optional(),
+        size: z.number().min(1).max(100).optional()
       }
     },
     async (params = {}) => {
@@ -296,14 +274,10 @@ if (apiClient) {
       title: 'Obtener Unidades',
       description: 'Get list of units/properties',
       inputSchema: {
-        type: 'object',
-        properties: {
-          nodeId: { type: 'string' },
-          status: { type: 'string' },
-          page: { type: 'number', minimum: 1 },
-          size: { type: 'number', minimum: 1, maximum: 100 }
-        },
-        required: []
+        nodeId: z.string().optional(),
+        status: z.string().optional(),
+        page: z.number().min(1).optional(),
+        size: z.number().min(1).max(100).optional()
       }
     },
     async (params = {}) => {
@@ -326,14 +300,7 @@ if (apiClient) {
       title: 'Obtener Unidad',
       description: 'Get specific unit details by ID',
       inputSchema: {
-        type: 'object',
-        properties: {
-          unitId: { 
-            type: 'string', 
-            description: 'The ID of the unit to retrieve'
-          }
-        },
-        required: ['unitId']
+        unitId: z.string().describe('The ID of the unit to retrieve')
       }
     },
     async ({ unitId }) => {
@@ -353,14 +320,10 @@ if (apiClient) {
       title: 'Obtener Reseñas',
       description: 'Get property reviews',
       inputSchema: {
-        type: 'object',
-        properties: {
-          nodeId: { type: 'string' },
-          rating: { type: 'number', minimum: 1, maximum: 5 },
-          page: { type: 'number', minimum: 1 },
-          size: { type: 'number', minimum: 1, maximum: 100 }
-        },
-        required: []
+        nodeId: z.string().optional(),
+        rating: z.number().min(1).max(5).optional(),
+        page: z.number().min(1).optional(),
+        size: z.number().min(1).max(100).optional()
       }
     },
     async (params = {}) => {
@@ -383,12 +346,8 @@ if (apiClient) {
       title: 'Obtener Cuentas Contables',
       description: 'Get ledger accounts',
       inputSchema: {
-        type: 'object',
-        properties: {
-          page: { type: 'number', minimum: 1 },
-          size: { type: 'number', minimum: 1, maximum: 100 }
-        },
-        required: []
+        page: z.number().min(1).optional(),
+        size: z.number().min(1).max(100).optional()
       }
     },
     async (params = {}) => {
@@ -409,14 +368,7 @@ if (apiClient) {
       title: 'Obtener Cuenta Contable',
       description: 'Get specific ledger account by ID',
       inputSchema: {
-        type: 'object',
-        properties: {
-          accountId: { 
-            type: 'string', 
-            description: 'The ID of the account to retrieve'
-          }
-        },
-        required: ['accountId']
+        accountId: z.string().describe('The ID of the account to retrieve')
       }
     },
     async ({ accountId }) => {
@@ -436,12 +388,8 @@ if (apiClient) {
       title: 'Obtener Folios',
       description: 'Get accounting folios collection',
       inputSchema: {
-        type: 'object',
-        properties: {
-          page: { type: 'number', minimum: 1 },
-          size: { type: 'number', minimum: 1, maximum: 100 }
-        },
-        required: []
+        page: z.number().min(1).optional(),
+        size: z.number().min(1).max(100).optional()
       }
     },
     async (params = {}) => {
@@ -462,14 +410,7 @@ if (apiClient) {
       title: 'Obtener Notas de Reservación',
       description: 'Get notes for a specific reservation',
       inputSchema: {
-        type: 'object',
-        properties: {
-          reservationId: { 
-            type: 'string', 
-            description: 'The ID of the reservation'
-          }
-        },
-        required: ['reservationId']
+        reservationId: z.string().describe('The ID of the reservation')
       }
     },
     async ({ reservationId }) => {
@@ -489,12 +430,8 @@ if (apiClient) {
       title: 'Obtener Nodos',
       description: 'Get list of nodes/properties',
       inputSchema: {
-        type: 'object',
-        properties: {
-          page: { type: 'number', minimum: 1 },
-          size: { type: 'number', minimum: 1, maximum: 100 }
-        },
-        required: []
+        page: z.number().min(1).optional(),
+        size: z.number().min(1).max(100).optional()
       }
     },
     async (params = {}) => {
@@ -515,14 +452,7 @@ if (apiClient) {
       title: 'Obtener Nodo',
       description: 'Get specific node by ID',
       inputSchema: {
-        type: 'object',
-        properties: {
-          nodeId: { 
-            type: 'string', 
-            description: 'The ID of the node to retrieve'
-          }
-        },
-        required: ['nodeId']
+        nodeId: z.string().describe('The ID of the node to retrieve')
       }
     },
     async ({ nodeId }) => {
@@ -542,14 +472,10 @@ if (apiClient) {
       title: 'Obtener Órdenes de Trabajo',
       description: 'Get maintenance work orders',
       inputSchema: {
-        type: 'object',
-        properties: {
-          status: { type: 'string' },
-          priority: { type: 'string' },
-          page: { type: 'number', minimum: 1 },
-          size: { type: 'number', minimum: 1, maximum: 100 }
-        },
-        required: []
+        status: z.string().optional(),
+        priority: z.string().optional(),
+        page: z.number().min(1).optional(),
+        size: z.number().min(1).max(100).optional()
       }
     },
     async (params = {}) => {
