@@ -1,10 +1,10 @@
-# 📚 Documentación - Track HS MCP Connector
+#  Documentación - Track HS MCP Connector
 
-## 🎯 Resumen Ejecutivo
+##  Resumen Ejecutivo
 
 **Track HS MCP Connector** es un servidor MCP (Model Context Protocol) remoto que conecta Claude con la API de Track HS, proporcionando 13 herramientas especializadas para gestión de propiedades, reservaciones, contactos, contabilidad y mantenimiento.
 
-### **✅ Estado del Proyecto: COMPLETADO**
+### ** Estado del Proyecto: COMPLETADO**
 - **Versión**: 1.0.0
 - **Servidor MCP**: 100% funcional
 - **Herramientas**: 13 herramientas implementadas
@@ -13,7 +13,7 @@
 
 ---
 
-## 📋 Tabla de Contenidos
+##  Tabla de Contenidos
 
 1. [Configuración Rápida](#-configuración-rápida)
 2. [Herramientas Disponibles](#-herramientas-disponibles)
@@ -24,7 +24,7 @@
 
 ---
 
-## 🚀 Configuración Rápida
+##  Configuración Rápida
 
 ### **Variables de Entorno Requeridas**
 ```bash
@@ -40,7 +40,7 @@ TRACKHS_PASSWORD=tu_contraseña
 
 ---
 
-## 🛠️ Herramientas Disponibles
+##  Herramientas Disponibles
 
 | Herramienta | Descripción |
 |-------------|-------------|
@@ -60,7 +60,7 @@ TRACKHS_PASSWORD=tu_contraseña
 
 ---
 
-## 🤖 Configuración en Claude
+##  Configuración en Claude
 
 ### **Claude Desktop**
 1. Configura `claude_desktop_config.json`:
@@ -89,7 +89,7 @@ TRACKHS_PASSWORD=tu_contraseña
 
 ---
 
-## 🔧 Desarrollo
+##  Desarrollo
 
 ### **Comandos Principales**
 ```bash
@@ -109,16 +109,16 @@ npm run deploy
 ### **Estructura del Proyecto**
 ```
 src/
-├── core/           # Core del servidor MCP
-├── tools/          # Herramientas MCP
-├── types/          # Tipos TypeScript
-├── index.ts        # Punto de entrada
-└── server.ts       # Servidor principal
+ core/           # Core del servidor MCP
+ tools/          # Herramientas MCP
+ types/          # Tipos TypeScript
+ index.ts        # Punto de entrada
+ server.ts       # Servidor principal
 ```
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ### **Estrategia de Testing**
 - **Unit Tests**: `npm run test:unit`
@@ -133,7 +133,7 @@ npm run test:coverage
 
 ---
 
-## 🔍 Troubleshooting
+##  Troubleshooting
 
 ### **Problemas Comunes**
 
@@ -154,7 +154,7 @@ npm run test:coverage
 
 ---
 
-## 📞 Soporte
+##  Soporte
 
 - **GitHub Issues**: Para reportar problemas
 - **Documentación**: Guías completas en `/docs`
@@ -162,6 +162,6 @@ npm run test:coverage
 
 ---
 
-**¡Listo para usar!** 🎉
+**¡Listo para usar!** 
 
 *Última actualización: 2025-01-27*

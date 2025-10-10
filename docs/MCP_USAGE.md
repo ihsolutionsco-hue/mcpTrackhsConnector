@@ -1,13 +1,13 @@
 # Guía de Uso del Servidor MCP TrackHS
 
-## 🚀 Servidor MCP Funcionando
+##  Servidor MCP Funcionando
 
 El servidor MCP para TrackHS está desplegado y funcionando en:
 - **URL Principal**: `https://trackhs-mcp-connector.vercel.app/api/mcp`
 - **Health Check**: `https://trackhs-mcp-connector.vercel.app/api/health`
 - **Tools List**: `https://trackhs-mcp-connector.vercel.app/api/tools`
 
-## 🔧 Configuración en Claude
+##  Configuración en Claude
 
 ### Paso 1: Abrir Claude Desktop
 1. Abre Claude Desktop
@@ -24,7 +24,7 @@ El servidor MCP para TrackHS está desplegado y funcionando en:
 - Claude debería mostrar "Connected" junto al connector
 - Si hay errores, verifica que las variables de entorno estén configuradas en Vercel
 
-## 🛠️ Herramientas Disponibles
+##  Herramientas Disponibles
 
 ### Tools (13 herramientas)
 - `get_contacts` - Obtener contactos del CRM
@@ -54,7 +54,7 @@ El servidor MCP para TrackHS está desplegado y funcionando en:
 - `maintenance-summary` - Resumen de órdenes de mantenimiento
 - `financial-analysis` - Análisis financiero básico
 
-## 📝 Ejemplos de Uso
+##  Ejemplos de Uso
 
 ### 1. Obtener Contactos
 ```
@@ -76,7 +76,7 @@ Pregunta a Claude: "Verifica la disponibilidad de unidades del 15 al 20 de octub
 Pregunta a Claude: "Haz un análisis financiero del mes actual"
 ```
 
-## 🔍 Verificación del Estado
+##  Verificación del Estado
 
 ### Health Check
 ```bash
@@ -88,14 +88,14 @@ curl https://trackhs-mcp-connector.vercel.app/api/health
 curl https://trackhs-mcp-connector.vercel.app/api/tools
 ```
 
-## ⚠️ Variables de Entorno Requeridas
+##  Variables de Entorno Requeridas
 
 El servidor necesita estas variables configuradas en Vercel:
 - `TRACKHS_API_URL` - URL de la API de TrackHS
 - `TRACKHS_USERNAME` - Usuario de TrackHS
 - `TRACKHS_PASSWORD` - Contraseña de TrackHS
 
-## 🐛 Solución de Problemas
+##  Solución de Problemas
 
 ### Error: "Variable de entorno requerida no configurada"
 - Verifica que las variables de entorno estén configuradas en Vercel
@@ -109,17 +109,17 @@ El servidor necesita estas variables configuradas en Vercel:
 - El servidor ya tiene CORS configurado correctamente
 - Si persiste, verifica que estés usando la URL correcta
 
-## 📊 Estado del Servidor
+##  Estado del Servidor
 
-- ✅ **Build**: Funcionando correctamente
-- ✅ **Deployment**: Desplegado en Vercel
-- ✅ **Health Check**: Respondiendo
-- ✅ **Tools**: 13 herramientas disponibles
-- ✅ **Resources**: 4 recursos disponibles
-- ✅ **Prompts**: 5 prompts disponibles
-- ✅ **CORS**: Configurado correctamente
+-  **Build**: Funcionando correctamente
+-  **Deployment**: Desplegado en Vercel
+-  **Health Check**: Respondiendo
+-  **Tools**: 13 herramientas disponibles
+-  **Resources**: 4 recursos disponibles
+-  **Prompts**: 5 prompts disponibles
+-  **CORS**: Configurado correctamente
 
-## 🎯 Próximos Pasos
+##  Próximos Pasos
 
 1. **Configurar variables de entorno** en Vercel
 2. **Probar conexión** desde Claude
@@ -128,4 +128,4 @@ El servidor necesita estas variables configuradas en Vercel:
 
 ---
 
-**¡El servidor MCP está listo para usar!** 🎉
+**¡El servidor MCP está listo para usar!** 
