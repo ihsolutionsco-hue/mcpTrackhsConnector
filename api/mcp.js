@@ -2,6 +2,7 @@
  * Endpoint MCP optimizado para Vercel
  * Implementa Streamable HTTP transport usando Express + McpServer
  * Configurado para funcionar con Claude y otros clientes MCP
+ * Endpoint principal: /mcp (según especificación MCP oficial)
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -13,12 +14,11 @@ import { z } from 'zod';
 const app = express();
 app.use(express.json());
 
-// Configuración CORS para MCP según especificación
+// Configuración CORS básica según teoría MCP
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, mcp-session-id');
-  res.header('Access-Control-Expose-Headers', 'Mcp-Session-Id');
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
   
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
@@ -842,55 +842,9 @@ app.get('/api/mcp', (req, res) => {
   });
 });
 
-// Manejar peticiones GET para transport MCP (SSE)
-app.get('/api/mcp', async (req, res) => {
-  console.log('GET /api/mcp request received:', {
-    method: req.method,
-    url: req.url,
-    headers: req.headers
-  });
-  
-  try {
-    console.log('[MCP Handler] Iniciando manejo de petición GET MCP');
-    
-    // Crear transport para cada petición (stateless) según especificación MCP
-    const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: undefined,
-      enableJsonResponse: true
-    });
-
-    // Configurar manejo de cierre de conexión
-    res.on('close', () => {
-      console.log('[MCP Handler] Conexión GET cerrada, limpiando transport');
-      transport.close();
-    });
-
-    console.log('[MCP Handler] Transport GET creado, conectando con servidor MCP...');
-    await mcpServer.connect(transport);
-    
-    console.log('[MCP Handler] Servidor MCP conectado, manejando petición GET...');
-    await transport.handleRequest(req, res);
-    
-    console.log('[MCP Handler] Petición GET MCP manejada exitosamente');
-  } catch (error) {
-    console.error('[MCP Handler] Error handling GET MCP request:', error);
-    console.error('[MCP Handler] Error stack:', error.stack);
-    if (!res.headersSent) {
-      res.status(500).json({
-        jsonrpc: '2.0',
-        error: {
-          code: -32603,
-          message: 'Internal server error',
-          details: error.message
-        },
-        id: null
-      });
-    }
-  }
-});
-
-app.post('/api/mcp', async (req, res) => {
-  console.log('POST /api/mcp request received:', {
+// Endpoint MCP principal según especificación oficial
+app.post('/mcp', async (req, res) => {
+  console.log('POST /mcp request received:', {
     method: req.method,
     url: req.url,
     body: req.body,
