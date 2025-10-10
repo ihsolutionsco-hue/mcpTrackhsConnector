@@ -1,40 +1,36 @@
 """
-Herramienta MCP para buscar reservas en Track HS API
+Herramienta MCP para obtener contactos de Track HS API
 """
 
 from typing import Optional
 from ..core.api_client import TrackHSApiClient
 
-def register_search_reservations(mcp, api_client: TrackHSApiClient):
-    """Registra la herramienta search_reservations"""
+def register_get_contacts(mcp, api_client: TrackHSApiClient):
+    """Registra la herramienta get_contacts"""
     
     @mcp.tool()
-    async def search_reservations(
+    async def get_contacts(
         page: int = 1,
         size: int = 10,
-        sort_column: str = "name",
+        sort_column: str = "id",
         sort_direction: str = "asc",
         search: str = None,
-        updated_since: str = None,
-        tags: str = None,
-        node_id: str = None,
-        unit_id: str = None,
-        status: str = None
+        term: str = None,
+        email: str = None,
+        updated_since: str = None
     ):
         """
-        Search reservations in Track HS with various filters
+        Get contacts from Track HS
         
         Args:
             page: Número de página (default: 1)
             size: Tamaño de página (default: 10)
-            sort_column: Columna para ordenar (default: "name")
+            sort_column: Columna para ordenar (default: "id")
             sort_direction: Dirección de ordenamiento (default: "asc")
             search: Término de búsqueda (opcional)
+            term: Término específico (opcional)
+            email: Email del contacto (opcional)
             updated_since: Filtro por fecha de actualización (opcional)
-            tags: Tags para filtrar (opcional)
-            node_id: ID del nodo (opcional)
-            unit_id: ID de la unidad (opcional)
-            status: Estado de la reserva (opcional)
         """
         query_params = {
             "page": page,
@@ -45,18 +41,14 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         
         if search:
             query_params["search"] = search
+        if term:
+            query_params["term"] = term
+        if email:
+            query_params["email"] = email
         if updated_since:
             query_params["updatedSince"] = updated_since
-        if tags:
-            query_params["tags"] = tags
-        if node_id:
-            query_params["nodeId"] = node_id
-        if unit_id:
-            query_params["unitId"] = unit_id
-        if status:
-            query_params["status"] = status
         
-        endpoint = f"/reservations/search"
+        endpoint = f"/crm/contacts"
         query_string = "&".join([f"{k}={v}" for k, v in query_params.items()])
         if query_string:
             endpoint += f"?{query_string}"
@@ -65,4 +57,4 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             result = await api_client.get(endpoint)
             return result
         except Exception as e:
-            return {"error": f"Error al buscar reservas: {str(e)}"}
+            return {"error": f"Error al obtener contactos: {str(e)}"}

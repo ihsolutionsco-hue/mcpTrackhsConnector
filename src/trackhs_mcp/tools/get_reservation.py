@@ -1,19 +1,22 @@
 """
-Herramienta MCP para obtener una reserva específica de Track HS
+Herramienta MCP para obtener una reserva específica de Track HS API
 """
 
-from .core.api_client import TrackHSApiClient
-from ..types import ReservationResponse, GetReservationParams
+from ..core.api_client import TrackHSApiClient
 
-async def get_reservation(reservation_id: int) -> ReservationResponse:
-    """
-    Get a specific reservation by ID from Track HS
+def register_get_reservation(mcp, api_client: TrackHSApiClient):
+    """Registra la herramienta get_reservation"""
     
-    Args:
-        reservation_id: ID of the reservation to retrieve
-    
-    Returns:
-        ReservationResponse: Reservation data
-    """
-    # Esta función será implementada cuando se registre con el cliente API
-    pass
+    @mcp.tool()
+    async def get_reservation(reservation_id: int):
+        """
+        Get a specific reservation by ID from Track HS
+        
+        Args:
+            reservation_id: ID de la reserva a obtener
+        """
+        try:
+            result = await api_client.get(f"/reservations/{reservation_id}")
+            return result
+        except Exception as e:
+            return {"error": f"Error al obtener reserva: {str(e)}"}
