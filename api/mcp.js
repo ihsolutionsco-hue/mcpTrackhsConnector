@@ -13,6 +13,20 @@ import { z } from 'zod';
 const app = express();
 app.use(express.json());
 
+// Configuración CORS para MCP según especificación
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, mcp-session-id');
+  res.header('Access-Control-Expose-Headers', 'Mcp-Session-Id');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
     // Validar variables de entorno
 function validateEnvironment() {
     const requiredEnvVars = ['TRACKHS_API_URL', 'TRACKHS_USERNAME', 'TRACKHS_PASSWORD'];
@@ -828,6 +842,53 @@ app.get('/api/mcp', (req, res) => {
   });
 });
 
+// Manejar peticiones GET para transport MCP (SSE)
+app.get('/api/mcp', async (req, res) => {
+  console.log('GET /api/mcp request received:', {
+    method: req.method,
+    url: req.url,
+    headers: req.headers
+  });
+  
+  try {
+    console.log('[MCP Handler] Iniciando manejo de petición GET MCP');
+    
+    // Crear transport para cada petición (stateless) según especificación MCP
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+      enableJsonResponse: true
+    });
+
+    // Configurar manejo de cierre de conexión
+    res.on('close', () => {
+      console.log('[MCP Handler] Conexión GET cerrada, limpiando transport');
+      transport.close();
+    });
+
+    console.log('[MCP Handler] Transport GET creado, conectando con servidor MCP...');
+    await mcpServer.connect(transport);
+    
+    console.log('[MCP Handler] Servidor MCP conectado, manejando petición GET...');
+    await transport.handleRequest(req, res);
+    
+    console.log('[MCP Handler] Petición GET MCP manejada exitosamente');
+  } catch (error) {
+    console.error('[MCP Handler] Error handling GET MCP request:', error);
+    console.error('[MCP Handler] Error stack:', error.stack);
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal server error',
+          details: error.message
+        },
+        id: null
+      });
+    }
+  }
+});
+
 app.post('/api/mcp', async (req, res) => {
   console.log('POST /api/mcp request received:', {
     method: req.method,
@@ -840,10 +901,16 @@ app.post('/api/mcp', async (req, res) => {
     console.log('[MCP Handler] Iniciando manejo de petición MCP');
     console.log('[MCP Handler] Cliente API disponible:', !!apiClient);
     
-    // Crear transport para cada petición (stateless)
+    // Crear transport para cada petición (stateless) según especificación MCP
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
       enableJsonResponse: true
+    });
+
+    // Configurar manejo de cierre de conexión
+    res.on('close', () => {
+      console.log('[MCP Handler] Conexión cerrada, limpiando transport');
+      transport.close();
     });
 
     console.log('[MCP Handler] Transport creado, conectando con servidor MCP...');
