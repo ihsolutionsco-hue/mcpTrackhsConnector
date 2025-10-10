@@ -163,7 +163,7 @@ if (apiClient) {
     {
       title: 'Obtener Contactos',
       description: 'Retrieve all contacts from Track HS CRM system',
-      inputSchema: {
+      inputSchema: z.object({
         sortColumn: z.enum(['id', 'name', 'email', 'cellPhone', 'homePhone', 'otherPhone', 'vip']).optional(),
         sortDirection: z.enum(['asc', 'desc']).default('asc'),
         search: z.string().optional(),
@@ -172,7 +172,7 @@ if (apiClient) {
         page: z.number().min(1).optional(),
         size: z.number().min(1).max(100).optional(),
         updatedSince: z.string().optional()
-      }
+      })
     },
     async (params = {}) => {
       try {
@@ -211,9 +211,9 @@ if (apiClient) {
     {
       title: 'Obtener Reservación',
       description: 'Get detailed information for a specific reservation by ID',
-      inputSchema: {
+      inputSchema: z.object({
         reservationId: z.string().describe('The ID of the reservation to retrieve')
-      }
+      })
     },
     async ({ reservationId }) => {
       if (!reservationId || reservationId.trim() === '') {
@@ -231,14 +231,14 @@ if (apiClient) {
     {
       title: 'Buscar Reservaciones',
       description: 'Search reservations with various filters',
-      inputSchema: {
+      inputSchema: z.object({
         checkIn: z.string().optional(),
         checkOut: z.string().optional(),
         status: z.string().optional(),
         guestName: z.string().optional(),
         page: z.number().min(1).optional(),
         size: z.number().min(1).max(100).optional()
-      }
+      })
     },
     async (params = {}) => {
       try {
@@ -273,12 +273,12 @@ if (apiClient) {
     {
       title: 'Obtener Unidades',
       description: 'Get list of units/properties',
-      inputSchema: {
+      inputSchema: z.object({
         nodeId: z.string().optional(),
         status: z.string().optional(),
         page: z.number().min(1).optional(),
         size: z.number().min(1).max(100).optional()
-      }
+      })
     },
     async (params = {}) => {
       const queryParams = new URLSearchParams();
@@ -299,9 +299,9 @@ if (apiClient) {
     {
       title: 'Obtener Unidad',
       description: 'Get specific unit details by ID',
-      inputSchema: {
+      inputSchema: z.object({
         unitId: z.string().describe('The ID of the unit to retrieve')
-      }
+      })
     },
     async ({ unitId }) => {
       if (!unitId || unitId.trim() === '') {
@@ -319,12 +319,12 @@ if (apiClient) {
     {
       title: 'Obtener Reseñas',
       description: 'Get property reviews',
-      inputSchema: {
+      inputSchema: z.object({
         nodeId: z.string().optional(),
         rating: z.number().min(1).max(5).optional(),
         page: z.number().min(1).optional(),
         size: z.number().min(1).max(100).optional()
-      }
+      })
     },
     async (params = {}) => {
       const queryParams = new URLSearchParams();
@@ -345,10 +345,10 @@ if (apiClient) {
     {
       title: 'Obtener Cuentas Contables',
       description: 'Get ledger accounts',
-      inputSchema: {
+      inputSchema: z.object({
         page: z.number().min(1).optional(),
         size: z.number().min(1).max(100).optional()
-      }
+      })
     },
     async (params = {}) => {
       const queryParams = new URLSearchParams();
@@ -367,9 +367,9 @@ if (apiClient) {
     {
       title: 'Obtener Cuenta Contable',
       description: 'Get specific ledger account by ID',
-      inputSchema: {
+      inputSchema: z.object({
         accountId: z.string().describe('The ID of the account to retrieve')
-      }
+      })
     },
     async ({ accountId }) => {
       if (!accountId || accountId.trim() === '') {
@@ -387,10 +387,10 @@ if (apiClient) {
     {
       title: 'Obtener Folios',
       description: 'Get accounting folios collection',
-      inputSchema: {
+      inputSchema: z.object({
         page: z.number().min(1).optional(),
         size: z.number().min(1).max(100).optional()
-      }
+      })
     },
     async (params = {}) => {
       const queryParams = new URLSearchParams();
@@ -409,9 +409,9 @@ if (apiClient) {
     {
       title: 'Obtener Notas de Reservación',
       description: 'Get notes for a specific reservation',
-      inputSchema: {
+      inputSchema: z.object({
         reservationId: z.string().describe('The ID of the reservation')
-      }
+      })
     },
     async ({ reservationId }) => {
       if (!reservationId || reservationId.trim() === '') {
@@ -429,10 +429,10 @@ if (apiClient) {
     {
       title: 'Obtener Nodos',
       description: 'Get list of nodes/properties',
-      inputSchema: {
+      inputSchema: z.object({
         page: z.number().min(1).optional(),
         size: z.number().min(1).max(100).optional()
-      }
+      })
     },
     async (params = {}) => {
       const queryParams = new URLSearchParams();
@@ -451,9 +451,9 @@ if (apiClient) {
     {
       title: 'Obtener Nodo',
       description: 'Get specific node by ID',
-      inputSchema: {
+      inputSchema: z.object({
         nodeId: z.string().describe('The ID of the node to retrieve')
-      }
+      })
     },
     async ({ nodeId }) => {
       if (!nodeId || nodeId.trim() === '') {
@@ -471,12 +471,12 @@ if (apiClient) {
     {
       title: 'Obtener Órdenes de Trabajo',
       description: 'Get maintenance work orders',
-      inputSchema: {
+      inputSchema: z.object({
         status: z.string().optional(),
         priority: z.string().optional(),
         page: z.number().min(1).optional(),
         size: z.number().min(1).max(100).optional()
-      }
+      })
     },
     async (params = {}) => {
       const queryParams = new URLSearchParams();
