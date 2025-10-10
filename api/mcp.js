@@ -818,7 +818,4 @@ app.post('/mcp', async (req, res) => {
 });
 
 // Exportar handler compatible con Vercel serverless
-export default async (req, res) => {
-  console.log('Vercel handler called:', req.method, req.url);
-  return app(req, res);
-};
+export default app;
