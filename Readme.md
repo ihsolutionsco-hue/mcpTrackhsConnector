@@ -9,7 +9,8 @@ Servidor MCP (Model Context Protocol) para Track HS API implementado con FastMCP
 - **5 Prompts** predefinidos para casos de uso comunes
 - **Autenticación Basic Auth** integrada
 - **Validación de tipos** con Pydantic
-- **Deployment automático** con FastMCP
+- **Cliente HTTP** robusto con manejo de errores
+- **Estructura modular** para fácil mantenimiento
 
 ## 📋 Herramientas Disponibles
 
@@ -48,6 +49,7 @@ Servidor MCP (Model Context Protocol) para Track HS API implementado con FastMCP
 
 - Python 3.8+
 - FastMCP 2.0+
+- Credenciales de Track HS API
 
 ### Instalación Local
 
@@ -65,16 +67,17 @@ uv pip install -r requirements.txt
 
 ### Configuración
 
-1. Copiar el archivo de ejemplo:
+1. Crear archivo `.env` en la raíz del proyecto:
 ```bash
-cp .env.example .env
+touch .env
 ```
 
 2. Configurar las variables de entorno en `.env`:
 ```env
 TRACKHS_API_URL=https://api.trackhs.com/api
-TRACKHS_USERNAME=your_username
-TRACKHS_PASSWORD=your_password
+TRACKHS_USERNAME=tu_usuario
+TRACKHS_PASSWORD=tu_contraseña
+TRACKHS_TIMEOUT=30
 ```
 
 ## 🚀 Uso
@@ -87,28 +90,43 @@ fastmcp dev
 
 # O ejecutar directamente
 python -m src.trackhs_mcp.server
+
+# Con variables de entorno específicas
+TRACKHS_USERNAME=usuario TRACKHS_PASSWORD=contraseña python -m src.trackhs_mcp.server
 ```
 
-### Deployment con FastMCP
+### Configuración en Claude Desktop
 
-```bash
-# Deploy a FastMCP
-fastmcp deploy
-
-# Verificar deployment
-fastmcp status
+1. Crear archivo de configuración `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "trackhs": {
+      "command": "python",
+      "args": ["-m", "src.trackhs_mcp.server"],
+      "cwd": "/ruta/al/proyecto",
+      "env": {
+        "TRACKHS_API_URL": "https://api.trackhs.com/api",
+        "TRACKHS_USERNAME": "tu_usuario",
+        "TRACKHS_PASSWORD": "tu_contraseña"
+      }
+    }
+  }
+}
 ```
+
+2. Reiniciar Claude Desktop
 
 ## 📚 Recursos MCP
 
-- `trackhs://schema/reservations` - Esquema de reservas
-- `trackhs://schema/units` - Esquema de unidades  
-- `trackhs://status/system` - Estado del sistema
-- `trackhs://docs/api` - Documentación de la API
+- `trackhs://schema/reservations` - Esquema de datos para reservas
+- `trackhs://schema/units` - Esquema de datos para unidades  
+- `trackhs://status/system` - Estado del sistema y conectividad
+- `trackhs://docs/api` - Documentación de la API de Track HS
 
 ## 🎯 Prompts Predefinidos
 
-- `check-today-reservations` - Revisar reservas de hoy
+- `check-today-reservations` - Revisar reservas de hoy (check-in/check-out)
 - `unit-availability` - Consultar disponibilidad de unidades
 - `guest-contact-info` - Información de contacto de huéspedes
 - `maintenance-summary` - Resumen de órdenes de mantenimiento
@@ -123,37 +141,72 @@ src/trackhs_mcp/
 ├── __init__.py
 ├── server.py              # Servidor FastMCP principal
 ├── core/
-│   ├── api_client.py      # Cliente HTTP
-│   ├── auth.py           # Autenticación
-│   └── types.py          # Tipos base
+│   ├── __init__.py
+│   ├── api_client.py      # Cliente HTTP con autenticación
+│   ├── auth.py           # Manejo de autenticación Basic Auth
+│   └── types.py          # Tipos base y configuración
 ├── tools/
-│   ├── all_tools.py      # Todas las herramientas MCP
-│   └── __init__.py
+│   ├── __init__.py
+│   ├── all_tools.py      # Registrador de todas las herramientas
+│   ├── get_contacts.py   # Herramienta de contactos
+│   ├── get_reservation.py # Herramienta de reservas
+│   ├── search_reservations.py # Búsqueda de reservas
+│   ├── get_units.py      # Herramienta de unidades
+│   ├── get_unit.py       # Herramienta de unidad específica
+│   ├── get_reviews.py    # Herramienta de reseñas
+│   ├── get_folios_collection.py # Herramienta de folios
+│   ├── get_ledger_accounts.py # Herramienta de cuentas contables
+│   ├── get_ledger_account.py # Herramienta de cuenta específica
+│   ├── get_reservation_notes.py # Herramienta de notas
+│   ├── get_nodes.py      # Herramienta de nodos
+│   ├── get_node.py       # Herramienta de nodo específico
+│   ├── get_maintenance_work_orders.py # Herramienta de mantenimiento
+│   └── README.md         # Documentación de herramientas
 ├── types/
-│   ├── reviews.py        # Modelos de reseñas
+│   ├── __init__.py
+│   ├── base.py           # Tipos base
+│   ├── contacts.py       # Modelos de contactos
+│   ├── folios.py         # Modelos de folios
+│   ├── ledger_accounts.py # Modelos de cuentas contables
+│   ├── maintenance_work_orders.py # Modelos de mantenimiento
+│   ├── nodes.py          # Modelos de nodos
+│   ├── reservation_notes.py # Modelos de notas
 │   ├── reservations.py   # Modelos de reservas
-│   ├── units.py         # Modelos de unidades
-│   └── ...              # Otros modelos
+│   ├── reviews.py        # Modelos de reseñas
+│   └── units.py          # Modelos de unidades
 ├── resources.py          # Resources MCP
 └── prompts.py           # Prompts MCP
 ```
 
 ### Agregar Nueva Herramienta
 
-1. Agregar la función en `src/trackhs_mcp/tools/all_tools.py`:
+1. Crear archivo `src/trackhs_mcp/tools/nueva_herramienta.py`:
 
 ```python
-@mcp.tool()
-async def nueva_herramienta(param1: str, param2: int = 10):
-    """Descripción de la nueva herramienta"""
-    try:
-        result = await api_client.get(f"/endpoint/{param1}")
-        return result
-    except Exception as e:
-        return {"error": f"Error: {str(e)}"}
+from ..core.api_client import TrackHSApiClient
+
+def register_nueva_herramienta(mcp, api_client: TrackHSApiClient):
+    """Registra la nueva herramienta MCP"""
+    
+    @mcp.tool()
+    async def nueva_herramienta(param1: str, param2: int = 10):
+        """Descripción de la nueva herramienta"""
+        try:
+            result = await api_client.get(f"/endpoint/{param1}")
+            return result
+        except Exception as e:
+            return {"error": f"Error: {str(e)}"}
 ```
 
-2. La herramienta se registrará automáticamente.
+2. Importar y registrar en `src/trackhs_mcp/tools/all_tools.py`:
+
+```python
+from .nueva_herramienta import register_nueva_herramienta
+
+def register_all_tools(mcp, api_client: TrackHSApiClient):
+    # ... otras herramientas ...
+    register_nueva_herramienta(mcp, api_client)
+```
 
 ### Agregar Nuevo Resource
 
@@ -187,6 +240,19 @@ async def nuevo_prompt(param1: str):
     }
 ```
 
+### Comandos de Desarrollo
+
+```bash
+# Ejecutar servidor en modo desarrollo
+python -m src.trackhs_mcp.server
+
+# Verificar estructura del proyecto
+python -c "from src.trackhs_mcp.server import main; print('Estructura OK')"
+
+# Instalar en modo desarrollo
+pip install -e .
+```
+
 ## 🧪 Testing
 
 ```bash
@@ -195,29 +261,43 @@ pytest
 
 # Con cobertura
 pytest --cov=src/trackhs_mcp
+
+# Verificar conectividad con Track HS
+python -c "from src.trackhs_mcp.core.api_client import TrackHSApiClient; print('API Client OK')"
 ```
 
 ## 📦 Deployment
 
-### GitHub Actions (Automático)
+### Configuración Local
 
-El proyecto está configurado para deployment automático con FastMCP:
+```bash
+# Verificar que el servidor funciona
+python -m src.trackhs_mcp.server
 
-1. Push a `main` → deployment automático
-2. FastMCP genera URL pública
-3. Configurar secrets en GitHub:
-   - `TRACKHS_API_URL`
-   - `TRACKHS_USERNAME` 
-   - `TRACKHS_PASSWORD`
+# Probar con variables de entorno
+TRACKHS_USERNAME=test TRACKHS_PASSWORD=test python -m src.trackhs_mcp.server
+```
 
-### Manual
+### Deployment con FastMCP
 
 ```bash
 # Deploy manual
 fastmcp deploy
 
-# Verificar
+# Verificar deployment
 fastmcp status
+
+# Ver logs
+fastmcp logs
+```
+
+### Variables de Entorno para Producción
+
+```env
+TRACKHS_API_URL=https://api.trackhs.com/api
+TRACKHS_USERNAME=usuario_produccion
+TRACKHS_PASSWORD=contraseña_produccion
+TRACKHS_TIMEOUT=30
 ```
 
 ## 🔍 Troubleshooting
@@ -228,6 +308,9 @@ fastmcp status
 # Verificar variables de entorno
 echo $TRACKHS_USERNAME
 echo $TRACKHS_PASSWORD
+
+# Verificar archivo .env
+cat .env
 ```
 
 ### Error de Conexión
@@ -235,6 +318,15 @@ echo $TRACKHS_PASSWORD
 ```bash
 # Verificar URL de API
 curl -u $TRACKHS_USERNAME:$TRACKHS_PASSWORD $TRACKHS_API_URL/health
+
+# Probar conectividad
+python -c "
+import os
+from dotenv import load_dotenv
+load_dotenv()
+print(f'URL: {os.getenv(\"TRACKHS_API_URL\")}')
+print(f'User: {os.getenv(\"TRACKHS_USERNAME\")}')
+"
 ```
 
 ### FastMCP no encontrado
@@ -245,6 +337,22 @@ pip install fastmcp
 
 # O con uv
 uv pip install fastmcp
+
+# Verificar instalación
+fastmcp --version
+```
+
+### Problemas con Claude Desktop
+
+```bash
+# Verificar configuración
+cat claude_desktop_config.json
+
+# Verificar que Python está en PATH
+which python
+
+# Probar ejecución directa
+python -m src.trackhs_mcp.server
 ```
 
 ## 📄 Licencia
@@ -265,6 +373,18 @@ MIT License - ver [LICENSE](LICENSE) para más detalles.
 - **Issues**: [GitHub Issues](https://github.com/trackhs/mcp-connector/issues)
 - **Email**: team@trackhs.com
 
+## 📋 Estado del Proyecto
+
+- ✅ **Servidor MCP**: Completamente funcional
+- ✅ **13 Herramientas**: Todas implementadas y probadas
+- ✅ **4 Resources**: Esquemas y documentación disponibles
+- ✅ **5 Prompts**: Casos de uso predefinidos
+- ✅ **Autenticación**: Basic Auth integrada
+- ✅ **Validación**: Tipos Pydantic implementados
+- ✅ **Estructura**: Modular y mantenible
+
 ---
 
 **TrackHS MCP Connector** - Conectando Track HS con el ecosistema MCP 🚀
+
+*Última actualización: 2025-01-27*
