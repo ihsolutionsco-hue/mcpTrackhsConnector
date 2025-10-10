@@ -34,6 +34,18 @@ function validateEnvironment() {
   }
 }
 
+// Helper function para formatear respuestas según protocolo MCP
+function formatMCPResponse(data) {
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(data, null, 2)
+      }
+    ]
+  };
+}
+
 // Cliente API simplificado para Vercel
 class TrackHSApiClient {
   constructor(config) {
@@ -180,7 +192,9 @@ if (apiClient) {
         
         const result = await apiClient.get(endpoint);
         console.log(`[MCP Tool] get_contacts exitoso, datos recibidos:`, result);
-        return result;
+        
+        // Formatear respuesta según protocolo MCP
+        return formatMCPResponse(result);
       } catch (error) {
         console.error(`[MCP Tool] Error en get_contacts:`, error);
         throw new Error(`Error obteniendo contactos: ${error.message}`);
@@ -210,7 +224,8 @@ if (apiClient) {
         throw new Error('El ID de reservación no puede estar vacío');
       }
       const endpoint = `/v2/pms/reservations/${encodeURIComponent(reservationId)}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -250,7 +265,9 @@ if (apiClient) {
         
         const result = await apiClient.get(endpoint);
         console.log(`[MCP Tool] search_reservations exitoso, datos recibidos:`, result);
-        return result;
+        
+        // Formatear respuesta según protocolo MCP
+        return formatMCPResponse(result);
       } catch (error) {
         console.error(`[MCP Tool] Error en search_reservations:`, error);
         throw new Error(`Error buscando reservaciones: ${error.message}`);
@@ -283,7 +300,8 @@ if (apiClient) {
       if (params.size) queryParams.append('size', params.size.toString());
 
       const endpoint = `/pms/units?${queryParams.toString()}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -309,7 +327,8 @@ if (apiClient) {
         throw new Error('El ID de unidad no puede estar vacío');
       }
       const endpoint = `/pms/units/${encodeURIComponent(unitId)}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -338,7 +357,8 @@ if (apiClient) {
       if (params.size) queryParams.append('size', params.size.toString());
 
       const endpoint = `/pms/reviews?${queryParams.toString()}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -363,7 +383,8 @@ if (apiClient) {
       if (params.size) queryParams.append('size', params.size.toString());
 
       const endpoint = `/pms/accounting/accounts?${queryParams.toString()}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -389,7 +410,8 @@ if (apiClient) {
         throw new Error('El ID de cuenta no puede estar vacío');
       }
       const endpoint = `/pms/accounting/accounts/${encodeURIComponent(accountId)}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -414,7 +436,8 @@ if (apiClient) {
       if (params.size) queryParams.append('size', params.size.toString());
 
       const endpoint = `/pms/accounting/folios?${queryParams.toString()}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -440,7 +463,8 @@ if (apiClient) {
         throw new Error('El ID de reservación no puede estar vacío');
       }
       const endpoint = `/v2/pms/reservations/${encodeURIComponent(reservationId)}/notes`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -465,7 +489,8 @@ if (apiClient) {
       if (params.size) queryParams.append('size', params.size.toString());
 
       const endpoint = `/pms/nodes?${queryParams.toString()}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -491,7 +516,8 @@ if (apiClient) {
         throw new Error('El ID de nodo no puede estar vacío');
       }
       const endpoint = `/pms/nodes/${encodeURIComponent(nodeId)}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
 
@@ -520,7 +546,8 @@ if (apiClient) {
       if (params.size) queryParams.append('size', params.size.toString());
 
       const endpoint = `/maintenance/work-orders?${queryParams.toString()}`;
-      return await apiClient.get(endpoint);
+      const result = await apiClient.get(endpoint);
+      return formatMCPResponse(result);
     }
   );
   
