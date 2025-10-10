@@ -34,7 +34,7 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         departure_start: Optional[str] = None,
         departure_end: Optional[str] = None,
         updated_since: Optional[str] = None,
-        scroll: Optional[Union[int, str]]] = None,
+        scroll: Optional[Union[int, str]] = None,
         in_house_today: Optional[Literal[0, 1]] = None,
         status: Optional[Union[Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"], List[str]]] = None,
         group_id: Optional[int] = None,

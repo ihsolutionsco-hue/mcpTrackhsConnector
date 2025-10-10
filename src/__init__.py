@@ -1,1 +1,1 @@
-# TrackHS MCP Connector - Python Package
+# TrackHS MCP Connector Package

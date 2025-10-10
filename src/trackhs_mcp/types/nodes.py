@@ -22,7 +22,7 @@ class NodeType(BaseModel):
     created_by: Optional[str] = Field(default=None, description="Creado por")
     updated_at: Optional[str] = Field(default=None, description="Fecha de actualización")
     updated_by: Optional[str] = Field(default=None, description="Actualizado por")
-    _links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, description="Enlaces")
+    links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, alias="_links", description="Enlaces")
 
 class TaxDistrict(BaseModel):
     """Modelo de TaxDistrict"""
@@ -40,8 +40,8 @@ class TaxDistrict(BaseModel):
     created_by: Optional[str] = Field(default=None, description="Creado por")
     updated_at: Optional[str] = Field(default=None, description="Fecha de actualización")
     updated_by: Optional[str] = Field(default=None, description="Actualizado por")
-    _embedded: Optional[Dict[str, Any]] = Field(default=None, description="Datos embebidos")
-    _links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, description="Enlaces")
+    embedded: Optional[Dict[str, Any]] = Field(default=None, alias="_embedded", description="Datos embebidos")
+    links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, alias="_links", description="Enlaces")
 
 class CancellationBreakpoint(BaseModel):
     """Modelo de CancellationBreakpoint"""
@@ -75,7 +75,7 @@ class CancellationPolicy(BaseModel):
     tripadvisor_type: Optional[str] = Field(default=None, description="Tipo de TripAdvisor")
     homeaway_type: Optional[str] = Field(default=None, description="Tipo de HomeAway")
     breakpoints: Optional[List[CancellationBreakpoint]] = Field(default=None, description="Puntos de quiebre")
-    _links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, description="Enlaces")
+    links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, alias="_links", description="Enlaces")
 
 class HousekeepingZone(BaseModel):
     """Modelo de HousekeepingZone"""
@@ -87,7 +87,7 @@ class HousekeepingZone(BaseModel):
     created_by: Optional[str] = Field(default=None, description="Creado por")
     updated_at: Optional[str] = Field(default=None, description="Fecha de actualización")
     updated_by: Optional[str] = Field(default=None, description="Actualizado por")
-    _links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, description="Enlaces")
+    links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, alias="_links", description="Enlaces")
 
 class MaintenanceZone(BaseModel):
     """Modelo de MaintenanceZone"""
@@ -99,7 +99,7 @@ class MaintenanceZone(BaseModel):
     created_by: Optional[str] = Field(default=None, description="Creado por")
     updated_at: Optional[str] = Field(default=None, description="Fecha de actualización")
     updated_by: Optional[str] = Field(default=None, description="Actualizado por")
-    _links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, description="Enlaces")
+    links: Optional[Dict[str, Dict[str, str]]] = Field(default=None, alias="_links", description="Enlaces")
 
 class Node(BaseModel):
     """Modelo de Node"""
@@ -168,8 +168,8 @@ class Node(BaseModel):
     amenities_ids: Optional[List[int]] = Field(default=None, description="IDs de amenidades")
     documents_ids: Optional[List[int]] = Field(default=None, description="IDs de documentos")
     gateways_ids: Optional[List[int]] = Field(default=None, description="IDs de gateways")
-    _embedded: Optional[Dict[str, Any]] = Field(default=None, description="Datos embebidos")
-    _links: Optional[Dict[str, Union[str, Dict[str, str]]]] = Field(default=None, description="Enlaces")
+    embedded: Optional[Dict[str, Any]] = Field(default=None, alias="_embedded", description="Datos embebidos")
+    links: Optional[Dict[str, Union[str, Dict[str, str]]]] = Field(default=None, alias="_links", description="Enlaces")
 
 class GetNodesParams(PaginationParams, SearchParams):
     """Parámetros para obtener nodos"""
@@ -184,12 +184,12 @@ class GetNodesParams(PaginationParams, SearchParams):
 
 class GetNodesResponse(BaseModel):
     """Respuesta de obtener nodos"""
-    _embedded: Dict[str, List[Node]] = Field(..., description="Datos embebidos")
+    embedded: Dict[str, List[Node]] = Field(..., alias="_embedded", description="Datos embebidos")
     page: int = Field(..., description="Página actual")
     page_count: int = Field(..., description="Total de páginas")
     page_size: int = Field(..., description="Tamaño de página")
     total_items: int = Field(..., description="Total de elementos")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
 
 class GetNodeParams(BaseModel):
     """Parámetros para obtener un nodo específico"""

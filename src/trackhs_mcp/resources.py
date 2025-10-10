@@ -5,8 +5,8 @@ Basado en la especificación completa de la API Search Reservations V2
 
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
-from .core.api_client import TrackHSApiClient
-from .core.logging import get_logger
+from trackhs_mcp.core.api_client import TrackHSApiClient
+from trackhs_mcp.core.logging import get_logger
 
 logger = get_logger(__name__)
 

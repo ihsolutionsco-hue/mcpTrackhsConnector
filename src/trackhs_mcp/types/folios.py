@@ -38,7 +38,7 @@ class FolioContact(BaseModel):
     tags: Optional[List[Dict[str, Union[int, str]]]] = Field(default=None, description="Tags")
     custom_values: Optional[Dict[str, Any]] = Field(default=None, description="Valores personalizados")
     no_identity: Optional[bool] = Field(default=None, description="Sin identidad")
-    _links: Dict[str, Dict[str, str]] = Field(..., description="Enlaces")
+    links: Dict[str, Dict[str, str]] = Field(..., alias="_links", description="Enlaces")
     updated_at: str = Field(..., description="Fecha de actualización")
     created_by: str = Field(..., description="Creado por")
     created_at: str = Field(..., description="Fecha de creación")
@@ -77,7 +77,7 @@ class FolioCompany(BaseModel):
     fax: Optional[str] = Field(default=None, description="Fax")
     phone: Optional[str] = Field(default=None, description="Teléfono")
     tags: Optional[List[Dict[str, Union[int, str]]]] = Field(default=None, description="Tags")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
     created_by: str = Field(..., description="Creado por")
     created_at: str = Field(..., description="Fecha de creación")
     updated_by: str = Field(..., description="Actualizado por")
@@ -100,7 +100,7 @@ class FolioRule(BaseModel):
     breakdown_fee_percent: Optional[int] = Field(default=None, description="Porcentaje de desglose de tarifas")
     breakdown_charges_mode: Optional[Literal["percent", "required"]] = Field(default=None, description="Modo de desglose de cargos")
     breakdown_charges_include_tax: Optional[bool] = Field(default=None, description="Si incluir impuestos en desglose de cargos")
-    _links: Dict[str, Dict[str, str]] = Field(..., description="Enlaces")
+    links: Dict[str, Dict[str, str]] = Field(..., alias="_links", description="Enlaces")
     created_by: str = Field(..., description="Creado por")
     created_at: str = Field(..., description="Fecha de creación")
     updated_by: str = Field(..., description="Actualizado por")
@@ -119,8 +119,8 @@ class MasterFolioRule(BaseModel):
     created_at: str = Field(..., description="Fecha de creación")
     updated_by: str = Field(..., description="Actualizado por")
     updated_at: str = Field(..., description="Fecha de actualización")
-    _embedded: Optional[Dict[str, FolioRule]] = Field(default=None, description="Datos embebidos")
-    _links: Dict[str, Dict[str, str]] = Field(..., description="Enlaces")
+    embedded: Optional[Dict[str, FolioRule]] = Field(default=None, alias="_embedded", description="Datos embebidos")
+    links: Dict[str, Dict[str, str]] = Field(..., alias="_links", description="Enlaces")
 
 class Folio(BaseModel):
     """Modelo de Folio"""
@@ -147,12 +147,12 @@ class Folio(BaseModel):
     travel_agent_id: Optional[int] = Field(default=None, description="ID del agente de viajes")
     reservation_id: Optional[int] = Field(default=None, description="ID de la reserva")
     name: Optional[str] = Field(default=None, description="Nombre")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
     updated_at: str = Field(..., description="Fecha de actualización")
     updated_by: str = Field(..., description="Actualizado por")
     created_at: str = Field(..., description="Fecha de creación")
     created_by: str = Field(..., description="Creado por")
-    _embedded: Optional[Dict[str, Union[FolioContact, FolioCompany, MasterFolioRule, "Folio"]]] = Field(default=None, description="Datos embebidos")
+    embedded: Optional[Dict[str, Union[FolioContact, FolioCompany, MasterFolioRule, "Folio"]]] = Field(default=None, alias="_embedded", description="Datos embebidos")
 
 class GetFoliosCollectionParams(PaginationParams, SearchParams):
     """Parámetros para obtener colección de folios"""
@@ -166,9 +166,9 @@ class GetFoliosCollectionParams(PaginationParams, SearchParams):
 
 class GetFoliosCollectionResponse(BaseModel):
     """Respuesta de obtener colección de folios"""
-    _embedded: Dict[str, List[Folio]] = Field(..., description="Datos embebidos")
+    embedded: Dict[str, List[Folio]] = Field(..., alias="_embedded", description="Datos embebidos")
     page: int = Field(..., description="Página actual")
     page_count: int = Field(..., description="Total de páginas")
     page_size: int = Field(..., description="Tamaño de página")
     total_items: int = Field(..., description="Total de elementos")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")

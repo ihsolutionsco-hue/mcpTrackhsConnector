@@ -104,8 +104,8 @@ class Node(BaseModel):
     amenities: List[Amenity] = Field(..., description="Amenidades")
     custom: List[Any] = Field(..., description="Datos personalizados")
     updated_at: str = Field(..., description="Fecha de actualización")
-    _embedded: Optional[Dict[str, Any]] = Field(default=None, description="Datos embebidos")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    embedded: Optional[Dict[str, Any]] = Field(default=None, alias="_embedded", description="Datos embebidos")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
 
 class Unit(BaseModel):
     """Modelo de Unit"""
@@ -168,8 +168,8 @@ class Unit(BaseModel):
     updated: Optional[Dict[str, str]] = Field(default=None, description="Información de actualización")
     updated_at: str = Field(..., description="Fecha de actualización")
     custom_data: Optional[Dict[str, Any]] = Field(default=None, description="Datos personalizados")
-    _embedded: Optional[Dict[str, Any]] = Field(default=None, description="Datos embebidos")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    embedded: Optional[Dict[str, Any]] = Field(default=None, alias="_embedded", description="Datos embebidos")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
 
 class GetUnitsParams(PaginationParams, SearchParams):
     """Parámetros para obtener unidades"""
@@ -209,12 +209,12 @@ class GetUnitsParams(PaginationParams, SearchParams):
 
 class GetUnitsResponse(BaseModel):
     """Respuesta de obtener unidades"""
-    _embedded: Dict[str, List[Unit]] = Field(..., description="Datos embebidos")
+    embedded: Dict[str, List[Unit]] = Field(..., alias="_embedded", description="Datos embebidos")
     page: int = Field(..., description="Página actual")
     page_count: int = Field(..., description="Total de páginas")
     page_size: int = Field(..., description="Tamaño de página")
     total_items: int = Field(..., description="Total de elementos")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
 
 class GetUnitParams(BaseModel):
     """Parámetros para obtener una unidad específica"""

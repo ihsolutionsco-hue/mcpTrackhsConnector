@@ -224,8 +224,8 @@ class Reservation(BaseModel):
     group_id: Optional[int] = Field(default=None, description="ID del grupo")
     payment_plan: List[PaymentPlan] = Field(..., description="Plan de pagos")
     travel_insurance_products: List[TravelInsuranceProduct] = Field(..., description="Productos de seguro de viaje")
-    _embedded: Dict[str, Any] = Field(..., description="Datos embebidos")
-    _links: Dict[str, Dict[str, str]] = Field(..., description="Enlaces")
+    embedded: Dict[str, Any] = Field(..., alias="_embedded", description="Datos embebidos")
+    links: Dict[str, Dict[str, str]] = Field(..., alias="_links", description="Enlaces")
 
 class SearchReservationsParams(PaginationParams, SearchParams):
     """Parámetros para buscar reservas V2 - Basado en la especificación completa de la API"""
@@ -256,12 +256,12 @@ class SearchReservationsParams(PaginationParams, SearchParams):
 
 class SearchReservationsResponse(BaseModel):
     """Respuesta de búsqueda de reservas"""
-    _embedded: Dict[str, List[Reservation]] = Field(..., description="Datos embebidos")
+    embedded: Dict[str, List[Reservation]] = Field(..., alias="_embedded", description="Datos embebidos")
     page: int = Field(..., description="Página actual")
     page_count: int = Field(..., description="Total de páginas")
     page_size: int = Field(..., description="Tamaño de página")
-    total_items: int = Field(..., description="Total de elementos")
-    _links: Dict[str, Dict[str, str]] = Field(..., description="Enlaces")
+    total_items: int = Field(..., alias="total_items", description="Total de elementos")
+    links: Dict[str, Dict[str, str]] = Field(..., alias="_links", description="Enlaces")
 
 class GetReservationParams(BaseModel):
     """Parámetros para obtener una reserva específica"""

@@ -63,8 +63,8 @@ class MaintenanceWorkOrder(BaseModel):
     created_by: str = Field(..., description="Creado por")
     updated_at: str = Field(..., description="Fecha de actualización")
     updated_by: str = Field(..., description="Actualizado por")
-    _embedded: Optional[WorkOrderEmbedded] = Field(default=None, description="Datos embebidos")
-    _links: Optional[WorkOrderLinks] = Field(default=None, description="Enlaces")
+    embedded: Optional[WorkOrderEmbedded] = Field(default=None, alias="_embedded", description="Datos embebidos")
+    links: Optional[WorkOrderLinks] = Field(default=None, alias="_links", description="Enlaces")
 
 class GetMaintenanceWorkOrdersParams(PaginationParams, SearchParams):
     """Parámetros para obtener órdenes de trabajo de mantenimiento"""
@@ -90,9 +90,9 @@ class GetMaintenanceWorkOrdersParams(PaginationParams, SearchParams):
 
 class MaintenanceWorkOrdersResponse(BaseModel):
     """Respuesta de órdenes de trabajo de mantenimiento"""
-    _embedded: Dict[str, List[MaintenanceWorkOrder]] = Field(..., description="Datos embebidos")
+    embedded: Dict[str, List[MaintenanceWorkOrder]] = Field(..., alias="_embedded", description="Datos embebidos")
     page: int = Field(..., description="Página actual")
     page_count: int = Field(..., description="Total de páginas")
     page_size: int = Field(..., description="Tamaño de página")
     total_items: int = Field(..., description="Total de elementos")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")

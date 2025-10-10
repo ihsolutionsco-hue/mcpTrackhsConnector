@@ -2,7 +2,7 @@
 Modelos Pydantic para Reservation Notes de Track HS API
 """
 
-from typing import Optional, Literal, List, Dict, Any
+from typing import Optional, Literal, List, Dict, Any, Union
 from pydantic import BaseModel, Field
 from .base import PaginationParams, SearchParams
 
@@ -21,12 +21,12 @@ class ReservationNote(BaseModel):
 
 class ReservationNotesResponse(BaseModel):
     """Respuesta de notas de reserva"""
-    _embedded: Dict[str, List[ReservationNote]] = Field(..., description="Datos embebidos")
+    embedded: Dict[str, List[ReservationNote]] = Field(..., alias="_embedded", description="Datos embebidos")
     page: Optional[int] = Field(default=None, description="Página actual")
     page_count: Optional[int] = Field(default=None, description="Total de páginas")
     page_size: Optional[int] = Field(default=None, description="Tamaño de página")
     total_items: Optional[int] = Field(default=None, description="Total de elementos")
-    _links: Dict[str, Union[str, Dict[str, str]]] = Field(..., description="Enlaces")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
 
 class GetReservationNotesParams(PaginationParams, SearchParams):
     """Parámetros para obtener notas de reserva"""

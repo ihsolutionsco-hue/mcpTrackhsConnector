@@ -55,7 +55,7 @@ class Stakeholder(BaseModel):
     updated_by: str = Field(..., description="Actualizado por")
     updated_at: str = Field(..., description="Fecha de actualización")
     tags: Optional[List[StakeholderTag]] = Field(default=None, description="Tags")
-    _links: Optional[StakeholderLinks] = Field(default=None, description="Enlaces")
+    links: Optional[StakeholderLinks] = Field(default=None, alias="_links", description="Enlaces")
 
 class LedgerAccountLinks(BaseModel):
     """Modelo de LedgerAccountLinks"""
@@ -94,8 +94,8 @@ class LedgerAccount(BaseModel):
     created_at: str = Field(..., description="Fecha de creación")
     updated_by: str = Field(..., description="Actualizado por")
     updated_at: str = Field(..., description="Fecha de actualización")
-    _embedded: Optional[Dict[str, Union["LedgerAccount", Stakeholder]]] = Field(default=None, description="Datos embebidos")
-    _links: Optional[LedgerAccountLinks] = Field(default=None, description="Enlaces")
+    embedded: Optional[Dict[str, Union["LedgerAccount", Stakeholder]]] = Field(default=None, alias="_embedded", description="Datos embebidos")
+    links: Optional[LedgerAccountLinks] = Field(default=None, alias="_links", description="Enlaces")
 
 class GetLedgerAccountsParams(PaginationParams, SearchParams):
     """Parámetros para obtener cuentas contables"""
@@ -110,7 +110,7 @@ class GetLedgerAccountsParams(PaginationParams, SearchParams):
 
 class LedgerAccountsResponse(BaseModel):
     """Respuesta de cuentas contables"""
-    _embedded: Dict[str, List[LedgerAccount]] = Field(..., description="Datos embebidos")
+    embedded: Dict[str, List[LedgerAccount]] = Field(..., alias="_embedded", description="Datos embebidos")
 
 class GetLedgerAccountParams(BaseModel):
     """Parámetros para obtener una cuenta contable específica"""

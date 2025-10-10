@@ -2,7 +2,7 @@
 Modelos Pydantic para Contacts de Track HS API
 """
 
-from typing import Optional, Literal, List, Dict, Any
+from typing import Optional, Literal, List, Dict, Any, Union
 from pydantic import BaseModel, Field
 from .base import PaginationParams, SearchParams
 
@@ -52,7 +52,7 @@ class Contact(BaseModel):
     references: Optional[List[ContactReference]] = Field(default=None, description="Referencias")
     tags: Optional[List[ContactTag]] = Field(default=None, description="Tags")
     custom_values: Optional[Dict[str, Union[str, List[str]]]] = Field(default=None, description="Valores personalizados")
-    _links: Optional[ContactLinks] = Field(default=None, description="Enlaces")
+    links: Optional[ContactLinks] = Field(default=None, alias="_links", description="Enlaces")
     updated_at: str = Field(..., description="Fecha de actualización")
     updated_by: str = Field(..., description="Actualizado por")
     created_at: str = Field(..., description="Fecha de creación")
@@ -68,7 +68,7 @@ class GetContactsParams(PaginationParams, SearchParams):
 
 class ContactsResponse(BaseModel):
     """Respuesta de contactos"""
-    _embedded: Dict[str, List[Contact]] = Field(..., description="Datos embebidos")
+    embedded: Dict[str, List[Contact]] = Field(..., alias="_embedded", description="Datos embebidos")
 
 class ContactFilters(BaseModel):
     """Filtros para contactos"""

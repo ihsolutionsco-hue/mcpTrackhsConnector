@@ -3,10 +3,16 @@ Servidor FastMCP principal para Track HS API
 """
 
 import os
+import sys
+from pathlib import Path
 from dotenv import load_dotenv
 from fastmcp import FastMCP
-from .core.api_client import TrackHSApiClient
-from .core.types import TrackHSConfig
+
+# Agregar el directorio src al path para importaciones absolutas
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from trackhs_mcp.core.api_client import TrackHSApiClient
+from trackhs_mcp.core.types import TrackHSConfig
 
 # Cargar variables de entorno
 load_dotenv()
@@ -28,9 +34,9 @@ mcp = FastMCP("TrackHS MCP Server")
 # Registrar todas las herramientas, resources y prompts
 def register_all_components():
     """Registra todos los componentes del servidor MCP"""
-    from .tools import register_all_tools
-    from .resources import register_all_resources
-    from .prompts import register_all_prompts
+    from trackhs_mcp.tools import register_all_tools
+    from trackhs_mcp.resources import register_all_resources
+    from trackhs_mcp.prompts import register_all_prompts
     
     # Registrar herramientas
     register_all_tools(mcp, api_client)
