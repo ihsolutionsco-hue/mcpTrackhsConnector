@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trackhs-mcp-connector"
+version = "1.0.0"
+description = "Servidor MCP (Model Context Protocol) para Track HS API"
+authors = [
+    {name = "IHSolutions", email = "team@ihsolutions.co"}
+]
+readme = "Readme.md"
+requires-python = ">=3.8"
+dependencies = [
+    "fastmcp>=2.0.0",
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0"
+]
+
+[project.scripts]
+trackhs-mcp = "src.trackhs_mcp.server:main"
+
+[project.entry-points."console_scripts"]
+trackhs-mcp = "src.trackhs_mcp.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
