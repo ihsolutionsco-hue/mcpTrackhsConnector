@@ -6,10 +6,7 @@ Basado en la especificación completa de la API Search Reservations V2
 from typing import List, Literal, Optional, Union
 
 from ..core.api_client import TrackHSApiClient
-from ..core.error_handling import (
-    ValidationError,
-    error_handler,
-)
+from ..core.error_handling import ValidationError, error_handler
 
 
 def register_search_reservations(mcp, api_client: TrackHSApiClient):
@@ -124,13 +121,13 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         - unit_type_id: Unit type ID(s)
         - rate_type_id: Rate type ID(s)
         - reservation_type_id: Reservation type ID(s)
-        - booked_start/end: Booking date range (ISO 8601). 
+        - booked_start/end: Booking date range (ISO 8601).
           Examples: "2025-01-01", "2025-01-01T00:00:00Z"
-        - arrival_start/end: Arrival date range (ISO 8601). 
+        - arrival_start/end: Arrival date range (ISO 8601).
           Examples: "2025-01-01", "2025-01-01T00:00:00Z"
-        - departure_start/end: Departure date range (ISO 8601). 
+        - departure_start/end: Departure date range (ISO 8601).
           Examples: "2025-01-01", "2025-01-01T00:00:00Z"
-        - updated_since: Updated since date (ISO 8601). 
+        - updated_since: Updated since date (ISO 8601).
           Examples: "2025-01-01", "2025-01-01T00:00:00Z"
         - scroll: Elasticsearch scroll (1 to start, string to continue)
         - in_house_today: Filter by in-house today (0/1)
@@ -418,7 +415,7 @@ def _normalize_date_format_flexible(date_string: str) -> str:
             format2 = f"{date_string}T00:00:00+00:00"
             # Formato 3: Sin timezone
             format3 = f"{date_string}T00:00:00"
-            
+
             # Por defecto usar formato 1 (con Z)
             return format1
 
@@ -432,7 +429,7 @@ def _normalize_date_format_flexible(date_string: str) -> str:
             format2 = f"{date_string}+00:00"
             # Formato 3: Sin timezone (original)
             format3 = date_string
-            
+
             # Por defecto usar formato 1 (con Z)
             return format1
 
