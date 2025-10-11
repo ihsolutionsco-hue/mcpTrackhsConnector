@@ -20,7 +20,7 @@ class TestSearchReservationsIntegration:
     def mock_api_client(self):
         """Mock del API client"""
         client = Mock()
-        client.get = AsyncMock()
+        client.get = AsyncMock()  # Debe ser AsyncMock para funciones async
         return client
 
     @pytest.fixture
@@ -38,13 +38,72 @@ class TestSearchReservationsIntegration:
                 "reservations": [
                     {
                         "id": 12345,
-                        "status": "Confirmed",
-                        "arrivalDate": "2024-01-15",
-                        "departureDate": "2024-01-20",
-                        "nights": 5,
+                        "alternates": None,
                         "currency": "USD",
-                        "unitId": 1,
-                        "contactId": 1,
+                        "unit_id": 1,
+                        "client_ip_address": None,
+                        "session": None,
+                        "is_unit_locked": False,
+                        "is_unit_assigned": True,
+                        "is_unit_type_locked": False,
+                        "unit_type_id": 1,
+                        "arrival_date": "2024-01-15",
+                        "departure_date": "2024-01-20",
+                        "early_arrival": False,
+                        "late_departure": False,
+                        "arrival_time": "15:00:00",
+                        "departure_time": "11:00:00",
+                        "nights": 5.0,
+                        "status": "Confirmed",
+                        "cancelled_at": None,
+                        "occupants": [
+                            {
+                                "id": 1,
+                                "first_name": "John",
+                                "last_name": "Doe",
+                                "email": "john@example.com",
+                                "phone": "+1234567890",
+                                "nationality": "US",
+                                "document_type": "passport",
+                                "document_number": "A1234567"
+                            }
+                        ],
+                        "security_deposit": {
+                            "amount": "100.00",
+                            "currency": "USD",
+                            "status": "pending"
+                        },
+                        "updated_at": "2024-01-15T10:00:00Z",
+                        "created_at": "2024-01-15T10:00:00Z",
+                        "booked_at": "2024-01-15T10:00:00Z",
+                        "guest_breakdown": {
+                            "adults": 2,
+                            "children": 0,
+                            "infants": 0
+                        },
+                        "contact_id": 1,
+                        "channel_id": 1,
+                        "folio_id": 1,
+                        "user_id": 1,
+                        "type_id": 1,
+                        "rate_type_id": 1,
+                        "is_taxable": True,
+                        "uuid": "123e4567-e89b-12d3-a456-426614174000",
+                        "source": "direct",
+                        "is_channel_locked": False,
+                        "agreement_status": "signed",
+                        "automate_payment": False,
+                        "revenue_realized_method": "deposit",
+                        "updated_by": 1,
+                        "created_by": 1,
+                        "payment_plan": {
+                            "id": 1,
+                            "name": "Standard",
+                            "installments": 1
+                        },
+                        "travel_insurance_products": [],
+                        "_embedded": {},
+                        "_links": {}
                     }
                 ]
             },
@@ -53,9 +112,9 @@ class TestSearchReservationsIntegration:
             "page_size": 10,
             "total_items": 1,
             "_links": {
-                "self": {"hre": "/v2/pms/reservations?page=1&size=10"},
-                "first": {"hre": "/v2/pms/reservations?page=1&size=10"},
-                "last": {"hre": "/v2/pms/reservations?page=1&size=10"},
+                "self": {"href": "/v2/pms/reservations?page=1&size=10"},
+                "first": {"href": "/v2/pms/reservations?page=1&size=10"},
+                "last": {"href": "/v2/pms/reservations?page=1&size=10"},
             },
         }
 
