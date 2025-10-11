@@ -55,6 +55,7 @@ class PaginationResult:
     page_info: PageInfo
     links: Dict[str, str]
     metadata: Dict[str, Any]
+    scroll_id: Optional[str] = None
 
 
 class PaginationUtility:
@@ -70,7 +71,7 @@ class PaginationUtility:
             page = 1
 
         if size < 1:
-            size = 10
+            size = 1
         elif size > self.config.max_page_size:
             size = self.config.max_page_size
 

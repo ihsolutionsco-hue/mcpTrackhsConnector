@@ -169,7 +169,9 @@ class TestPaginationUtility:
         """Test cálculo de información de página"""
         response_data = {"page": 2, "page_size": 10, "total_items": 50}
 
-        page_info = pagination_utility.calculate_page_info(response_data)
+        page_info = pagination_utility.calculate_page_info(
+            response_data["page"], response_data["page_size"], response_data["total_items"]
+        )
 
         assert page_info.current_page == 2
         assert page_info.page_size == 10
@@ -183,7 +185,9 @@ class TestPaginationUtility:
         """Test cálculo de información de página para la última página"""
         response_data = {"page": 5, "page_size": 10, "total_items": 50}
 
-        page_info = pagination_utility.calculate_page_info(response_data)
+        page_info = pagination_utility.calculate_page_info(
+            response_data["page"], response_data["page_size"], response_data["total_items"]
+        )
 
         assert page_info.current_page == 5
         assert page_info.has_next is False
@@ -194,7 +198,9 @@ class TestPaginationUtility:
         """Test cálculo de información de página para la primera página"""
         response_data = {"page": 1, "page_size": 10, "total_items": 50}
 
-        page_info = pagination_utility.calculate_page_info(response_data)
+        page_info = pagination_utility.calculate_page_info(
+            response_data["page"], response_data["page_size"], response_data["total_items"]
+        )
 
         assert page_info.current_page == 1
         assert page_info.has_next is True
@@ -206,7 +212,7 @@ class TestPaginationUtility:
         page_info = PageInfo(2, 10, 5, 50, True, True)
         base_url = "/test"
 
-        links = pagination_utility.generate_links(page_info, base_url)
+        links = pagination_utility.generate_links(base_url, page_info, {})
 
         assert "sel" in links
         assert "first" in links
@@ -226,7 +232,7 @@ class TestPaginationUtility:
         page_info = PageInfo(1, 10, 5, 50, True, False)
         base_url = "/test"
 
-        links = pagination_utility.generate_links(page_info, base_url)
+        links = pagination_utility.generate_links(base_url, page_info, {})
 
         assert "prev" not in links  # No debe tener enlace previo
         assert "next" in links
@@ -237,7 +243,7 @@ class TestPaginationUtility:
         page_info = PageInfo(5, 10, 5, 50, False, True)
         base_url = "/test"
 
-        links = pagination_utility.generate_links(page_info, base_url)
+        links = pagination_utility.generate_links(base_url, page_info, {})
 
         assert "next" not in links  # No debe tener enlace siguiente
         assert "prev" in links
@@ -251,7 +257,7 @@ class TestPaginationUtility:
             "scroll_id": "scroll123",
         }
 
-        result = pagination_utility.process_scroll_response(response_data, "/test")
+        result = pagination_utility.process_scroll_response(response_data)
 
         assert len(result.data) == 2
         assert result.scroll_id == "scroll123"
@@ -267,7 +273,7 @@ class TestPaginationUtility:
             "total_items": 20,
         }
 
-        result = pagination_utility.process_standard_response(response_data, "/test")
+        result = pagination_utility.process_standard_response(response_data, 1, 10)
 
         assert len(result.data) == 2
         assert result.page_info.current_page == 1
@@ -378,19 +384,19 @@ class TestPaginationUtility:
         # Crear resultados de paginación simulados
         from src.trackhs_mcp.infrastructure.utils.pagination import PaginationResult
 
+        from src.trackhs_mcp.infrastructure.utils.pagination import PageInfo
+        
         result1 = PaginationResult(
             data=[{"id": 1}, {"id": 2}],
-            page=1,
-            page_size=2,
-            total_items=4,
-            has_next=True,
+            page_info=PageInfo(page=1, size=2, total_items=4, total_pages=2, has_next=True, has_previous=False),
+            links={},
+            metadata={}
         )
         result2 = PaginationResult(
             data=[{"id": 3}, {"id": 4}],
-            page=2,
-            page_size=2,
-            total_items=4,
-            has_next=False,
+            page_info=PageInfo(page=2, size=2, total_items=4, total_pages=2, has_next=False, has_previous=True),
+            links={},
+            metadata={}
         )
 
         results = [result1, result2]
