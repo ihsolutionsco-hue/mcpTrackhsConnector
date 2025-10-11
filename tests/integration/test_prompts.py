@@ -28,7 +28,7 @@ class TestPromptsIntegration:
     @pytest.mark.integration
     def test_register_all_prompts(self, mock_mcp, mock_api_client):
         """Test registro de todos los prompts"""
-        register_all_prompts(mcp, mock_api_client)
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Verificar que se registraron múltiples prompts
         assert mock_mcp.prompt.call_count >= 5  # Al menos 5 prompts esperados
@@ -37,12 +37,11 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_check_today_reservations_prompt(self, mock_api_client):
         """Test prompt de verificación de reservas del día"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener el primer prompt registrado (check_today_reservations)
-        prompt_func = mcp.prompt.call_args_list[0][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[0][0][1]
         
         result = await prompt_func()
         
@@ -70,11 +69,10 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_check_today_reservations_prompt_with_date(self, mock_api_client):
         """Test prompt de verificación de reservas con fecha específica"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
-        prompt_func = mcp.prompt.call_args_list[0][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[0][0][1]
         
         result = await prompt_func(date="2024-01-15")
         
@@ -87,12 +85,11 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_unit_availability_prompt(self, mock_api_client):
         """Test prompt de disponibilidad de unidades"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener el segundo prompt registrado (unit_availability)
-        prompt_func = mcp.prompt.call_args_list[1][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[1][0][1]
         
         result = await prompt_func()
         
@@ -112,11 +109,10 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_unit_availability_prompt_with_parameters(self, mock_api_client):
         """Test prompt de disponibilidad con parámetros específicos"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
-        prompt_func = mcp.prompt.call_args_list[1][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[1][0][1]
         
         result = await prompt_func(
             start_date="2024-01-15",
@@ -135,12 +131,11 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_guest_contact_info_prompt(self, mock_api_client):
         """Test prompt de información de contacto de huéspedes"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener el tercer prompt registrado (guest_contact_info)
-        prompt_func = mcp.prompt.call_args_list[2][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[2][0][1]
         
         result = await prompt_func()
         
@@ -159,11 +154,10 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_guest_contact_info_prompt_with_contact_id(self, mock_api_client):
         """Test prompt de información de contacto con ID específico"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
-        prompt_func = mcp.prompt.call_args_list[2][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[2][0][1]
         
         result = await prompt_func(contact_id=123)
         
@@ -176,12 +170,11 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_maintenance_summary_prompt(self, mock_api_client):
         """Test prompt de resumen de mantenimiento"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener el cuarto prompt registrado (maintenance_summary)
-        prompt_func = mcp.prompt.call_args_list[3][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[3][0][1]
         
         result = await prompt_func()
         
@@ -200,11 +193,10 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_maintenance_summary_prompt_with_date_range(self, mock_api_client):
         """Test prompt de resumen de mantenimiento con rango de fechas"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
-        prompt_func = mcp.prompt.call_args_list[3][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[3][0][1]
         
         result = await prompt_func(
             start_date="2024-01-01",
@@ -221,12 +213,11 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_financial_analysis_prompt(self, mock_api_client):
         """Test prompt de análisis financiero"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener el quinto prompt registrado (financial_analysis)
-        prompt_func = mcp.prompt.call_args_list[4][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[4][0][1]
         
         result = await prompt_func()
         
@@ -246,11 +237,10 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_financial_analysis_prompt_with_period(self, mock_api_client):
         """Test prompt de análisis financiero con período específico"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
-        prompt_func = mcp.prompt.call_args_list[4][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[4][0][1]
         
         result = await prompt_func(
             start_date="2024-01-01",
@@ -269,12 +259,11 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_advanced_reservation_search_prompt(self, mock_api_client):
         """Test prompt de búsqueda avanzada de reservas"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener el sexto prompt registrado (advanced_reservation_search)
-        prompt_func = mcp.prompt.call_args_list[5][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[5][0][1]
         
         result = await prompt_func()
         
@@ -294,11 +283,10 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_advanced_reservation_search_prompt_with_criteria(self, mock_api_client):
         """Test prompt de búsqueda avanzada con criterios específicos"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
-        prompt_func = mcp.prompt.call_args_list[5][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[5][0][1]
         
         result = await prompt_func(
             search_criteria={
@@ -321,12 +309,11 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_reservation_analytics_prompt(self, mock_api_client):
         """Test prompt de análisis de reservas"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener el séptimo prompt registrado (reservation_analytics)
-        prompt_func = mcp.prompt.call_args_list[6][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[6][0][1]
         
         result = await prompt_func()
         
@@ -346,11 +333,10 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_reservation_analytics_prompt_with_metrics(self, mock_api_client):
         """Test prompt de análisis con métricas específicas"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
-        prompt_func = mcp.prompt.call_args_list[6][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[6][0][1]
         
         result = await prompt_func(
             metrics=["occupancy_rate", "revenue", "cancellation_rate"],
@@ -369,12 +355,11 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_guest_experience_analysis_prompt(self, mock_api_client):
         """Test prompt de análisis de experiencia del huésped"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener el octavo prompt registrado (guest_experience_analysis)
-        prompt_func = mcp.prompt.call_args_list[7][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[7][0][1]
         
         result = await prompt_func()
         
@@ -394,11 +379,10 @@ class TestPromptsIntegration:
     @pytest.mark.asyncio
     async def test_guest_experience_analysis_prompt_with_focus(self, mock_api_client):
         """Test prompt de análisis de experiencia con enfoque específico"""
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
-        prompt_func = mcp.prompt.call_args_list[7][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[7][0][1]
         
         result = await prompt_func(
             focus_area="check_in_process",
@@ -453,12 +437,11 @@ class TestPromptsIntegration:
             "data": "test_response"
         }
         
-        mcp = Mock()
-        mcp.prompt = Mock()
-        register_all_prompts(mcp, mock_api_client)
+        mock_mcp.prompt = Mock()
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Test que los prompts se pueden ejecutar sin errores
-        for call in mcp.prompt.call_args_list:
+        for call in mock_mcp.prompt.call_args_list:
             prompt_func = call[0][1]
             result = await prompt_func()
             

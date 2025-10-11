@@ -14,7 +14,7 @@ from ..core.error_handling import (
 def register_search_reservations(mcp, api_client: TrackHSApiClient):
     """Registra la herramienta search_reservations"""
     
-    @mcp.tool()
+    @mcp.tool
     @error_handler("search_reservations")
     async def search_reservations(
         page: int = 1,

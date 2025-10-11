@@ -35,6 +35,15 @@ class TestMCPIntegrationE2E:
             return TrackHSApiClient(mock_config)
     
     @pytest.fixture
+    def mock_mcp(self):
+        """Mock del servidor MCP"""
+        mcp = Mock()
+        mcp.tool = Mock()
+        mcp.resource = Mock()
+        mcp.prompt = Mock()
+        return mcp
+    
+    @pytest.fixture
     def sample_reservation_data(self):
         """Datos de ejemplo de reserva"""
         return {
@@ -95,27 +104,26 @@ class TestMCPIntegrationE2E:
         mock_api_client.get.return_value = sample_search_response
         
         # Crear servidor MCP mock
-        mcp = Mock()
-        mcp.tool = Mock()
-        mcp.resource = Mock()
-        mcp.prompt = Mock()
+        mock_mcp.tool = Mock()
+        mock_mcp.resource = Mock()
+        mock_mcp.prompt = Mock()
         
         # Registrar todos los componentes
         from src.trackhs_mcp.tools import register_all_tools
         from src.trackhs_mcp.resources import register_all_resources
         from src.trackhs_mcp.prompts import register_all_prompts
         
-        register_all_tools(mcp, mock_api_client)
-        register_all_resources(mcp, mock_api_client)
-        register_all_prompts(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
+        register_all_resources(mock_mcp, mock_api_client)
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Verificar que se registraron componentes
-        assert mcp.tool.call_count >= 1
-        assert mcp.resource.call_count >= 7
-        assert mcp.prompt.call_count >= 8
+        assert mock_mcp.tool.call_count >= 1
+        assert mock_mcp.resource.call_count >= 7
+        assert mock_mcp.prompt.call_count >= 8
         
         # Simular uso de herramienta
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         result = await tool_func(page=1, size=10)
         
         assert result == sample_search_response
@@ -129,12 +137,12 @@ class TestMCPIntegrationE2E:
         mock_api_client.get.side_effect = Exception("API Error")
         
         mcp = Mock()
-        mcp.tool = Mock()
+        mock_mcp.tool = Mock()
         
         from src.trackhs_mcp.tools import register_all_tools
-        register_all_tools(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         
         # La herramienta debe manejar el error
         with pytest.raises(Exception):
@@ -145,13 +153,13 @@ class TestMCPIntegrationE2E:
     async def test_resource_access(self, mock_api_client):
         """Test acceso a recursos"""
         mcp = Mock()
-        mcp.resource = Mock()
+        mock_mcp.resource = Mock()
         
         from src.trackhs_mcp.resources import register_all_resources
-        register_all_resources(mcp, mock_api_client)
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Obtener función de recurso
-        resource_func = mcp.resource.call_args_list[0][0][1]
+        resource_func = mock_mcp.resource.call_args_list[0][0][1]
         
         # Ejecutar recurso
         result = await resource_func()
@@ -163,13 +171,13 @@ class TestMCPIntegrationE2E:
     async def test_prompt_usage(self, mock_api_client):
         """Test uso de prompts"""
         mcp = Mock()
-        mcp.prompt = Mock()
+        mock_mcp.prompt = Mock()
         
         from src.trackhs_mcp.prompts import register_all_prompts
-        register_all_prompts(mcp, mock_api_client)
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Obtener función de prompt
-        prompt_func = mcp.prompt.call_args_list[0][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[0][0][1]
         
         # Ejecutar prompt
         result = await prompt_func()
@@ -185,12 +193,12 @@ class TestMCPIntegrationE2E:
         mock_api_client.get.return_value = sample_search_response
         
         mcp = Mock()
-        mcp.tool = Mock()
+        mock_mcp.tool = Mock()
         
         from src.trackhs_mcp.tools import register_all_tools
-        register_all_tools(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         
         # Ejecutar búsqueda con parámetros completos
         result = await tool_func(
@@ -241,12 +249,12 @@ class TestMCPIntegrationE2E:
         mock_api_client.get.side_effect = [page1_response, page2_response]
         
         mcp = Mock()
-        mcp.tool = Mock()
+        mock_mcp.tool = Mock()
         
         from src.trackhs_mcp.tools import register_all_tools
-        register_all_tools(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         
         # Ejecutar primera página
         result1 = await tool_func(page=1, size=1)
@@ -278,12 +286,12 @@ class TestMCPIntegrationE2E:
         ]
         
         mcp = Mock()
-        mcp.tool = Mock()
+        mock_mcp.tool = Mock()
         
         from src.trackhs_mcp.tools import register_all_tools
-        register_all_tools(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         
         # Primera llamada debe fallar
         with pytest.raises(Exception):
@@ -300,12 +308,12 @@ class TestMCPIntegrationE2E:
         mock_api_client.get.return_value = sample_search_response
         
         mcp = Mock()
-        mcp.tool = Mock()
+        mock_mcp.tool = Mock()
         
         from src.trackhs_mcp.tools import register_all_tools
-        register_all_tools(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         
         # Ejecutar múltiples requests concurrentes
         tasks = [
@@ -331,51 +339,51 @@ class TestMCPIntegrationE2E:
         
         # Crear servidor MCP completo
         mcp = Mock()
-        mcp.tool = Mock()
-        mcp.resource = Mock()
-        mcp.prompt = Mock()
+        mock_mcp.tool = Mock()
+        mock_mcp.resource = Mock()
+        mock_mcp.prompt = Mock()
         
         # Registrar todos los componentes
         from src.trackhs_mcp.tools import register_all_tools
         from src.trackhs_mcp.resources import register_all_resources
         from src.trackhs_mcp.prompts import register_all_prompts
         
-        register_all_tools(mcp, mock_api_client)
-        register_all_resources(mcp, mock_api_client)
-        register_all_prompts(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
+        register_all_resources(mock_mcp, mock_api_client)
+        register_all_prompts(mock_mcp, mock_api_client)
         
         # Simular flujo completo de trabajo
         # 1. Usar herramienta de búsqueda
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         search_result = await tool_func(page=1, size=10)
         assert search_result == sample_search_response
         
         # 2. Acceder a recursos
-        resource_func = mcp.resource.call_args_list[0][0][1]
+        resource_func = mock_mcp.resource.call_args_list[0][0][1]
         resource_result = await resource_func()
         assert "schema" in resource_result or "status" in resource_result
         
         # 3. Usar prompts
-        prompt_func = mcp.prompt.call_args_list[0][0][1]
+        prompt_func = mock_mcp.prompt.call_args_list[0][0][1]
         prompt_result = await prompt_func()
         assert "messages" in prompt_result
         
         # Verificar que se registraron todos los componentes
-        assert mcp.tool.call_count >= 1
-        assert mcp.resource.call_count >= 7
-        assert mcp.prompt.call_count >= 8
+        assert mock_mcp.tool.call_count >= 1
+        assert mock_mcp.resource.call_count >= 7
+        assert mock_mcp.prompt.call_count >= 8
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
     async def test_validation_workflow(self, mock_api_client):
         """Test flujo de validación"""
         mcp = Mock()
-        mcp.tool = Mock()
+        mock_mcp.tool = Mock()
         
         from src.trackhs_mcp.tools import register_all_tools
-        register_all_tools(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         
         # Test validaciones
         with pytest.raises(Exception):  # ValidationError
@@ -396,12 +404,12 @@ class TestMCPIntegrationE2E:
         mock_api_client.get.return_value = sample_search_response
         
         mcp = Mock()
-        mcp.tool = Mock()
+        mock_mcp.tool = Mock()
         
         from src.trackhs_mcp.tools import register_all_tools
-        register_all_tools(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         
         # Medir tiempo de ejecución
         start_time = time.time()
@@ -428,12 +436,12 @@ class TestMCPIntegrationE2E:
         mock_api_client.get.return_value = sample_search_response
         
         mcp = Mock()
-        mcp.tool = Mock()
+        mock_mcp.tool = Mock()
         
         from src.trackhs_mcp.tools import register_all_tools
-        register_all_tools(mcp, mock_api_client)
+        register_all_tools(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args_list[0][0][1]
+        tool_func = mock_mcp.tool.call_args_list[0][0][1]
         
         # Ejecutar múltiples operaciones
         for i in range(100):

@@ -36,12 +36,11 @@ class TestResourcesIntegration:
     @pytest.mark.asyncio
     async def test_reservations_schema_resource(self, mock_api_client):
         """Test recurso de esquema de reservas"""
-        mcp = Mock()
-        mcp.resource = Mock()
-        register_all_resources(mcp, mock_api_client)
+        mock_mcp.resource = Mock()
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Obtener el primer recurso registrado (reservations_schema)
-        resource_func = mcp.resource.call_args_list[0][0][1]
+        resource_func = mock_mcp.resource.call_args_list[0][0][1]
         
         result = await resource_func()
         
@@ -82,12 +81,11 @@ class TestResourcesIntegration:
     @pytest.mark.asyncio
     async def test_units_schema_resource(self, mock_api_client):
         """Test recurso de esquema de unidades"""
-        mcp = Mock()
-        mcp.resource = Mock()
-        register_all_resources(mcp, mock_api_client)
+        mock_mcp.resource = Mock()
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Obtener el segundo recurso registrado (units_schema)
-        resource_func = mcp.resource.call_args_list[1][0][1]
+        resource_func = mock_mcp.resource.call_args_list[1][0][1]
         
         result = await resource_func()
         
@@ -113,12 +111,11 @@ class TestResourcesIntegration:
     @pytest.mark.asyncio
     async def test_system_status_resource(self, mock_api_client):
         """Test recurso de estado del sistema"""
-        mcp = Mock()
-        mcp.resource = Mock()
-        register_all_resources(mcp, mock_api_client)
+        mock_mcp.resource = Mock()
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Obtener el tercer recurso registrado (system_status)
-        resource_func = mcp.resource.call_args_list[2][0][1]
+        resource_func = mock_mcp.resource.call_args_list[2][0][1]
         
         result = await resource_func()
         
@@ -144,12 +141,11 @@ class TestResourcesIntegration:
     @pytest.mark.asyncio
     async def test_api_documentation_resource(self, mock_api_client):
         """Test recurso de documentación de API"""
-        mcp = Mock()
-        mcp.resource = Mock()
-        register_all_resources(mcp, mock_api_client)
+        mock_mcp.resource = Mock()
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Obtener el cuarto recurso registrado (api_documentation)
-        resource_func = mcp.resource.call_args_list[3][0][1]
+        resource_func = mock_mcp.resource.call_args_list[3][0][1]
         
         result = await resource_func()
         
@@ -178,12 +174,11 @@ class TestResourcesIntegration:
     @pytest.mark.asyncio
     async def test_api_v2_endpoints_resource(self, mock_api_client):
         """Test recurso de endpoints API V2"""
-        mcp = Mock()
-        mcp.resource = Mock()
-        register_all_resources(mcp, mock_api_client)
+        mock_mcp.resource = Mock()
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Obtener el quinto recurso registrado (api_v2_endpoints)
-        resource_func = mcp.resource.call_args_list[4][0][1]
+        resource_func = mock_mcp.resource.call_args_list[4][0][1]
         
         result = await resource_func()
         
@@ -208,12 +203,11 @@ class TestResourcesIntegration:
     @pytest.mark.asyncio
     async def test_api_v2_parameters_resource(self, mock_api_client):
         """Test recurso de parámetros API V2"""
-        mcp = Mock()
-        mcp.resource = Mock()
-        register_all_resources(mcp, mock_api_client)
+        mock_mcp.resource = Mock()
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Obtener el sexto recurso registrado (api_v2_parameters)
-        resource_func = mcp.resource.call_args_list[5][0][1]
+        resource_func = mock_mcp.resource.call_args_list[5][0][1]
         
         result = await resource_func()
         
@@ -246,12 +240,11 @@ class TestResourcesIntegration:
     @pytest.mark.asyncio
     async def test_api_v2_examples_resource(self, mock_api_client):
         """Test recurso de ejemplos API V2"""
-        mcp = Mock()
-        mcp.resource = Mock()
-        register_all_resources(mcp, mock_api_client)
+        mock_mcp.resource = Mock()
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Obtener el séptimo recurso registrado (api_v2_examples)
-        resource_func = mcp.resource.call_args_list[6][0][1]
+        resource_func = mock_mcp.resource.call_args_list[6][0][1]
         
         result = await resource_func()
         
@@ -286,9 +279,8 @@ class TestResourcesIntegration:
             "timestamp": "2024-01-01T00:00:00Z"
         }
         
-        mcp = Mock()
-        mcp.resource = Mock()
-        register_all_resources(mcp, mock_api_client)
+        mock_mcp.resource = Mock()
+        register_all_resources(mock_mcp, mock_api_client)
         
         # Test system_status que puede hacer llamadas al API
         system_status_func = None

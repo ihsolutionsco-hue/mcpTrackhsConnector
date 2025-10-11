@@ -2,7 +2,7 @@
 Tipos compartidos para el servidor MCP de Track HS
 """
 
-from typing import Dict, Any, Optional, Generic, TypeVar
+from typing import Dict, Any, Optional, Generic, TypeVar, Union, List
 from pydantic import BaseModel, Field
 
 T = TypeVar('T')
@@ -39,6 +39,8 @@ class SearchParams(BaseModel):
     """Parámetros de búsqueda"""
     search: Optional[str] = Field(default=None, description="Término de búsqueda")
     updated_since: Optional[str] = Field(default=None, description="Filtro por fecha de actualización (ISO 8601)")
+    node_id: Optional[Union[int, List[int]]] = Field(default=None, description="ID del nodo")
+    tags: Optional[str] = Field(default=None, description="Tags para filtrar")
 
 class TrackHSResponse(BaseModel, Generic[T]):
     """Respuesta genérica de Track HS API"""

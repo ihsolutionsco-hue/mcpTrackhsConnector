@@ -36,15 +36,15 @@ class TestCompletionSuggestion:
             value="test_value",
             label="Test Label",
             description="Test description",
-            type=CompletionType.PARAMETER,
-            confidence=0.9
+            category="parameter",
+            priority=9
         )
         
         assert suggestion.value == "test_value"
         assert suggestion.label == "Test Label"
         assert suggestion.description == "Test description"
-        assert suggestion.type == CompletionType.PARAMETER
-        assert suggestion.confidence == 0.9
+        assert suggestion.category == "parameter"
+        assert suggestion.priority == 9
     
     @pytest.mark.unit
     def test_completion_suggestion_with_defaults(self):
@@ -56,9 +56,9 @@ class TestCompletionSuggestion:
         
         assert suggestion.value == "test_value"
         assert suggestion.label == "Test Label"
-        assert suggestion.description == ""
-        assert suggestion.type == CompletionType.PARAMETER
-        assert suggestion.confidence == 1.0
+        assert suggestion.description is None
+        assert suggestion.category is None
+        assert suggestion.priority == 0
 
 
 class TestCompletionContext:
@@ -68,26 +68,23 @@ class TestCompletionContext:
     def test_completion_context_creation(self):
         """Test creación de CompletionContext"""
         context = CompletionContext(
+            current_input="no",
             parameter_name="node_id",
-            current_value="1",
-            partial_input="no",
-            context_type="search"
+            endpoint="search"
         )
         
+        assert context.current_input == "no"
         assert context.parameter_name == "node_id"
-        assert context.current_value == "1"
-        assert context.partial_input == "no"
-        assert context.context_type == "search"
+        assert context.endpoint == "search"
     
     @pytest.mark.unit
     def test_completion_context_with_defaults(self):
         """Test CompletionContext con valores por defecto"""
-        context = CompletionContext(parameter_name="test_param")
+        context = CompletionContext(current_input="test")
         
-        assert context.parameter_name == "test_param"
-        assert context.current_value is None
-        assert context.partial_input is None
-        assert context.context_type is None
+        assert context.current_input == "test"
+        assert context.parameter_name is None
+        assert context.endpoint is None
 
 
 class TestTrackHSCompletion:
@@ -192,8 +189,8 @@ class TestTrackHSCompletion:
         ]
         
         context = CompletionContext(
-            parameter_name="node_id",
-            partial_input="no"
+            current_input="no",
+            parameter_name="node_id"
         )
         
         filtered = completion._filter_suggestions(suggestions, context)
@@ -207,7 +204,7 @@ class TestTrackHSCompletion:
     @pytest.mark.unit
     def test_get_parameter_suggestions(self, completion):
         """Test obtención de sugerencias de parámetros"""
-        context = CompletionContext(parameter_name="test_param")
+        context = CompletionContext(current_input="test", parameter_name="test_param")
         
         suggestions = completion.get_parameter_suggestions(context)
         
@@ -217,7 +214,7 @@ class TestTrackHSCompletion:
     @pytest.mark.unit
     def test_get_sort_column_suggestions(self, completion):
         """Test obtención de sugerencias de columnas de ordenamiento"""
-        context = CompletionContext(parameter_name="sort_column")
+        context = CompletionContext(current_input="test", parameter_name="sort_column")
         
         suggestions = completion.get_sort_column_suggestions(context)
         
@@ -233,7 +230,7 @@ class TestTrackHSCompletion:
     @pytest.mark.unit
     def test_get_status_suggestions(self, completion):
         """Test obtención de sugerencias de estado"""
-        context = CompletionContext(parameter_name="status")
+        context = CompletionContext(current_input="test", parameter_name="status")
         
         suggestions = completion.get_status_suggestions(context)
         
@@ -348,7 +345,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_parameter_suggestions(self, completion):
         """Test obtención de completions para sugerencias de parámetros"""
-        context = CompletionContext(parameter_name="test_param")
+        context = CompletionContext(current_input="test", parameter_name="test_param")
         
         suggestions = await completion.get_completions(context)
         
@@ -359,7 +356,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_sort_column(self, completion):
         """Test obtención de completions para sort_column"""
-        context = CompletionContext(parameter_name="sort_column")
+        context = CompletionContext(current_input="test", parameter_name="sort_column")
         
         suggestions = await completion.get_completions(context)
         
@@ -370,7 +367,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_status(self, completion):
         """Test obtención de completions para status"""
-        context = CompletionContext(parameter_name="status")
+        context = CompletionContext(current_input="test", parameter_name="status")
         
         suggestions = await completion.get_completions(context)
         
@@ -425,7 +422,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_with_cache(self, completion):
         """Test obtención de completions con cache"""
-        context = CompletionContext(parameter_name="test_param")
+        context = CompletionContext(current_input="test", parameter_name="test_param")
         
         # Primera llamada
         suggestions1 = await completion.get_completions(context)
@@ -441,8 +438,8 @@ class TestTrackHSCompletion:
     async def test_get_completions_with_partial_input(self, completion):
         """Test obtención de completions con entrada parcial"""
         context = CompletionContext(
-            parameter_name="node_id",
-            partial_input="no"
+            current_input="no",
+            parameter_name="node_id"
         )
         
         suggestions = await completion.get_completions(context)

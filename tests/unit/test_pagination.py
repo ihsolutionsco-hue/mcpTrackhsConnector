@@ -63,16 +63,16 @@ class TestPageInfo:
     def test_page_info_creation(self):
         """Test creación de PageInfo"""
         page_info = PageInfo(
-            current_page=2,
-            page_size=10,
-            total_pages=5,
+            page=2,
+            size=10,
             total_items=50,
+            total_pages=5,
             has_next=True,
             has_previous=True
         )
         
-        assert page_info.current_page == 2
-        assert page_info.page_size == 10
+        assert page_info.page == 2
+        assert page_info.size == 10
         assert page_info.total_pages == 5
         assert page_info.total_items == 50
         assert page_info.has_next is True

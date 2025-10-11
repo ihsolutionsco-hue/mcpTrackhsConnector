@@ -114,8 +114,15 @@ class TrackHSLogger:
         """Envía log al cliente MCP si está disponible"""
         if self.mcp_client:
             try:
-                # Enviar log al cliente MCP
-                asyncio.create_task(self._send_mcp_log(log_entry))
+                # Enviar log al cliente MCP de forma síncrona
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # Si el loop está corriendo, crear una tarea
+                    asyncio.create_task(self._send_mcp_log(log_entry))
+                else:
+                    # Si no está corriendo, ejecutar directamente
+                    loop.run_until_complete(self._send_mcp_log(log_entry))
             except Exception as e:
                 # Fallback al logger estándar si MCP falla
                 self.logger.error(f"Error enviando log a MCP: {str(e)}")

@@ -69,12 +69,11 @@ class TestSearchReservationsIntegration:
         mock_api_client.get.return_value = sample_search_response
         
         # Registrar la herramienta
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
         # Obtener la función registrada
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         # Ejecutar la función
         result = await tool_func(
@@ -93,11 +92,10 @@ class TestSearchReservationsIntegration:
         """Test búsqueda con filtros"""
         mock_api_client.get.return_value = sample_search_response
         
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         result = await tool_func(
             page=1,
@@ -117,11 +115,10 @@ class TestSearchReservationsIntegration:
         """Test búsqueda con filtros de fecha"""
         mock_api_client.get.return_value = sample_search_response
         
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         result = await tool_func(
             page=1,
@@ -141,11 +138,10 @@ class TestSearchReservationsIntegration:
         """Test búsqueda con scroll"""
         mock_api_client.get.return_value = sample_search_response
         
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         result = await tool_func(
             page=1,
@@ -162,11 +158,10 @@ class TestSearchReservationsIntegration:
         """Test búsqueda con múltiples IDs"""
         mock_api_client.get.return_value = sample_search_response
         
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         result = await tool_func(
             page=1,
@@ -183,11 +178,10 @@ class TestSearchReservationsIntegration:
     @pytest.mark.asyncio
     async def test_search_reservations_validation_error_invalid_page(self, mock_api_client):
         """Test error de validación con página inválida"""
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         with pytest.raises(ValidationError, match="Page must be >= 1"):
             await tool_func(page=0, size=10)
@@ -196,11 +190,10 @@ class TestSearchReservationsIntegration:
     @pytest.mark.asyncio
     async def test_search_reservations_validation_error_invalid_size(self, mock_api_client):
         """Test error de validación con tamaño inválido"""
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         with pytest.raises(ValidationError, match="Size must be between 1 and 1000"):
             await tool_func(page=1, size=0)
@@ -209,11 +202,10 @@ class TestSearchReservationsIntegration:
     @pytest.mark.asyncio
     async def test_search_reservations_validation_error_size_too_large(self, mock_api_client):
         """Test error de validación con tamaño demasiado grande"""
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         with pytest.raises(ValidationError, match="Size must be between 1 and 1000"):
             await tool_func(page=1, size=1001)
@@ -222,11 +214,10 @@ class TestSearchReservationsIntegration:
     @pytest.mark.asyncio
     async def test_search_reservations_validation_error_invalid_date(self, mock_api_client):
         """Test error de validación con fecha inválida"""
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         with pytest.raises(ValidationError, match="Invalid date format"):
             await tool_func(
@@ -241,11 +232,10 @@ class TestSearchReservationsIntegration:
         """Test error de API"""
         mock_api_client.get.side_effect = Exception("API Error")
         
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         with pytest.raises(Exception, match="API Error"):
             await tool_func(page=1, size=10)
@@ -256,11 +246,10 @@ class TestSearchReservationsIntegration:
         """Test búsqueda con todos los parámetros"""
         mock_api_client.get.return_value = sample_search_response
         
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         result = await tool_func(
             page=2,
@@ -333,11 +322,10 @@ class TestSearchReservationsIntegration:
         """Test construcción del endpoint con parámetros"""
         mock_api_client.get.return_value = sample_search_response
         
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         await tool_func(
             page=2,
@@ -378,11 +366,10 @@ class TestSearchReservationsIntegration:
         
         mock_api_client.get.return_value = empty_response
         
-        mcp = Mock()
-        mcp.tool = Mock()
-        register_search_reservations(mcp, mock_api_client)
+        mock_mcp.tool = Mock()
+        register_search_reservations(mock_mcp, mock_api_client)
         
-        tool_func = mcp.tool.call_args[0][0]
+        tool_func = mock_mcp.tool.call_args[0][0]
         
         result = await tool_func(page=1, size=10)
         
