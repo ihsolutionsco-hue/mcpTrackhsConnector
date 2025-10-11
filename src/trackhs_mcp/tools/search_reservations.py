@@ -5,7 +5,7 @@ Basado en la especificación completa de la API Search Reservations V2
 
 from typing import Optional, List, Union, Literal
 from ..core.api_client import TrackHSApiClient
-from ..types.reservations import SearchReservationsParams
+from ..models.reservations import SearchReservationsParams
 from ..core.error_handling import (
     error_handler, ValidationError, validate_required_params,
     validate_param_types

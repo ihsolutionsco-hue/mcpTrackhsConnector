@@ -16,3 +16,10 @@ class SearchParams(BaseModel):
     """Parámetros de búsqueda"""
     search: Optional[str] = Field(default=None, description="Término de búsqueda")
     updated_since: Optional[str] = Field(default=None, description="Filtro por fecha de actualización (ISO 8601)")
+
+class TrackHSResponse(BaseModel):
+    """Respuesta base de Track HS API"""
+    success: bool = Field(..., description="Indica si la operación fue exitosa")
+    data: Optional[dict] = Field(default=None, description="Datos de la respuesta")
+    message: Optional[str] = Field(default=None, description="Mensaje de la respuesta")
+    error: Optional[str] = Field(default=None, description="Mensaje de error si aplica")
