@@ -167,7 +167,7 @@ class TrackHSLogger:
         log_entry = self._format_message(message, ctx, category, level)
 
         # Log estándar
-        if level.value >= LogLevel.INFO.value:
+        if level.value >= LogLevel.DEBUG.value:
             self.logger.log(level.value, json.dumps(log_entry, ensure_ascii=False))
 
         # Log a MCP
@@ -381,6 +381,7 @@ class PerformanceTimer:
         self.logger = logger
         self.operation = operation
         self.start_time = None
+        self.duration = None
 
     def __enter__(self):
         self.start_time = time.time()
@@ -388,8 +389,8 @@ class PerformanceTimer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.start_time:
-            duration_ms = (time.time() - self.start_time) * 1000
-            self.logger.log_performance(self.operation, duration_ms)
+            self.duration = (time.time() - self.start_time) * 1000
+            self.logger.log_performance(self.operation, self.duration)
 
 
 # Funciones de conveniencia
