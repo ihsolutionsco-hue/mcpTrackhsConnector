@@ -62,10 +62,10 @@ def main():
 try:
     # Crear dependencias
     config, api_client = create_dependencies()
-    
+
     # Crear servidor MCP
     mcp = FastMCP("TrackHS MCP Server")
-    
+
     # Registrar componentes con inyección de dependencias
     register_all_components(mcp, api_client)
 except Exception as e:
