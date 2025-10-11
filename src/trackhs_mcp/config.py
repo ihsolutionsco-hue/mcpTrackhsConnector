@@ -28,6 +28,13 @@ class TrackHSConfig:
         password = os.getenv("TRACKHS_PASSWORD", "18c87461011f355cc11000a24215cbda")
         timeout = int(os.getenv("TRACKHS_TIMEOUT", "30"))
 
+        # Validar que las credenciales no sean las de ejemplo
+        if username == "your_username_here" or password == "your_password_here":
+            raise ValueError(
+                "Credenciales de ejemplo detectadas. "
+                "Configura TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno."
+            )
+
         return cls(
             base_url=base_url, username=username, password=password, timeout=timeout
         )
