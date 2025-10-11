@@ -6,11 +6,16 @@ Basado en la especificación completa de la API Search Reservations V2
 from typing import Optional, List, Union, Literal
 from ..core.api_client import TrackHSApiClient
 from ..types.reservations import SearchReservationsParams
+from ..core.error_handling import (
+    error_handler, ValidationError, validate_required_params,
+    validate_param_types
+)
 
 def register_search_reservations(mcp, api_client: TrackHSApiClient):
     """Registra la herramienta search_reservations"""
     
     @mcp.tool()
+    @error_handler("search_reservations")
     async def search_reservations(
         page: int = 1,
         size: int = 10,
@@ -72,6 +77,27 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             group_id: ID del grupo conectado
             checkin_office_id: ID de la oficina de check-in
         """
+        # Validar parámetros básicos
+        if page < 1:
+            raise ValidationError("Page must be >= 1", "page")
+        if size < 1 or size > 1000:
+            raise ValidationError("Size must be between 1 and 1000", "size")
+        
+        # Validar fechas si se proporcionan
+        date_params = {
+            'booked_start': booked_start,
+            'booked_end': booked_end,
+            'arrival_start': arrival_start,
+            'arrival_end': arrival_end,
+            'departure_start': departure_start,
+            'departure_end': departure_end,
+            'updated_since': updated_since
+        }
+        
+        for param_name, param_value in date_params.items():
+            if param_value and not _is_valid_date_format(param_value):
+                raise ValidationError(f"Invalid date format for {param_name}. Use ISO 8601 format.", param_name)
+        
         query_params = {
             "page": page,
             "size": size,
@@ -132,8 +158,15 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         if query_string:
             endpoint += f"?{query_string}"
         
-        try:
-            result = await api_client.get(endpoint)
-            return result
-        except Exception as e:
-            return {"error": f"Error al buscar reservas: {str(e)}"}
+        result = await api_client.get(endpoint)
+        return result
+
+def _is_valid_date_format(date_string: str) -> bool:
+    """Valida formato de fecha ISO 8601"""
+    try:
+        from datetime import datetime
+        # Intentar parsear como ISO 8601
+        datetime.fromisoformat(date_string.replace('Z', '+00:00'))
+        return True
+    except ValueError:
+        return False

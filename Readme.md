@@ -11,6 +11,8 @@ Servidor MCP (Model Context Protocol) para Track HS API V2 implementado con Fast
 - **Validación de tipos** con Pydantic V2
 - **Cliente HTTP** robusto con manejo de errores
 - **Utilidades de soporte** (paginación, logging, completion, errores)
+- **Testing Completo** - Tests unitarios, integración y E2E
+- **Deployment Automático** - CI/CD con GitHub Actions y FastMCP Cloud
 
 ## 📋 Herramienta Principal
 
@@ -329,6 +331,101 @@ which python
 # Probar ejecución directa
 python -m src.trackhs_mcp.server
 ```
+
+## 🧪 Testing
+
+### Tests Automáticos
+
+```bash
+# Ejecutar todos los tests
+pytest tests/ -v
+
+# Tests con cobertura
+pytest tests/ --cov=src --cov-report=html
+
+# Tests específicos
+pytest tests/unit/ -v          # Tests unitarios
+pytest tests/integration/ -v   # Tests de integración
+pytest tests/e2e/ -v           # Tests E2E
+```
+
+### Test Local
+
+```bash
+# Ejecutar test local completo
+python test_local.py
+```
+
+### CI/CD Testing
+
+Los tests se ejecutan automáticamente en:
+- ✅ **Push a main**: Tests completos + deployment
+- ✅ **Pull Request**: Tests completos + linting
+- ✅ **Manual**: Tests completos + security scan
+
+## 🚀 Deployment
+
+### Deployment Automático
+
+El deployment se ejecuta automáticamente cuando se hace push a `main`:
+
+1. **Tests**: Se ejecutan todos los tests
+2. **Build**: Se construye el paquete Python
+3. **Deploy**: Se despliega a FastMCP Cloud
+4. **Verify**: Se verifica que el deployment fue exitoso
+
+### Configuración de Secrets
+
+Configura los siguientes secrets en GitHub:
+
+```
+TRACKHS_API_URL=https://api.trackhs.com/api
+TRACKHS_USERNAME=your_username
+TRACKHS_PASSWORD=your_password
+TRACKHS_TIMEOUT=30
+FASTMCP_API_KEY=your_api_key
+```
+
+### Deployment Manual
+
+```bash
+# Construir paquete
+python -m build
+
+# Desplegar a FastMCP Cloud
+fastmcp deploy
+
+# Verificar deployment
+fastmcp status
+```
+
+## 📊 Monitoreo
+
+### Health Check
+
+```bash
+# Verificar salud del servidor
+curl https://trackhs-mcp.fastmcp.cloud/health
+```
+
+### Logs y Métricas
+
+```bash
+# Ver logs en tiempo real
+fastmcp logs --follow
+
+# Ver métricas
+fastmcp metrics
+
+# Ver dashboard
+fastmcp dashboard
+```
+
+## 📚 Documentación Adicional
+
+- [Testing](docs/TESTING.md) - Guía completa de testing
+- [Deployment](docs/DEPLOYMENT.md) - Guía de deployment
+- [Estructura del Proyecto](docs/PROJECT_STRUCTURE.md) - Arquitectura del proyecto
 
 ## 📄 Licencia
 

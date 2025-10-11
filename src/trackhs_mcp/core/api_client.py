@@ -3,9 +3,14 @@ Cliente HTTP para Track HS API usando httpx
 """
 
 import httpx
+import asyncio
 from typing import Any, Dict, Optional, TypeVar
 from .auth import TrackHSAuth
-from .types import TrackHSConfig, RequestOptions, ApiError, TrackHSResponse
+from .types import TrackHSConfig, RequestOptions, TrackHSResponse
+from .error_handling import (
+    ApiError, AuthenticationError, NetworkError, TimeoutError,
+    error_handler, validate_required_params
+)
 
 T = TypeVar('T')
 
@@ -38,63 +43,122 @@ class TrackHSApiClient:
         """Cierra el cliente HTTP"""
         await self.client.aclose()
     
+    @error_handler("api_request")
     async def request(
         self, 
         endpoint: str, 
-        options: Optional[RequestOptions] = None
+        options: Optional[RequestOptions] = None,
+        max_retries: int = 3
     ) -> Any:
         """
-        Realiza una petición HTTP a la API de Track HS
+        Realiza una petición HTTP a la API de Track HS con reintentos
         
         Args:
             endpoint: Endpoint de la API
             options: Opciones de la petición
+            max_retries: Número máximo de reintentos
             
         Returns:
             Respuesta de la API
             
         Raises:
-            ApiError: Si la petición falla
+            ApiError: Si la petición falla después de todos los reintentos
         """
         url = f"{self.config.base_url}{endpoint}"
+        last_error = None
         
-        try:
-            # Preparar opciones de la petición
-            request_kwargs = {
-                "method": options.method if options else "GET",
-                "headers": self.auth.get_headers()
-            }
-            
-            if options and options.headers:
-                request_kwargs["headers"].update(options.headers)
-            
-            if options and options.body:
-                request_kwargs["data"] = options.body
-            
-            # Realizar petición
-            response = await self.client.request(**request_kwargs)
-            
-            # Verificar si la respuesta es exitosa
-            if not response.is_success:
-                error_message = f"Track HS API Error: {response.status_code} {response.reason_phrase}"
-                raise ApiError(
-                    message=error_message,
-                    status=response.status_code,
-                    status_text=response.reason_phrase
-                )
-            
-            # Determinar tipo de contenido
-            content_type = response.headers.get('content-type', '')
-            
-            if 'application/json' in content_type:
-                return response.json()
-            else:
-                return response.text
+        for attempt in range(max_retries + 1):
+            try:
+                # Preparar opciones de la petición
+                request_kwargs = {
+                    "method": options.method if options else "GET",
+                    "headers": self.auth.get_headers()
+                }
                 
-        except httpx.RequestError as e:
-            raise ApiError(f"Error en petición a Track HS: {str(e)}")
-        except Exception as e:
-            raise ApiError(f"Error desconocido en petición a Track HS: {str(e)}")
+                if options and options.headers:
+                    request_kwargs["headers"].update(options.headers)
+                
+                if options and options.body:
+                    request_kwargs["data"] = options.body
+                
+                # Realizar petición
+                response = await self.client.request(**request_kwargs)
+                
+                # Verificar si la respuesta es exitosa
+                if not response.is_success:
+                    if response.status_code == 401:
+                        raise AuthenticationError("Invalid credentials")
+                    elif response.status_code == 403:
+                        raise AuthenticationError("Access forbidden")
+                    elif response.status_code == 404:
+                        raise ApiError(f"Endpoint not found: {endpoint}", 404, endpoint)
+                    elif response.status_code >= 500:
+                        # Error del servidor, reintentar
+                        if attempt < max_retries:
+                            await asyncio.sleep(2 ** attempt)  # Backoff exponencial
+                            continue
+                        else:
+                            raise ApiError(
+                                f"Server error: {response.status_code} {response.reason_phrase}",
+                                response.status_code,
+                                endpoint
+                            )
+                    else:
+                        raise ApiError(
+                            f"API Error: {response.status_code} {response.reason_phrase}",
+                            response.status_code,
+                            endpoint
+                        )
+                
+                # Determinar tipo de contenido
+                content_type = response.headers.get('content-type', '')
+                
+                if 'application/json' in content_type:
+                    return response.json()
+                else:
+                    return response.text
+                    
+            except httpx.TimeoutException as e:
+                last_error = TimeoutError(f"Request timeout: {str(e)}")
+                if attempt < max_retries:
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                else:
+                    raise last_error
+                    
+            except httpx.ConnectError as e:
+                last_error = NetworkError(f"Connection error: {str(e)}")
+                if attempt < max_retries:
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                else:
+                    raise last_error
+                    
+            except httpx.RequestError as e:
+                last_error = NetworkError(f"Request error: {str(e)}")
+                if attempt < max_retries:
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                else:
+                    raise last_error
+                    
+            except (ApiError, AuthenticationError):
+                # No reintentar errores de API o autenticación
+                raise
+                
+            except Exception as e:
+                last_error = ApiError(f"Unexpected error: {str(e)}")
+                if attempt < max_retries:
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                else:
+                    raise last_error
+        
+        # Si llegamos aquí, todos los reintentos fallaron
+        if last_error:
+            raise last_error
+        else:
+            raise ApiError("All retry attempts failed")
     
     async def get(self, endpoint: str, options: Optional[RequestOptions] = None) -> Any:
         """Realiza una petición GET"""
