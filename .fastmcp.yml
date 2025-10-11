@@ -15,7 +15,7 @@ server:
 
 # Configuración de la aplicación
 app:
-  entry_point: "src.trackhs_mcp.server:main"
+  entry_point: "src.trackhs_mcp.__main__:main"
   python_version: "3.11"
   requirements:
     - "fastmcp>=2.0.0"

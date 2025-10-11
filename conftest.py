@@ -294,7 +294,7 @@ def sample_search_response():
 @pytest.fixture
 def mock_trackhs_config():
     """Configuración mock de Track HS"""
-    from src.trackhs_mcp.core.types import TrackHSConfig
+    from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
 
     return TrackHSConfig(
         base_url="https://api-test.trackhs.com/api",

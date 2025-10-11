@@ -26,7 +26,7 @@ line_length = 88
 force_single_line = false
 include_trailing_comma = true
 ensure_newline_before_comments = true
-known_first_party = ["trackhs_mcp"]
+known_first_party = ["trackhs_mcp", "src.trackhs_mcp"]
 known_third_party = ["fastmcp", "httpx", "pydantic", "pytest"]
 
 [tool.flake8]
@@ -78,7 +78,7 @@ exclude_dirs = ["tests", "venv", ".venv", "Lib", "Scripts"]
 skips = ["B101", "B601"]
 
 [tool.coverage.run]
-source = ["src"]
+source = ["src/trackhs_mcp"]
 omit = [
     "*/tests/*",
     "*/test_*",

@@ -1,0 +1,3 @@
+"""
+Excepciones del dominio
+"""

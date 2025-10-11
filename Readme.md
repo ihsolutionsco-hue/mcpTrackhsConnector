@@ -1,23 +1,39 @@
-# TrackHS MCP Connector - API V2
+# TrackHS MCP Connector - Clean Architecture
 
-Servidor MCP (Model Context Protocol) para Track HS API V2 implementado con FastMCP en Python.
+Servidor MCP (Model Context Protocol) para Track HS API V2 implementado con **Clean Architecture** en Python.
+
+## 🏗️ Arquitectura
+
+Este proyecto sigue los principios de **Clean Architecture** con separación clara de responsabilidades:
+
+```
+src/trackhs_mcp/
+├── domain/                    # Capa de Dominio
+│   ├── entities/             # Entidades de negocio
+│   ├── value_objects/        # Value Objects
+│   └── exceptions/           # Excepciones de dominio
+├── application/              # Capa de Aplicación
+│   ├── use_cases/           # Casos de uso
+│   └── ports/               # Interfaces (puertos)
+└── infrastructure/           # Capa de Infraestructura
+    ├── adapters/            # Adaptadores (API, MCP)
+    ├── mcp/                 # Adaptador MCP
+    └── utils/               # Utilidades
+```
 
 ## 🚀 Características
 
-- **1 Herramienta Principal** - `search_reservations` con capacidades completas de API V2
-- **4 Resources** con esquemas y documentación actualizados
-- **5 Prompts** predefinidos para casos de uso comunes
-- **Autenticación Basic Auth** integrada
-- **Validación de tipos** con Pydantic V2
-- **Cliente HTTP** robusto con manejo de errores
-- **Utilidades de soporte** (paginación, logging, completion, errores)
-- **Testing Completo** - Tests unitarios, integración y E2E
-- **Deployment Automático** - CI/CD con GitHub Actions y FastMCP Cloud
+- **✅ Clean Architecture** - Separación clara de responsabilidades
+- **✅ API V2 Completa** - Soporte completo para Search Reservations V2
+- **✅ Protocolo MCP** - Integración nativa con el ecosistema MCP
+- **✅ Inyección de Dependencias** - Fácil testing y mantenimiento
+- **✅ Testing Robusto** - Tests unitarios, integración y E2E
+- **✅ Documentación Completa** - Organizada por temas
 
 ## 📋 Herramienta Principal
 
 ### Search Reservations V2
-- **`search_reservations`** - ⭐ **HERRAMIENTA PRINCIPAL** - Búsqueda avanzada de reservas con todos los parámetros de la API V2
+- **`search_reservations`** - ⭐ **HERRAMIENTA PRINCIPAL** - Búsqueda avanzada de reservas
   - Filtros de fecha completos (booked, arrival, departure)
   - Filtros por ID múltiples (node, unit, contact, etc.)
   - Paginación estándar y scroll de Elasticsearch
@@ -28,7 +44,6 @@ Servidor MCP (Model Context Protocol) para Track HS API V2 implementado con Fast
 ## 🛠️ Instalación
 
 ### Prerrequisitos
-
 - Python 3.8+
 - FastMCP 2.0+
 - Credenciales de Track HS API
@@ -67,14 +82,14 @@ TRACKHS_TIMEOUT=30
 ### Desarrollo Local
 
 ```bash
-# Ejecutar servidor en modo desarrollo
-fastmcp dev
+# Ejecutar servidor con Clean Architecture
+python -m src.trackhs_mcp
 
 # O ejecutar directamente
-python -m src.trackhs_mcp.server
+python -m src.trackhs_mcp.__main__
 
 # Con variables de entorno específicas
-TRACKHS_USERNAME=usuario TRACKHS_PASSWORD=contraseña python -m src.trackhs_mcp.server
+TRACKHS_USERNAME=usuario TRACKHS_PASSWORD=contraseña python -m src.trackhs_mcp
 ```
 
 ### Configuración en Claude Desktop
@@ -85,7 +100,7 @@ TRACKHS_USERNAME=usuario TRACKHS_PASSWORD=contraseña python -m src.trackhs_mcp.
   "mcpServers": {
     "trackhs": {
       "command": "python",
-      "args": ["-m", "src.trackhs_mcp.server"],
+      "args": ["-m", "src.trackhs_mcp"],
       "cwd": "/ruta/al/proyecto",
       "env": {
         "TRACKHS_API_URL": "https://api.trackhs.com/api",
@@ -118,113 +133,67 @@ TRACKHS_USERNAME=usuario TRACKHS_PASSWORD=contraseña python -m src.trackhs_mcp.
 
 ## 🔧 Desarrollo
 
-### Estructura del Proyecto
+### Estructura del Proyecto (Clean Architecture)
 
 ```
 src/trackhs_mcp/
-├── __init__.py
-├── server.py              # Servidor FastMCP principal
-├── core/
-│   ├── __init__.py
-│   ├── api_client.py      # Cliente HTTP con autenticación
-│   ├── auth.py           # Manejo de autenticación Basic Auth
-│   ├── types.py          # Tipos base y configuración
-│   ├── pagination.py      # Utilidad de paginación robusta
-│   ├── logging.py         # Sistema de logging avanzado
-│   ├── completion.py     # Utilidad de completion inteligente
-│   └── error_handling.py # Manejo robusto de errores
-├── tools/
-│   ├── __init__.py
-│   ├── all_tools.py      # Registrador de la herramienta principal
-│   ├── search_reservations.py # ⭐ HERRAMIENTA PRINCIPAL V2
-│   ├── README.md         # Documentación de herramientas
-│   └── SEARCH_RESERVATIONS_V2.md # Documentación detallada
-├── types/
-│   ├── __init__.py
-│   ├── base.py           # Tipos base
-│   ├── contacts.py       # Modelos de contactos
-│   ├── folios.py         # Modelos de folios
-│   ├── ledger_accounts.py # Modelos de cuentas contables
-│   ├── maintenance_work_orders.py # Modelos de mantenimiento
-│   ├── nodes.py          # Modelos de nodos
-│   ├── reservation_notes.py # Modelos de notas
-│   ├── reservations.py   # Modelos de reservas
-│   ├── reviews.py        # Modelos de reseñas
-│   └── units.py          # Modelos de unidades
-├── resources.py          # Resources MCP
-└── prompts.py           # Prompts MCP
+├── domain/                    # Capa de Dominio
+│   ├── entities/             # Entidades de negocio
+│   │   ├── reservation.py
+│   │   ├── contact.py
+│   │   ├── unit.py
+│   │   └── ...
+│   ├── value_objects/        # Value Objects
+│   │   ├── config.py
+│   │   └── request.py
+│   └── exceptions/           # Excepciones de dominio
+│       └── api_exceptions.py
+├── application/              # Capa de Aplicación
+│   ├── use_cases/           # Casos de uso
+│   │   └── search_reservations.py
+│   └── ports/               # Interfaces (puertos)
+│       └── api_client_port.py
+├── infrastructure/           # Capa de Infraestructura
+│   ├── adapters/            # Adaptadores
+│   │   ├── trackhs_api_client.py
+│   │   └── config.py
+│   ├── mcp/                 # Adaptador MCP
+│   │   ├── tools.py
+│   │   ├── resources.py
+│   │   ├── prompts.py
+│   │   └── server.py
+│   └── utils/               # Utilidades
+│       ├── auth.py
+│       ├── error_handling.py
+│       ├── logging.py
+│       ├── pagination.py
+│       └── completion.py
+└── __main__.py              # Entry point con inyección de dependencias
 ```
+
+### Principios de Clean Architecture
+
+1. **Independencia de Frameworks** - El código de negocio no depende de frameworks
+2. **Testabilidad** - Fácil testing con inyección de dependencias
+3. **Independencia de UI** - La lógica de negocio no depende de la interfaz
+4. **Independencia de Base de Datos** - El dominio no depende de la persistencia
+5. **Independencia de Agentes Externos** - El dominio no depende de servicios externos
 
 ### Agregar Nueva Herramienta
 
-1. Crear archivo `src/trackhs_mcp/tools/nueva_herramienta.py`:
-
-```python
-from ..core.api_client import TrackHSApiClient
-
-def register_nueva_herramienta(mcp, api_client: TrackHSApiClient):
-    """Registra la nueva herramienta MCP"""
-
-    @mcp.tool()
-    async def nueva_herramienta(param1: str, param2: int = 10):
-        """Descripción de la nueva herramienta"""
-        try:
-            result = await api_client.get(f"/endpoint/{param1}")
-            return result
-        except Exception as e:
-            return {"error": f"Error: {str(e)}"}
-```
-
-2. Importar y registrar en `src/trackhs_mcp/tools/all_tools.py`:
-
-```python
-from .nueva_herramienta import register_nueva_herramienta
-
-def register_all_tools(mcp, api_client: TrackHSApiClient):
-    # ... otras herramientas ...
-    register_nueva_herramienta(mcp, api_client)
-```
-
-### Agregar Nuevo Resource
-
-1. Agregar en `src/trackhs_mcp/resources.py`:
-
-```python
-@mcp.resource("trackhs://nuevo-resource")
-async def nuevo_resource():
-    """Descripción del resource"""
-    return {"data": "valor"}
-```
-
-### Agregar Nuevo Prompt
-
-1. Agregar en `src/trackhs_mcp/prompts.py`:
-
-```python
-@mcp.prompt("nuevo-prompt")
-async def nuevo_prompt(param1: str):
-    """Descripción del prompt"""
-    return {
-        "messages": [
-            {
-                "role": "user",
-                "content": {
-                    "type": "text",
-                    "text": f"Prompt con {param1}"
-                }
-            }
-        ]
-    }
-```
+1. Crear caso de uso en `application/use_cases/`
+2. Crear puerto (interfaz) en `application/ports/`
+3. Implementar adaptador en `infrastructure/adapters/`
+4. Registrar en `infrastructure/mcp/`
 
 ### Comandos de Desarrollo
 
 ```bash
-# Ejecutar servidor en modo desarrollo
-python -m src.trackhs_mcp.server
+# Ejecutar servidor con Clean Architecture
+python -m src.trackhs_mcp
 
 # Verificar estructura del proyecto
-python -c "from src.trackhs_mcp.server import main; print('Estructura OK')"
+python -c "from src.trackhs_mcp.__main__ import main; print('Estructura OK')"
 
 # Instalar en modo desarrollo
 pip install -e .
@@ -232,40 +201,50 @@ pip install -e .
 
 ## 🧪 Testing
 
+### Estructura de Tests (Clean Architecture)
+
+```
+tests/
+├── unit/                    # Tests unitarios por capa
+│   ├── domain/
+│   │   ├── entities/
+│   │   └── value_objects/
+│   ├── application/
+│   │   └── use_cases/
+│   └── infrastructure/
+│       ├── adapters/
+│       └── utils/
+├── integration/             # Tests de integración
+└── e2e/                     # Tests end-to-end
+```
+
+### Ejecutar Tests
+
 ```bash
-# Ejecutar tests (cuando estén implementados)
-pytest
+# Ejecutar todos los tests
+pytest tests/ -v
 
-# Con cobertura
-pytest --cov=src/trackhs_mcp
+# Tests con cobertura
+pytest tests/ --cov=src/trackhs_mcp --cov-report=html
 
-# Verificar conectividad con Track HS
-python -c "from src.trackhs_mcp.core.api_client import TrackHSApiClient; print('API Client OK')"
+# Tests específicos por capa
+pytest tests/unit/domain/ -v          # Tests de dominio
+pytest tests/unit/application/ -v     # Tests de aplicación
+pytest tests/unit/infrastructure/ -v   # Tests de infraestructura
+pytest tests/integration/ -v           # Tests de integración
+pytest tests/e2e/ -v                   # Tests E2E
 ```
 
 ## 📦 Deployment
 
-### Configuración Local
+### Deployment con Clean Architecture
 
 ```bash
 # Verificar que el servidor funciona
-python -m src.trackhs_mcp.server
+python -m src.trackhs_mcp
 
 # Probar con variables de entorno
-TRACKHS_USERNAME=test TRACKHS_PASSWORD=test python -m src.trackhs_mcp.server
-```
-
-### Deployment con FastMCP
-
-```bash
-# Deploy manual
-fastmcp deploy
-
-# Verificar deployment
-fastmcp status
-
-# Ver logs
-fastmcp logs
+TRACKHS_USERNAME=test TRACKHS_PASSWORD=test python -m src.trackhs_mcp
 ```
 
 ### Variables de Entorno para Producción
@@ -306,126 +285,14 @@ print(f'User: {os.getenv(\"TRACKHS_USERNAME\")}')
 "
 ```
 
-### FastMCP no encontrado
-
-```bash
-# Instalar FastMCP
-pip install fastmcp
-
-# O con uv
-uv pip install fastmcp
-
-# Verificar instalación
-fastmcp --version
-```
-
-### Problemas con Claude Desktop
-
-```bash
-# Verificar configuración
-cat claude_desktop_config.json
-
-# Verificar que Python está en PATH
-which python
-
-# Probar ejecución directa
-python -m src.trackhs_mcp.server
-```
-
-## 🧪 Testing
-
-### Tests Automáticos
-
-```bash
-# Ejecutar todos los tests
-pytest tests/ -v
-
-# Tests con cobertura
-pytest tests/ --cov=src --cov-report=html
-
-# Tests específicos
-pytest tests/unit/ -v          # Tests unitarios
-pytest tests/integration/ -v   # Tests de integración
-pytest tests/e2e/ -v           # Tests E2E
-```
-
-### Test Local
-
-```bash
-# Ejecutar test local completo
-python test_local.py
-```
-
-### CI/CD Testing
-
-Los tests se ejecutan automáticamente en:
-- ✅ **Push a main**: Tests completos + deployment
-- ✅ **Pull Request**: Tests completos + linting
-- ✅ **Manual**: Tests completos + security scan
-
-## 🚀 Deployment
-
-### Deployment Automático
-
-El deployment se ejecuta automáticamente cuando se hace push a `main`:
-
-1. **Tests**: Se ejecutan todos los tests
-2. **Build**: Se construye el paquete Python
-3. **Deploy**: Se despliega a FastMCP Cloud
-4. **Verify**: Se verifica que el deployment fue exitoso
-
-### Configuración de Secrets
-
-Configura los siguientes secrets en GitHub:
-
-```
-TRACKHS_API_URL=https://api.trackhs.com/api
-TRACKHS_USERNAME=your_username
-TRACKHS_PASSWORD=your_password
-TRACKHS_TIMEOUT=30
-FASTMCP_API_KEY=your_api_key
-```
-
-### Deployment Manual
-
-```bash
-# Construir paquete
-python -m build
-
-# Desplegar a FastMCP Cloud
-fastmcp deploy
-
-# Verificar deployment
-fastmcp status
-```
-
-## 📊 Monitoreo
-
-### Health Check
-
-```bash
-# Verificar salud del servidor
-curl https://trackhs-mcp.fastmcp.cloud/health
-```
-
-### Logs y Métricas
-
-```bash
-# Ver logs en tiempo real
-fastmcp logs --follow
-
-# Ver métricas
-fastmcp metrics
-
-# Ver dashboard
-fastmcp dashboard
-```
-
 ## 📚 Documentación Adicional
 
-- [Testing](docs/TESTING.md) - Guía completa de testing
-- [Deployment](docs/DEPLOYMENT.md) - Guía de deployment
-- [Estructura del Proyecto](docs/PROJECT_STRUCTURE.md) - Arquitectura del proyecto
+- [Documentación Completa](docs/README.md) - Guía completa organizada por temas
+- [Arquitectura](docs/architecture/) - Detalles de Clean Architecture
+- [API](docs/api/) - Documentación de la API V2
+- [MCP](docs/mcp/) - Protocolo MCP y mejores prácticas
+- [Desarrollo](docs/development/) - Guías de desarrollo
+- [Deployment](docs/deployment/) - Guías de deployment
 
 ## 📄 Licencia
 
@@ -447,16 +314,16 @@ MIT License - ver [LICENSE](LICENSE) para más detalles.
 
 ## 📋 Estado del Proyecto
 
+- ✅ **Clean Architecture**: Implementada completamente
 - ✅ **Servidor MCP**: Completamente funcional
-- ✅ **13 Herramientas**: Todas implementadas y probadas
-- ✅ **4 Resources**: Esquemas y documentación disponibles
-- ✅ **5 Prompts**: Casos de uso predefinidos
-- ✅ **Autenticación**: Basic Auth integrada
-- ✅ **Validación**: Tipos Pydantic implementados
-- ✅ **Estructura**: Modular y mantenible
+- ✅ **API V2**: Soporte completo con todos los parámetros
+- ✅ **Inyección de Dependencias**: Implementada
+- ✅ **Testing**: Tests organizados por capas
+- ✅ **Documentación**: Organizada por temas
+- ✅ **Deployment**: Configurado para producción
 
 ---
 
-**TrackHS MCP Connector** - Conectando Track HS con el ecosistema MCP 🚀
+**TrackHS MCP Connector** - Conectando Track HS con el ecosistema MCP usando Clean Architecture 🚀
 
 *Última actualización: 2025-01-27*
