@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from src.trackhs_mcp.prompts import register_all_prompts
+from src.trackhs_mcp.infrastructure.mcp.prompts import register_all_prompts
 
 
 class TestPromptsIntegration:
