@@ -32,7 +32,7 @@ class TestSearchReservationsValidation:
             "page_count": 1,
             "page_size": 10,
             "total_items": 0,
-            "_links": {}
+            "_links": {},
         }
         return mock
 
@@ -262,7 +262,7 @@ class TestSearchReservationsValidation:
             "page_count": 1,
             "page_size": 10,
             "total_items": 0,
-            "_links": {}
+            "_links": {},
         }
         mock_api_client.get.return_value = mock_response
 
