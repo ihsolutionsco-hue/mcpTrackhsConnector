@@ -1,47 +1,27 @@
-# TrackHS MCP Connector - Python
+# TrackHS MCP Connector - API V2
 
-Servidor MCP (Model Context Protocol) para Track HS API implementado con FastMCP en Python.
+Servidor MCP (Model Context Protocol) para Track HS API V2 implementado con FastMCP en Python.
 
 ## 🚀 Características
 
-- **13 Herramientas MCP** para interactuar con la API de Track HS
-- **4 Resources** con esquemas y documentación
+- **1 Herramienta Principal** - `search_reservations` con capacidades completas de API V2
+- **4 Resources** con esquemas y documentación actualizados
 - **5 Prompts** predefinidos para casos de uso comunes
 - **Autenticación Basic Auth** integrada
-- **Validación de tipos** con Pydantic
+- **Validación de tipos** con Pydantic V2
 - **Cliente HTTP** robusto con manejo de errores
-- **Estructura modular** para fácil mantenimiento
+- **Utilidades de soporte** (paginación, logging, completion, errores)
 
-## 📋 Herramientas Disponibles
+## 📋 Herramienta Principal
 
-### Reservas
-- `get_reservation` - Obtener reserva específica
-- `search_reservations` - Buscar reservas con filtros
-
-### Unidades
-- `get_units` - Listar unidades con filtros
-- `get_unit` - Obtener unidad específica
-
-### Reseñas
-- `get_reviews` - Obtener reseñas paginadas
-
-### Contactos
-- `get_contacts` - Listar contactos
-
-### Contabilidad
-- `get_ledger_accounts` - Listar cuentas contables
-- `get_ledger_account` - Obtener cuenta contable específica
-- `get_folios_collection` - Obtener colección de folios
-
-### Mantenimiento
-- `get_maintenance_work_orders` - Obtener órdenes de trabajo
-
-### Nodos
-- `get_nodes` - Listar nodos
-- `get_node` - Obtener nodo específico
-
-### Notas de Reserva
-- `get_reservation_notes` - Obtener notas de reserva
+### Search Reservations V2
+- **`search_reservations`** - ⭐ **HERRAMIENTA PRINCIPAL** - Búsqueda avanzada de reservas con todos los parámetros de la API V2
+  - Filtros de fecha completos (booked, arrival, departure)
+  - Filtros por ID múltiples (node, unit, contact, etc.)
+  - Paginación estándar y scroll de Elasticsearch
+  - Ordenamiento avanzado
+  - Búsqueda de texto
+  - Filtros especiales (inHouseToday, status, tags, etc.)
 
 ## 🛠️ Instalación
 
@@ -119,17 +99,19 @@ TRACKHS_USERNAME=usuario TRACKHS_PASSWORD=contraseña python -m src.trackhs_mcp.
 
 ## 📚 Recursos MCP
 
-- `trackhs://schema/reservations` - Esquema de datos para reservas
-- `trackhs://schema/units` - Esquema de datos para unidades  
+- `trackhs://schema/reservations` - Esquema completo de reservas V2
+- `trackhs://api/v2/endpoints` - Endpoints disponibles en API V2
+- `trackhs://api/v2/parameters` - Parámetros de la API V2
+- `trackhs://api/v2/examples` - Ejemplos de uso de la API V2
 - `trackhs://status/system` - Estado del sistema y conectividad
-- `trackhs://docs/api` - Documentación de la API de Track HS
+- `trackhs://docs/api` - Documentación completa de la API V2
 
 ## 🎯 Prompts Predefinidos
 
-- `check-today-reservations` - Revisar reservas de hoy (check-in/check-out)
-- `unit-availability` - Consultar disponibilidad de unidades
-- `guest-contact-info` - Información de contacto de huéspedes
-- `maintenance-summary` - Resumen de órdenes de mantenimiento
+- `check-today-reservations` - Revisar reservas de hoy usando API V2
+- `advanced-reservation-search` - Búsqueda avanzada con filtros V2
+- `reservation-analytics` - Análisis con métricas y KPIs
+- `guest-experience-analysis` - Análisis de experiencia del huésped
 - `financial-analysis` - Análisis financiero básico
 
 ## 🔧 Desarrollo
@@ -144,24 +126,17 @@ src/trackhs_mcp/
 │   ├── __init__.py
 │   ├── api_client.py      # Cliente HTTP con autenticación
 │   ├── auth.py           # Manejo de autenticación Basic Auth
-│   └── types.py          # Tipos base y configuración
+│   ├── types.py          # Tipos base y configuración
+│   ├── pagination.py      # Utilidad de paginación robusta
+│   ├── logging.py         # Sistema de logging avanzado
+│   ├── completion.py     # Utilidad de completion inteligente
+│   └── error_handling.py # Manejo robusto de errores
 ├── tools/
 │   ├── __init__.py
-│   ├── all_tools.py      # Registrador de todas las herramientas
-│   ├── get_contacts.py   # Herramienta de contactos
-│   ├── get_reservation.py # Herramienta de reservas
-│   ├── search_reservations.py # Búsqueda de reservas
-│   ├── get_units.py      # Herramienta de unidades
-│   ├── get_unit.py       # Herramienta de unidad específica
-│   ├── get_reviews.py    # Herramienta de reseñas
-│   ├── get_folios_collection.py # Herramienta de folios
-│   ├── get_ledger_accounts.py # Herramienta de cuentas contables
-│   ├── get_ledger_account.py # Herramienta de cuenta específica
-│   ├── get_reservation_notes.py # Herramienta de notas
-│   ├── get_nodes.py      # Herramienta de nodos
-│   ├── get_node.py       # Herramienta de nodo específico
-│   ├── get_maintenance_work_orders.py # Herramienta de mantenimiento
-│   └── README.md         # Documentación de herramientas
+│   ├── all_tools.py      # Registrador de la herramienta principal
+│   ├── search_reservations.py # ⭐ HERRAMIENTA PRINCIPAL V2
+│   ├── README.md         # Documentación de herramientas
+│   └── SEARCH_RESERVATIONS_V2.md # Documentación detallada
 ├── types/
 │   ├── __init__.py
 │   ├── base.py           # Tipos base

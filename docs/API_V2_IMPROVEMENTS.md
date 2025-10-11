@@ -26,11 +26,12 @@ Se han implementado mejoras significativas en el Track HS MCP Connector basadas 
 - `payment_plan` (planes de pago)
 - Y muchos más campos específicos de la API V2
 
-### 2. Herramienta Search Reservations Mejorada ✅
+### 2. Herramienta Search Reservations V2 ✅
 
 **Archivo:** `src/trackhs_mcp/tools/search_reservations.py`
 
-**Mejoras:**
+**Características:**
+- **Única herramienta principal** del sistema
 - Todos los parámetros de la API V2 implementados
 - Soporte para paginación estándar y scroll de Elasticsearch
 - Filtros de fecha con formato ISO 8601
@@ -152,25 +153,25 @@ Se han implementado mejoras significativas en el Track HS MCP Connector basadas 
 
 ## Beneficios de las Mejoras
 
-### 1. Compatibilidad Completa con API V2
+### 1. Enfoque Simplificado
+- **Una sola herramienta poderosa** que cubre todas las necesidades de búsqueda
+- **Simplicidad de uso** - no hay confusión sobre qué herramienta usar
+- **Mantenimiento reducido** - solo una herramienta que mantener
+
+### 2. Compatibilidad Completa con API V2
 - Todos los campos y parámetros de la API V2
 - Soporte para scroll de Elasticsearch
 - Filtros avanzados y ordenamiento
 
-### 2. Mejor Rendimiento
+### 3. Mejor Rendimiento
 - Paginación eficiente para grandes conjuntos
 - Cache inteligente para sugerencias
 - Logging optimizado con contexto
 
-### 3. Experiencia de Usuario Mejorada
+### 4. Experiencia de Usuario Mejorada
 - Autocompletado inteligente
 - Sugerencias contextuales
 - Manejo de errores informativo
-
-### 4. Mantenibilidad
-- Código bien documentado
-- Separación de responsabilidades
-- Testing y debugging mejorados
 
 ### 5. Escalabilidad
 - Manejo de grandes volúmenes de datos
