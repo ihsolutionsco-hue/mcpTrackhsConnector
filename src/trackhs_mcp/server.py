@@ -17,14 +17,16 @@ from fastmcp import FastMCP
 
 from trackhs_mcp.core.api_client import TrackHSApiClient
 from trackhs_mcp.core.types import TrackHSConfig
+from trackhs_mcp.config import TrackHSConfig as CentralizedConfig
 
-# Configurar cliente API
-config = TrackHSConfig(
-    base_url=os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api"),
-    username=os.getenv("TRACKHS_USERNAME", "test_user"),
-    password=os.getenv("TRACKHS_PASSWORD", "test_password"),
-    timeout=int(os.getenv("TRACKHS_TIMEOUT", "30"))
-)
+# Configurar cliente API usando configuración centralizada
+config = CentralizedConfig.from_env()
+
+# Validar que la URL sea la correcta
+if not config.validate_url():
+    print(f"ADVERTENCIA: URL configurada ({config.base_url}) no es la URL oficial de IHVM")
+    print(f"   URL oficial: {CentralizedConfig.DEFAULT_URL}")
+    print(f"   Configura TRACKHS_API_URL en .env si necesitas usar otra URL")
 
 # Crear cliente API
 api_client = TrackHSApiClient(config)
