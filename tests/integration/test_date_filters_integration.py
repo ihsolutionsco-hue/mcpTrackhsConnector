@@ -34,7 +34,7 @@ class TestDateFiltersIntegration:
             return client
     
     @pytest.mark.asyncio
-    async def test_search_reservations_with_date_filters_params_transformation(self, mock_api_client):
+    async def test_search_reservations_with_date_filters_params_transformation(self, mock_mcp, mock_api_client):
         """Test que valida que los parámetros de fecha se transforman correctamente"""
         
         # Mock de la respuesta del API
@@ -94,7 +94,7 @@ class TestDateFiltersIntegration:
         assert call_args[0][1] == "/v2/pms/reservations"  # endpoint
     
     @pytest.mark.asyncio
-    async def test_date_normalization_formats(self, mock_api_client):
+    async def test_date_normalization_formats(self, mock_mcp, mock_api_client):
         """Test que valida la normalización de diferentes formatos de fecha"""
         
         test_cases = [
@@ -147,7 +147,7 @@ class TestDateFiltersIntegration:
             assert captured_params["arrivalStart"] == expected_output, f"Failed for input: {input_date}"
     
     @pytest.mark.asyncio
-    async def test_all_date_parameters_included(self, mock_api_client):
+    async def test_all_date_parameters_included(self, mock_mcp, mock_api_client):
         """Test que valida que todos los parámetros de fecha se incluyen correctamente"""
         
         # Mock de respuesta
@@ -208,7 +208,7 @@ class TestDateFiltersIntegration:
             assert captured_params[param_name] == expected_value, f"Wrong value for {param_name}: {captured_params[param_name]} != {expected_value}"
     
     @pytest.mark.asyncio
-    async def test_url_construction_with_date_filters(self, mock_api_client):
+    async def test_url_construction_with_date_filters(self, mock_mcp, mock_api_client):
         """Test que valida que el URL se construye correctamente con filtros de fecha"""
         
         # Mock de respuesta

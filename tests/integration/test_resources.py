@@ -34,7 +34,7 @@ class TestResourcesIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_reservations_schema_resource(self, mock_api_client):
+    async def test_reservations_schema_resource(self, mock_mcp, mock_api_client):
         """Test recurso de esquema de reservas"""
         mock_mcp.resource = Mock()
         register_all_resources(mock_mcp, mock_api_client)
@@ -79,7 +79,7 @@ class TestResourcesIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_units_schema_resource(self, mock_api_client):
+    async def test_units_schema_resource(self, mock_mcp, mock_api_client):
         """Test recurso de esquema de unidades"""
         mock_mcp.resource = Mock()
         register_all_resources(mock_mcp, mock_api_client)
@@ -109,7 +109,7 @@ class TestResourcesIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_system_status_resource(self, mock_api_client):
+    async def test_system_status_resource(self, mock_mcp, mock_api_client):
         """Test recurso de estado del sistema"""
         mock_mcp.resource = Mock()
         register_all_resources(mock_mcp, mock_api_client)
@@ -139,7 +139,7 @@ class TestResourcesIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_api_documentation_resource(self, mock_api_client):
+    async def test_api_documentation_resource(self, mock_mcp, mock_api_client):
         """Test recurso de documentación de API"""
         mock_mcp.resource = Mock()
         register_all_resources(mock_mcp, mock_api_client)
@@ -172,7 +172,7 @@ class TestResourcesIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_api_v2_endpoints_resource(self, mock_api_client):
+    async def test_api_v2_endpoints_resource(self, mock_mcp, mock_api_client):
         """Test recurso de endpoints API V2"""
         mock_mcp.resource = Mock()
         register_all_resources(mock_mcp, mock_api_client)
@@ -201,7 +201,7 @@ class TestResourcesIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_api_v2_parameters_resource(self, mock_api_client):
+    async def test_api_v2_parameters_resource(self, mock_mcp, mock_api_client):
         """Test recurso de parámetros API V2"""
         mock_mcp.resource = Mock()
         register_all_resources(mock_mcp, mock_api_client)
@@ -238,7 +238,7 @@ class TestResourcesIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_api_v2_examples_resource(self, mock_api_client):
+    async def test_api_v2_examples_resource(self, mock_mcp, mock_api_client):
         """Test recurso de ejemplos API V2"""
         mock_mcp.resource = Mock()
         register_all_resources(mock_mcp, mock_api_client)
@@ -271,7 +271,7 @@ class TestResourcesIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_resources_with_api_client_calls(self, mock_api_client):
+    async def test_resources_with_api_client_calls(self, mock_mcp, mock_api_client):
         """Test recursos que hacen llamadas al API client"""
         # Configurar mock para llamadas específicas
         mock_api_client.get.return_value = {
@@ -284,7 +284,7 @@ class TestResourcesIntegration:
         
         # Test system_status que puede hacer llamadas al API
         system_status_func = None
-        for call in mcp.resource.call_args_list:
+        for call in mock_mcp.resource.call_args_list:
             if "system_status" in str(call):
                 system_status_func = call[0][1]
                 break

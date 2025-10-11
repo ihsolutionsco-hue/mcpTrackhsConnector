@@ -35,7 +35,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_check_today_reservations_prompt(self, mock_api_client):
+    async def test_check_today_reservations_prompt(self, mock_mcp, mock_api_client):
         """Test prompt de verificación de reservas del día"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -67,7 +67,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_check_today_reservations_prompt_with_date(self, mock_api_client):
+    async def test_check_today_reservations_prompt_with_date(self, mock_mcp, mock_api_client):
         """Test prompt de verificación de reservas con fecha específica"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -83,7 +83,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_unit_availability_prompt(self, mock_api_client):
+    async def test_unit_availability_prompt(self, mock_mcp, mock_api_client):
         """Test prompt de disponibilidad de unidades"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -107,7 +107,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_unit_availability_prompt_with_parameters(self, mock_api_client):
+    async def test_unit_availability_prompt_with_parameters(self, mock_mcp, mock_api_client):
         """Test prompt de disponibilidad con parámetros específicos"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -129,7 +129,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_guest_contact_info_prompt(self, mock_api_client):
+    async def test_guest_contact_info_prompt(self, mock_mcp, mock_api_client):
         """Test prompt de información de contacto de huéspedes"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -152,7 +152,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_guest_contact_info_prompt_with_contact_id(self, mock_api_client):
+    async def test_guest_contact_info_prompt_with_contact_id(self, mock_mcp, mock_api_client):
         """Test prompt de información de contacto con ID específico"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -168,7 +168,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_maintenance_summary_prompt(self, mock_api_client):
+    async def test_maintenance_summary_prompt(self, mock_mcp, mock_api_client):
         """Test prompt de resumen de mantenimiento"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -191,7 +191,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_maintenance_summary_prompt_with_date_range(self, mock_api_client):
+    async def test_maintenance_summary_prompt_with_date_range(self, mock_mcp, mock_api_client):
         """Test prompt de resumen de mantenimiento con rango de fechas"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -211,7 +211,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_financial_analysis_prompt(self, mock_api_client):
+    async def test_financial_analysis_prompt(self, mock_mcp, mock_api_client):
         """Test prompt de análisis financiero"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -235,7 +235,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_financial_analysis_prompt_with_period(self, mock_api_client):
+    async def test_financial_analysis_prompt_with_period(self, mock_mcp, mock_api_client):
         """Test prompt de análisis financiero con período específico"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -257,7 +257,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_advanced_reservation_search_prompt(self, mock_api_client):
+    async def test_advanced_reservation_search_prompt(self, mock_mcp, mock_api_client):
         """Test prompt de búsqueda avanzada de reservas"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -281,7 +281,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_advanced_reservation_search_prompt_with_criteria(self, mock_api_client):
+    async def test_advanced_reservation_search_prompt_with_criteria(self, mock_mcp, mock_api_client):
         """Test prompt de búsqueda avanzada con criterios específicos"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -307,7 +307,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_reservation_analytics_prompt(self, mock_api_client):
+    async def test_reservation_analytics_prompt(self, mock_mcp, mock_api_client):
         """Test prompt de análisis de reservas"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -331,7 +331,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_reservation_analytics_prompt_with_metrics(self, mock_api_client):
+    async def test_reservation_analytics_prompt_with_metrics(self, mock_mcp, mock_api_client):
         """Test prompt de análisis con métricas específicas"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -353,7 +353,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_guest_experience_analysis_prompt(self, mock_api_client):
+    async def test_guest_experience_analysis_prompt(self, mock_mcp, mock_api_client):
         """Test prompt de análisis de experiencia del huésped"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -377,7 +377,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_guest_experience_analysis_prompt_with_focus(self, mock_api_client):
+    async def test_guest_experience_analysis_prompt_with_focus(self, mock_mcp, mock_api_client):
         """Test prompt de análisis de experiencia con enfoque específico"""
         mock_mcp.prompt = Mock()
         register_all_prompts(mock_mcp, mock_api_client)
@@ -430,7 +430,7 @@ class TestPromptsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_prompts_with_api_client_calls(self, mock_api_client):
+    async def test_prompts_with_api_client_calls(self, mock_mcp, mock_api_client):
         """Test prompts que pueden hacer llamadas al API client"""
         # Configurar mock para llamadas específicas
         mock_api_client.get.return_value = {

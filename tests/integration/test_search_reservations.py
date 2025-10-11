@@ -64,7 +64,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_basic_success(self, mock_api_client, sample_search_response):
+    async def test_search_reservations_basic_success(self, mock_mcp, mock_api_client, sample_search_response):
         """Test búsqueda básica exitosa"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -88,7 +88,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_with_filters(self, mock_api_client, sample_search_response):
+    async def test_search_reservations_with_filters(self, mock_mcp, mock_api_client, sample_search_response):
         """Test búsqueda con filtros"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -111,7 +111,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_with_date_filters(self, mock_api_client, sample_search_response):
+    async def test_search_reservations_with_date_filters(self, mock_mcp, mock_api_client, sample_search_response):
         """Test búsqueda con filtros de fecha"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -134,7 +134,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_with_scroll(self, mock_api_client, sample_search_response):
+    async def test_search_reservations_with_scroll(self, mock_mcp, mock_api_client, sample_search_response):
         """Test búsqueda con scroll"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -154,7 +154,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_with_multiple_ids(self, mock_api_client, sample_search_response):
+    async def test_search_reservations_with_multiple_ids(self, mock_mcp, mock_api_client, sample_search_response):
         """Test búsqueda con múltiples IDs"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -176,7 +176,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_validation_error_invalid_page(self, mock_api_client):
+    async def test_search_reservations_validation_error_invalid_page(self, mock_mcp, mock_api_client):
         """Test error de validación con página inválida"""
         mock_mcp.tool = Mock()
         register_search_reservations(mock_mcp, mock_api_client)
@@ -188,7 +188,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_validation_error_invalid_size(self, mock_api_client):
+    async def test_search_reservations_validation_error_invalid_size(self, mock_mcp, mock_api_client):
         """Test error de validación con tamaño inválido"""
         mock_mcp.tool = Mock()
         register_search_reservations(mock_mcp, mock_api_client)
@@ -200,7 +200,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_validation_error_size_too_large(self, mock_api_client):
+    async def test_search_reservations_validation_error_size_too_large(self, mock_mcp, mock_api_client):
         """Test error de validación con tamaño demasiado grande"""
         mock_mcp.tool = Mock()
         register_search_reservations(mock_mcp, mock_api_client)
@@ -212,7 +212,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_validation_error_invalid_date(self, mock_api_client):
+    async def test_search_reservations_validation_error_invalid_date(self, mock_mcp, mock_api_client):
         """Test error de validación con fecha inválida"""
         mock_mcp.tool = Mock()
         register_search_reservations(mock_mcp, mock_api_client)
@@ -228,7 +228,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_api_error(self, mock_api_client):
+    async def test_search_reservations_api_error(self, mock_mcp, mock_api_client):
         """Test error de API"""
         mock_api_client.get.side_effect = Exception("API Error")
         
@@ -242,7 +242,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_all_parameters(self, mock_api_client, sample_search_response):
+    async def test_search_reservations_all_parameters(self, mock_mcp, mock_api_client, sample_search_response):
         """Test búsqueda con todos los parámetros"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -318,7 +318,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_endpoint_construction(self, mock_api_client, sample_search_response):
+    async def test_search_reservations_endpoint_construction(self, mock_mcp, mock_api_client, sample_search_response):
         """Test construcción del endpoint con parámetros"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -349,7 +349,7 @@ class TestSearchReservationsIntegration:
     
     @pytest.mark.integration
     @pytest.mark.asyncio
-    async def test_search_reservations_empty_response(self, mock_api_client):
+    async def test_search_reservations_empty_response(self, mock_mcp, mock_api_client):
         """Test respuesta vacía"""
         empty_response = {
             "_embedded": {"reservations": []},

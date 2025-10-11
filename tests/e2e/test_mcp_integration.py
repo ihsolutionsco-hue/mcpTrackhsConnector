@@ -98,7 +98,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_complete_mcp_workflow(self, mock_api_client, sample_search_response):
+    async def test_complete_mcp_workflow(self, mock_mcp, mock_api_client, sample_search_response):
         """Test flujo completo de trabajo MCP"""
         # Configurar mock del API client
         mock_api_client.get.return_value = sample_search_response
@@ -131,7 +131,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_tool_execution_with_error_handling(self, mock_api_client):
+    async def test_tool_execution_with_error_handling(self, mock_mcp, mock_api_client):
         """Test ejecución de herramienta con manejo de errores"""
         # Configurar error en API
         mock_api_client.get.side_effect = Exception("API Error")
@@ -150,7 +150,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_resource_access(self, mock_api_client):
+    async def test_resource_access(self, mock_mcp, mock_api_client):
         """Test acceso a recursos"""
         mcp = Mock()
         mock_mcp.resource = Mock()
@@ -168,7 +168,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_prompt_usage(self, mock_api_client):
+    async def test_prompt_usage(self, mock_mcp, mock_api_client):
         """Test uso de prompts"""
         mcp = Mock()
         mock_mcp.prompt = Mock()
@@ -188,7 +188,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_complete_search_workflow(self, mock_api_client, sample_search_response):
+    async def test_complete_search_workflow(self, mock_mcp, mock_api_client, sample_search_response):
         """Test flujo completo de búsqueda"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -217,7 +217,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_pagination_workflow(self, mock_api_client):
+    async def test_pagination_workflow(self, mock_mcp, mock_api_client):
         """Test flujo de paginación"""
         # Configurar respuestas de paginación
         page1_response = {
@@ -271,7 +271,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_error_recovery_workflow(self, mock_api_client):
+    async def test_error_recovery_workflow(self, mock_mcp, mock_api_client):
         """Test flujo de recuperación de errores"""
         # Configurar error seguido de éxito
         mock_api_client.get.side_effect = [
@@ -303,7 +303,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_concurrent_requests(self, mock_api_client, sample_search_response):
+    async def test_concurrent_requests(self, mock_mcp, mock_api_client, sample_search_response):
         """Test requests concurrentes"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -333,7 +333,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_complete_mcp_ecosystem(self, mock_api_client, sample_search_response):
+    async def test_complete_mcp_ecosystem(self, mock_mcp, mock_api_client, sample_search_response):
         """Test ecosistema MCP completo"""
         mock_api_client.get.return_value = sample_search_response
         
@@ -375,7 +375,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_validation_workflow(self, mock_api_client):
+    async def test_validation_workflow(self, mock_mcp, mock_api_client):
         """Test flujo de validación"""
         mcp = Mock()
         mock_mcp.tool = Mock()
@@ -397,7 +397,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_performance_workflow(self, mock_api_client, sample_search_response):
+    async def test_performance_workflow(self, mock_mcp, mock_api_client, sample_search_response):
         """Test flujo de rendimiento"""
         import time
         
@@ -424,7 +424,7 @@ class TestMCPIntegrationE2E:
     
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_memory_usage_workflow(self, mock_api_client, sample_search_response):
+    async def test_memory_usage_workflow(self, mock_mcp, mock_api_client, sample_search_response):
         """Test flujo de uso de memoria"""
         import psutil
         import os
