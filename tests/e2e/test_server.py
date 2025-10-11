@@ -57,18 +57,21 @@ class TestServerE2E:
         assert mcp is not None
 
         # Verificar tipos básicos
-        assert hasattr(config, 'base_url')
-        assert hasattr(config, 'username')
-        assert hasattr(config, 'password')
-        assert hasattr(config, 'timeout')
+        assert hasattr(config, "base_url")
+        assert hasattr(config, "username")
+        assert hasattr(config, "password")
+        assert hasattr(config, "timeout")
 
     @pytest.mark.e2e
     def test_register_all_components(self, mock_mcp, mock_api_client):
         """Test registro de todos los componentes"""
-        with patch("src.trackhs_mcp.infrastructure.mcp.server.register_all_components") as mock_register:
+        with patch(
+            "src.trackhs_mcp.infrastructure.mcp.server.register_all_components"
+        ) as mock_register:
             from src.trackhs_mcp.infrastructure.mcp.server import (
                 register_all_components,
             )
+
             register_all_components(mock_mcp, mock_api_client)
 
             # Verificar que se llamó la función de registro
@@ -129,7 +132,9 @@ class TestServerE2E:
             assert mock_mcp.prompt.call_count >= 8
 
     @pytest.mark.e2e
-    @pytest.mark.skip(reason="Test requiere ejecutar servidor real, usar test de integración")
+    @pytest.mark.skip(
+        reason="Test requiere ejecutar servidor real, usar test de integración"
+    )
     def test_main_function(self):
         """Test función main"""
         # Este test se salta porque intenta ejecutar el servidor real
@@ -143,8 +148,8 @@ class TestServerE2E:
         from src.trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 
         # Verificar que la clase existe y tiene el método from_env
-        assert hasattr(TrackHSConfig, 'from_env')
-        assert callable(getattr(TrackHSConfig, 'from_env'))
+        assert hasattr(TrackHSConfig, "from_env")
+        assert callable(getattr(TrackHSConfig, "from_env"))
 
     @pytest.mark.e2e
     def test_server_error_handling(self):
@@ -185,13 +190,16 @@ class TestServerE2E:
         # Test simplificado: verificar que dotenv se puede importar
         try:
             from dotenv import load_dotenv
+
             assert callable(load_dotenv)
         except ImportError:
             pytest.fail("dotenv no está disponible")
 
     @pytest.mark.e2e
     @pytest.mark.asyncio
-    async def test_server_component_registration_flow(self, mock_config, mock_api_client):
+    async def test_server_component_registration_flow(
+        self, mock_config, mock_api_client
+    ):
         """Test flujo completo de registro de componentes"""
         with (
             patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
@@ -259,10 +267,10 @@ class TestServerE2E:
         assert config is not None
 
         # Verificar que tiene los campos necesarios
-        assert hasattr(config, 'base_url')
-        assert hasattr(config, 'username')
-        assert hasattr(config, 'password')
-        assert hasattr(config, 'timeout')
+        assert hasattr(config, "base_url")
+        assert hasattr(config, "username")
+        assert hasattr(config, "password")
+        assert hasattr(config, "timeout")
 
     @pytest.mark.e2e
     def test_server_api_client_initialization(self, mock_config):
@@ -274,10 +282,10 @@ class TestServerE2E:
         assert api_client is not None
 
         # Verificar que tiene métodos básicos
-        assert hasattr(api_client, 'get')
-        assert hasattr(api_client, 'post')
-        assert hasattr(api_client, 'put')
-        assert hasattr(api_client, 'delete')
+        assert hasattr(api_client, "get")
+        assert hasattr(api_client, "post")
+        assert hasattr(api_client, "put")
+        assert hasattr(api_client, "delete")
 
     @pytest.mark.e2e
     def test_server_fastmcp_initialization(self):
@@ -289,7 +297,7 @@ class TestServerE2E:
         assert mcp is not None
 
         # Verificar que tiene métodos básicos de FastMCP
-        assert hasattr(mcp, 'tool')
-        assert hasattr(mcp, 'resource')
-        assert hasattr(mcp, 'prompt')
-        assert hasattr(mcp, 'run')
+        assert hasattr(mcp, "tool")
+        assert hasattr(mcp, "resource")
+        assert hasattr(mcp, "prompt")
+        assert hasattr(mcp, "run")
