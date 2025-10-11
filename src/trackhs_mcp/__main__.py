@@ -58,5 +58,21 @@ def main():
     mcp.run()
 
 
+# Crear instancia del servidor para FastMCP Cloud
+try:
+    # Crear dependencias
+    config, api_client = create_dependencies()
+    
+    # Crear servidor MCP
+    mcp = FastMCP("TrackHS MCP Server")
+    
+    # Registrar componentes con inyección de dependencias
+    register_all_components(mcp, api_client)
+except Exception as e:
+    # Si hay error en la inicialización, crear un servidor vacío
+    print(f"Error inicializando servidor: {e}")
+    mcp = FastMCP("TrackHS MCP Server")
+
+
 if __name__ == "__main__":
     main()

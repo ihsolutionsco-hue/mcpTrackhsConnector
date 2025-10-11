@@ -27,7 +27,9 @@ class TestMCPIntegrationE2E:
     @pytest.fixture
     def mock_api_client(self, mock_config):
         """API client mock"""
-        with patch("src.trackhs_mcp.infrastructure.adapters.trackhs_api_client.TrackHSAuth") as mock_auth:
+        with patch(
+            "src.trackhs_mcp.infrastructure.adapters.trackhs_api_client.TrackHSAuth"
+        ) as mock_auth:
             mock_auth.return_value.validate_credentials.return_value = True
             mock_auth.return_value.get_headers.return_value = {
                 "Authorization": "Basic dGVzdF91c2VyOnRlc3RfcGFzc3dvcmQ=",
