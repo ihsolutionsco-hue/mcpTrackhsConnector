@@ -25,17 +25,17 @@ class TestResourcesIntegration:
         mcp = Mock()
         mcp.resource = Mock()
         return mcp
-    
+
     def setup_resource_mock(self, mock_mcp):
         """Configura un mock que funcione como decorador de resources"""
         registered_functions = {}
-        
+
         def mock_resource_decorator(name):
             def decorator(func):
                 registered_functions[name] = func
                 return func
             return decorator
-        
+
         mock_mcp.resource = mock_resource_decorator
         return registered_functions
 
