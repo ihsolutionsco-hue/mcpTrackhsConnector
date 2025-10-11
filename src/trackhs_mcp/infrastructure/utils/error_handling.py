@@ -43,6 +43,7 @@ class ApiError(TrackHSError):
         message: str,
         status_code: Optional[int] = None,
         endpoint: Optional[str] = None,
+        status_text: Optional[str] = None,
         **kwargs,
     ):
         context = kwargs.get("context", {})
@@ -50,6 +51,10 @@ class ApiError(TrackHSError):
             context["status_code"] = status_code
         if endpoint:
             context["endpoint"] = endpoint
+        
+        # Agregar atributos para compatibilidad con tests
+        self.status = status_code
+        self.status_text = status_text
 
         super().__init__(message, ErrorSeverity.HIGH, context)
 
