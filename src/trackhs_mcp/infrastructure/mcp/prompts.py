@@ -19,6 +19,7 @@ def register_all_prompts(mcp, api_client: ApiClientPort):
     async def check_today_reservations(date: Optional[str] = None) -> Dict[str, Any]:
         """Revisar todas las reservas que llegan o salen hoy usando API V2"""
         from datetime import datetime, timezone
+
         target_date = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
         return {
             "messages": [

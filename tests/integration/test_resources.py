@@ -34,6 +34,7 @@ class TestResourcesIntegration:
             def decorator(func):
                 registered_functions[name] = func
                 return func
+
             return decorator
 
         mock_mcp.resource = mock_resource_decorator

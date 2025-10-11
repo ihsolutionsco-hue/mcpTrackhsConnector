@@ -35,6 +35,7 @@ class TestPromptsIntegration:
             def decorator(func):
                 registered_functions[name] = func
                 return func
+
             return decorator
 
         mock_mcp.prompt = mock_prompt_decorator
@@ -195,8 +196,6 @@ class TestPromptsIntegration:
 
         register_all_prompts(mock_mcp, mock_api_client)
 
-
-
         # Obtener la función registrada
 
         prompt_func = registered_functions["maintenance-summary"]
@@ -224,8 +223,6 @@ class TestPromptsIntegration:
 
         register_all_prompts(mock_mcp, mock_api_client)
 
-
-
         # Obtener la función registrada
 
         prompt_func = registered_functions["maintenance-summary"]
@@ -245,8 +242,6 @@ class TestPromptsIntegration:
         registered_functions = self.setup_prompt_mock(mock_mcp)
 
         register_all_prompts(mock_mcp, mock_api_client)
-
-
 
         # Obtener la función registrada
 
@@ -276,8 +271,6 @@ class TestPromptsIntegration:
 
         register_all_prompts(mock_mcp, mock_api_client)
 
-
-
         # Obtener la función registrada
 
         prompt_func = registered_functions["financial-analysis"]
@@ -300,8 +293,6 @@ class TestPromptsIntegration:
         registered_functions = self.setup_prompt_mock(mock_mcp)
 
         register_all_prompts(mock_mcp, mock_api_client)
-
-
 
         # Obtener la función registrada
 
@@ -330,8 +321,6 @@ class TestPromptsIntegration:
         registered_functions = self.setup_prompt_mock(mock_mcp)
 
         register_all_prompts(mock_mcp, mock_api_client)
-
-
 
         # Obtener la función registrada
 
@@ -362,8 +351,6 @@ class TestPromptsIntegration:
 
         register_all_prompts(mock_mcp, mock_api_client)
 
-
-
         # Obtener la función registrada
 
         prompt_func = registered_functions["reservation-analytics"]
@@ -392,8 +379,6 @@ class TestPromptsIntegration:
 
         register_all_prompts(mock_mcp, mock_api_client)
 
-
-
         # Obtener la función registrada
 
         prompt_func = registered_functions["reservation-analytics"]
@@ -417,8 +402,6 @@ class TestPromptsIntegration:
         registered_functions = self.setup_prompt_mock(mock_mcp)
 
         register_all_prompts(mock_mcp, mock_api_client)
-
-
 
         # Obtener la función registrada
 
@@ -447,8 +430,6 @@ class TestPromptsIntegration:
         registered_functions = self.setup_prompt_mock(mock_mcp)
 
         register_all_prompts(mock_mcp, mock_api_client)
-
-
 
         # Obtener la función registrada
 

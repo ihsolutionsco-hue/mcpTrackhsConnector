@@ -27,7 +27,10 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                 },
                 "currency": {"type": "string", "description": "Moneda de la reserva"},
                 "unit_id": {"type": "integer", "description": "ID de la unidad"},
-                "unitId": {"type": "integer", "description": "ID de la unidad (camelCase)"},
+                "unitId": {
+                    "type": "integer",
+                    "description": "ID de la unidad (camelCase)",
+                },
                 "is_unit_locked": {
                     "type": "boolean",
                     "description": "Si la unidad está bloqueada",
