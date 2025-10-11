@@ -1,6 +1,6 @@
 """
-Herramienta MCP para buscar reservas en Track HS API V2
-Basado en la especificación completa de la API Search Reservations V2
+Herramienta MCP para buscar reservas en Track HS API V1
+Basado en la especificación completa de la API Search Reservations V1
 """
 
 from typing import List, Literal, Optional, Union
@@ -9,18 +9,18 @@ from ..core.api_client import TrackHSApiClient
 from ..core.error_handling import ValidationError, error_handler
 
 
-def register_search_reservations(mcp, api_client: TrackHSApiClient):
-    """Registra la herramienta search_reservations"""
+def register_search_reservations_v1(mcp, api_client: TrackHSApiClient):
+    """Registra la herramienta search_reservations_v1"""
 
     @mcp.tool
-    @error_handler("search_reservations")
-    async def search_reservations(
+    @error_handler("search_reservations_v1")
+    async def search_reservations_v1(
         page: int = 1,
         size: int = 10,
         sort_column: Literal[
             "name",
             "status",
-            "altCon",
+            "altConf",
             "agreementStatus",
             "type",
             "guest",
@@ -57,14 +57,14 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         checkin_office_id: Optional[int] = None,
     ):
         """
-        Search reservations in Track HS API V2 with comprehensive filtering options.
+        Search reservations in Track HS API V1 with comprehensive filtering options.
 
-        This MCP tool provides advanced reservation search capabilities with full API V2
+        This MCP tool provides advanced reservation search capabilities with full API V1
         compatibility, including pagination, filtering, sorting, and scroll support for
         large datasets.
 
         **Key Features:**
-        - ✅ Full API V2 compatibility with all 25+ parameters
+        - ✅ Full API V1 compatibility with all 25+ parameters
         - ✅ Advanced pagination (standard + Elasticsearch scroll)
         - ✅ Comprehensive filtering (dates, IDs, status, etc.)
         - ✅ Flexible sorting options
@@ -74,34 +74,34 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         **Examples:**
 
         # Basic search
-        search_reservations(page=1, size=10)
+        search_reservations_v1(page=1, size=10)
 
         # Date range search (múltiples formatos soportados)
-        search_reservations(
+        search_reservations_v1(
             arrival_start="2024-01-01",  # Solo fecha
             arrival_end="2024-01-31T23:59:59Z",  # Fecha con tiempo
             status=["Confirmed", "Checked In"]
         )
 
         # Date range search (formato ISO completo)
-        search_reservations(
+        search_reservations_v1(
             arrival_start="2024-01-01T00:00:00Z",
             arrival_end="2024-01-31T23:59:59Z",
             status=["Confirmed", "Checked In"]
         )
 
         # Large dataset with scroll
-        search_reservations(scroll=1, size=1000)
+        search_reservations_v1(scroll=1, size=1000)
 
         # Multi-ID filtering
-        search_reservations(
+        search_reservations_v1(
             node_id="1,2,3",
             unit_id="10,20,30",
             status=["Confirmed"]
         )
 
         # Status filtering
-        search_reservations(
+        search_reservations_v1(
             status=["Hold", "Confirmed"],
             in_house_today=1
         )
@@ -141,13 +141,13 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         and pagination information.
 
         **Error Handling:**
-        - Validates all parameters according to API V2 specification
+        - Validates all parameters according to API V1 specification
         - Handles API errors (401, 403, 500) with descriptive messages
         - Validates ISO 8601 date formats strictly
         - Enforces 10k total results limit
         - Disables sorting when using scroll
         """
-        # Validar parámetros básicos según documentación API V2
+        # Validar parámetros básicos según documentación API V1
         if page < 0:
             raise ValidationError("Page must be >= 0", "page")
         if size < 1:
@@ -159,7 +159,7 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
                 "Total results (page * size) must be <= 10,000", "page"
             )
 
-        # Validar parámetro scroll según documentación API V2
+        # Validar parámetro scroll según documentación API V1
         if scroll is not None:
             if isinstance(scroll, int) and scroll != 1:
                 raise ValidationError("Scroll must start with 1", "scroll")
@@ -169,8 +169,8 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             # Cuando se usa scroll, el sorting se deshabilita
             if sort_column != "name" or sort_direction != "asc":
                 raise ValidationError(
-                    "When using scroll, \
-     sorting is disabled. Use default sort_column='name' and sort_direction='asc'",
+                    "When using scroll, sorting is disabled. Use default "
+                    "sort_column='name' and sort_direction='asc'",
                     "scroll",
                 )
 
@@ -257,13 +257,14 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         if checkin_office_id:
             query_params["checkinOfficeId"] = checkin_office_id
 
-        endpoint = "ihmvacations.trackhs.com/v2/pms/reservations"
+        # Usar endpoint V1
+        endpoint = "/pms/reservations"
 
         # Logging detallado para debugging de filtros de fecha
         import logging
 
         logger = logging.getLogger(__name__)
-        logger.info(f"Search reservations query params: {query_params}")
+        logger.info(f"Search reservations V1 query params: {query_params}")
 
         # Logging específico para parámetros de fecha
         date_params = {
@@ -413,43 +414,6 @@ def _normalize_date_format(date_string: str) -> str:
         return date_string
 
 
-def _normalize_date_format_flexible(date_string: str) -> str:
-    """Normaliza fecha con múltiples formatos para máxima compatibilidad"""
-    try:
-        # Si es solo fecha, probar múltiples formatos
-        if len(date_string) == 10 and date_string.count("-") == 2:
-            # Formato 1: Con Z (UTC)
-            format1 = f"{date_string}T00:00:00Z"
-            # Formato 2: Con offset UTC (no usado)
-            # format2 = f"{date_string}T00:00:00+00:00"
-            # Formato 3: Sin timezone (no usado)
-            # format3 = f"{date_string}T00:00:00"
-
-            # Por defecto usar formato 1 (con Z)
-            return format1
-
-        # Si tiene tiempo pero no timezone, probar múltiples formatos
-        if "T" in date_string and not (
-            date_string.endswith("Z") or "+" in date_string or "-" in date_string[-6:]
-        ):
-            # Formato 1: Con Z
-            format1 = f"{date_string}Z"
-            # Formato 2: Con offset UTC (no usado)
-            # format2 = f"{date_string}+00:00"
-            # Formato 3: Sin timezone (original) (no usado)
-            # format3 = date_string
-
-            # Por defecto usar formato 1 (con Z)
-            return format1
-
-        # Si ya tiene formato correcto, devolverlo
-        return date_string
-
-    except Exception:
-        # Si hay error, devolver el string original
-        return date_string
-
-
 def _parse_id_string(id_string: Union[str, int]) -> Union[int, List[int]]:
     """
     Parsea un string de ID que puede ser:
@@ -495,19 +459,6 @@ def _parse_id_string(id_string: Union[str, int]) -> Union[int, List[int]]:
         return int(id_string)
     except ValueError:
         raise ValidationError(f"Invalid ID format: {id_string}", "id")
-
-
-def _format_id_param(param_value: Union[int, List[int]]) -> Union[int, List[int]]:
-    """
-    Formatea parámetros de ID para la API.
-    Asegura que los enteros se mantengan como enteros y los arrays como arrays.
-    """
-    if isinstance(param_value, list):
-        # Asegurar que todos los elementos sean enteros
-        return [int(x) for x in param_value]
-    else:
-        # Asegurar que sea entero
-        return int(param_value)
 
 
 def _format_status_param(status_value: Union[str, List[str]]) -> Union[str, List[str]]:
