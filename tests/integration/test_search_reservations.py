@@ -65,22 +65,18 @@ class TestSearchReservationsIntegration:
                                 "phone": "+1234567890",
                                 "nationality": "US",
                                 "document_type": "passport",
-                                "document_number": "A1234567"
+                                "document_number": "A1234567",
                             }
                         ],
                         "security_deposit": {
                             "amount": "100.00",
                             "currency": "USD",
-                            "status": "pending"
+                            "status": "pending",
                         },
                         "updated_at": "2024-01-15T10:00:00Z",
                         "created_at": "2024-01-15T10:00:00Z",
                         "booked_at": "2024-01-15T10:00:00Z",
-                        "guest_breakdown": {
-                            "adults": 2,
-                            "children": 0,
-                            "infants": 0
-                        },
+                        "guest_breakdown": {"adults": 2, "children": 0, "infants": 0},
                         "contact_id": 1,
                         "channel_id": 1,
                         "folio_id": 1,
@@ -99,11 +95,11 @@ class TestSearchReservationsIntegration:
                         "payment_plan": {
                             "id": 1,
                             "name": "Standard",
-                            "installments": 1
+                            "installments": 1,
                         },
                         "travel_insurance_products": [],
                         "_embedded": {},
-                        "_links": {}
+                        "_links": {},
                     }
                 ]
             },
