@@ -111,7 +111,7 @@ class TestMCPIntegrationE2E:
         # Registrar todos los componentes
         from src.trackhs_mcp.prompts import register_all_prompts
         from src.trackhs_mcp.resources import register_all_resources
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
         register_all_resources(mock_mcp, mock_api_client)
@@ -139,7 +139,7 @@ class TestMCPIntegrationE2E:
         mcp = Mock()
         mock_mcp.tool = Mock()
 
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
 
@@ -200,7 +200,7 @@ class TestMCPIntegrationE2E:
         mcp = Mock()
         mock_mcp.tool = Mock()
 
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
 
@@ -257,7 +257,7 @@ class TestMCPIntegrationE2E:
         mcp = Mock()
         mock_mcp.tool = Mock()
 
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
 
@@ -295,7 +295,7 @@ class TestMCPIntegrationE2E:
         mcp = Mock()
         mock_mcp.tool = Mock()
 
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
 
@@ -320,7 +320,7 @@ class TestMCPIntegrationE2E:
         mcp = Mock()
         mock_mcp.tool = Mock()
 
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
 
@@ -356,7 +356,7 @@ class TestMCPIntegrationE2E:
         # Registrar todos los componentes
         from src.trackhs_mcp.prompts import register_all_prompts
         from src.trackhs_mcp.resources import register_all_resources
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
         register_all_resources(mock_mcp, mock_api_client)
@@ -390,7 +390,7 @@ class TestMCPIntegrationE2E:
         mcp = Mock()
         mock_mcp.tool = Mock()
 
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
 
@@ -421,7 +421,7 @@ class TestMCPIntegrationE2E:
         mcp = Mock()
         mock_mcp.tool = Mock()
 
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
 
@@ -457,7 +457,7 @@ class TestMCPIntegrationE2E:
         mcp = Mock()
         mock_mcp.tool = Mock()
 
-        from src.trackhs_mcp.tools import register_all_tools
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         register_all_tools(mock_mcp, mock_api_client)
 

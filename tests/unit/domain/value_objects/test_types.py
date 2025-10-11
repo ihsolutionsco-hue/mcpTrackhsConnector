@@ -7,12 +7,12 @@ from pydantic import ValidationError
 
 from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
 from src.trackhs_mcp.domain.value_objects.request import (
-    ApiError,
     PaginationParams,
     RequestOptions,
     SearchParams,
     TrackHSResponse,
 )
+from src.trackhs_mcp.infrastructure.utils.error_handling import ApiError
 
 
 class TestTrackHSConfig:
