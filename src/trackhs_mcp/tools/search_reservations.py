@@ -359,22 +359,45 @@ def _is_valid_date_format(date_string: str) -> bool:
 
 
 def _normalize_date_format(date_string: str) -> str:
-    """Normaliza formato de fecha para la API de TrackHS - CORREGIDO"""
+    """Normaliza formato de fecha para la API de TrackHS - CORREGIDO FINAL"""
     try:
-        # Si es solo fecha, mantenerla como está (la API espera formato simple)
+        # Si es solo fecha, agregar tiempo sin timezone
         if len(date_string) == 10 and date_string.count("-") == 2:
-            # Solo fecha: 2025-01-01 -> 2025-01-01 (sin normalización)
-            return date_string
+            # Solo fecha: 2025-01-01 -> 2025-01-01T00:00:00
+            return f"{date_string}T00:00:00"
 
-        # Si tiene tiempo con T, extraer solo la fecha
+        # Si tiene tiempo con timezone, remover timezone
         if "T" in date_string:
-            # Extraer solo la parte de fecha: 2025-01-01T00:00:00Z -> 2025-01-01
-            return date_string.split("T")[0]
+            if date_string.endswith("Z") or date_string.endswith("z"):
+                # Remover Z o z: 2025-01-01T00:00:00Z -> 2025-01-01T00:00:00
+                return date_string[:-1]
+            elif "+" in date_string:
+                # Remover offset positivo: 2025-01-01T00:00:00+00:00 -> 2025-01-01T00:00:00
+                return date_string.split("+")[0]
+            elif "-" in date_string and len(date_string) > 19:
+                # Remover offset negativo: 2025-01-01T00:00:00-05:00 -> 2025-01-01T00:00:00
+                # Buscar el último - que esté después de la T
+                t_pos = date_string.find("T")
+                if t_pos > 0:
+                    # Buscar el último - después de la T
+                    last_dash = date_string.rfind("-")
+                    # Si el - está en las últimas 6 posiciones, es un offset
+                    if last_dash > t_pos and last_dash >= len(date_string) - 6:
+                        # Es un offset, removerlo
+                        return date_string[:last_dash]
+                    else:
+                        # Es parte de la fecha, no un offset
+                        return date_string
+                else:
+                    return date_string
+            else:
+                # Ya tiene formato correcto: 2025-01-01T00:00:00
+                return date_string
 
-        # Si tiene tiempo con espacio, extraer solo la fecha
+        # Si tiene tiempo con espacio, convertir a formato T
         if " " in date_string and len(date_string) > 10:
-            # Extraer solo la parte de fecha: 2025-01-01 00:00:00 -> 2025-01-01
-            return date_string.split(" ")[0]
+            # Convertir espacio a T: 2025-01-01 00:00:00 -> 2025-01-01T00:00:00
+            return date_string.replace(" ", "T")
 
         # Si ya tiene formato correcto, devolverlo
         return date_string
