@@ -5,9 +5,9 @@ Basado en la especificación completa de la API Search Reservations V1
 
 from typing import List, Literal, Optional, Union
 
-from trackhs_mcp.application.ports.api_client_port import ApiClientPort
-from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
-from trackhs_mcp.infrastructure.utils.error_handling import error_handler
+from ...application.ports.api_client_port import ApiClientPort
+from ...domain.exceptions.api_exceptions import ValidationError
+from ..utils.error_handling import error_handler
 
 
 def register_search_reservations_v1(mcp, api_client: ApiClientPort):

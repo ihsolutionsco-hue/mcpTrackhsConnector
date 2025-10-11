@@ -27,7 +27,7 @@ class TestMCPIntegrationE2E:
     @pytest.fixture
     def mock_api_client(self, mock_config):
         """API client mock"""
-        with patch("src.trackhs_mcp.core.api_client.TrackHSAuth") as mock_auth:
+        with patch("src.trackhs_mcp.infrastructure.adapters.trackhs_api_client.TrackHSAuth") as mock_auth:
             mock_auth.return_value.validate_credentials.return_value = True
             mock_auth.return_value.get_headers.return_value = {
                 "Authorization": "Basic dGVzdF91c2VyOnRlc3RfcGFzc3dvcmQ=",
@@ -110,8 +110,8 @@ class TestMCPIntegrationE2E:
 
         # Registrar todos los componentes
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
-        from src.trackhs_mcp.prompts import register_all_prompts
-        from src.trackhs_mcp.resources import register_all_resources
+        from src.trackhs_mcp.infrastructure.mcp.prompts import register_all_prompts
+        from src.trackhs_mcp.infrastructure.mcp.resources import register_all_resources
 
         register_all_tools(mock_mcp, mock_api_client)
         register_all_resources(mock_mcp, mock_api_client)
@@ -156,7 +156,7 @@ class TestMCPIntegrationE2E:
         # mcp = Mock()  # Variable not used
         mock_mcp.resource = Mock()
 
-        from src.trackhs_mcp.resources import register_all_resources
+        from src.trackhs_mcp.infrastructure.mcp.resources import register_all_resources
 
         register_all_resources(mock_mcp, mock_api_client)
 
@@ -175,7 +175,7 @@ class TestMCPIntegrationE2E:
         # mcp = Mock()  # Variable not used
         mock_mcp.prompt = Mock()
 
-        from src.trackhs_mcp.prompts import register_all_prompts
+        from src.trackhs_mcp.infrastructure.mcp.prompts import register_all_prompts
 
         register_all_prompts(mock_mcp, mock_api_client)
 
@@ -355,8 +355,8 @@ class TestMCPIntegrationE2E:
 
         # Registrar todos los componentes
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
-        from src.trackhs_mcp.prompts import register_all_prompts
-        from src.trackhs_mcp.resources import register_all_resources
+        from src.trackhs_mcp.infrastructure.mcp.prompts import register_all_prompts
+        from src.trackhs_mcp.infrastructure.mcp.resources import register_all_resources
 
         register_all_tools(mock_mcp, mock_api_client)
         register_all_resources(mock_mcp, mock_api_client)

@@ -8,11 +8,11 @@ from typing import Any, Dict, Optional, TypeVar
 
 import httpx
 
-from trackhs_mcp.application.ports.api_client_port import ApiClientPort
-from trackhs_mcp.domain.value_objects.config import TrackHSConfig
-from trackhs_mcp.domain.value_objects.request import RequestOptions
-from trackhs_mcp.infrastructure.utils.auth import TrackHSAuth
-from trackhs_mcp.infrastructure.utils.error_handling import (
+from ...application.ports.api_client_port import ApiClientPort
+from ...domain.value_objects.config import TrackHSConfig
+from ...domain.value_objects.request import RequestOptions
+from ..utils.auth import TrackHSAuth
+from ..utils.error_handling import (
     ApiError,
     AuthenticationError,
     NetworkError,

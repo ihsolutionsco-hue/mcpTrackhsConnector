@@ -5,7 +5,7 @@ Configuración centralizada para TrackHS MCP Connector
 import os
 from typing import ClassVar
 
-from trackhs_mcp.domain.value_objects.config import TrackHSConfig as BaseTrackHSConfig
+from ...domain.value_objects.config import TrackHSConfig as BaseTrackHSConfig
 
 
 class TrackHSConfig(BaseTrackHSConfig):

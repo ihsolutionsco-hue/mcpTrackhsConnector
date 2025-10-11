@@ -3,7 +3,7 @@ Registrador de herramientas MCP para Track HS API V1 y V2
 Registra las herramientas search_reservations V1 y V2
 """
 
-from trackhs_mcp.application.ports.api_client_port import ApiClientPort
+from ...application.ports.api_client_port import ApiClientPort
 
 # Importar las herramientas search_reservations V1 y V2
 from .search_reservations import register_search_reservations

@@ -6,7 +6,7 @@ Implementa inyección de dependencias
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from trackhs_mcp.application.ports.api_client_port import ApiClientPort
+    from ...application.ports.api_client_port import ApiClientPort
 
 
 def register_all_components(mcp, api_client: "ApiClientPort"):
