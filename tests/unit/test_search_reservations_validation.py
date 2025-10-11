@@ -45,22 +45,22 @@ class TestSearchReservationsValidation:
         assert "Page must be >= 0" in str(exc_info.value)
 
     @pytest.mark.asyncio
-        async def test_size_validation_minimum(self, search_tool):
-            """Test validación de tamaño mínimo"""
+    async def test_size_validation_minimum(self, search_tool):
+        """Test validación de tamaño mínimo"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(page=1, size=0)
         assert "Size must be >= 1" in str(exc_info.value)
 
     @pytest.mark.asyncio
-        async def test_total_results_limit(self, search_tool):
-            """Test límite de 10k resultados totales"""
+    async def test_total_results_limit(self, search_tool):
+        """Test límite de 10k resultados totales"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(page=1000, size=10)
         assert "Total results (page * size) must be <= 10,000" in str(exc_info.value)
 
     @pytest.mark.asyncio
-        async def test_scroll_validation_start_with_one(self, search_tool):
-            """Test que scroll debe empezar con 1"""
+    async def test_scroll_validation_start_with_one(self, search_tool):
+        """Test que scroll debe empezar con 1"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(scroll=2)
         assert "Scroll must start with 1" in str(exc_info.value)
