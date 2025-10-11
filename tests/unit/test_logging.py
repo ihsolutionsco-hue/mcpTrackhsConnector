@@ -390,7 +390,7 @@ class TestPerformanceTimer:
     def test_performance_timer_enter_exit(self):
         """Test context manager de PerformanceTimer"""
         logger = TrackHSLogger("test_logger")
-        
+
         with patch("time.time") as mock_time:
             mock_time.side_effect = [0.0, 1.5]  # start_time, end_time
 

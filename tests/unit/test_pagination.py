@@ -327,7 +327,7 @@ class TestPaginationUtility:
     async def test_get_all_pages(self, pagination_utility, mock_api_client):
         """Test obtención de todas las páginas"""
         # Crear resultados de paginación simulados
-        from src.trackhs_mcp.core.pagination import PaginationResult, PageInfo
+        from src.trackhs_mcp.core.pagination import PageInfo, PaginationResult
 
         page_info1 = PageInfo(
             page=1,
