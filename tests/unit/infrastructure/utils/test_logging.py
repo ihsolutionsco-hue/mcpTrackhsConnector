@@ -361,7 +361,9 @@ class TestRequestContext:
     @pytest.mark.unit
     def test_request_context_enter_exit(self):
         """Test context manager de RequestContext"""
-        with patch("src.trackhs_mcp.infrastructure.utils.logging.request_id_var") as mock_var:
+        with patch(
+            "src.trackhs_mcp.infrastructure.utils.logging.request_id_var"
+        ) as mock_var:
             mock_var.set = Mock()
             mock_var.get = Mock(return_value=None)
 
@@ -372,8 +374,12 @@ class TestRequestContext:
     def test_request_context_with_user_id(self):
         """Test RequestContext con user_id"""
         with (
-            patch("src.trackhs_mcp.infrastructure.utils.logging.request_id_var") as mock_request_var,
-            patch("src.trackhs_mcp.infrastructure.utils.logging.user_id_var") as mock_user_var,
+            patch(
+                "src.trackhs_mcp.infrastructure.utils.logging.request_id_var"
+            ) as mock_request_var,
+            patch(
+                "src.trackhs_mcp.infrastructure.utils.logging.user_id_var"
+            ) as mock_user_var,
         ):
             mock_request_var.set = Mock()
             mock_user_var.set = Mock()
