@@ -133,7 +133,9 @@ class TestTrackHSResponse:
     @pytest.mark.unit
     def test_valid_response(self):
         """Test respuesta válida"""
-        response = TrackHSResponse(data={"key": "value"}, success=True, message="Success")
+        response = TrackHSResponse(
+            data={"key": "value"}, success=True, message="Success"
+        )
 
         assert response.data == {"key": "value"}
         assert response.success == True
@@ -205,9 +207,7 @@ class TestSearchParams:
     @pytest.mark.unit
     def test_valid_search_params(self):
         """Test parámetros de búsqueda válidos"""
-        params = SearchParams(
-            search="test query", tags="tag1,tag2", node_id=[1, 2, 3]
-        )
+        params = SearchParams(search="test query", tags="tag1,tag2", node_id=[1, 2, 3])
 
         assert params.search == "test query"
         assert params.tags == "tag1,tag2"

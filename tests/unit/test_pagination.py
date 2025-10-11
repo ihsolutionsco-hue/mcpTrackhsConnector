@@ -329,22 +329,22 @@ class TestPaginationUtility:
         """Test obtención de todas las páginas"""
         # Crear resultados de paginación simulados
         from src.trackhs_mcp.core.pagination import PaginationResult
-        
+
         result1 = PaginationResult(
             data=[{"id": 1}, {"id": 2}],
             page=1,
             page_size=2,
             total_items=4,
-            has_next=True
+            has_next=True,
         )
         result2 = PaginationResult(
             data=[{"id": 3}, {"id": 4}],
             page=2,
             page_size=2,
             total_items=4,
-            has_next=False
+            has_next=False,
         )
-        
+
         results = [result1, result2]
         all_data = pagination_utility.get_all_pages(results)
 
@@ -358,22 +358,22 @@ class TestPaginationUtility:
         """Test obtención de resumen"""
         # Crear resultados de paginación simulados
         from src.trackhs_mcp.core.pagination import PaginationResult
-        
+
         result1 = PaginationResult(
             data=[{"id": 1}, {"id": 2}],
             page=1,
             page_size=2,
             total_items=4,
-            has_next=True
+            has_next=True,
         )
         result2 = PaginationResult(
             data=[{"id": 3}, {"id": 4}],
             page=2,
             page_size=2,
             total_items=4,
-            has_next=False
+            has_next=False,
         )
-        
+
         results = [result1, result2]
         summary = pagination_utility.get_summary(results)
 

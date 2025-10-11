@@ -21,6 +21,7 @@ def event_loop():
     yield loop
     loop.close()
 
+
 @pytest.fixture
 def mock_api_client():
     """Mock del API client para tests unitarios"""
@@ -29,6 +30,7 @@ def mock_api_client():
     client.post = AsyncMock()
     client.request = AsyncMock()
     return client
+
 
 @pytest.fixture
 def mock_auth():
@@ -41,6 +43,7 @@ def mock_auth():
     }
     auth.validate_credentials.return_value = True
     return auth
+
 
 @pytest.fixture
 def sample_reservation_data():

@@ -66,22 +66,22 @@ class TestSearchReservationsValidation:
         assert "Scroll must start with 1" in str(exc_info.value)
 
     @pytest.mark.asyncio
-        async def test_scroll_validation_empty_string(self, search_tool):
-            """Test que scroll string no puede estar vacío"""
+    async def test_scroll_validation_empty_string(self, search_tool):
+        """Test que scroll string no puede estar vacío"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(scroll="")
         assert "Scroll string cannot be empty" in str(exc_info.value)
 
     @pytest.mark.asyncio
-        async def test_scroll_disables_sorting(self, search_tool):
-            """Test que scroll deshabilita sorting"""
+    async def test_scroll_disables_sorting(self, search_tool):
+        """Test que scroll deshabilita sorting"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(scroll=1, sort_column="status")
         assert "When using scroll, sorting is disabled" in str(exc_info.value)
 
     @pytest.mark.asyncio
-        async def test_scroll_disables_sorting_direction(self, search_tool):
-            """Test que scroll deshabilita sorting direction"""
+    async def test_scroll_disables_sorting_direction(self, search_tool):
+        """Test que scroll deshabilita sorting direction"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(scroll=1, sort_direction="desc")
         assert "When using scroll, sorting is disabled" in str(exc_info.value)
@@ -180,15 +180,15 @@ class TestSearchReservationsValidation:
         await search_tool(node_id="[123,456,789]")
 
     @pytest.mark.asyncio
-        async def test_id_parsing_empty_string(self, search_tool):
-            """Test parsing de string vacío"""
+    async def test_id_parsing_empty_string(self, search_tool):
+        """Test parsing de string vacío"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(node_id="")
         assert "ID string cannot be empty" in str(exc_info.value)
 
     @pytest.mark.asyncio
-        async def test_id_parsing_invalid_format(self, search_tool):
-            """Test parsing de formato inválido"""
+    async def test_id_parsing_invalid_format(self, search_tool):
+        """Test parsing de formato inválido"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(node_id="invalid")
         assert "Invalid ID format" in str(exc_info.value)
