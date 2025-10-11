@@ -272,7 +272,7 @@ Por favor:
             for key, value in search_criteria.items():
                 criteria_items.append(f"- {key}: {value}")
             criteria_text = "\n".join(criteria_items)
-        
+
         # Construir sección de criterios adicionales
         additional_criteria_section = ""
         if criteria_text:
