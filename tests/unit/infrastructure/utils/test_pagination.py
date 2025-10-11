@@ -382,10 +382,11 @@ class TestPaginationUtility:
     async def test_get_summary(self, pagination_utility, mock_api_client):
         """Test obtención de resumen"""
         # Crear resultados de paginación simulados
-        from src.trackhs_mcp.infrastructure.utils.pagination import PaginationResult
+        from src.trackhs_mcp.infrastructure.utils.pagination import (
+            PageInfo,
+            PaginationResult,
+        )
 
-        from src.trackhs_mcp.infrastructure.utils.pagination import PageInfo
-        
         result1 = PaginationResult(
             data=[{"id": 1}, {"id": 2}],
             page_info=PageInfo(page=1, size=2, total_items=4, total_pages=2, has_next=True, has_previous=False),
