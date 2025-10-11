@@ -2,7 +2,7 @@
 Caso de uso para buscar reservas
 """
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Union
 
 from ...domain.entities.reservations import (
     SearchReservationsParams,
@@ -133,10 +133,12 @@ class SearchReservationsUseCase:
     def _process_response(self, response: Dict[str, Any]) -> SearchReservationsResponse:
         """Procesar respuesta de la API"""
         return SearchReservationsResponse(
-            embedded=response.get("_embedded", {}),
-            page=response.get("page", 1),
-            page_count=response.get("page_count", 1),
-            page_size=response.get("page_size", 10),
-            total_items=response.get("total_items", 0),
-            links=response.get("_links", {}),
+            **{
+                "_embedded": response.get("_embedded", {}),
+                "page": response.get("page", 1),
+                "page_count": response.get("page_count", 1),
+                "page_size": response.get("page_size", 10),
+                "total_items": response.get("total_items", 0),
+                "_links": response.get("_links", {}),
+            }
         )
