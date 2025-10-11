@@ -51,7 +51,7 @@ class ApiError(TrackHSError):
             context["status_code"] = status_code
         if endpoint:
             context["endpoint"] = endpoint
-        
+
         # Agregar atributos para compatibilidad con tests
         self.status = status_code
         self.status_text = status_text
