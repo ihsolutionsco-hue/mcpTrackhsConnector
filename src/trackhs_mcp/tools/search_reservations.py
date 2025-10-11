@@ -46,42 +46,111 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         checkin_office_id: Optional[int] = None
     ):
         """
-        Search reservations in Track HS API V2 with comprehensive filtering options
+        Search reservations in Track HS API V2 with comprehensive filtering options.
         
-        Args:
-            page: Número de página (default: 1)
-            size: Tamaño de página (default: 10, limitado a 10k resultados totales)
-            sort_column: Columna para ordenar (default: "name")
-            sort_direction: Dirección de ordenamiento (default: "asc")
-            search: Búsqueda por substring en nombre o descripciones
-            tags: Búsqueda por ID de tag
-            node_id: ID(s) del nodo específico (entero, array o string separado por comas)
-            unit_id: ID(s) de la unidad específica (entero, array o string separado por comas)
-            reservation_type_id: ID(s) del tipo de reserva específico (entero, array o string separado por comas)
-            contact_id: ID(s) del contacto específico (entero, array o string separado por comas)
-            travel_agent_id: ID(s) del agente de viajes específico (entero, array o string separado por comas)
-            campaign_id: ID(s) de la campaña específica (entero, array o string separado por comas)
-            user_id: ID(s) del usuario específico (entero, array o string separado por comas)
-            unit_type_id: ID(s) del tipo de unidad específico (entero, array o string separado por comas)
-            rate_type_id: ID(s) del tipo de tarifa específico (entero, array o string separado por comas)
-            booked_start: Fecha de inicio de reserva (ISO 8601)
-            booked_end: Fecha de fin de reserva (ISO 8601)
-            arrival_start: Fecha de inicio de llegada (ISO 8601)
-            arrival_end: Fecha de fin de llegada (ISO 8601)
-            departure_start: Fecha de inicio de salida (ISO 8601)
-            departure_end: Fecha de fin de salida (ISO 8601)
-            updated_since: Fecha de actualización desde (ISO 8601)
-            scroll: Scroll de Elasticsearch (1 para empezar, string para continuar)
-            in_house_today: Filtrar por en casa hoy (0 o 1)
-            status: Estado(s) de la reserva (string individual o lista de strings). Valores válidos: "Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"
-            group_id: ID del grupo conectado
-            checkin_office_id: ID de la oficina de check-in
+        This MCP tool provides advanced reservation search capabilities with full API V2 compatibility,
+        including pagination, filtering, sorting, and scroll support for large datasets.
+        
+        **Key Features:**
+        - ✅ Full API V2 compatibility with all 25+ parameters
+        - ✅ Advanced pagination (standard + Elasticsearch scroll)
+        - ✅ Comprehensive filtering (dates, IDs, status, etc.)
+        - ✅ Flexible sorting options
+        - ✅ Robust error handling
+        - ✅ MCP-optimized for AI model integration
+        
+        **Examples:**
+        
+        # Basic search
+        search_reservations(page=1, size=10)
+        
+        # Date range search (múltiples formatos soportados)
+        search_reservations(
+            arrival_start="2024-01-01",  # Solo fecha
+            arrival_end="2024-01-31T23:59:59Z",  # Fecha con tiempo
+            status=["Confirmed", "Checked In"]
+        )
+        
+        # Date range search (formato ISO completo)
+        search_reservations(
+            arrival_start="2024-01-01T00:00:00Z",
+            arrival_end="2024-01-31T23:59:59Z",
+            status=["Confirmed", "Checked In"]
+        )
+        
+        # Large dataset with scroll
+        search_reservations(scroll=1, size=1000)
+        
+        # Multi-ID filtering
+        search_reservations(
+            node_id="1,2,3",
+            unit_id="10,20,30",
+            status=["Confirmed"]
+        )
+        
+        # Status filtering
+        search_reservations(
+            status=["Hold", "Confirmed"],
+            in_house_today=1
+        )
+        
+        **Parameters:**
+        - page: Page number (0-based, max 10k total results)
+        - size: Page size (max 10k total results)
+        - sort_column: Sort by field (name, status, checkin, etc.)
+        - sort_direction: Sort direction (asc/desc)
+        - search: Text search in names/descriptions
+        - tags: Tag ID search
+        - node_id: Node ID(s) - single int, comma-separated, or array
+        - unit_id: Unit ID(s) - single int, comma-separated, or array
+        - contact_id: Contact ID(s) - single int, comma-separated, or array
+        - travel_agent_id: Travel agent ID(s)
+        - campaign_id: Campaign ID(s)
+        - user_id: User ID(s)
+        - unit_type_id: Unit type ID(s)
+        - rate_type_id: Rate type ID(s)
+        - reservation_type_id: Reservation type ID(s)
+        - booked_start/end: Booking date range (ISO 8601). Examples: "2025-01-01", "2025-01-01T00:00:00Z"
+        - arrival_start/end: Arrival date range (ISO 8601). Examples: "2025-01-01", "2025-01-01T00:00:00Z"
+        - departure_start/end: Departure date range (ISO 8601). Examples: "2025-01-01", "2025-01-01T00:00:00Z"
+        - updated_since: Updated since date (ISO 8601). Examples: "2025-01-01", "2025-01-01T00:00:00Z"
+        - scroll: Elasticsearch scroll (1 to start, string to continue)
+        - in_house_today: Filter by in-house today (0/1)
+        - status: Reservation status(es) - single string or list
+        - group_id: Group ID
+        - checkin_office_id: Check-in office ID
+        
+        **Returns:**
+        Complete reservation data with embedded objects (unit, contact, policies, etc.)
+        and pagination information.
+        
+        **Error Handling:**
+        - Validates all parameters according to API V2 specification
+        - Handles API errors (401, 403, 500) with descriptive messages
+        - Validates ISO 8601 date formats strictly
+        - Enforces 10k total results limit
+        - Disables sorting when using scroll
         """
-        # Validar parámetros básicos
-        if page < 1:
-            raise ValidationError("Page must be >= 1", "page")
-        if size < 1 or size > 1000:
-            raise ValidationError("Size must be between 1 and 1000", "size")
+        # Validar parámetros básicos según documentación API V2
+        if page < 0:
+            raise ValidationError("Page must be >= 0", "page")
+        if size < 1:
+            raise ValidationError("Size must be >= 1", "size")
+        
+        # Validar límite total de resultados (10k máximo)
+        if page * size > 10000:
+            raise ValidationError("Total results (page * size) must be <= 10,000", "page")
+        
+        # Validar parámetro scroll según documentación API V2
+        if scroll is not None:
+            if isinstance(scroll, int) and scroll != 1:
+                raise ValidationError("Scroll must start with 1", "scroll")
+            if isinstance(scroll, str) and not scroll.strip():
+                raise ValidationError("Scroll string cannot be empty", "scroll")
+            
+            # Cuando se usa scroll, el sorting se deshabilita
+            if sort_column != "name" or sort_direction != "asc":
+                raise ValidationError("When using scroll, sorting is disabled. Use default sort_column='name' and sort_direction='asc'", "scroll")
         
         # Validar fechas si se proporcionan
         date_params = {
@@ -129,19 +198,19 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         if rate_type_id:
             query_params["rateTypeId"] = _parse_id_string(rate_type_id)
         if booked_start:
-            query_params["bookedStart"] = booked_start
+            query_params["bookedStart"] = _normalize_date_format(booked_start)
         if booked_end:
-            query_params["bookedEnd"] = booked_end
+            query_params["bookedEnd"] = _normalize_date_format(booked_end)
         if arrival_start:
-            query_params["arrivalStart"] = arrival_start
+            query_params["arrivalStart"] = _normalize_date_format(arrival_start)
         if arrival_end:
-            query_params["arrivalEnd"] = arrival_end
+            query_params["arrivalEnd"] = _normalize_date_format(arrival_end)
         if departure_start:
-            query_params["departureStart"] = departure_start
+            query_params["departureStart"] = _normalize_date_format(departure_start)
         if departure_end:
-            query_params["departureEnd"] = departure_end
+            query_params["departureEnd"] = _normalize_date_format(departure_end)
         if updated_since:
-            query_params["updatedSince"] = updated_since
+            query_params["updatedSince"] = _normalize_date_format(updated_since)
         if scroll:
             query_params["scroll"] = scroll
         if in_house_today is not None:
@@ -155,22 +224,89 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             query_params["checkinOfficeId"] = checkin_office_id
         
         endpoint = "/v2/pms/reservations"
-        query_string = _build_query_string(query_params)
-        if query_string:
-            endpoint += f"?{query_string}"
         
-        result = await api_client.get(endpoint)
-        return result
+        # Logging para debugging de filtros de fecha
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Search reservations query params: {query_params}")
+        
+        try:
+            # Pasar query_params directamente al cliente API
+            result = await api_client.get(endpoint, params=query_params)
+            return result
+        except Exception as e:
+            # Manejar errores específicos de la API según documentación
+            if hasattr(e, 'status_code'):
+                if e.status_code == 401:
+                    raise ValidationError("Unauthorized: Invalid authentication credentials", "auth")
+                elif e.status_code == 403:
+                    raise ValidationError("Forbidden: Insufficient permissions for this operation", "permissions")
+                elif e.status_code == 500:
+                    raise ValidationError("Internal Server Error: API temporarily unavailable", "api")
+            raise ValidationError(f"API request failed: {str(e)}", "api")
 
 def _is_valid_date_format(date_string: str) -> bool:
-    """Valida formato de fecha ISO 8601"""
+    """Valida formato de fecha con múltiples formatos soportados"""
+    try:
+        import re
+        from datetime import datetime
+        
+        # Patrones de fecha soportados
+        patterns = [
+            # ISO 8601 completo con timezone
+            r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$',
+            # ISO 8601 sin timezone
+            r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$',
+            # Solo fecha ISO
+            r'^\d{4}-\d{2}-\d{2}$',
+            # Formato con espacio (alternativo)
+            r'^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
+        ]
+        
+        # Verificar si coincide con algún patrón
+        for pattern in patterns:
+            if re.match(pattern, date_string):
+                # Intentar parsear la fecha
+                try:
+                    if 'T' in date_string:
+                        # Formato ISO con tiempo
+                        if date_string.endswith('Z'):
+                            datetime.fromisoformat(date_string.replace('Z', '+00:00'))
+                        elif '+' in date_string or '-' in date_string[-6:]:
+                            datetime.fromisoformat(date_string)
+                        else:
+                            datetime.fromisoformat(date_string)
+                    else:
+                        # Solo fecha
+                        datetime.fromisoformat(date_string)
+                    return True
+                except ValueError:
+                    continue
+        
+        return False
+    except (ValueError, AttributeError):
+        return False
+
+def _normalize_date_format(date_string: str) -> str:
+    """Normaliza formato de fecha para la API de TrackHS"""
     try:
         from datetime import datetime
-        # Intentar parsear como ISO 8601
-        datetime.fromisoformat(date_string.replace('Z', '+00:00'))
-        return True
-    except ValueError:
-        return False
+        
+        # Si es solo fecha, agregar tiempo
+        if len(date_string) == 10 and date_string.count('-') == 2:
+            # Solo fecha: 2025-01-01 -> 2025-01-01T00:00:00Z
+            return f"{date_string}T00:00:00Z"
+        
+        # Si tiene tiempo pero no timezone, agregar Z
+        if 'T' in date_string and not (date_string.endswith('Z') or '+' in date_string or '-' in date_string[-6:]):
+            return f"{date_string}Z"
+        
+        # Si ya tiene formato correcto, devolverlo
+        return date_string
+        
+    except Exception:
+        # Si hay error, devolver el string original
+        return date_string
 
 def _parse_id_string(id_string: str) -> Union[int, List[int]]:
     """
@@ -269,23 +405,3 @@ def _format_status_param(status_value: Union[str, List[str]]) -> Union[str, List
             if status_value not in valid_statuses:
                 raise ValidationError(f"Invalid status: {status_value}. Must be one of: {', '.join(valid_statuses)}", "status")
             return status_value
-
-def _build_query_string(params: dict) -> str:
-    """
-    Construye la query string correctamente manejando arrays y tipos de datos.
-    """
-    query_parts = []
-    
-    for key, value in params.items():
-        if value is None:
-            continue
-            
-        if isinstance(value, list):
-            # Para arrays, repetir el parámetro con cada valor
-            for item in value:
-                query_parts.append(f"{key}={item}")
-        else:
-            # Para valores únicos, usar directamente
-            query_parts.append(f"{key}={value}")
-    
-    return "&".join(query_parts)

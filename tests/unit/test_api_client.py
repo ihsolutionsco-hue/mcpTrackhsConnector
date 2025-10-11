@@ -60,6 +60,29 @@ class TestTrackHSApiClient:
     
     @pytest.mark.unit
     @pytest.mark.asyncio
+    async def test_request_with_params(self, api_client):
+        """Test petición con parámetros de consulta"""
+        mock_response = Mock()
+        mock_response.is_success = True
+        mock_response.headers = {'content-type': 'application/json'}
+        mock_response.json.return_value = {"data": "test"}
+        
+        with patch.object(api_client.client, 'request', new_callable=AsyncMock) as mock_request:
+            mock_request.return_value = mock_response
+            
+            params = {"arrivalStart": "2025-01-01T00:00:00Z", "status": "Confirmed"}
+            result = await api_client.request("/test", params=params)
+            assert result == {"data": "test"}
+            
+            # Verificar que se llamó con los parámetros correctos
+            call_args = mock_request.call_args
+            assert call_args[0][0] == "GET"  # method
+            assert call_args[0][1] == "/test"  # endpoint
+            assert "params" in call_args[1]
+            assert call_args[1]["params"] == params
+    
+    @pytest.mark.unit
+    @pytest.mark.asyncio
     async def test_request_authentication_error(self, api_client):
         """Test error de autenticación"""
         mock_response = Mock()
@@ -167,7 +190,24 @@ class TestTrackHSApiClient:
             
             result = await api_client.get("/test")
             assert result == {"data": "test"}
-            mock_request.assert_called_once_with("/test", None)
+            mock_request.assert_called_once_with("/test", None, params=None)
+    
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_get_method_with_params(self, api_client):
+        """Test método GET con parámetros"""
+        mock_response = Mock()
+        mock_response.is_success = True
+        mock_response.headers = {'content-type': 'application/json'}
+        mock_response.json.return_value = {"data": "test"}
+        
+        with patch.object(api_client, 'request', new_callable=AsyncMock) as mock_request:
+            mock_request.return_value = {"data": "test"}
+            
+            params = {"arrivalStart": "2025-01-01T00:00:00Z", "status": "Confirmed"}
+            result = await api_client.get("/test", params=params)
+            assert result == {"data": "test"}
+            mock_request.assert_called_once_with("/test", None, params=params)
     
     @pytest.mark.unit
     @pytest.mark.asyncio

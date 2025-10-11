@@ -48,7 +48,8 @@ class TrackHSApiClient:
         self, 
         endpoint: str, 
         options: Optional[RequestOptions] = None,
-        max_retries: int = 3
+        max_retries: int = 3,
+        params: Optional[Dict[str, Any]] = None
     ) -> Any:
         """
         Realiza una petición HTTP a la API de Track HS con reintentos
@@ -57,6 +58,7 @@ class TrackHSApiClient:
             endpoint: Endpoint de la API
             options: Opciones de la petición
             max_retries: Número máximo de reintentos
+            params: Parámetros de consulta para la petición
             
         Returns:
             Respuesta de la API
@@ -64,7 +66,6 @@ class TrackHSApiClient:
         Raises:
             ApiError: Si la petición falla después de todos los reintentos
         """
-        url = f"{self.config.base_url}{endpoint}"
         last_error = None
         
         for attempt in range(max_retries + 1):
@@ -78,11 +79,22 @@ class TrackHSApiClient:
                 
                 request_kwargs = {"headers": headers}
                 
+                # Agregar params a request_kwargs si existen
+                if params:
+                    request_kwargs["params"] = params
+                
                 if options and options.body:
                     request_kwargs["data"] = options.body
                 
-                # Realizar petición
-                response = await self.client.request(method, url, **request_kwargs)
+                # Logging de debug
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.debug(f"API Request: {method} {endpoint}")
+                logger.debug(f"Params: {params}")
+                logger.debug(f"Full URL: {self.client.base_url}{endpoint}")
+                
+                # Realizar petición usando endpoint relativo, httpx usará base_url automáticamente
+                response = await self.client.request(method, endpoint, **request_kwargs)
                 
                 # Verificar si la respuesta es exitosa
                 if not response.is_success:
@@ -167,26 +179,8 @@ class TrackHSApiClient:
         else:
             options.method = "GET"
         
-        # Agregar parámetros de consulta si se proporcionan
-        if params:
-            # Construir query string
-            query_parts = []
-            for key, value in params.items():
-                if value is not None:
-                    if isinstance(value, list):
-                        for item in value:
-                            query_parts.append(f"{key}={item}")
-                    else:
-                        query_parts.append(f"{key}={value}")
-            
-            if query_parts:
-                query_string = "&".join(query_parts)
-                if "?" in endpoint:
-                    endpoint += f"&{query_string}"
-                else:
-                    endpoint += f"?{query_string}"
-        
-        return await self.request(endpoint, options)
+        # Pasar params directamente a request() sin construcción manual
+        return await self.request(endpoint, options, params=params)
     
     async def post(
         self, 
