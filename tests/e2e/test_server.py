@@ -69,7 +69,9 @@ class TestServerE2E:
     def test_register_all_components(self, mock_mcp, mock_api_client):
         """Test registro de todos los componentes"""
         with patch("src.trackhs_mcp.infrastructure.mcp.server.register_all_components") as mock_register:
-            from src.trackhs_mcp.infrastructure.mcp.server import register_all_components
+            from src.trackhs_mcp.infrastructure.mcp.server import (
+                register_all_components,
+            )
             register_all_components(mock_mcp, mock_api_client)
 
             # Verificar que se llamó la función de registro
