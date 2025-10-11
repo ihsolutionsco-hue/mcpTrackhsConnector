@@ -28,14 +28,12 @@ class TestServerE2E:
     @pytest.fixture
     def mock_api_client(self, mock_config):
         """API client mock"""
-        with patch("src.trackhs_mcp.core.api_client.TrackHSAuth") as mock_auth:
-            mock_auth.return_value.validate_credentials.return_value = True
-            mock_auth.return_value.get_headers.return_value = {
-                "Authorization": "Basic dGVzdF91c2VyOnRlc3RfcGFzc3dvcmQ=",
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            }
-            return TrackHSApiClient(mock_config)
+        mock_client = Mock()
+        mock_client.get = Mock()
+        mock_client.post = Mock()
+        mock_client.put = Mock()
+        mock_client.delete = Mock()
+        return mock_client
 
     @pytest.fixture
     def mock_mcp(self):
@@ -70,11 +68,12 @@ class TestServerE2E:
     @pytest.mark.e2e
     def test_register_all_components(self, mock_mcp, mock_api_client):
         """Test registro de todos los componentes"""
-        with patch("src.trackhs_mcp.server.register_all_components") as mock_register:
-            register_all_components()
+        with patch("src.trackhs_mcp.infrastructure.mcp.server.register_all_components") as mock_register:
+            from src.trackhs_mcp.infrastructure.mcp.server import register_all_components
+            register_all_components(mock_mcp, mock_api_client)
 
             # Verificar que se llamó la función de registro
-            mock_register.assert_called_once()
+            mock_register.assert_called_once_with(mock_mcp, mock_api_client)
 
     @pytest.mark.e2e
     def test_register_all_components_integration(self, mock_mcp, mock_api_client):
@@ -123,7 +122,7 @@ class TestServerE2E:
             )
 
             # Ejecutar registro de componentes
-            register_all_components()
+            register_all_components(mock_mcp, mock_api_client)
 
             # Verificar que se registraron componentes
             assert mock_mcp.tool.call_count >= 1
@@ -207,8 +206,8 @@ class TestServerE2E:
     def test_server_path_manipulation(self):
         """Test manipulación de paths en el servidor"""
         with (
-            patch("src.trackhs_mcp.server.sys") as mock_sys,
-            patch("src.trackhs_mcp.server.Path") as mock_path,
+            patch("src.trackhs_mcp.__main__.sys") as mock_sys,
+            patch("src.trackhs_mcp.__main__.Path") as mock_path,
         ):
 
             mock_path.return_value.parent.parent = Mock()
@@ -225,7 +224,7 @@ class TestServerE2E:
     @pytest.mark.e2e
     def test_server_dotenv_loading(self):
         """Test carga de variables de entorno"""
-        with patch("src.trackhs_mcp.server.load_dotenv") as mock_load_dotenv:
+        with patch("src.trackhs_mcp.__main__.load_dotenv") as mock_load_dotenv:
             # Importar el servidor
             # from src.trackhs_mcp.server import load_dotenv  # Not used
 
@@ -256,7 +255,7 @@ class TestServerE2E:
             )
 
             # Ejecutar registro
-            register_all_components()
+            register_all_components(mock_mcp, mock_api_client)
 
             # Verificar que se registraron todos los tipos de componentes
             assert mock_mcp.tool.call_count > 0, "No tools registered"
