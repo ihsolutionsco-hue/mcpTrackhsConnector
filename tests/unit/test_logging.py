@@ -3,7 +3,7 @@ Tests unitarios para sistema de logging
 """
 
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -56,13 +56,13 @@ class TestLogContext:
             request_id="req123",
             user_id="user456",
             session_id="session789",
-            operation="test_operation",
+            tool_name="test_tool",
         )
 
         assert context.request_id == "req123"
         assert context.user_id == "user456"
         assert context.session_id == "session789"
-        assert context.operation == "test_operation"
+        assert context.tool_name == "test_tool"
 
     @pytest.mark.unit
     def test_log_context_with_defaults(self):
@@ -127,7 +127,7 @@ class TestTrackHSLogger:
     def test_format_message(self, logger):
         """Test formateo de mensaje"""
         message = "Test message"
-        context = LogContext(request_id="req123", operation="test")
+        context = LogContext(request_id="req123", tool_name="test")
 
         formatted = logger.format_message(message, context)
 
@@ -148,7 +148,7 @@ class TestTrackHSLogger:
     @pytest.mark.unit
     def test_log_with_context(self, logger):
         """Test logging con contexto"""
-        context = LogContext(request_id="req123", operation="test")
+        context = LogContext(request_id="req123", tool_name="test")
 
         with patch.object(logger.logger, "log") as mock_log:
             logger.log(LogLevel.INFO, "Test message", LogCategory.MCP_TOOL, context)
@@ -406,6 +406,9 @@ class TestPerformanceTimer:
 
             with PerformanceTimer("test_operation", mock_logger) as timer:
                 pass
+            
+            # Verify timer was used
+            assert timer.operation == "test_operation"
 
             mock_logger.log_performance.assert_called_once_with(
                 "test_operation", 1.5, {}
