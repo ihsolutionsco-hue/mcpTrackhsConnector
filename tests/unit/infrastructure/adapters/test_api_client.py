@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import httpx
 import pytest
 
+from src.trackhs_mcp.domain.value_objects.request import RequestOptions
 from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
 from src.trackhs_mcp.infrastructure.utils.error_handling import (
     ApiError,
@@ -14,7 +15,6 @@ from src.trackhs_mcp.infrastructure.utils.error_handling import (
     NetworkError,
     TimeoutError,
 )
-from src.trackhs_mcp.domain.value_objects.request import RequestOptions
 
 
 class TestTrackHSApiClient:
