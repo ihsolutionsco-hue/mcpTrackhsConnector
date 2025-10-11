@@ -105,29 +105,29 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             "sortDirection": sort_direction
         }
         
-        # Agregar parámetros opcionales
+        # Agregar parámetros opcionales con validación correcta
         if search:
             query_params["search"] = search
         if tags:
             query_params["tags"] = tags
         if node_id:
-            query_params["nodeId"] = node_id
+            query_params["nodeId"] = _format_id_param(node_id)
         if unit_id:
-            query_params["unitId"] = unit_id
+            query_params["unitId"] = _format_id_param(unit_id)
         if reservation_type_id:
-            query_params["reservationTypeId"] = reservation_type_id
+            query_params["reservationTypeId"] = _format_id_param(reservation_type_id)
         if contact_id:
-            query_params["contactId"] = contact_id
+            query_params["contactId"] = _format_id_param(contact_id)
         if travel_agent_id:
-            query_params["travelAgentId"] = travel_agent_id
+            query_params["travelAgentId"] = _format_id_param(travel_agent_id)
         if campaign_id:
-            query_params["campaignId"] = campaign_id
+            query_params["campaignId"] = _format_id_param(campaign_id)
         if user_id:
-            query_params["userId"] = user_id
+            query_params["userId"] = _format_id_param(user_id)
         if unit_type_id:
-            query_params["unitTypeId"] = unit_type_id
+            query_params["unitTypeId"] = _format_id_param(unit_type_id)
         if rate_type_id:
-            query_params["rateTypeId"] = rate_type_id
+            query_params["rateTypeId"] = _format_id_param(rate_type_id)
         if booked_start:
             query_params["bookedStart"] = booked_start
         if booked_end:
@@ -145,16 +145,17 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         if scroll:
             query_params["scroll"] = scroll
         if in_house_today is not None:
-            query_params["inHouseToday"] = in_house_today
+            # Asegurar que in_house_today sea un entero
+            query_params["inHouseToday"] = int(in_house_today)
         if status:
-            query_params["status"] = status
+            query_params["status"] = _format_status_param(status)
         if group_id:
             query_params["groupId"] = group_id
         if checkin_office_id:
             query_params["checkinOfficeId"] = checkin_office_id
         
         endpoint = "/v2/pms/reservations"
-        query_string = "&".join([f"{k}={v}" for k, v in query_params.items()])
+        query_string = _build_query_string(query_params)
         if query_string:
             endpoint += f"?{query_string}"
         
@@ -170,3 +171,54 @@ def _is_valid_date_format(date_string: str) -> bool:
         return True
     except ValueError:
         return False
+
+def _format_id_param(param_value: Union[int, List[int]]) -> Union[int, List[int]]:
+    """
+    Formatea parámetros de ID para la API.
+    Asegura que los enteros se mantengan como enteros y los arrays como arrays.
+    """
+    if isinstance(param_value, list):
+        # Asegurar que todos los elementos sean enteros
+        return [int(x) for x in param_value]
+    else:
+        # Asegurar que sea entero
+        return int(param_value)
+
+def _format_status_param(status_value: Union[str, List[str]]) -> Union[str, List[str]]:
+    """
+    Formatea parámetros de status para la API.
+    Valida que los valores sean válidos según la especificación.
+    """
+    valid_statuses = {"Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"}
+    
+    if isinstance(status_value, list):
+        # Validar cada status en la lista
+        for status in status_value:
+            if status not in valid_statuses:
+                raise ValidationError(f"Invalid status: {status}. Must be one of: {', '.join(valid_statuses)}", "status")
+        return status_value
+    else:
+        # Validar status único
+        if status_value not in valid_statuses:
+            raise ValidationError(f"Invalid status: {status_value}. Must be one of: {', '.join(valid_statuses)}", "status")
+        return status_value
+
+def _build_query_string(params: dict) -> str:
+    """
+    Construye la query string correctamente manejando arrays y tipos de datos.
+    """
+    query_parts = []
+    
+    for key, value in params.items():
+        if value is None:
+            continue
+            
+        if isinstance(value, list):
+            # Para arrays, repetir el parámetro con cada valor
+            for item in value:
+                query_parts.append(f"{key}={item}")
+        else:
+            # Para valores únicos, usar directamente
+            query_parts.append(f"{key}={value}")
+    
+    return "&".join(query_parts)
