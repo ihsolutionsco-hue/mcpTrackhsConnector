@@ -239,8 +239,8 @@ class TestSearchReservationsIntegration:
 
         tool_func = mock_mcp.tool.call_args[0][0]
 
-        with pytest.raises(TrackHSError, match="Page must be >= 1"):
-            await tool_func(page=0, size=10)
+        with pytest.raises(TrackHSError, match="Page must be >= 0"):
+            await tool_func(page=-1, size=10)
 
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -253,7 +253,7 @@ class TestSearchReservationsIntegration:
 
         tool_func = mock_mcp.tool.call_args[0][0]
 
-        with pytest.raises(TrackHSError, match="Size must be between 1 and 1000"):
+        with pytest.raises(TrackHSError, match="Size must be >= 1"):
             await tool_func(page=1, size=0)
 
     @pytest.mark.integration
@@ -267,7 +267,7 @@ class TestSearchReservationsIntegration:
 
         tool_func = mock_mcp.tool.call_args[0][0]
 
-        with pytest.raises(TrackHSError, match="Size must be between 1 and 1000"):
+        with pytest.raises(TrackHSError, match="Size must be <= 1000"):
             await tool_func(page=1, size=1001)
 
     @pytest.mark.integration

@@ -151,10 +151,12 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
         - Disables sorting when using scroll
         """
         # Validar parámetros básicos según documentación API V2
-        if page < 1:
-            raise ValidationError("Page must be >= 1", "page")
-        if size < 1 or size > 1000:
-            raise ValidationError("Size must be between 1 and 1000", "size")
+        if page < 0:
+            raise ValidationError("Page must be >= 0", "page")
+        if size < 1:
+            raise ValidationError("Size must be >= 1", "size")
+        if size > 1000:
+            raise ValidationError("Size must be <= 1000", "size")
 
         # Validar límite total de resultados (10k máximo)
         if page * size > 10000:
