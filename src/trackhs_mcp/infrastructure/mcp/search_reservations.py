@@ -6,9 +6,7 @@ Basado en la especificación completa de la API Search Reservations V2
 from typing import List, Literal, Optional, Union
 
 from ...application.ports.api_client_port import ApiClientPort
-from ...application.use_cases.search_reservations import (
-    SearchReservationsUseCase,
-)
+from ...application.use_cases.search_reservations import SearchReservationsUseCase
 from ...domain.entities.reservations import SearchReservationsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
