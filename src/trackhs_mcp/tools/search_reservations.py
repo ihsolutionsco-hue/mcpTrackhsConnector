@@ -205,7 +205,7 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             query_params["search"] = search
         if tags:
             query_params["tags"] = tags
-        if node_id:
+        if node_id is not None:
             query_params["nodeId"] = _parse_id_string(node_id)
         if unit_id:
             query_params["unitId"] = _parse_id_string(unit_id)
@@ -240,6 +240,9 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         if scroll:
             query_params["scroll"] = scroll
         if in_house_today is not None:
+            # Validar que in_house_today sea 0 o 1
+            if in_house_today not in [0, 1]:
+                raise ValidationError("in_house_today must be 0 or 1", "in_house_today")
             # Asegurar que in_house_today sea un entero
             query_params["inHouseToday"] = int(in_house_today)
         if status:
@@ -365,14 +368,18 @@ def _normalize_date_format(date_string: str) -> str:
         return date_string
 
 
-def _parse_id_string(id_string: str) -> Union[int, List[int]]:
+def _parse_id_string(id_string: Union[str, int]) -> Union[int, List[int]]:
     """
     Parsea un string de ID que puede ser:
-    - Un entero simple: "48"
+    - Un entero simple: "48" o 48
     - Múltiples IDs separados por comas: "48,49,50"
     - Array en formato string: "[48,49,50]"
     """
-    if not id_string or not id_string.strip():
+    # Si ya es un entero, devolverlo directamente
+    if isinstance(id_string, int):
+        return id_string
+    
+    if not id_string or not str(id_string).strip():
         raise ValidationError("ID string cannot be empty", "id")
 
     # Limpiar espacios

@@ -55,7 +55,7 @@ class TestSearchReservationsValidation:
     async def test_total_results_limit(self, search_tool):
         """Test límite de 10k resultados totales"""
         with pytest.raises(ValidationError) as exc_info:
-            await search_tool(page=1000, size=10)
+            await search_tool(page=1001, size=10)
         assert "Total results (page * size) must be <= 10,000" in str(exc_info.value)
 
     @pytest.mark.asyncio
@@ -77,22 +77,24 @@ class TestSearchReservationsValidation:
         """Test que scroll deshabilita sorting"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(scroll=1, sort_column="status")
-        assert "When using scroll, sorting is disabled" in str(exc_info.value)
+        assert "When using scroll" in str(exc_info.value) and "sorting is disabled" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_scroll_disables_sorting_direction(self, search_tool):
         """Test que scroll deshabilita sorting direction"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(scroll=1, sort_direction="desc")
-        assert "When using scroll, sorting is disabled" in str(exc_info.value)
+        assert "When using scroll" in str(exc_info.value) and "sorting is disabled" in str(exc_info.value)
 
-    def test_scroll_valid_usage(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_scroll_valid_usage(self, search_tool):
         """Test uso válido de scroll"""
         # Scroll con valores por defecto debe ser válido
         await search_tool(scroll=1)
         # No debe lanzar excepción
 
-    def test_date_validation_flexible_formats(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_date_validation_flexible_formats(self, search_tool):
         """Test validación flexible de fechas - acepta múltiples formatos"""
         # Fecha con timezone Z (formato completo)
         await search_tool(arrival_start="2024-01-01T00:00:00Z")
@@ -109,7 +111,8 @@ class TestSearchReservationsValidation:
         # Fecha con microsegundos
         await search_tool(arrival_start="2024-01-01T00:00:00.123Z")
 
-    def test_date_validation_with_timezone(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_date_validation_with_timezone(self, search_tool):
         """Test validación de fechas con timezone"""
         # Fecha con Z
         await search_tool(arrival_start="2024-01-01T00:00:00Z")
@@ -120,7 +123,8 @@ class TestSearchReservationsValidation:
         # Fecha con microsegundos
         await search_tool(arrival_start="2024-01-01T00:00:00.123Z")
 
-    def test_status_validation_single(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_status_validation_single(self, search_tool):
         """Test validación de status individual"""
         # Status válido
         await search_tool(status="Confirmed")
@@ -130,7 +134,8 @@ class TestSearchReservationsValidation:
             await search_tool(status="InvalidStatus")
         assert "Invalid status" in str(exc_info.value)
 
-    def test_status_validation_list(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_status_validation_list(self, search_tool):
         """Test validación de status como lista"""
         # Lista válida
         await search_tool(status=["Confirmed", "Checked In"])
@@ -140,7 +145,8 @@ class TestSearchReservationsValidation:
             await search_tool(status=["Confirmed", "InvalidStatus"])
         assert "Invalid status" in str(exc_info.value)
 
-    def test_status_validation_comma_separated(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_status_validation_comma_separated(self, search_tool):
         """Test validación de status separado por comas"""
         # String con comas válido
         await search_tool(status="Confirmed,Checked In")
@@ -150,7 +156,8 @@ class TestSearchReservationsValidation:
             await search_tool(status="Confirmed,InvalidStatus")
         assert "Invalid status" in str(exc_info.value)
 
-    def test_in_house_today_validation(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_in_house_today_validation(self, search_tool):
         """Test validación de in_house_today"""
         # Valores válidos
         await search_tool(in_house_today=0)
@@ -159,9 +166,10 @@ class TestSearchReservationsValidation:
         # Valor inválido (debe ser 0 o 1)
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(in_house_today=2)
-        # Esto debería fallar en la validación de tipo
+        assert "in_house_today must be 0 or 1" in str(exc_info.value)
 
-    def test_id_parsing_single(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_id_parsing_single(self, search_tool):
         """Test parsing de ID único"""
         # ID único como string
         await search_tool(node_id="123")
@@ -169,12 +177,14 @@ class TestSearchReservationsValidation:
         # ID único como entero
         await search_tool(node_id=123)
 
-    def test_id_parsing_comma_separated(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_id_parsing_comma_separated(self, search_tool):
         """Test parsing de IDs separados por comas"""
         # IDs separados por comas
         await search_tool(node_id="123,456,789")
 
-    def test_id_parsing_array_string(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_id_parsing_array_string(self, search_tool):
         """Test parsing de array en formato string"""
         # Array en formato string
         await search_tool(node_id="[123,456,789]")
