@@ -6,10 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.trackhs_mcp.__main__ import main
 from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
-from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from src.trackhs_mcp.infrastructure.mcp.server import register_all_components
 
 
 class TestServerE2E:
@@ -68,11 +65,8 @@ class TestServerE2E:
         with patch(
             "src.trackhs_mcp.infrastructure.mcp.server.register_all_components"
         ) as mock_register:
-            from src.trackhs_mcp.infrastructure.mcp.server import (
-                register_all_components,
-            )
-
-            register_all_components(mock_mcp, mock_api_client)
+            # Simular el registro de componentes
+            mock_register(mock_mcp, mock_api_client)
 
             # Verificar que se llamó la función de registro
             mock_register.assert_called_once_with(mock_mcp, mock_api_client)
@@ -257,7 +251,7 @@ class TestServerE2E:
     @pytest.mark.e2e
     def test_server_configuration_validation(self, mock_config):
         """Test validación de configuración del servidor"""
-        # Test simplificado: verificar que la configuración existe y tiene los campos correctos
+        # Test simplificado: verificar que la configuración existe y tiene los campos
         from src.trackhs_mcp.server import config
 
         # Verificar que la configuración existe

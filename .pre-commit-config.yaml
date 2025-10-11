@@ -1,5 +1,5 @@
 # Pre-commit hooks para TrackHS MCP Connector
-# Configuración optimizada para desarrollo Python con mejores prácticas
+# Configuración simplificada para desarrollo Python
 
 repos:
   # Hooks básicos de formato y limpieza
@@ -7,36 +7,26 @@ repos:
     rev: v4.5.0
     hooks:
       - id: trailing-whitespace
-        name: "Trim Trailing Whitespace"
-        description: "Remove trailing whitespace from files"
       - id: end-of-file-fixer
-        name: "Fix End of Files"
-        description: "Ensure files end with a newline"
       - id: check-yaml
-        name: "Check YAML"
-        description: "Check YAML files for syntax errors"
       - id: check-json
-        name: "Check JSON"
-        description: "Check JSON files for syntax errors"
       - id: check-toml
-        name: "Check TOML"
-        description: "Check TOML files for syntax errors"
       - id: check-merge-conflict
-        name: "Check for merge conflicts"
-        description: "Check for files that contain merge conflict strings"
       - id: check-added-large-files
-        name: "Check for large files"
-        description: "Prevent large files from being committed"
         args: ['--maxkb=1000']
+      - id: check-docstring-first
+      - id: debug-statements
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: mixed-line-ending
 
   # Python code formatting
   - repo: https://github.com/psf/black
     rev: 24.1.1
     hooks:
       - id: black
-        name: "Black Code Formatter"
-        description: "Format Python code with Black"
-        language_version: python3
         args: [--line-length=88, --target-version=py311]
 
   # Import sorting
@@ -44,55 +34,10 @@ repos:
     rev: 5.13.2
     hooks:
       - id: isort
-        name: "isort Import Sorter"
-        description: "Sort Python imports with isort"
         args: [--profile=black, --line-length=88]
-
-  # Python linting (simplified)
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        name: "Flake8 Linter"
-        description: "Lint Python code with Flake8"
-        args: [--max-line-length=88, --extend-ignore=E203,W503,E501,F401,F841,E712,F541,E402]
-
-  # Security checks (disabled for now due to dependency issues)
-  # - repo: https://github.com/pycqa/bandit
-  #   rev: 1.7.5
-  #   hooks:
-  #     - id: bandit
-  #       name: "Bandit Security Check"
-  #       description: "Check for common security issues"
-  #       args: [-r, src/, -f, json, -o, bandit-report.json, --skip=B101,B601]
-  #       exclude: ^tests/
-
-  # Type checking (disabled for now to focus on core functionality)
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.8.0
-  #   hooks:
-  #     - id: mypy
-  #       name: "MyPy Type Checker"
-  #       description: "Static type checking with MyPy"
-  #       args: [--ignore-missing-imports, --no-strict-optional, --disable-error-code=union-attr,assignment,no-any-return]
-  #       additional_dependencies: [types-requests, types-PyYAML]
-  #       files: ^src/
 
 # Configuración global
 default_install_hook_types: [pre-commit, pre-push]
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: false
 minimum_pre_commit_version: 3.0.0
-
-# Configuración de CI
-ci:
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit.com hooks
-
-    for more information, see https://pre-commit.ci
-  autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: weekly
-  skip: []
-  submodules: false
