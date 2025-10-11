@@ -34,6 +34,7 @@ class CompletionSuggestion:
     category: Optional[str] = None
     priority: int = 0
     metadata: Optional[Dict[str, Any]] = None
+    type: Optional[CompletionType] = None
 
 
 @dataclass
@@ -107,13 +108,13 @@ class TrackHSCompletion:
         suggestions.extend(
             [
                 CompletionSuggestion(
-                    "page", "Page", "Número de página", "pagination", 10
+                    "page", "Page", "Número de página", "pagination", 10, type=CompletionType.PARAMETER
                 ),
                 CompletionSuggestion(
-                    "size", "Size", "Tamaño de página", "pagination", 10
+                    "size", "Size", "Tamaño de página", "pagination", 10, type=CompletionType.PARAMETER
                 ),
                 CompletionSuggestion(
-                    "sortColumn", "Sort Column", "Columna para ordenar", "sorting", 9
+                    "sortColumn", "Sort Column", "Columna para ordenar", "sorting", 9, type=CompletionType.PARAMETER
                 ),
                 CompletionSuggestion(
                     "sortDirection",
@@ -121,6 +122,7 @@ class TrackHSCompletion:
                     "Dirección de ordenamiento",
                     "sorting",
                     9,
+                    type=CompletionType.PARAMETER,
                 ),
             ]
         )
@@ -253,10 +255,10 @@ class TrackHSCompletion:
     ) -> List[CompletionSuggestion]:
         """Obtiene sugerencias para sortColumn"""
         suggestions = [
-            CompletionSuggestion("name", "Name", "Ordenar por nombre", "sort", 10),
-            CompletionSuggestion("status", "Status", "Ordenar por estado", "sort", 9),
+            CompletionSuggestion("name", "Name", "Ordenar por nombre", "sort", 10, type=CompletionType.SORT),
+            CompletionSuggestion("status", "Status", "Ordenar por estado", "sort", 9, type=CompletionType.SORT),
             CompletionSuggestion(
-                "altCon", "Alt Con", "Ordenar por confirmación alternativa", "sort", 8
+                "altCon", "Alt Con", "Ordenar por confirmación alternativa", "sort", 8, type=CompletionType.SORT
             ),
             CompletionSuggestion(
                 "agreementStatus",
@@ -264,8 +266,9 @@ class TrackHSCompletion:
                 "Ordenar por estado de acuerdo",
                 "sort",
                 8,
+                type=CompletionType.SORT,
             ),
-            CompletionSuggestion("type", "Type", "Ordenar por tipo", "sort", 7),
+            CompletionSuggestion("type", "Type", "Ordenar por tipo", "sort", 7, type=CompletionType.SORT),
             CompletionSuggestion("guest", "Guest", "Ordenar por huésped", "sort", 7),
             CompletionSuggestion(
                 "guests", "Guests", "Ordenar por huéspedes", "sort", 7

@@ -187,7 +187,7 @@ class TestTrackHSCompletion:
 
         context = CompletionContext(current_input="no", parameter_name="node_id")
 
-        filtered = completion._filter_suggestions(suggestions, context)
+        filtered = completion._filter_suggestions(suggestions, context.current_input)
 
         # Debe filtrar por "no" (node1, node2)
         assert len(filtered) == 2
