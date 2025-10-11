@@ -204,15 +204,15 @@ def search_reservations(
 ) -> dict:
     """
     Search reservations in Track HS API V2 with comprehensive filtering options.
-    
+
     Args:
         page: Page number (0-based, max 10k total results)
         size: Page size (max 10k total results)
         # ... más documentación
-        
+
     Returns:
         Complete reservation data with embedded objects
-        
+
     Raises:
         ValidationError: If parameters are invalid
     """
@@ -229,31 +229,31 @@ from src.trackhs_mcp.core.error_handling import ValidationError
 
 class TestMiFuncionalidad:
     """Tests para mi funcionalidad"""
-    
+
     @pytest.fixture
     def mock_api_client(self):
         """Mock del cliente API"""
         return AsyncMock()
-    
+
     @pytest.mark.asyncio
     async def test_caso_exitoso(self, mock_api_client):
         """Test caso exitoso"""
         # Arrange
         mock_api_client.get.return_value = {"data": "test"}
-        
+
         # Act
         result = await mi_funcion()
-        
+
         # Assert
         assert result == {"data": "test"}
         mock_api_client.get.assert_called_once()
-    
+
     @pytest.mark.asyncio
     async def test_caso_error(self, mock_api_client):
         """Test manejo de errores"""
         # Arrange
         mock_api_client.get.side_effect = Exception("API Error")
-        
+
         # Act & Assert
         with pytest.raises(ValidationError):
             await mi_funcion()

@@ -164,7 +164,7 @@ from ..core.api_client import TrackHSApiClient
 
 def register_nueva_herramienta(mcp, api_client: TrackHSApiClient):
     """Registra la nueva herramienta MCP"""
-    
+
     @mcp.tool()
     async def nueva_herramienta(param1: str, param2: int = 10):
         """Descripción de la nueva herramienta"""

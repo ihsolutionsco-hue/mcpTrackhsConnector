@@ -2,17 +2,19 @@
 Configuración global de pytest para Track HS MCP Connector
 """
 
-import pytest
 import asyncio
 import os
-from unittest.mock import Mock, AsyncMock
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 # Configurar variables de entorno para testing
 os.environ.setdefault("TRACKHS_API_URL", "https://api-test.trackhs.com/api")
 os.environ.setdefault("TRACKHS_USERNAME", "test_user")
 os.environ.setdefault("TRACKHS_PASSWORD", "test_password")
 os.environ.setdefault("TRACKHS_TIMEOUT", "30")
+
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -39,7 +41,7 @@ def mock_auth():
     auth.get_headers.return_value = {
         "Authorization": "Basic dGVzdF91c2VyOnRlc3RfcGFzc3dvcmQ=",
         "Content-Type": "application/json",
-        "Accept": "application/json"
+        "Accept": "application/json",
     }
     auth.validate_credentials.return_value = True
     return auth
@@ -77,13 +79,10 @@ def sample_reservation_data():
                 "included": True,
                 "extraQuantity": 0,
                 "ratePerPersonPerStay": "0.00",
-                "ratePerStay": "0.00"
+                "ratePerStay": "0.00",
             }
         ],
-        "securityDeposit": {
-            "required": "100.00",
-            "remaining": 100
-        },
+        "securityDeposit": {"required": "100.00", "remaining": 100},
         "updatedAt": "2024-01-10T10:00:00Z",
         "createdAt": "2024-01-10T10:00:00Z",
         "bookedAt": "2024-01-10T10:00:00Z",
@@ -125,7 +124,7 @@ def sample_reservation_data():
             "id": 1,
             "type": "standard",
             "code": "STD",
-            "name": "Standard Rate"
+            "name": "Standard Rate",
         },
         "travelInsuranceProducts": [],
         "_embedded": {
@@ -139,14 +138,8 @@ def sample_reservation_data():
                 "longDescription": "A beautiful test unit with all amenities",
                 "houseRules": "No smoking, no pets",
                 "nodeId": 1,
-                "unitType": {
-                    "id": 1,
-                    "name": "Apartment"
-                },
-                "lodgingType": {
-                    "id": 1,
-                    "name": "Vacation Rental"
-                },
+                "unitType": {"id": 1, "name": "Apartment"},
+                "lodgingType": {"id": 1, "name": "Vacation Rental"},
                 "directions": "Turn left at the main street",
                 "checkinDetails": "Check-in at 3 PM",
                 "timezone": "America/New_York",
@@ -201,22 +194,20 @@ def sample_reservation_data():
                     "locality": "Test City",
                     "region": "Test State",
                     "postalCode": "12345",
-                    "country": "US"
+                    "country": "US",
                 },
                 "regulations": [],
                 "updated": {
                     "availability": "2024-01-10T10:00:00Z",
                     "content": "2024-01-10T10:00:00Z",
-                    "pricing": "2024-01-10T10:00:00Z"
+                    "pricing": "2024-01-10T10:00:00Z",
                 },
                 "updatedAt": "2024-01-10T10:00:00Z",
                 "createdAt": "2024-01-10T10:00:00Z",
                 "isActive": True,
                 "_links": {
-                    "self": {
-                        "href": "https://api-test.trackhs.com/api/v2/pms/units/1"
-                    }
-                }
+                    "self": {"href": "https://api-test.trackhs.com/api/v2/pms/units/1"}
+                },
             },
             "contact": {
                 "id": 1,
@@ -255,15 +246,16 @@ def sample_reservation_data():
                     "self": {
                         "href": "https://api-test.trackhs.com/api/v2/pms/contacts/1"
                     }
-                }
-            }
+                },
+            },
         },
         "_links": {
             "self": {
                 "href": "https://api-test.trackhs.com/api/v2/pms/reservations/12345"
             }
-        }
+        },
     }
+
 
 @pytest.fixture
 def sample_search_response():
@@ -277,7 +269,7 @@ def sample_search_response():
                     "arrivalDate": "2024-01-15",
                     "departureDate": "2024-01-20",
                     "nights": 5,
-                    "currency": "USD"
+                    "currency": "USD",
                 }
             ]
         },
@@ -294,20 +286,23 @@ def sample_search_response():
             },
             "last": {
                 "href": "https://api-test.trackhs.com/api/v2/pms/reservations?page=1&size=10"
-            }
-        }
+            },
+        },
     }
+
 
 @pytest.fixture
 def mock_trackhs_config():
     """Configuración mock de Track HS"""
     from src.trackhs_mcp.core.types import TrackHSConfig
+
     return TrackHSConfig(
         base_url="https://api-test.trackhs.com/api",
         username="test_user",
         password="test_password",
-        timeout=30
+        timeout=30,
     )
+
 
 @pytest.fixture
 def mock_mcp():
@@ -317,6 +312,7 @@ def mock_mcp():
     mcp.resource = Mock()
     mcp.prompt = Mock()
     return mcp
+
 
 # Marcadores para diferentes tipos de tests
 def pytest_configure(config):

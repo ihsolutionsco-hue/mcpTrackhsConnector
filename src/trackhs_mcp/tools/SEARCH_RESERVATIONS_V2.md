@@ -271,13 +271,13 @@ while True:
         size=100,
         # ... otros filtros
     )
-    
+
     if not result["_embedded"]["reservations"]:
         break
-    
+
     all_reservations.extend(result["_embedded"]["reservations"])
     scroll_id = result.get("_scroll_id")
-    
+
     if not scroll_id:
         break
 ```

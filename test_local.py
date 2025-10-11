@@ -5,19 +5,19 @@ Verifica la conexión API, registro de componentes y funcionalidad básica
 """
 
 import asyncio
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Agregar el directorio src al path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from trackhs_mcp.core.api_client import TrackHSApiClient
-from trackhs_mcp.core.types import TrackHSConfig
 from trackhs_mcp.core.error_handling import get_error_stats
-from trackhs_mcp.tools import register_all_tools
-from trackhs_mcp.resources import register_all_resources
+from trackhs_mcp.core.types import TrackHSConfig
 from trackhs_mcp.prompts import register_all_prompts
+from trackhs_mcp.resources import register_all_resources
+from trackhs_mcp.tools import register_all_tools
 
 
 class LocalTester:
@@ -34,7 +34,7 @@ class LocalTester:
             "resources": False,
             "prompts": False,
             "api_connection": False,
-            "error_handling": False
+            "error_handling": False,
         }
 
     def setup_config(self):
@@ -43,14 +43,17 @@ class LocalTester:
 
         # Cargar variables de entorno
         from dotenv import load_dotenv
+
         load_dotenv()
 
         # Configuración de testing
         self.config = TrackHSConfig(
-            base_url=os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api"),
+            base_url=os.getenv(
+                "TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api"
+            ),
             username=os.getenv("TRACKHS_USERNAME", "test_user"),
             password=os.getenv("TRACKHS_PASSWORD", "test_password"),
-            timeout=int(os.getenv("TRACKHS_TIMEOUT", "30"))
+            timeout=int(os.getenv("TRACKHS_TIMEOUT", "30")),
         )
 
         print(f"Configuración creada: {self.config.base_url}")
@@ -83,18 +86,21 @@ class LocalTester:
                 def decorator(func):
                     self.tools.append(func)
                     return func
+
                 return decorator
 
             def resource(self, name):
                 def decorator(func):
                     self.resources.append((name, func))
                     return func
+
                 return decorator
 
             def prompt(self, name):
                 def decorator(func):
                     self.prompts.append((name, func))
                     return func
+
                 return decorator
 
         self.mcp = MockMCP()

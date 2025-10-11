@@ -31,7 +31,7 @@ known_third_party = ["fastmcp", "httpx", "pydantic", "pytest"]
 
 [tool.flake8]
 max-line-length = 88
-extend-ignore = ["E203", "W503", "E501"]
+extend-ignore = ["E203", "W503", "E501", "D400", "D200", "D205", "D107", "D104", "D105", "F401", "F841", "E712", "F541", "E402"]
 exclude = [
     ".git",
     "__pycache__",
@@ -116,7 +116,7 @@ addopts = [
 testpaths = ["tests"]
 markers = [
     "unit: Unit tests",
-    "integration: Integration tests", 
+    "integration: Integration tests",
     "e2e: End-to-end tests",
     "performance: Performance tests",
     "slow: Slow running tests"

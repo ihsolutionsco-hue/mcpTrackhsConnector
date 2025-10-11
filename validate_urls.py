@@ -4,9 +4,10 @@ Script para validar URLs y endpoints de TrackHS API
 """
 
 import asyncio
-import httpx
 import sys
 from pathlib import Path
+
+import httpx
 
 # Agregar el directorio src al path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
@@ -20,7 +21,9 @@ class URLValidator:
     def __init__(self):
         self.results = {}
 
-    async def validate_url(self, url: str, endpoint: str = "/v2/pms/reservations") -> dict:
+    async def validate_url(
+        self, url: str, endpoint: str = "/v2/pms/reservations"
+    ) -> dict:
         """Validar una URL base y endpoint"""
         full_url = f"{url.rstrip('/')}{endpoint}"
 
@@ -33,7 +36,7 @@ class URLValidator:
                     "status_code": response.status_code,
                     "success": response.is_success,
                     "headers": dict(response.headers),
-                    "error": None
+                    "error": None,
                 }
         except Exception as e:
             return {
@@ -41,7 +44,7 @@ class URLValidator:
                 "status_code": None,
                 "success": False,
                 "headers": {},
-                "error": str(e)
+                "error": str(e),
             }
 
     async def validate_all_urls(self):
@@ -50,14 +53,12 @@ class URLValidator:
         print("=" * 60)
 
         # URL oficial de TrackHS API
-        urls_to_test = [
-            TrackHSConfig.DEFAULT_URL
-        ]
+        urls_to_test = [TrackHSConfig.DEFAULT_URL]
 
         endpoints_to_test = [
             "/v2/pms/reservations",
             "/pms/reservations",
-            "/v1/pms/reservations"
+            "/v1/pms/reservations",
         ]
 
         for url in urls_to_test:

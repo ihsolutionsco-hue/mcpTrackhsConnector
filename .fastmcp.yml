@@ -12,7 +12,7 @@ server:
   description: "MCP Server for TrackHS API integration"
   author: "IHSolutions"
   email: "team@ihsolutions.co"
-  
+
 # Configuración de la aplicación
 app:
   entry_point: "src.trackhs_mcp.server:main"
@@ -22,7 +22,7 @@ app:
     - "httpx>=0.24.0"
     - "pydantic>=2.0.0"
     - "python-dotenv>=1.0.0"
-  
+
 # Variables de entorno requeridas
 environment:
   required:
@@ -32,7 +32,7 @@ environment:
   optional:
     - TRACKHS_TIMEOUT
     - FASTMCP_API_KEY
-    
+
 # Configuración de deployment
 deployment:
   platform: "fastmcp-cloud"
@@ -42,26 +42,26 @@ deployment:
     min_instances: 1
     max_instances: 3
     target_cpu: 70
-    
+
 # Configuración de salud
 health_check:
   endpoint: "/health"
   interval: 30
   timeout: 10
   retries: 3
-  
+
 # Configuración de logging
 logging:
   level: "INFO"
   format: "json"
   retention: "30d"
-  
+
 # Configuración de monitoreo
 monitoring:
   metrics: true
   alerts: true
   dashboard: true
-  
+
 # Configuración de seguridad
 security:
   https_only: true
@@ -69,13 +69,13 @@ security:
   rate_limiting:
     enabled: true
     requests_per_minute: 100
-    
+
 # Configuración de backup
 backup:
   enabled: true
   frequency: "daily"
   retention: "7d"
-  
+
 # Configuración de notificaciones
 notifications:
   email:
@@ -85,20 +85,20 @@ notifications:
   slack:
     enabled: false
     webhook_url: ""
-    
+
 # Configuración de CI/CD
 ci_cd:
   auto_deploy: true
   branch: "main"
   tests_required: true
   security_scan: true
-  
+
 # Configuración de desarrollo
 development:
   debug_mode: false
   hot_reload: false
   local_port: 8000
-  
+
 # Configuración de producción
 production:
   debug_mode: false

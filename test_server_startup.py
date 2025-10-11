@@ -4,8 +4,8 @@ Test de inicio del servidor TrackHS MCP
 Verifica que el servidor se puede ejecutar sin errores
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Agregar el directorio src al path
@@ -18,7 +18,7 @@ def test_server_import():
 
     try:
         # Importar componentes del servidor
-        from trackhs_mcp.server import mcp, api_client, config
+        from trackhs_mcp.server import api_client, config, mcp
 
         print(f"   Servidor MCP: {type(mcp).__name__}")
         print(f"   Cliente API: {type(api_client).__name__}")
@@ -48,20 +48,20 @@ def test_server_components():
     print("\nTest de componentes del servidor...")
 
     try:
-        from trackhs_mcp.server import mcp, api_client, config
+        from trackhs_mcp.server import api_client, config, mcp
 
         # Verificar que el servidor tiene los métodos necesarios
-        if not hasattr(mcp, 'run'):
+        if not hasattr(mcp, "run"):
             print("   ERROR: Servidor no tiene método 'run'")
             return False
 
         # Verificar cliente API
-        if not hasattr(api_client, 'request'):
+        if not hasattr(api_client, "request"):
             print("   ERROR: Cliente API no tiene método 'request'")
             return False
 
         # Verificar configuración
-        if not hasattr(config, 'base_url'):
+        if not hasattr(config, "base_url"):
             print("   ERROR: Configuración no tiene 'base_url'")
             return False
 
@@ -78,7 +78,7 @@ def test_server_ready():
     print("\nTest de preparación del servidor...")
 
     try:
-        from trackhs_mcp.server import mcp, api_client, config
+        from trackhs_mcp.server import api_client, config, mcp
 
         # Verificar que todo está configurado
         if not config.base_url:
@@ -110,11 +110,7 @@ def main():
     print("TRACKHS MCP SERVER - TEST DE INICIO")
     print("=" * 50)
 
-    tests = [
-        test_server_import,
-        test_server_components,
-        test_server_ready
-    ]
+    tests = [test_server_import, test_server_components, test_server_ready]
 
     passed = 0
     total = len(tests)

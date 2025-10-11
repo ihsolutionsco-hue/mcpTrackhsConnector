@@ -162,6 +162,6 @@ npm run test:coverage
 
 ---
 
-**¡Listo para usar!** 
+**¡Listo para usar!**
 
 *Última actualización: 2025-01-27*

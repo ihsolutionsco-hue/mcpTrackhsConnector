@@ -183,4 +183,4 @@ Si encuentras problemas durante la limpieza:
 
 ---
 
-**Limpieza Completada** - Proyecto migrado exitosamente a Python 
+**Limpieza Completada** - Proyecto migrado exitosamente a Python

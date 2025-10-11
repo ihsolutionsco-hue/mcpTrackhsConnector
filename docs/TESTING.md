@@ -178,7 +178,7 @@ class TestNewFeature:
         feature = NewFeature()
         result = feature.process("input")
         assert result == "expected_output"
-    
+
     @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_new_feature_async(self):
@@ -200,12 +200,12 @@ class TestNewIntegration:
         client = Mock()
         client.get = AsyncMock()
         return client
-    
+
     @pytest.mark.integration
     @pytest.mark.asyncio
     async def test_new_integration(self, mock_api_client):
         mock_api_client.get.return_value = {"data": "test"}
-        
+
         # Test integration logic
         result = await some_integration_function(mock_api_client)
         assert result["data"] == "test"
@@ -280,7 +280,7 @@ import logging
 def test_with_logging():
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger(__name__)
-    
+
     logger.debug("Test starting")
     # Test logic
     logger.debug("Test completed")

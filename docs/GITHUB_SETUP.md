@@ -154,4 +154,4 @@ Si tienes problemas con la configuración:
 
 ---
 
-**GitHub + FastMCP** - Deployment automático y confiable 
+**GitHub + FastMCP** - Deployment automático y confiable

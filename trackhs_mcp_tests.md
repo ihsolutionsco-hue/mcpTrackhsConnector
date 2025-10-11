@@ -89,7 +89,7 @@ Validar las funcionalidades de la herramienta MCP `search_reservations` de Track
 
 **Resultados:**
 - ✅ **CORRECCIÓN IMPLEMENTADA**: Filtros de fecha ahora funcionan correctamente
-- ✅ **Múltiples formatos soportados**: 
+- ✅ **Múltiples formatos soportados**:
   - Solo fecha: "2025-01-01" → "2025-01-01T00:00:00Z"
   - Con tiempo: "2025-01-01T00:00:00" → "2025-01-01T00:00:00Z"
   - ISO completo: "2025-01-01T00:00:00Z" (sin cambios)

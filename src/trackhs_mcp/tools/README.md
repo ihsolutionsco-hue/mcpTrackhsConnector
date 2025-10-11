@@ -19,12 +19,12 @@ La herramienta search_reservations sigue el patrón estándar:
 ```python
 def register_search_reservations(mcp, api_client: TrackHSApiClient):
     """Registra la herramienta search_reservations V2"""
-    
+
     @mcp.tool()
     async def search_reservations(...):
         """
         Search reservations in Track HS API V2 with comprehensive filtering options
-        
+
         Args:
             page: Número de página (default: 1)
             size: Tamaño de página (default: 10)

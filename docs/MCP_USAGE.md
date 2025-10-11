@@ -128,4 +128,4 @@ El servidor necesita estas variables configuradas en Vercel:
 
 ---
 
-**¡El servidor MCP está listo para usar!** 
+**¡El servidor MCP está listo para usar!**

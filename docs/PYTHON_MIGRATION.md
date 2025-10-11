@@ -198,7 +198,7 @@ export class NuevaHerramientaTool extends BaseTrackHSTool {
   name = 'nueva_herramienta';
   description = 'Descripción';
   inputSchema = { param: z.string() };
-  
+
   async execute(params) {
     // implementación
   }
