@@ -50,11 +50,11 @@ class TestServerE2E:
     @pytest.mark.e2e
     def test_server_initialization(self, mock_config):
         """Test inicialización del servidor"""
-        with patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class, patch(
-            "src.trackhs_mcp.server.TrackHSApiClient"
-        ) as mock_client_class, patch(
-            "src.trackhs_mcp.server.FastMCP"
-        ) as mock_fastmcp_class:
+        with (
+            patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
+            patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
+            patch("src.trackhs_mcp.server.FastMCP") as mock_fastmcp_class,
+        ):
 
             mock_config_class.return_value = mock_config
             mock_client_class.return_value = Mock()
@@ -102,11 +102,11 @@ class TestServerE2E:
     @pytest.mark.asyncio
     async def test_server_with_real_components(self, mock_config):
         """Test servidor con componentes reales"""
-        with patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class, patch(
-            "src.trackhs_mcp.server.TrackHSApiClient"
-        ) as mock_client_class, patch(
-            "src.trackhs_mcp.server.FastMCP"
-        ) as mock_fastmcp_class:
+        with (
+            patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
+            patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
+            patch("src.trackhs_mcp.server.FastMCP") as mock_fastmcp_class,
+        ):
 
             mock_config_class.return_value = mock_config
             mock_client_class.return_value = Mock()
@@ -152,13 +152,11 @@ class TestServerE2E:
                 "TRACKHS_TIMEOUT": "30",
             },
         ):
-            with patch(
-                "src.trackhs_mcp.server.TrackHSConfig"
-            ) as mock_config_class, patch(
-                "src.trackhs_mcp.server.TrackHSApiClient"
-            ) as mock_client_class, patch(
-                "src.trackhs_mcp.server.FastMCP"
-            ) as mock_fastmcp_class:
+            with (
+                patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
+                patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
+                patch("src.trackhs_mcp.server.FastMCP") as mock_fastmcp_class,
+            ):
 
                 mock_config_class.return_value = Mock()
                 mock_client_class.return_value = Mock()
@@ -178,9 +176,10 @@ class TestServerE2E:
     @pytest.mark.e2e
     def test_server_error_handling(self):
         """Test manejo de errores en el servidor"""
-        with patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class, patch(
-            "src.trackhs_mcp.server.TrackHSApiClient"
-        ) as mock_client_class:
+        with (
+            patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
+            patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
+        ):
 
             # Simular error en la configuración
             mock_config_class.side_effect = Exception("Configuration error")
@@ -212,9 +211,10 @@ class TestServerE2E:
     @pytest.mark.e2e
     def test_server_path_manipulation(self):
         """Test manipulación de paths en el servidor"""
-        with patch("src.trackhs_mcp.server.sys") as mock_sys, patch(
-            "src.trackhs_mcp.server.Path"
-        ) as mock_path:
+        with (
+            patch("src.trackhs_mcp.server.sys") as mock_sys,
+            patch("src.trackhs_mcp.server.Path") as mock_path,
+        ):
 
             mock_path.return_value.parent.parent = Mock()
             mock_path.return_value.parent.parent.__str__ = Mock(
@@ -241,11 +241,11 @@ class TestServerE2E:
     @pytest.mark.asyncio
     async def test_server_component_registration_flow(self, mock_config):
         """Test flujo completo de registro de componentes"""
-        with patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class, patch(
-            "src.trackhs_mcp.server.TrackHSApiClient"
-        ) as mock_client_class, patch(
-            "src.trackhs_mcp.server.FastMCP"
-        ) as mock_fastmcp_class:
+        with (
+            patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
+            patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
+            patch("src.trackhs_mcp.server.FastMCP") as mock_fastmcp_class,
+        ):
 
             mock_config_class.return_value = mock_config
             mock_client_class.return_value = Mock()
@@ -298,9 +298,10 @@ class TestServerE2E:
     @pytest.mark.e2e
     def test_server_configuration_validation(self, mock_config):
         """Test validación de configuración del servidor"""
-        with patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class, patch(
-            "src.trackhs_mcp.server.TrackHSApiClient"
-        ) as mock_client_class:
+        with (
+            patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
+            patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
+        ):
 
             mock_config_class.return_value = mock_config
             mock_client_class.return_value = Mock()
@@ -320,9 +321,10 @@ class TestServerE2E:
     @pytest.mark.e2e
     def test_server_api_client_initialization(self, mock_config):
         """Test inicialización del API client"""
-        with patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class, patch(
-            "src.trackhs_mcp.server.TrackHSApiClient"
-        ) as mock_client_class:
+        with (
+            patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
+            patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
+        ):
 
             mock_config_class.return_value = mock_config
             mock_client_class.return_value = Mock()

@@ -77,14 +77,18 @@ class TestSearchReservationsValidation:
         """Test que scroll deshabilita sorting"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(scroll=1, sort_column="status")
-        assert "When using scroll" in str(exc_info.value) and "sorting is disabled" in str(exc_info.value)
+        assert "When using scroll" in str(
+            exc_info.value
+        ) and "sorting is disabled" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_scroll_disables_sorting_direction(self, search_tool):
         """Test que scroll deshabilita sorting direction"""
         with pytest.raises(ValidationError) as exc_info:
             await search_tool(scroll=1, sort_direction="desc")
-        assert "When using scroll" in str(exc_info.value) and "sorting is disabled" in str(exc_info.value)
+        assert "When using scroll" in str(
+            exc_info.value
+        ) and "sorting is disabled" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_scroll_valid_usage(self, search_tool):

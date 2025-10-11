@@ -180,9 +180,10 @@ class TestErrorHandler:
         """Test manejo de errores críticos"""
         error = TrackHSError("Critical error", ErrorSeverity.CRITICAL)
 
-        with patch.object(error_handler.logger, "log") as mock_log, patch.object(
-            error_handler.logger, "critical"
-        ) as mock_critical:
+        with (
+            patch.object(error_handler.logger, "log") as mock_log,
+            patch.object(error_handler.logger, "critical") as mock_critical,
+        ):
             error_handler.handle_error(error, "critical_operation")
 
             mock_log.assert_called_once()

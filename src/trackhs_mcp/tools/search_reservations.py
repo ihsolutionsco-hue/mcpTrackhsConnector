@@ -378,7 +378,7 @@ def _parse_id_string(id_string: Union[str, int]) -> Union[int, List[int]]:
     # Si ya es un entero, devolverlo directamente
     if isinstance(id_string, int):
         return id_string
-    
+
     if not id_string or not str(id_string).strip():
         raise ValidationError("ID string cannot be empty", "id")
 
