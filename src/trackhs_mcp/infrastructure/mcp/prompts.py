@@ -4,7 +4,7 @@ Basado en la especificación completa de la API Search Reservations V2
 """
 
 # datetime imports removed - not used
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from ...application.ports.api_client_port import ApiClientPort
 from ..utils.logging import get_logger
@@ -74,7 +74,7 @@ def register_all_prompts(mcp, api_client: ApiClientPort):
 
     @mcp.prompt("unit-availability")
     async def unit_availability(
-        check_in: str, check_out: str, node_id: Optional[str] = None
+        start_date: str, end_date: str, unit_type: Optional[str] = None
     ) -> Dict[str, Any]:
         """Verificar disponibilidad de unidades para fechas específicas"""
         return {
@@ -84,9 +84,9 @@ def register_all_prompts(mcp, api_client: ApiClientPort):
                     "content": {
                         "type": "text",
                         "text": f"""Necesito verificar la disponibilidad de unidades:
-- Entrada: {check_in}
-- Salida: {check_out}
-{f'- Nodo específico: {node_id}' if node_id else ''}
+- Fecha inicio: {start_date}
+- Fecha fin: {end_date}
+{f'- Tipo de unidad: {unit_type}' if unit_type else ''}
 
 Por favor:
 1. Lista todas las unidades disponibles
@@ -102,24 +102,34 @@ Por favor:
 
     @mcp.prompt("guest-contact-info")
     async def guest_contact_info(
-        reservation_id: Optional[str] = None, search_term: Optional[str] = None
+        reservation_id: Optional[str] = None,
+        search_term: Optional[str] = None,
+        contact_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Obtener información de contacto de huéspedes para reservas específicas"""
+        reservation_text = (
+            f"- Para la reserva ID: {reservation_id}" if reservation_id else ""
+        )
+        search_text = f"- Filtrando por: {search_term}" if search_term else ""
+        contact_text = f"- Contacto ID: {contact_id}" if contact_id else ""
+
         return {
             "messages": [
                 {
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Necesito obtener información de contacto:
-{f'- Para la reserva ID: {reservation_id}' if reservation_id else ''}
-{f'- Filtrando por: {search_term}' if search_term else ''}
+                        "text": f"""Necesito obtener información de contacto de huéspedes:
+{reservation_text}
+{search_text}
+{contact_text}
 
 Por favor:
-1. Obtén la información de contacto completa
+1. Obtén la información de contacto completa usando search_reservations
 2. Incluye nombre, email, teléfono y dirección
 3. Verifica si hay notas especiales o preferencias
-4. Proporciona un resumen organizado por reserva""",
+4. Proporciona un resumen organizado por reserva
+5. Usa contactId para filtrar contactos específicos""",
                     },
                 }
             ]
@@ -127,25 +137,36 @@ Por favor:
 
     @mcp.prompt("maintenance-summary")
     async def maintenance_summary(
-        status: str = "all", days: int = 30
+        status: str = "all",
+        days: int = 30,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Obtener resumen de órdenes de mantenimiento"""
+        status_text = "Todas" if status == "all" else status
+        date_text = (
+            f"- Fechas: {start_date} a {end_date}"
+            if start_date and end_date
+            else f"- Período: Últimos {days} días"
+        )
+
         return {
             "messages": [
                 {
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Necesito un resumen de las órdenes de mantenimiento:
-- Estado: {status if status != 'all' else 'Todas'}
-- Período: Últimos {days} días
+                        "text": f"""Necesito un resumen de las órdenes de mantenimiento:
+- Estado: {status_text}
+{date_text}
 
 Por favor:
-1. Lista todas las órdenes que coincidan con los criterios
+1. Lista todas las órdenes que coincidan con los criterios usando search_reservations
 2. Agrupa por estado (pendiente, en progreso, completada)
 3. Incluye información de prioridad y fecha de vencimiento
 4. Proporciona estadísticas de completitud
-5. Identifica órdenes urgentes o vencidas""",
+5. Identifica órdenes urgentes o vencidas
+6. Incluye información de unidades afectadas""",
                     },
                 }
             ]
@@ -153,25 +174,66 @@ Por favor:
 
     @mcp.prompt("financial-analysis")
     async def financial_analysis(
-        period: str, include_forecast: bool = False
+        period: str = "monthly",
+        include_forecast: bool = False,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        analysis_type: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Obtener un análisis financiero básico de reservas y cuentas"""
+        period_text = f"- Tipo: {period}"
+        forecast_text = f"- Incluir pronósticos: {'Sí' if include_forecast else 'No'}"
+        date_text = (
+            f"- Fechas: {start_date} a {end_date}" if start_date and end_date else ""
+        )
+        analysis_text = f"- Tipo de análisis: {analysis_type}" if analysis_type else ""
+
         return {
             "messages": [
                 {
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Necesito análisis financiero para: {period}
-{f'- Incluir proyecciones futuras' if include_forecast else ''}
+                        "text": f"""Análisis financiero de reservas:
 
-Por favor:
-1. Obtén datos de reservas para el período
-2. Calcula ingresos totales y promedio por reserva
-3. Analiza ocupación y tarifas
-4. Incluye información de cuentas contables relevantes
-5. Proporciona métricas clave de rendimiento
-{f'6. Incluye proyecciones basadas en tendencias' if include_forecast else ''}""",
+**Período de Análisis:**
+{period_text}
+{forecast_text}
+{date_text}
+{analysis_text}
+
+**Métricas a Calcular:**
+1. **Ingresos Totales:**
+   - Ingresos brutos (gross_rent)
+   - Ingresos netos (net_rent)
+   - Comparación con períodos anteriores
+
+2. **Análisis de Tarifas:**
+   - ADR (Average Daily Rate) por unidad
+   - RevPAR (Revenue per Available Room)
+   - Análisis de estacionalidad
+
+3. **Rentabilidad por Reserva:**
+   - Desglose de guest_breakdown
+   - Análisis de owner_breakdown
+   - Identificación de reservas más rentables
+
+4. **Productos Adicionales:**
+   - Seguros de viaje
+   - Planes de pago
+   - Servicios adicionales
+
+**Usar search_reservations con:**
+- Parámetros de fecha apropiados
+- Incluir todos los campos financieros
+- Agrupar por nodo y tipo de unidad
+- Calcular métricas de ocupación
+
+**Formato de Salida:**
+- Dashboard financiero ejecutivo
+- Gráficos de tendencias
+- Análisis comparativo
+- Recomendaciones estratégicas""",
                     },
                 }
             ]
@@ -186,26 +248,50 @@ Por favor:
         unit_type_id: Optional[str] = None,
         contact_id: Optional[str] = None,
         scroll_mode: bool = False,
+        search_criteria: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Búsqueda avanzada de reservas usando API V2"""
+        term_text = (
+            f"- Término: {search_term}" if search_term else "- Sin término específico"
+        )
+        status_text = f"- Estado: {status}" if status else "- Todos"
+        date_text = f"- Fechas: {date_range}" if date_range else "- Sin filtro"
+        node_text = f"- Nodo: {node_id}" if node_id else "- Todos"
+        unit_text = (
+            f"- Tipo de unidad ID: {unit_type_id}"
+            if unit_type_id
+            else "- Todos los tipos"
+        )
+        contact_text = (
+            f"- Contacto ID: {contact_id}" if contact_id else "- Todos los contactos"
+        )
+
+        criteria_text = ""
+        if search_criteria:
+            criteria_items = []
+            for key, value in search_criteria.items():
+                criteria_items.append(f"- {key}: {value}")
+            criteria_text = "\n".join(criteria_items)
+
         return {
             "messages": [
                 {
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Realiza búsqueda avanzada de reservas con criterios:
+                        "text": f"""Realiza búsqueda avanzada de reservas con criterios:
 
 **Criterios de Búsqueda:**
-{f'- Término: {search_term}' if search_term else '- Sin término específico'}
-{f'- Estado: {status}' if status else '- Todos'}
-{f'- Fechas: {date_range}' if date_range else '- Sin filtro'}
-{f'- Nodo: {node_id}' if node_id else '- Todos'}
-{f'- Tipo de unidad ID: {unit_type_id}' if unit_type_id else '- Todos los tipos'}
-{f'- Contacto ID: {contact_id}' if contact_id else '- Todos los contactos'}
+{term_text}
+{status_text}
+{date_text}
+{node_text}
+{unit_text}
+{contact_text}
+{f'**Criterios Adicionales:**\n{criteria_text}' if criteria_text else ''}
 
 **Configuración de Búsqueda:**
-- Usar API V2: /v2/pms/reservations
+- Usar search_reservations con API V2: /v2/pms/reservations
 - Modo de paginación: {'Scroll (para grandes conjuntos)' if scroll_mode else 'Estándar'}
 - Ordenamiento: Por fecha de llegada (arrivalStart)
 - Tamaño de página: {'100 (scroll)' if scroll_mode else '50 (estándar)'}
@@ -224,6 +310,7 @@ Por favor:
 - Filtros de ID: travelAgentId, campaignId, userId, rateTypeId
 - Filtros especiales: inHouseToday, tags, groupId, checkinOfficeId
 - Ordenamiento: name, status, altConf, agreementStatus, type, guest, guests
+- Parámetros de búsqueda avanzada disponibles
 
 **Formato de Respuesta:**
 - Resumen ejecutivo con métricas clave
@@ -238,26 +325,47 @@ Por favor:
 
     @mcp.prompt("reservation-analytics")
     async def reservation_analytics(
-        start_date: str,
-        end_date: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
         group_by: str = "node",
         include_financials: bool = True,
         include_occupancy: bool = True,
+        metrics: Optional[List[str]] = None,
+        period: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Análisis avanzado de reservas con métricas y KPIs"""
+        date_text = (
+            f"- Período: {start_date} a {end_date}"
+            if start_date and end_date
+            else "- Período: Sin especificar"
+        )
+        group_text = f"- Agrupación: {group_by} (node, unitType, status, channel)"
+        financial_text = (
+            f"- Incluir información financiera: {'Sí' if include_financials else 'No'}"
+        )
+        occupancy_text = (
+            f"- Incluir análisis de ocupación: {'Sí' if include_occupancy else 'No'}"
+        )
+        metrics_text = (
+            f"- Métricas específicas: {', '.join(metrics)}" if metrics else ""
+        )
+        period_text = f"- Período de análisis: {period}" if period else ""
+
         return {
             "messages": [
                 {
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Análisis de reservas para {start_date} a {end_date}:
+                        "text": f"""Análisis de reservas:
 
 **Parámetros de Análisis:**
-- Período: {start_date} a {end_date}
-- Agrupación: {group_by} (node, unitType, status, channel)
-- Incluir información financiera: {'Sí' if include_financials else 'No'}
-- Incluir análisis de ocupación: {'Sí' if include_occupancy else 'No'}
+{date_text}
+{group_text}
+{financial_text}
+{occupancy_text}
+{metrics_text}
+{period_text}
 
 **Métricas a Calcular:**
 1. **Ocupación:**
@@ -284,9 +392,9 @@ Por favor:
    - Tiempo de respuesta por canal
    - Eficiencia de check-in/check-out
 
-**Usar API V2 con:**
-- arrivalStart: {start_date}
-- arrivalEnd: {end_date}
+**Usar search_reservations con:**
+- arrivalStart: {start_date or 'fecha_inicio'}
+- arrivalEnd: {end_date or 'fecha_fin'}
 - Parámetros de scroll para grandes conjuntos
 - Ordenamiento por fecha y nodo
 - Incluir todos los campos de desglose financiero
@@ -296,7 +404,8 @@ Por favor:
 - Gráficos de tendencias temporales
 - Análisis comparativo por nodo/tipo
 - Recomendaciones estratégicas
-- Identificación de oportunidades de mejora""",
+- Identificación de oportunidades de mejora
+- Estadísticas detalladas de rendimiento""",
                     },
                 }
             ]
@@ -307,20 +416,40 @@ Por favor:
         reservation_id: Optional[str] = None,
         contact_id: Optional[str] = None,
         include_history: bool = True,
+        focus_area: Optional[str] = None,
+        time_period: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Análisis de experiencia del huésped con información completa de la API V2"""
+        reservation_text = (
+            f"- Reserva ID: {reservation_id}"
+            if reservation_id
+            else "- Sin reserva específica"
+        )
+        contact_text = (
+            f"- Contacto ID: {contact_id}"
+            if contact_id
+            else "- Sin contacto específico"
+        )
+        history_text = (
+            f"- Incluir historial completo: {'Sí' if include_history else 'No'}"
+        )
+        focus_text = f"- Área de enfoque: {focus_area}" if focus_area else ""
+        time_text = f"- Período de tiempo: {time_period}" if time_period else ""
+
         return {
             "messages": [
                 {
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Análisis de experiencia:
+                        "text": f"""Análisis de experiencia:
 
 **Identificación:**
-{f'- Reserva ID: {reservation_id}' if reservation_id else '- Sin reserva específica'}
-{f'- Contacto ID: {contact_id}' if contact_id else '- Sin contacto específico'}
-{f'- Incluir historial completo: {"Sí" if include_history else "No"}'}
+{reservation_text}
+{contact_text}
+{history_text}
+{focus_text}
+{time_text}
 
 **Información a Recopilar:**
 1. **Datos de la Reserva:**
@@ -359,7 +488,7 @@ Por favor:
 - Identificación de problemas potenciales
 - Recomendaciones de mejora
 - Seguimiento de preferencias
-- Análisis de satisfacción basado en datos
+- Análisis de satisfacción y comentarios basado en datos
 
 **Usar herramientas:**
 - search_reservations para datos de reserva

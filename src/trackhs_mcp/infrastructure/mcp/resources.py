@@ -622,7 +622,7 @@ def register_all_resources(mcp, api_client: ApiClientPort):
             "description": "Estructura de datos para unidades en TrackHS",
         }
 
-    @mcp.resource("trackhs://status/system")
+    @mcp.resource("trackhs://system/status")
     async def system_status() -> Dict[str, Any]:
         """Estado actual del sistema TrackHS y configuración"""
         return {
@@ -634,7 +634,7 @@ def register_all_resources(mcp, api_client: ApiClientPort):
             "capabilities": ["tools", "resources", "prompts"],
         }
 
-    @mcp.resource("trackhs://docs/api")
+    @mcp.resource("trackhs://api/documentation")
     async def api_documentation() -> str:
         """Documentación completa de la API de TrackHS V2"""
         return """# TrackHS API V2 Documentation

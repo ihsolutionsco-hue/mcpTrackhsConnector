@@ -109,7 +109,7 @@ class TestPromptsIntegration:
         # Obtener la función registrada
         prompt_func = registered_functions["unit-availability"]
 
-        result = await prompt_func(check_in="2024-01-15", check_out="2024-01-20")
+        result = await prompt_func(start_date="2024-01-15", end_date="2024-01-20")
 
         assert "messages" in result
         message = result["messages"][0]
@@ -494,9 +494,11 @@ class TestPromptsIntegration:
 
         # Test que los prompts se pueden ejecutar sin errores
         for call in mock_mcp.prompt.call_args_list:
-            prompt_func = call[0][1]
-            result = await prompt_func()
+            # call[0] es una tupla con (name, function)
+            if len(call[0]) >= 2:
+                prompt_func = call[0][1]
+                result = await prompt_func()
 
-            assert "messages" in result
-            assert len(result["messages"]) > 0
-            assert result["messages"][0]["role"] == "user"
+                assert "messages" in result
+                assert len(result["messages"]) > 0
+                assert result["messages"][0]["role"] == "user"
