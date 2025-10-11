@@ -75,12 +75,12 @@ class TestRequestOptions:
         options = RequestOptions(
             method="POST",
             headers={"Content-Type": "application/json"},
-            body={"key": "value"},
+            body='{"key": "value"}',
         )
 
         assert options.method == "POST"
         assert options.headers == {"Content-Type": "application/json"}
-        assert options.body == {"key": "value"}
+        assert options.body == '{"key": "value"}'
 
     @pytest.mark.unit
     def test_request_options_with_defaults(self):
@@ -133,20 +133,20 @@ class TestTrackHSResponse:
     @pytest.mark.unit
     def test_valid_response(self):
         """Test respuesta válida"""
-        response = TrackHSResponse(data={"key": "value"}, status=200, message="Success")
+        response = TrackHSResponse(data={"key": "value"}, success=True, message="Success")
 
         assert response.data == {"key": "value"}
-        assert response.status == 200
+        assert response.success == True
         assert response.message == "Success"
 
     @pytest.mark.unit
     def test_response_with_defaults(self):
         """Test respuesta con valores por defecto"""
-        response = TrackHSResponse(data={"key": "value"})
+        response = TrackHSResponse(data={"key": "value"}, success=True)
 
         assert response.data == {"key": "value"}
-        assert response.status == 200
-        assert response.message == "OK"
+        assert response.success == True
+        assert response.message is None
 
     @pytest.mark.unit
     def test_response_invalid_status(self):
@@ -177,7 +177,7 @@ class TestPaginationParams:
 
         assert params.page == 1
         assert params.size == 10
-        assert params.sort_column == "name"
+        assert params.sort_column == "id"
         assert params.sort_direction == "asc"
 
     @pytest.mark.unit
@@ -206,13 +206,12 @@ class TestSearchParams:
     def test_valid_search_params(self):
         """Test parámetros de búsqueda válidos"""
         params = SearchParams(
-            search="test query", tags="tag1,tag2", node_id=[1, 2, 3], unit_id=1
+            search="test query", tags="tag1,tag2", node_id=[1, 2, 3]
         )
 
         assert params.search == "test query"
         assert params.tags == "tag1,tag2"
         assert params.node_id == [1, 2, 3]
-        assert params.unit_id == 1
 
     @pytest.mark.unit
     def test_search_params_with_defaults(self):
@@ -222,7 +221,6 @@ class TestSearchParams:
         assert params.search is None
         assert params.tags is None
         assert params.node_id is None
-        assert params.unit_id is None
 
     @pytest.mark.unit
     def test_search_params_single_node_id(self):

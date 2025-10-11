@@ -327,32 +327,58 @@ class TestPaginationUtility:
     @pytest.mark.asyncio
     async def test_get_all_pages(self, pagination_utility, mock_api_client):
         """Test obtención de todas las páginas"""
-        mock_api_client.get.return_value = {
-            "_embedded": {"reservations": [{"id": 1}]},
-            "page": 1,
-            "page_size": 10,
-            "total_items": 10,
-        }
+        # Crear resultados de paginación simulados
+        from src.trackhs_mcp.core.pagination import PaginationResult
+        
+        result1 = PaginationResult(
+            data=[{"id": 1}, {"id": 2}],
+            page=1,
+            page_size=2,
+            total_items=4,
+            has_next=True
+        )
+        result2 = PaginationResult(
+            data=[{"id": 3}, {"id": 4}],
+            page=2,
+            page_size=2,
+            total_items=4,
+            has_next=False
+        )
+        
+        results = [result1, result2]
+        all_data = pagination_utility.get_all_pages(results)
 
-        all_data = await pagination_utility.get_all_pages(mock_api_client, "/test", {})
-
-        assert len(all_data) == 1
-        assert len(all_data[0].data) == 1
+        assert len(all_data) == 4
+        assert all_data[0]["id"] == 1
+        assert all_data[3]["id"] == 4
 
     @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_get_summary(self, pagination_utility, mock_api_client):
         """Test obtención de resumen"""
-        mock_api_client.get.return_value = {
-            "_embedded": {"reservations": [{"id": 1}]},
-            "page": 1,
-            "page_size": 10,
-            "total_items": 10,
-        }
-
-        summary = await pagination_utility.get_summary(mock_api_client, "/test", {})
+        # Crear resultados de paginación simulados
+        from src.trackhs_mcp.core.pagination import PaginationResult
+        
+        result1 = PaginationResult(
+            data=[{"id": 1}, {"id": 2}],
+            page=1,
+            page_size=2,
+            total_items=4,
+            has_next=True
+        )
+        result2 = PaginationResult(
+            data=[{"id": 3}, {"id": 4}],
+            page=2,
+            page_size=2,
+            total_items=4,
+            has_next=False
+        )
+        
+        results = [result1, result2]
+        summary = pagination_utility.get_summary(results)
 
         assert "total_items" in summary
         assert "total_pages" in summary
-        assert "current_page" in summary
-        assert summary["total_items"] == 10
+        assert "pages_processed" in summary
+        assert summary["total_items"] == 4
+        assert summary["total_pages"] == 2

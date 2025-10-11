@@ -30,157 +30,167 @@ class TestSearchReservationsValidation:
         register_search_reservations(mock_mcp, mock_api_client)
         return mock_mcp.tool.call_args[0][0]
 
-    def test_page_validation_zero_allowed(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_page_validation_zero_allowed(self, search_tool):
         """Test que página 0 es válida según documentación API V2"""
         # Página 0 debe ser válida
-        search_tool(page=0, size=10)
+        await search_tool(page=0, size=10)
         # No debe lanzar excepción
 
-    def test_page_validation_negative_invalid(self, search_tool):
+    @pytest.mark.asyncio
+    async def test_page_validation_negative_invalid(self, search_tool):
         """Test que página negativa es inválida"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(page=-1, size=10)
+            await search_tool(page=-1, size=10)
         assert "Page must be >= 0" in str(exc_info.value)
 
-    def test_size_validation_minimum(self, search_tool):
-        """Test validación de tamaño mínimo"""
+    @pytest.mark.asyncio
+        async def test_size_validation_minimum(self, search_tool):
+            """Test validación de tamaño mínimo"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(page=1, size=0)
+            await search_tool(page=1, size=0)
         assert "Size must be >= 1" in str(exc_info.value)
 
-    def test_total_results_limit(self, search_tool):
-        """Test límite de 10k resultados totales"""
+    @pytest.mark.asyncio
+        async def test_total_results_limit(self, search_tool):
+            """Test límite de 10k resultados totales"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(page=1000, size=10)
+            await search_tool(page=1000, size=10)
         assert "Total results (page * size) must be <= 10,000" in str(exc_info.value)
 
-    def test_scroll_validation_start_with_one(self, search_tool):
-        """Test que scroll debe empezar con 1"""
+    @pytest.mark.asyncio
+        async def test_scroll_validation_start_with_one(self, search_tool):
+            """Test que scroll debe empezar con 1"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(scroll=2)
+            await search_tool(scroll=2)
         assert "Scroll must start with 1" in str(exc_info.value)
 
-    def test_scroll_validation_empty_string(self, search_tool):
-        """Test que scroll string no puede estar vacío"""
+    @pytest.mark.asyncio
+        async def test_scroll_validation_empty_string(self, search_tool):
+            """Test que scroll string no puede estar vacío"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(scroll="")
+            await search_tool(scroll="")
         assert "Scroll string cannot be empty" in str(exc_info.value)
 
-    def test_scroll_disables_sorting(self, search_tool):
-        """Test que scroll deshabilita sorting"""
+    @pytest.mark.asyncio
+        async def test_scroll_disables_sorting(self, search_tool):
+            """Test que scroll deshabilita sorting"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(scroll=1, sort_column="status")
+            await search_tool(scroll=1, sort_column="status")
         assert "When using scroll, sorting is disabled" in str(exc_info.value)
 
-    def test_scroll_disables_sorting_direction(self, search_tool):
-        """Test que scroll deshabilita sorting direction"""
+    @pytest.mark.asyncio
+        async def test_scroll_disables_sorting_direction(self, search_tool):
+            """Test que scroll deshabilita sorting direction"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(scroll=1, sort_direction="desc")
+            await search_tool(scroll=1, sort_direction="desc")
         assert "When using scroll, sorting is disabled" in str(exc_info.value)
 
     def test_scroll_valid_usage(self, search_tool):
         """Test uso válido de scroll"""
         # Scroll con valores por defecto debe ser válido
-        search_tool(scroll=1)
+        await search_tool(scroll=1)
         # No debe lanzar excepción
 
     def test_date_validation_flexible_formats(self, search_tool):
         """Test validación flexible de fechas - acepta múltiples formatos"""
         # Fecha con timezone Z (formato completo)
-        search_tool(arrival_start="2024-01-01T00:00:00Z")
+        await search_tool(arrival_start="2024-01-01T00:00:00Z")
 
         # Solo fecha (se normaliza automáticamente)
-        search_tool(arrival_start="2024-01-01")
+        await search_tool(arrival_start="2024-01-01")
 
         # Fecha con tiempo sin timezone (se normaliza automáticamente)
-        search_tool(arrival_start="2024-01-01T00:00:00")
+        await search_tool(arrival_start="2024-01-01T00:00:00")
 
         # Fecha con timezone offset
-        search_tool(arrival_start="2024-01-01T00:00:00+00:00")
+        await search_tool(arrival_start="2024-01-01T00:00:00+00:00")
 
         # Fecha con microsegundos
-        search_tool(arrival_start="2024-01-01T00:00:00.123Z")
+        await search_tool(arrival_start="2024-01-01T00:00:00.123Z")
 
     def test_date_validation_with_timezone(self, search_tool):
         """Test validación de fechas con timezone"""
         # Fecha con Z
-        search_tool(arrival_start="2024-01-01T00:00:00Z")
+        await search_tool(arrival_start="2024-01-01T00:00:00Z")
 
         # Fecha con timezone offset
-        search_tool(arrival_start="2024-01-01T00:00:00+00:00")
+        await search_tool(arrival_start="2024-01-01T00:00:00+00:00")
 
         # Fecha con microsegundos
-        search_tool(arrival_start="2024-01-01T00:00:00.123Z")
+        await search_tool(arrival_start="2024-01-01T00:00:00.123Z")
 
     def test_status_validation_single(self, search_tool):
         """Test validación de status individual"""
         # Status válido
-        search_tool(status="Confirmed")
+        await search_tool(status="Confirmed")
 
         # Status inválido
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(status="InvalidStatus")
+            await search_tool(status="InvalidStatus")
         assert "Invalid status" in str(exc_info.value)
 
     def test_status_validation_list(self, search_tool):
         """Test validación de status como lista"""
         # Lista válida
-        search_tool(status=["Confirmed", "Checked In"])
+        await search_tool(status=["Confirmed", "Checked In"])
 
         # Lista con status inválido
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(status=["Confirmed", "InvalidStatus"])
+            await search_tool(status=["Confirmed", "InvalidStatus"])
         assert "Invalid status" in str(exc_info.value)
 
     def test_status_validation_comma_separated(self, search_tool):
         """Test validación de status separado por comas"""
         # String con comas válido
-        search_tool(status="Confirmed,Checked In")
+        await search_tool(status="Confirmed,Checked In")
 
         # String con comas inválido
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(status="Confirmed,InvalidStatus")
+            await search_tool(status="Confirmed,InvalidStatus")
         assert "Invalid status" in str(exc_info.value)
 
     def test_in_house_today_validation(self, search_tool):
         """Test validación de in_house_today"""
         # Valores válidos
-        search_tool(in_house_today=0)
-        search_tool(in_house_today=1)
+        await search_tool(in_house_today=0)
+        await search_tool(in_house_today=1)
 
         # Valor inválido (debe ser 0 o 1)
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(in_house_today=2)
+            await search_tool(in_house_today=2)
         # Esto debería fallar en la validación de tipo
 
     def test_id_parsing_single(self, search_tool):
         """Test parsing de ID único"""
         # ID único como string
-        search_tool(node_id="123")
+        await search_tool(node_id="123")
 
         # ID único como entero
-        search_tool(node_id=123)
+        await search_tool(node_id=123)
 
     def test_id_parsing_comma_separated(self, search_tool):
         """Test parsing de IDs separados por comas"""
         # IDs separados por comas
-        search_tool(node_id="123,456,789")
+        await search_tool(node_id="123,456,789")
 
     def test_id_parsing_array_string(self, search_tool):
         """Test parsing de array en formato string"""
         # Array en formato string
-        search_tool(node_id="[123,456,789]")
+        await search_tool(node_id="[123,456,789]")
 
-    def test_id_parsing_empty_string(self, search_tool):
-        """Test parsing de string vacío"""
+    @pytest.mark.asyncio
+        async def test_id_parsing_empty_string(self, search_tool):
+            """Test parsing de string vacío"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(node_id="")
+            await search_tool(node_id="")
         assert "ID string cannot be empty" in str(exc_info.value)
 
-    def test_id_parsing_invalid_format(self, search_tool):
-        """Test parsing de formato inválido"""
+    @pytest.mark.asyncio
+        async def test_id_parsing_invalid_format(self, search_tool):
+            """Test parsing de formato inválido"""
         with pytest.raises(ValidationError) as exc_info:
-            search_tool(node_id="invalid")
+            await search_tool(node_id="invalid")
         assert "Invalid ID format" in str(exc_info.value)
 
     @pytest.mark.asyncio
