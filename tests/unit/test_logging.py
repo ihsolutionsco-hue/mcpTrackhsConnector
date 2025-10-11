@@ -130,10 +130,11 @@ class TestTrackHSLogger:
         context = LogContext(request_id="req123", tool_name="test")
 
         # Use the private method for testing
-        formatted = logger._format_message(message, context, LogCategory.API, LogLevel.INFO)
+        formatted = logger._format_message(message, context, LogCategory.API_REQUEST, LogLevel.INFO)
 
-        assert "Test message" in formatted
-        assert "req123" in formatted or "test" in formatted
+        assert "Test message" in formatted["message"]
+        assert formatted["context"]["request_id"] == "req123"
+        assert formatted["context"]["tool_name"] == "test"
 
     @pytest.mark.unit
     def test_log_basic(self, logger):
