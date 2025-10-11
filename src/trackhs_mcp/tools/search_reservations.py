@@ -23,15 +23,15 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         sort_direction: Literal["asc", "desc"] = "asc",
         search: Optional[str] = None,
         tags: Optional[str] = None,
-        node_id: Optional[Union[int, List[int]]] = None,
-        unit_id: Optional[Union[int, List[int]]] = None,
-        reservation_type_id: Optional[Union[int, List[int]]] = None,
-        contact_id: Optional[Union[int, List[int]]] = None,
-        travel_agent_id: Optional[Union[int, List[int]]] = None,
-        campaign_id: Optional[Union[int, List[int]]] = None,
-        user_id: Optional[Union[int, List[int]]] = None,
-        unit_type_id: Optional[Union[int, List[int]]] = None,
-        rate_type_id: Optional[Union[int, List[int]]] = None,
+        node_id: Optional[str] = None,
+        unit_id: Optional[str] = None,
+        reservation_type_id: Optional[str] = None,
+        contact_id: Optional[str] = None,
+        travel_agent_id: Optional[str] = None,
+        campaign_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        unit_type_id: Optional[str] = None,
+        rate_type_id: Optional[str] = None,
         booked_start: Optional[str] = None,
         booked_end: Optional[str] = None,
         arrival_start: Optional[str] = None,
@@ -41,7 +41,7 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         updated_since: Optional[str] = None,
         scroll: Optional[Union[int, str]] = None,
         in_house_today: Optional[Literal[0, 1]] = None,
-        status: Optional[Union[Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"], List[str]]] = None,
+        status: Optional[Union[str, List[str]]] = None,
         group_id: Optional[int] = None,
         checkin_office_id: Optional[int] = None
     ):
@@ -55,15 +55,15 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             sort_direction: Dirección de ordenamiento (default: "asc")
             search: Búsqueda por substring en nombre o descripciones
             tags: Búsqueda por ID de tag
-            node_id: ID(s) del nodo específico
-            unit_id: ID(s) de la unidad específica
-            reservation_type_id: ID(s) del tipo de reserva específico
-            contact_id: ID(s) del contacto específico
-            travel_agent_id: ID(s) del agente de viajes específico
-            campaign_id: ID(s) de la campaña específica
-            user_id: ID(s) del usuario específico
-            unit_type_id: ID(s) del tipo de unidad específico
-            rate_type_id: ID(s) del tipo de tarifa específico
+            node_id: ID(s) del nodo específico (entero, array o string separado por comas)
+            unit_id: ID(s) de la unidad específica (entero, array o string separado por comas)
+            reservation_type_id: ID(s) del tipo de reserva específico (entero, array o string separado por comas)
+            contact_id: ID(s) del contacto específico (entero, array o string separado por comas)
+            travel_agent_id: ID(s) del agente de viajes específico (entero, array o string separado por comas)
+            campaign_id: ID(s) de la campaña específica (entero, array o string separado por comas)
+            user_id: ID(s) del usuario específico (entero, array o string separado por comas)
+            unit_type_id: ID(s) del tipo de unidad específico (entero, array o string separado por comas)
+            rate_type_id: ID(s) del tipo de tarifa específico (entero, array o string separado por comas)
             booked_start: Fecha de inicio de reserva (ISO 8601)
             booked_end: Fecha de fin de reserva (ISO 8601)
             arrival_start: Fecha de inicio de llegada (ISO 8601)
@@ -73,7 +73,7 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             updated_since: Fecha de actualización desde (ISO 8601)
             scroll: Scroll de Elasticsearch (1 para empezar, string para continuar)
             in_house_today: Filtrar por en casa hoy (0 o 1)
-            status: Estado(s) de la reserva
+            status: Estado(s) de la reserva (string individual o lista de strings). Valores válidos: "Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"
             group_id: ID del grupo conectado
             checkin_office_id: ID de la oficina de check-in
         """
@@ -111,23 +111,23 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         if tags:
             query_params["tags"] = tags
         if node_id:
-            query_params["nodeId"] = _format_id_param(node_id)
+            query_params["nodeId"] = _parse_id_string(node_id)
         if unit_id:
-            query_params["unitId"] = _format_id_param(unit_id)
+            query_params["unitId"] = _parse_id_string(unit_id)
         if reservation_type_id:
-            query_params["reservationTypeId"] = _format_id_param(reservation_type_id)
+            query_params["reservationTypeId"] = _parse_id_string(reservation_type_id)
         if contact_id:
-            query_params["contactId"] = _format_id_param(contact_id)
+            query_params["contactId"] = _parse_id_string(contact_id)
         if travel_agent_id:
-            query_params["travelAgentId"] = _format_id_param(travel_agent_id)
+            query_params["travelAgentId"] = _parse_id_string(travel_agent_id)
         if campaign_id:
-            query_params["campaignId"] = _format_id_param(campaign_id)
+            query_params["campaignId"] = _parse_id_string(campaign_id)
         if user_id:
-            query_params["userId"] = _format_id_param(user_id)
+            query_params["userId"] = _parse_id_string(user_id)
         if unit_type_id:
-            query_params["unitTypeId"] = _format_id_param(unit_type_id)
+            query_params["unitTypeId"] = _parse_id_string(unit_type_id)
         if rate_type_id:
-            query_params["rateTypeId"] = _format_id_param(rate_type_id)
+            query_params["rateTypeId"] = _parse_id_string(rate_type_id)
         if booked_start:
             query_params["bookedStart"] = booked_start
         if booked_end:
@@ -172,6 +172,48 @@ def _is_valid_date_format(date_string: str) -> bool:
     except ValueError:
         return False
 
+def _parse_id_string(id_string: str) -> Union[int, List[int]]:
+    """
+    Parsea un string de ID que puede ser:
+    - Un entero simple: "48"
+    - Múltiples IDs separados por comas: "48,49,50"
+    - Array en formato string: "[48,49,50]"
+    """
+    if not id_string or not id_string.strip():
+        raise ValidationError("ID string cannot be empty", "id")
+    
+    # Limpiar espacios
+    id_string = id_string.strip()
+    
+    # Si es un array en formato string, parsearlo
+    if id_string.startswith('[') and id_string.endswith(']'):
+        try:
+            # Remover corchetes y dividir por comas
+            content = id_string[1:-1].strip()
+            if not content:
+                raise ValidationError("Empty array not allowed", "id")
+            # Dividir por comas y convertir a enteros
+            ids = [int(x.strip()) for x in content.split(',')]
+            return ids if len(ids) > 1 else ids[0]
+        except ValueError as e:
+            raise ValidationError(f"Invalid array format: {id_string}", "id")
+    
+    # Si contiene comas, es una lista de IDs
+    if ',' in id_string:
+        try:
+            ids = [int(x.strip()) for x in id_string.split(',') if x.strip()]
+            if not ids:
+                raise ValidationError("No valid IDs found", "id")
+            return ids if len(ids) > 1 else ids[0]
+        except ValueError as e:
+            raise ValidationError(f"Invalid ID format: {id_string}", "id")
+    
+    # Es un ID único
+    try:
+        return int(id_string)
+    except ValueError:
+        raise ValidationError(f"Invalid ID format: {id_string}", "id")
+
 def _format_id_param(param_value: Union[int, List[int]]) -> Union[int, List[int]]:
     """
     Formatea parámetros de ID para la API.
@@ -188,6 +230,7 @@ def _format_status_param(status_value: Union[str, List[str]]) -> Union[str, List
     """
     Formatea parámetros de status para la API.
     Valida que los valores sean válidos según la especificación.
+    Maneja tanto strings individuales como listas de strings.
     """
     valid_statuses = {"Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"}
     
@@ -198,10 +241,34 @@ def _format_status_param(status_value: Union[str, List[str]]) -> Union[str, List
                 raise ValidationError(f"Invalid status: {status}. Must be one of: {', '.join(valid_statuses)}", "status")
         return status_value
     else:
-        # Validar status único
-        if status_value not in valid_statuses:
-            raise ValidationError(f"Invalid status: {status_value}. Must be one of: {', '.join(valid_statuses)}", "status")
-        return status_value
+        # Si es un string, verificar si es un array JSON
+        if status_value.startswith('[') and status_value.endswith(']'):
+            try:
+                import json
+                # Parsear como JSON array
+                statuses = json.loads(status_value)
+                if not isinstance(statuses, list):
+                    raise ValidationError(f"Invalid status format: {status_value}", "status")
+                # Validar cada status
+                for status in statuses:
+                    if status not in valid_statuses:
+                        raise ValidationError(f"Invalid status: {status}. Must be one of: {', '.join(valid_statuses)}", "status")
+                return statuses if len(statuses) > 1 else statuses[0]
+            except (json.JSONDecodeError, ValueError):
+                raise ValidationError(f"Invalid status format: {status_value}", "status")
+        # Si es un string, verificar si contiene comas (múltiples status)
+        elif ',' in status_value:
+            # Dividir por comas y limpiar comillas
+            statuses = [s.strip().strip('"').strip("'") for s in status_value.split(',') if s.strip()]
+            for status in statuses:
+                if status not in valid_statuses:
+                    raise ValidationError(f"Invalid status: {status}. Must be one of: {', '.join(valid_statuses)}", "status")
+            return statuses if len(statuses) > 1 else statuses[0]
+        else:
+            # Validar status único
+            if status_value not in valid_statuses:
+                raise ValidationError(f"Invalid status: {status_value}. Must be one of: {', '.join(valid_statuses)}", "status")
+            return status_value
 
 def _build_query_string(params: dict) -> str:
     """
