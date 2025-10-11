@@ -257,7 +257,7 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         if checkin_office_id:
             query_params["checkinOfficeId"] = checkin_office_id
 
-        endpoint = "ihmvacations.trackhs.com/v2/pms/reservations"
+        endpoint = "/v2/pms/reservations"
 
         # Logging detallado para debugging de filtros de fecha
         import logging
