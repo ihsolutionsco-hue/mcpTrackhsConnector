@@ -328,6 +328,8 @@ class GetNodesParams(PaginationParams, SearchParams):
 class GetNodesResponse(BaseModel):
     """Respuesta de obtener nodos"""
 
+    model_config = {"populate_by_name": True}
+
     embedded: Dict[str, List[Node]] = Field(
         ..., alias="_embedded", description="Datos embebidos"
     )

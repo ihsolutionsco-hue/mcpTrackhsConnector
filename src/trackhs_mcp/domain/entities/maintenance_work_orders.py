@@ -175,6 +175,8 @@ class GetMaintenanceWorkOrdersParams(PaginationParams, SearchParams):
 class MaintenanceWorkOrdersResponse(BaseModel):
     """Respuesta de órdenes de trabajo de mantenimiento"""
 
+    model_config = {"populate_by_name": True}
+
     embedded: Dict[str, List[MaintenanceWorkOrder]] = Field(
         ..., alias="_embedded", description="Datos embebidos"
     )

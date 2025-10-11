@@ -329,6 +329,8 @@ class GetUnitsParams(PaginationParams, SearchParams):
 class GetUnitsResponse(BaseModel):
     """Respuesta de obtener unidades"""
 
+    model_config = {"populate_by_name": True}
+
     embedded: Dict[str, List[Unit]] = Field(
         ..., alias="_embedded", description="Datos embebidos"
     )

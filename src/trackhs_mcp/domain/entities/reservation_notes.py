@@ -29,6 +29,8 @@ class ReservationNote(BaseModel):
 class ReservationNotesResponse(BaseModel):
     """Respuesta de notas de reserva"""
 
+    model_config = {"populate_by_name": True}
+
     embedded: Dict[str, List[ReservationNote]] = Field(
         ..., alias="_embedded", description="Datos embebidos"
     )

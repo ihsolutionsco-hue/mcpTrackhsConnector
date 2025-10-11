@@ -433,6 +433,8 @@ class SearchReservationsParams(PaginationParams, SearchParams):
 class SearchReservationsResponse(BaseModel):
     """Respuesta de búsqueda de reservas"""
 
+    model_config = {"populate_by_name": True}
+
     embedded: Dict[str, List[Reservation]] = Field(
         ..., alias="_embedded", description="Datos embebidos"
     )
