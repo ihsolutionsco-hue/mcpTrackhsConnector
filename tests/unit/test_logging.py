@@ -406,7 +406,7 @@ class TestPerformanceTimer:
 
             with PerformanceTimer("test_operation", mock_logger) as timer:
                 pass
-            
+
             # Verify timer was used
             assert timer.operation == "test_operation"
 
