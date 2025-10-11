@@ -408,16 +408,16 @@ def _is_valid_date_format(date_string: str) -> bool:
 def _normalize_date_format(date_string: str) -> str:
     """Normaliza formato de fecha para la API de TrackHS - CORREGIDO FINAL"""
     try:
-        # Si es solo fecha, agregar tiempo sin timezone
+        # Si es solo fecha, agregar tiempo con timezone UTC
         if len(date_string) == 10 and date_string.count("-") == 2:
-            # Solo fecha: 2025-01-01 -> 2025-01-01T00:00:00
-            return f"{date_string}T00:00:00"
+            # Solo fecha: 2025-01-01 -> 2025-01-01T00:00:00Z
+            return f"{date_string}T00:00:00Z"
 
         # Si tiene tiempo con timezone, remover timezone
         if "T" in date_string:
             if date_string.endswith("Z") or date_string.endswith("z"):
-                # Remover Z o z: 2025-01-01T00:00:00Z -> 2025-01-01T00:00:00
-                return date_string[:-1]
+                # Ya tiene Z: 2025-01-01T00:00:00Z -> mantener
+                return date_string
             elif "+" in date_string:
                 # Remover offset positivo: 2025-01-01T00:00:00+00:00 ->
                 # 2025-01-01T00:00:00
@@ -440,13 +440,13 @@ def _normalize_date_format(date_string: str) -> str:
                 else:
                     return date_string
             else:
-                # Ya tiene formato correcto: 2025-01-01T00:00:00
-                return date_string
+                # Tiempo sin timezone: 2025-01-01T00:00:00 -> 2025-01-01T00:00:00Z
+                return date_string + "Z"
 
         # Si tiene tiempo con espacio, convertir a formato T
         if " " in date_string and len(date_string) > 10:
-            # Convertir espacio a T: 2025-01-01 00:00:00 -> 2025-01-01T00:00:00
-            return date_string.replace(" ", "T")
+            # Convertir espacio a T: 2025-01-01 00:00:00 -> 2025-01-01T00:00:00Z
+            return date_string.replace(" ", "T") + "Z"
 
         # Si ya tiene formato correcto, devolverlo
         return date_string
