@@ -19,27 +19,27 @@ from src.trackhs_mcp.application.use_cases.search_reservations import SearchRese
 
 async def main():
     """Basic usage example"""
-    
+
     # 1. Configure the client
     config = TrackHSConfig.from_env()
     api_client = TrackHSApiClient(config)
-    
+
     # 2. Create use case
     search_use_case = SearchReservationsUseCase(api_client)
-    
+
     # 3. Search reservations
     filters = {
         'date_from': '2024-01-01',
         'date_to': '2024-01-31',
         'status': 'confirmed'
     }
-    
+
     result = await search_use_case.execute(filters)
-    
+
     print(f"Found {result['total']} reservations")
     for reservation in result['reservations']:
         print(f"- {reservation.guest_name}: {reservation.arrival_date} to {reservation.departure_date}")
-    
+
     # 4. Clean up
     await api_client.close()
 
@@ -124,17 +124,17 @@ while True:
         'page': page,
         'per_page': per_page
     }
-    
+
     result = await search_use_case.execute(filters)
-    
+
     if not result['reservations']:
         break
-    
+
     print(f"Page {page}: {len(result['reservations'])} reservations")
-    
+
     for reservation in result['reservations']:
         print(f"  - {reservation.guest_name}")
-    
+
     page += 1
 ```
 

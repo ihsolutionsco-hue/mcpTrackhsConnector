@@ -47,25 +47,25 @@ upstream mcp_backend {
 server {
     listen 443 ssl http2;
     server_name api.yourcompany.com;
-    
+
     # SSL Configuration
     ssl_certificate /etc/ssl/certs/your-cert.pem;
     ssl_certificate_key /etc/ssl/private/your-key.pem;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256;
     ssl_prefer_server_ciphers off;
-    
+
     # Security Headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Frame-Options DENY always;
     add_header X-Content-Type-Options nosniff always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    
+
     # Rate Limiting
     limit_req_zone $binary_remote_addr zone=mcp:10m rate=10r/s;
     limit_req zone=mcp burst=20 nodelay;
-    
+
     # MCP Endpoint
     location /mcp {
         proxy_pass http://mcp_backend;
@@ -77,24 +77,24 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        
+
         # Timeouts
         proxy_connect_timeout 5s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
-        
+
         # Buffer settings
         proxy_buffering on;
         proxy_buffer_size 4k;
         proxy_buffers 8 4k;
     }
-    
+
     # Health Check
     location /health {
         access_log off;
         proxy_pass http://mcp_backend;
     }
-    
+
     # Metrics
     location /metrics {
         allow 10.0.0.0/8;
@@ -149,7 +149,7 @@ module.exports = {
     transport: 'streamable-http',
     path: '/mcp'
   },
-  
+
   // Autenticación
   auth: {
     serverUrl: process.env.AUTH_SERVER_URL,
@@ -157,7 +157,7 @@ module.exports = {
     clientSecret: process.env.CLIENT_SECRET,
     audience: process.env.AUDIENCE
   },
-  
+
   // Base de datos
   redis: {
     url: process.env.REDIS_URL,
@@ -165,7 +165,7 @@ module.exports = {
     maxRetriesPerRequest: 3,
     lazyConnect: true
   },
-  
+
   // CORS
   cors: {
     origin: process.env.CORS_ORIGINS?.split(',') || [],
@@ -173,21 +173,21 @@ module.exports = {
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Mcp-Session-Id']
   },
-  
+
   // Rate Limiting
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'),
     max: parseInt(process.env.RATE_LIMIT_MAX || '100'),
     userMax: parseInt(process.env.RATE_LIMIT_USER_MAX || '50')
   },
-  
+
   // Logging
   logging: {
     level: process.env.LOG_LEVEL || 'info',
     format: process.env.LOG_FORMAT || 'json',
     transports: ['console', 'file']
   },
-  
+
   // Monitoreo
   monitoring: {
     enabled: true,
@@ -603,13 +603,13 @@ const logger = createLogger({
         format.simple()
       )
     }),
-    new transports.File({ 
-      filename: 'logs/error.log', 
+    new transports.File({
+      filename: 'logs/error.log',
       level: 'error',
       maxsize: 5242880, // 5MB
       maxFiles: 5
     }),
-    new transports.File({ 
+    new transports.File({
       filename: 'logs/combined.log',
       maxsize: 5242880, // 5MB
       maxFiles: 5
@@ -625,7 +625,7 @@ const auditLogger = createLogger({
     format.json()
   ),
   transports: [
-    new transports.File({ 
+    new transports.File({
       filename: 'logs/audit.log',
       maxsize: 10485760, // 10MB
       maxFiles: 10
@@ -636,7 +636,7 @@ const auditLogger = createLogger({
 // Middleware de auditoría
 app.use('/mcp', (req, res, next) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     auditLogger.info('MCP Request', {
       method: req.method,
@@ -649,7 +649,7 @@ app.use('/mcp', (req, res, next) => {
       userAgent: req.get('User-Agent')
     });
   });
-  
+
   next();
 });
 ```
@@ -766,14 +766,14 @@ const mcpRequestSchema = Joi.object({
 // Middleware de validación
 app.use('/mcp', (req, res, next) => {
   const { error } = mcpRequestSchema.validate(req.body);
-  
+
   if (error) {
     return res.status(400).json({
       error: 'Solicitud MCP inválida',
       details: error.details[0].message
     });
   }
-  
+
   next();
 });
 ```

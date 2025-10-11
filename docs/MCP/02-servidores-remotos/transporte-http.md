@@ -39,7 +39,7 @@ const mcp = new FastMCP('Mi Servidor Remoto', {
     host: process.env.HOST || '0.0.0.0',
     port: parseInt(process.env.PORT || '3232'),
     path: '/mcp',
-    
+
     // Configuración de CORS
     cors: {
       origin: process.env.CORS_ORIGINS?.split(',') || ['https://claude.ai'],
@@ -47,7 +47,7 @@ const mcp = new FastMCP('Mi Servidor Remoto', {
       methods: ['GET', 'POST', 'PUT', 'DELETE'],
       allowedHeaders: ['Content-Type', 'Authorization', 'Mcp-Session-Id']
     },
-    
+
     // Configuración de sesiones
     session: {
       store: 'redis', // o 'memory' para desarrollo
@@ -57,7 +57,7 @@ const mcp = new FastMCP('Mi Servidor Remoto', {
       ttl: 7 * 24 * 60 * 60 * 1000, // 7 días
       secret: process.env.SESSION_SECRET
     },
-    
+
     // Configuración de eventos
     events: {
       enabled: true,
@@ -168,10 +168,10 @@ app.get('/sse', (req, res) => {
 // Endpoint para enviar mensajes
 app.post('/sse/message', (req, res) => {
   const { sessionId, message } = req.body;
-  
+
   // Enviar mensaje a cliente específico
   sendToClient(sessionId, message);
-  
+
   res.json({ success: true });
 });
 ```
@@ -208,7 +208,7 @@ app.use(cors({
 const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
-    
+
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -271,7 +271,7 @@ app.use('/mcp', authenticateToken);
 // Middleware de sesión
 function sessionMiddleware(req, res, next) {
   const sessionId = req.headers['mcp-session-id'];
-  
+
   if (!sessionId) {
     return res.status(400).json({ error: 'Session ID requerido' });
   }
@@ -360,10 +360,10 @@ app.use(morgan('combined', {
 // Middleware de logging MCP
 app.use('/mcp', (req, res, next) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - start;
-    
+
     logger.info('MCP Request', {
       method: req.method,
       url: req.url,
@@ -373,7 +373,7 @@ app.use('/mcp', (req, res, next) => {
       sessionId: req.sessionId
     });
   });
-  
+
   next();
 });
 ```
@@ -398,15 +398,15 @@ const mcpActiveConnections = new prometheus.Gauge({
 // Middleware de métricas
 app.use('/mcp', (req, res, next) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = (Date.now() - start) / 1000;
-    
+
     mcpRequestDuration
       .labels(req.method, res.statusCode, req.user?.sub || 'anonymous')
       .observe(duration);
   });
-  
+
   next();
 });
 
@@ -463,19 +463,19 @@ upstream mcp_backend {
 server {
     listen 443 ssl http2;
     server_name your-mcp-server.com;
-    
+
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
-    
+
     # Configuración de seguridad
     add_header X-Frame-Options DENY;
     add_header X-Content-Type-Options nosniff;
     add_header X-XSS-Protection "1; mode=block";
-    
+
     # Rate limiting
     limit_req_zone $binary_remote_addr zone=mcp:10m rate=10r/s;
     limit_req zone=mcp burst=20 nodelay;
-    
+
     # Proxy a servidor MCP
     location /mcp {
         proxy_pass http://mcp_backend;
@@ -487,13 +487,13 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        
+
         # Timeouts
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
     }
-    
+
     # SSE endpoint
     location /sse {
         proxy_pass http://mcp_backend;
@@ -519,10 +519,10 @@ describe('HTTP Transport', () => {
 
   beforeEach(async () => {
     mcp = new FastMCP('Test Server');
-    
+
     // Configurar herramientas de prueba
     mcp.tool('test_tool', () => 'test result');
-    
+
     app = mcp.createExpressApp();
   });
 

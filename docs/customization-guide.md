@@ -17,7 +17,7 @@ from ...application.ports.api_client_port import ApiClientPort
 class NewToolUseCase:
     def __init__(self, api_client: ApiClientPort):
         self.api_client = api_client
-    
+
     async def execute(self, param1: str, param2: Optional[int] = None) -> Dict[str, Any]:
         """Execute the new tool logic"""
         # Implement your business logic here
@@ -37,12 +37,12 @@ from ...application.use_cases.new_tool import NewToolUseCase
 
 def register_new_tool(mcp: FastMCP, api_client):
     """Register the new tool with MCP"""
-    
+
     @mcp.tool()
     async def new_tool(param1: str, param2: int = None) -> str:
         """
         Description of your new tool.
-        
+
         Args:
             param1: First parameter description
             param2: Second parameter description (optional)
@@ -77,7 +77,7 @@ from fastmcp import FastMCP
 
 def register_new_resource(mcp: FastMCP, api_client):
     """Register new resource with MCP"""
-    
+
     @mcp.resource("trackhs://new-resource")
     async def get_new_resource() -> Dict[str, Any]:
         """Get new resource data"""
@@ -113,12 +113,12 @@ from fastmcp import FastMCP
 
 def register_new_prompt(mcp: FastMCP, api_client):
     """Register new prompt with MCP"""
-    
+
     @mcp.prompt()
     async def new_prompt(context: str = "", options: Optional[Dict[str, Any]] = None) -> str:
         """
         Description of your new prompt.
-        
+
         Args:
             context: Additional context for the prompt
             options: Optional configuration options
@@ -126,12 +126,12 @@ def register_new_prompt(mcp: FastMCP, api_client):
         # Generate prompt based on context and options
         prompt_text = f"""
         Based on the context: {context}
-        
+
         Generate a response that:
         1. Analyzes the provided information
         2. Provides actionable insights
         3. Suggests next steps
-        
+
         Options: {options or {}}
         """
         return prompt_text
@@ -161,13 +161,13 @@ from datetime import datetime
 
 class NewEntity(BaseModel):
     """New domain entity"""
-    
+
     id: str = Field(..., description="Unique identifier")
     name: str = Field(..., description="Entity name")
     description: Optional[str] = Field(None, description="Entity description")
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         json_encoders = {
             datetime: lambda v: v.isoformat()
@@ -183,11 +183,11 @@ from typing import Optional
 
 class NewValueObject(BaseModel):
     """New value object"""
-    
+
     value: str = Field(..., description="Value content")
     type: str = Field(..., description="Value type")
     metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
-    
+
     @validator('value')
     def validate_value(cls, v):
         if not v or len(v.strip()) == 0:
@@ -206,19 +206,19 @@ from ...domain.value_objects.config import TrackHSConfig
 
 class CustomAuthProvider:
     """Custom authentication provider"""
-    
+
     def __init__(self, config: TrackHSConfig):
         self.config = config
-    
+
     async def authenticate(self, credentials: Dict[str, Any]) -> bool:
         """Authenticate with custom provider"""
         # Implement custom authentication logic
         username = credentials.get('username')
         password = credentials.get('password')
-        
+
         # Custom authentication logic here
         return await self._validate_credentials(username, password)
-    
+
     async def _validate_credentials(self, username: str, password: str) -> bool:
         """Validate credentials with custom logic"""
         # Implement your authentication logic
@@ -235,7 +235,7 @@ class TrackHSApiClient(ApiClientPort):
     def __init__(self, config: TrackHSConfig):
         super().__init__(config)
         self.auth_provider = CustomAuthProvider(config)
-    
+
     async def authenticate(self):
         """Use custom authentication"""
         credentials = {
@@ -256,24 +256,24 @@ from typing import Optional
 
 class TrackHSConfig(BaseModel):
     """Extended configuration with custom options"""
-    
+
     # Existing fields...
     base_url: str
     username: str
     password: str
     timeout: int = 30
-    
+
     # New custom fields
     custom_endpoint: Optional[str] = Field(None, description="Custom API endpoint")
     retry_count: int = Field(3, description="Number of retry attempts")
     cache_ttl: int = Field(300, description="Cache TTL in seconds")
     enable_logging: bool = Field(True, description="Enable detailed logging")
-    
+
     @classmethod
     def from_env(cls) -> "TrackHSConfig":
         """Create configuration from environment variables"""
         import os
-        
+
         return cls(
             base_url=os.getenv("TRACKHS_API_URL", "https://api.trackhs.com/api"),
             username=os.getenv("TRACKHS_USERNAME", ""),
@@ -318,18 +318,18 @@ class TestNewToolUseCase:
     @pytest.fixture
     def mock_api_client(self):
         return AsyncMock()
-    
+
     @pytest.fixture
     def use_case(self, mock_api_client):
         return NewToolUseCase(mock_api_client)
-    
+
     @pytest.mark.asyncio
     async def test_execute_success(self, use_case, mock_api_client):
         """Test successful execution"""
         mock_api_client.get.return_value = {"result": "success"}
-        
+
         result = await use_case.execute("test_param", 123)
-        
+
         assert result == {"result": "success"}
         mock_api_client.get.assert_called_once()
 ```
@@ -347,13 +347,13 @@ class TestNewToolIntegration:
     def mcp_server(self):
         mcp = FastMCP("Test Server")
         return mcp
-    
+
     @pytest.mark.asyncio
     async def test_tool_registration(self, mcp_server):
         """Test tool registration"""
         mock_api_client = AsyncMock()
         register_new_tool(mcp_server, mock_api_client)
-        
+
         # Verify tool is registered
         assert "new_tool" in [tool.name for tool in mcp_server.tools]
 ```

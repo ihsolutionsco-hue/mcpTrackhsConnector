@@ -10,7 +10,7 @@ Esta sección contiene ejemplos prácticos de implementaciones MCP organizados p
 Ejemplos rápidos para comenzar con MCP:
 
 - **mcp-client-python**: Cliente MCP básico en Python
-- **mcp-client-typescript**: Cliente MCP básico en TypeScript  
+- **mcp-client-typescript**: Cliente MCP básico en TypeScript
 - **weather-server-python**: Servidor de clima en Python
 - **weather-server-rust**: Servidor de clima en Rust
 - **weather-server-typescript**: Servidor de clima en TypeScript

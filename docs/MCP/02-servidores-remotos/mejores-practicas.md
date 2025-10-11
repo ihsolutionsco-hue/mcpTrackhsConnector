@@ -97,18 +97,18 @@ async function validateToken(token: string): Promise<TokenInfo> {
     },
     body: `token=${token}`
   });
-  
+
   const introspection = await response.json();
-  
+
   if (!introspection.active) {
     throw new Error('Token inválido o expirado');
   }
-  
+
   // Validar audience
   if (introspection.aud !== EXPECTED_AUDIENCE) {
     throw new Error('Token no válido para este servidor');
   }
-  
+
   return introspection;
 }
 ```
@@ -188,19 +188,19 @@ const SECURITY_EVENTS = {
 ```typescript
 class TokenCache {
   private cache = new Map<string, { data: any; expires: number }>();
-  
+
   async get(token: string): Promise<any> {
     const cached = this.cache.get(token);
-    
+
     if (cached && cached.expires > Date.now()) {
       return cached.data;
     }
-    
+
     // Token expirado o no encontrado
     this.cache.delete(token);
     return null;
   }
-  
+
   async set(token: string, data: any, ttl: number = 300000): Promise<void> {
     this.cache.set(token, {
       data,
@@ -236,11 +236,11 @@ const metrics = {
   // Rendimiento
   requestDuration: new Histogram('mcp_request_duration_seconds'),
   activeConnections: new Gauge('mcp_active_connections'),
-  
+
   // Errores
   errorRate: new Counter('mcp_errors_total'),
   authFailures: new Counter('mcp_auth_failures_total'),
-  
+
   // Negocio
   toolsExecuted: new Counter('mcp_tools_executed_total'),
   resourcesAccessed: new Counter('mcp_resources_accessed_total')
@@ -294,9 +294,9 @@ app.get('/health', async (req, res) => {
       authServer: await checkAuthServer()
     }
   };
-  
+
   const isHealthy = Object.values(health.checks).every(check => check.status === 'ok');
-  
+
   res.status(isHealthy ? 200 : 503).json(health);
 });
 ```
@@ -332,13 +332,13 @@ describe('MCP Server Authentication', () => {
   beforeEach(() => {
     // Setup de test
   });
-  
+
   it('should validate valid token', async () => {
     const token = await generateTestToken();
     const result = await validateToken(token);
     expect(result.active).toBe(true);
   });
-  
+
   it('should reject invalid token', async () => {
     await expect(validateToken('invalid-token')).rejects.toThrow();
   });
@@ -353,16 +353,16 @@ describe('OAuth Flow Integration', () => {
   it('should complete full OAuth flow', async () => {
     // 1. Iniciar flujo OAuth
     const authUrl = await initiateOAuthFlow();
-    
+
     // 2. Simular autorización de usuario
     const authCode = await simulateUserAuthorization(authUrl);
-    
+
     // 3. Intercambiar código por token
     const tokens = await exchangeCodeForToken(authCode);
-    
+
     // 4. Usar token para solicitud MCP
     const response = await makeMCPRequest(tokens.access_token);
-    
+
     expect(response.status).toBe(200);
   });
 });

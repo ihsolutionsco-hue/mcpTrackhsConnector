@@ -268,7 +268,7 @@ app.get('/authorize', async (req, res) => {
       query: req.query,
       body: req.body
     });
-    
+
     // Mostrar página de autorización
     res.render('authorize', { authRequest });
   } catch (error) {
@@ -285,7 +285,7 @@ app.post('/token', async (req, res) => {
       query: req.query,
       body: req.body
     });
-    
+
     res.json(token);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -295,7 +295,7 @@ app.post('/token', async (req, res) => {
 // Endpoint de introspección
 app.post('/introspect', async (req, res) => {
   const { token } = req.body;
-  
+
   try {
     const introspection = await oauth.introspect(token);
     res.json(introspection);
@@ -326,11 +326,11 @@ const mcp = new FastMCP('Mi Servidor Remoto', {
 // Middleware de autenticación
 mcp.use(async (req, res, next) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
-  
+
   if (!token) {
     return res.status(401).json({ error: 'Token requerido' });
   }
-  
+
   try {
     // Validar token con servidor de autorización
     const response = await fetch(`${authSettings.issuer_url}/introspect`, {
@@ -338,13 +338,13 @@ mcp.use(async (req, res, next) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `token=${token}`
     });
-    
+
     const introspection = await response.json();
-    
+
     if (!introspection.active) {
       return res.status(401).json({ error: 'Token inválido' });
     }
-    
+
     req.user = introspection;
     next();
   } catch (error) {

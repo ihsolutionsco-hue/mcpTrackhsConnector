@@ -154,7 +154,7 @@ describe('MCP Server', () => {
   test('should list tools', async () => {
     const client = new MCPClient('stdio', ['node', 'server.js']);
     await client.connect();
-    
+
     const tools = await client.listTools();
     expect(tools).toHaveLength(1);
     expect(tools[0].name).toBe('test_tool');
@@ -172,10 +172,10 @@ from mcp.client.stdio import stdio_client
 @pytest.mark.asyncio
 async def test_server_tools():
     server_params = StdioServerParameters(
-        command="python", 
+        command="python",
         args=["server.py"]
     )
-    
+
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()

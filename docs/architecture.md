@@ -68,7 +68,7 @@ from typing import Optional, List
 
 class Reservation(BaseModel):
     """Reservation entity representing a booking"""
-    
+
     id: str = Field(..., description="Unique reservation identifier")
     guest_name: str = Field(..., description="Guest name")
     arrival_date: datetime = Field(..., description="Arrival date")
@@ -77,7 +77,7 @@ class Reservation(BaseModel):
     total_amount: float = Field(..., description="Total amount")
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         json_encoders = {
             datetime: lambda v: v.isoformat()
@@ -95,18 +95,18 @@ from typing import Optional
 
 class TrackHSConfig(BaseModel):
     """Configuration value object"""
-    
+
     base_url: str = Field(..., description="API base URL")
     username: str = Field(..., description="API username")
     password: str = Field(..., description="API password")
     timeout: int = Field(30, description="Request timeout")
-    
+
     @validator('base_url')
     def validate_url(cls, v):
         if not v.startswith(('http://', 'https://')):
             raise ValueError('URL must start with http:// or https://')
         return v
-    
+
     @validator('timeout')
     def validate_timeout(cls, v):
         if v <= 0:
@@ -153,27 +153,27 @@ from ...application.ports.api_client_port import ApiClientPort
 
 class SearchReservationsUseCase:
     """Use case for searching reservations"""
-    
+
     def __init__(self, api_client: ApiClientPort):
         self.api_client = api_client
-    
+
     async def execute(self, filters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute reservation search"""
         # Validate filters
         self._validate_filters(filters)
-        
+
         # Call API
         response = await self.api_client.get("/api/reservations", filters)
-        
+
         # Process response
         reservations = [Reservation(**item) for item in response.get('data', [])]
-        
+
         return {
             'reservations': reservations,
             'pagination': response.get('pagination', {}),
             'total': response.get('total', 0)
         }
-    
+
     def _validate_filters(self, filters: Dict[str, Any]) -> None:
         """Validate search filters"""
         # Implementation details...
@@ -191,22 +191,22 @@ from typing import Dict, Any, Optional
 
 class ApiClientPort(ABC):
     """Port for API client operations"""
-    
+
     @abstractmethod
     async def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Perform GET request"""
         pass
-    
+
     @abstractmethod
     async def post(self, endpoint: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Perform POST request"""
         pass
-    
+
     @abstractmethod
     async def put(self, endpoint: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Perform PUT request"""
         pass
-    
+
     @abstractmethod
     async def delete(self, endpoint: str) -> Dict[str, Any]:
         """Perform DELETE request"""
@@ -230,26 +230,26 @@ from ...domain.value_objects.config import TrackHSConfig
 
 class TrackHSApiClient(ApiClientPort):
     """Track HS API client implementation"""
-    
+
     def __init__(self, config: TrackHSConfig):
         self.config = config
         self.client = httpx.AsyncClient(
             base_url=config.base_url,
             timeout=config.timeout
         )
-    
+
     async def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Perform GET request"""
         response = await self.client.get(endpoint, params=params)
         response.raise_for_status()
         return response.json()
-    
+
     async def post(self, endpoint: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Perform POST request"""
         response = await self.client.post(endpoint, json=data)
         response.raise_for_status()
         return response.json()
-    
+
     # Additional methods...
 ```
 
@@ -264,7 +264,7 @@ from ...application.use_cases.search_reservations import SearchReservationsUseCa
 
 def register_search_reservations_tool(mcp: FastMCP, api_client):
     """Register search reservations tool"""
-    
+
     @mcp.tool()
     async def search_reservations(
         date_from: str = None,
@@ -273,7 +273,7 @@ def register_search_reservations_tool(mcp: FastMCP, api_client):
     ) -> str:
         """
         Search reservations with filters.
-        
+
         Args:
             date_from: Start date (YYYY-MM-DD)
             date_to: End date (YYYY-MM-DD)
@@ -307,13 +307,13 @@ def main():
     # Create dependencies
     config = TrackHSConfig.from_env()
     api_client = TrackHSApiClient(config)
-    
+
     # Create MCP server
     mcp = FastMCP("TrackHS MCP Server")
-    
+
     # Register components with dependencies
     register_all_components(mcp, api_client)
-    
+
     # Run server
     mcp.run()
 
@@ -350,12 +350,12 @@ from ...domain.entities.reservation import Reservation
 
 class ReservationRepositoryPort(ABC):
     """Repository port for reservation data"""
-    
+
     @abstractmethod
     async def find_by_id(self, reservation_id: str) -> Optional[Reservation]:
         """Find reservation by ID"""
         pass
-    
+
     @abstractmethod
     async def search(self, filters: Dict[str, Any]) -> List[Reservation]:
         """Search reservations with filters"""
@@ -373,7 +373,7 @@ from typing import Dict, Any
 
 class NotificationPort(ABC):
     """Port for notifications"""
-    
+
     @abstractmethod
     async def send(self, message: str, data: Dict[str, Any]) -> bool:
         """Send notification"""
@@ -381,14 +381,14 @@ class NotificationPort(ABC):
 
 class EmailNotificationAdapter(NotificationPort):
     """Email notification implementation"""
-    
+
     async def send(self, message: str, data: Dict[str, Any]) -> bool:
         # Email implementation
         pass
 
 class SlackNotificationAdapter(NotificationPort):
     """Slack notification implementation"""
-    
+
     async def send(self, message: str, data: Dict[str, Any]) -> bool:
         # Slack implementation
         pass
@@ -407,7 +407,7 @@ from ...infrastructure.adapters.mock_api_client import MockApiClient
 
 class ApiClientFactory:
     """Factory for creating API clients"""
-    
+
     @staticmethod
     def create(environment: str = "production") -> ApiClientPort:
         """Create API client based on environment"""
@@ -433,11 +433,11 @@ class TestSearchReservationsUseCase:
     @pytest.fixture
     def mock_api_client(self):
         return AsyncMock()
-    
+
     @pytest.fixture
     def use_case(self, mock_api_client):
         return SearchReservationsUseCase(mock_api_client)
-    
+
     @pytest.mark.asyncio
     async def test_execute_success(self, use_case, mock_api_client):
         """Test successful execution"""
@@ -445,9 +445,9 @@ class TestSearchReservationsUseCase:
             'data': [{'id': '1', 'guest_name': 'John Doe'}],
             'total': 1
         }
-        
+
         result = await use_case.execute({'status': 'confirmed'})
-        
+
         assert result['total'] == 1
         assert len(result['reservations']) == 1
 ```
@@ -470,11 +470,11 @@ class TestApiIntegration:
             username="test",
             password="test"
         )
-    
+
     @pytest.fixture
     def api_client(self, config):
         return TrackHSApiClient(config)
-    
+
     @pytest.mark.asyncio
     async def test_api_connection(self, api_client):
         """Test API connection"""
@@ -498,7 +498,7 @@ class TestMCPIntegration:
         mcp = FastMCP("Test Server")
         # Register components
         return mcp
-    
+
     @pytest.mark.asyncio
     async def test_tool_execution(self, mcp_server):
         """Test tool execution through MCP"""
