@@ -291,21 +291,21 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
                 sort_direction=sort_direction,
                 search=search,
                 tags=tags,
-                node_id=_parse_id_param(node_id) if node_id else None,
-                unit_id=_parse_id_param(unit_id) if unit_id else None,
+                node_id=_parse_id_string(node_id) if node_id else None,
+                unit_id=_parse_id_string(unit_id) if unit_id else None,
                 reservation_type_id=(
-                    _parse_id_param(reservation_type_id)
+                    _parse_id_string(reservation_type_id)
                     if reservation_type_id
                     else None
                 ),
-                contact_id=_parse_id_param(contact_id) if contact_id else None,
+                contact_id=_parse_id_string(contact_id) if contact_id else None,
                 travel_agent_id=(
-                    _parse_id_param(travel_agent_id) if travel_agent_id else None
+                    _parse_id_string(travel_agent_id) if travel_agent_id else None
                 ),
-                campaign_id=_parse_id_param(campaign_id) if campaign_id else None,
-                user_id=_parse_id_param(user_id) if user_id else None,
-                unit_type_id=_parse_id_param(unit_type_id) if unit_type_id else None,
-                rate_type_id=_parse_id_param(rate_type_id) if rate_type_id else None,
+                campaign_id=_parse_id_string(campaign_id) if campaign_id else None,
+                user_id=_parse_id_string(user_id) if user_id else None,
+                unit_type_id=_parse_id_string(unit_type_id) if unit_type_id else None,
+                rate_type_id=_parse_id_string(rate_type_id) if rate_type_id else None,
                 booked_start=booked_start,
                 booked_end=booked_end,
                 arrival_start=arrival_start,
