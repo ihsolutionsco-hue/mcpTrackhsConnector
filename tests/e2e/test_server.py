@@ -80,9 +80,9 @@ class TestServerE2E:
     def test_register_all_components_integration(self, mock_mcp, mock_api_client):
         """Test integración de registro de componentes"""
         # Importar las funciones de registro
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
         from src.trackhs_mcp.prompts import register_all_prompts
         from src.trackhs_mcp.resources import register_all_resources
-        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
 
         # Registrar todos los componentes
         register_all_tools(mock_mcp, mock_api_client)

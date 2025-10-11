@@ -7,10 +7,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from src.trackhs_mcp.infrastructure.utils.error_handling import ValidationError
 from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
     register_search_reservations,
 )
+from src.trackhs_mcp.infrastructure.utils.error_handling import ValidationError
 
 
 class TestSearchReservationsValidation:
