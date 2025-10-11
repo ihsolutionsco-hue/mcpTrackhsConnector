@@ -25,7 +25,7 @@ Search Reservations V2
       "url": "{customerDomain}/api",
       "variables": {
         "customerDomain": {
-          "default": "https://api-integration-example.tracksandbox.io",
+          "default": "https://api.trackhs.com",
           "description": "API domain"
         }
       }

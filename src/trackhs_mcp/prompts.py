@@ -3,16 +3,18 @@ Prompts MCP para Track HS API V2
 Basado en la especificación completa de la API Search Reservations V2
 """
 
-from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+
 from trackhs_mcp.core.api_client import TrackHSApiClient
 from trackhs_mcp.core.logging import get_logger
 
 logger = get_logger(__name__)
 
+
 def register_all_prompts(mcp, api_client: TrackHSApiClient):
     """Registra todos los prompts MCP"""
-    
+
     @mcp.prompt("check-today-reservations")
     async def check_today_reservations(date: Optional[str] = None) -> Dict[str, Any]:
         """Revisar todas las reservas que llegan o salen hoy usando API V2"""
@@ -23,7 +25,8 @@ def register_all_prompts(mcp, api_client: TrackHSApiClient):
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": f"""Por favor, revisa todas las reservas para la fecha {target_date} usando la API V2. Incluye:
+                        "text": """Por favor, \
+     revisa todas las reservas para la fecha {target_date} usando la API V2. Incluye:
 
 **Información de Check-in (Llegadas):**
 - Reservas con arrival_date = {target_date}
@@ -61,14 +64,16 @@ def register_all_prompts(mcp, api_client: TrackHSApiClient):
 - Información de desglose financiero (guest_breakdown)
 - Estado de acuerdos (agreement_status)
 - Productos de seguro de viaje
-- Planes de pago"""
-                    }
+- Planes de pago""",
+                    },
                 }
             ]
         }
-    
+
     @mcp.prompt("unit-availability")
-    async def unit_availability(check_in: str, check_out: str, node_id: Optional[str] = None) -> Dict[str, Any]:
+    async def unit_availability(
+        check_in: str, check_out: str, node_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Verificar disponibilidad de unidades para fechas específicas"""
         return {
             "messages": [
@@ -76,7 +81,7 @@ def register_all_prompts(mcp, api_client: TrackHSApiClient):
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": f"""Necesito verificar la disponibilidad de unidades para las fechas:
+                        "text": """Necesito verificar la disponibilidad de unidades para las fechas:
 - Entrada: {check_in}
 - Salida: {check_out}
 {f'- Nodo específico: {node_id}' if node_id else ''}
@@ -85,14 +90,16 @@ Por favor:
 1. Lista todas las unidades disponibles
 2. Verifica si hay reservas conflictivas en esas fechas
 3. Proporciona un resumen de disponibilidad por tipo de unidad
-4. Incluye información de capacidad y amenidades"""
-                    }
+4. Incluye información de capacidad y amenidades""",
+                    },
                 }
             ]
         }
-    
+
     @mcp.prompt("guest-contact-info")
-    async def guest_contact_info(reservation_id: Optional[str] = None, search_term: Optional[str] = None) -> Dict[str, Any]:
+    async def guest_contact_info(
+        reservation_id: Optional[str] = None, search_term: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Obtener información de contacto de huéspedes para reservas específicas"""
         return {
             "messages": [
@@ -100,7 +107,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": f"""Necesito obtener información de contacto de huéspedes:
+                        "text": """Necesito obtener información de contacto de huéspedes:
 {f'- Para la reserva ID: {reservation_id}' if reservation_id else ''}
 {f'- Filtrando por: {search_term}' if search_term else ''}
 
@@ -108,14 +115,16 @@ Por favor:
 1. Obtén la información de contacto completa
 2. Incluye nombre, email, teléfono y dirección
 3. Verifica si hay notas especiales o preferencias
-4. Proporciona un resumen organizado por reserva"""
-                    }
+4. Proporciona un resumen organizado por reserva""",
+                    },
                 }
             ]
         }
-    
+
     @mcp.prompt("maintenance-summary")
-    async def maintenance_summary(status: str = "all", days: int = 30) -> Dict[str, Any]:
+    async def maintenance_summary(
+        status: str = "all", days: int = 30
+    ) -> Dict[str, Any]:
         """Obtener un resumen de las órdenes de mantenimiento pendientes y completadas"""
         return {
             "messages": [
@@ -123,7 +132,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": f"""Necesito un resumen de las órdenes de mantenimiento:
+                        "text": """Necesito un resumen de las órdenes de mantenimiento:
 - Estado: {status if status != 'all' else 'Todas'}
 - Período: Últimos {days} días
 
@@ -132,14 +141,16 @@ Por favor:
 2. Agrupa por estado (pendiente, en progreso, completada)
 3. Incluye información de prioridad y fecha de vencimiento
 4. Proporciona estadísticas de completitud
-5. Identifica órdenes urgentes o vencidas"""
-                    }
+5. Identifica órdenes urgentes o vencidas""",
+                    },
                 }
             ]
         }
-    
+
     @mcp.prompt("financial-analysis")
-    async def financial_analysis(period: str, include_forecast: bool = False) -> Dict[str, Any]:
+    async def financial_analysis(
+        period: str, include_forecast: bool = False
+    ) -> Dict[str, Any]:
         """Obtener un análisis financiero básico de reservas y cuentas"""
         return {
             "messages": [
@@ -147,7 +158,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": f"""Necesito un análisis financiero para el período: {period}
+                        "text": """Necesito un análisis financiero para el período: {period}
 {f'- Incluir proyecciones futuras' if include_forecast else ''}
 
 Por favor:
@@ -156,8 +167,8 @@ Por favor:
 3. Analiza ocupación y tarifas
 4. Incluye información de cuentas contables relevantes
 5. Proporciona métricas clave de rendimiento
-{f'6. Incluye proyecciones basadas en tendencias' if include_forecast else ''}"""
-                    }
+{f'6. Incluye proyecciones basadas en tendencias' if include_forecast else ''}""",
+                    },
                 }
             ]
         }
@@ -170,7 +181,7 @@ Por favor:
         node_id: Optional[str] = None,
         unit_type_id: Optional[str] = None,
         contact_id: Optional[str] = None,
-        scroll_mode: bool = False
+        scroll_mode: bool = False,
     ) -> Dict[str, Any]:
         """Búsqueda avanzada de reservas usando API V2 con todos los parámetros disponibles"""
         return {
@@ -179,7 +190,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": f"""Realiza una búsqueda avanzada de reservas usando la API V2 con los siguientes criterios:
+                        "text": """Realiza una búsqueda avanzada de reservas usando la API V2 con los siguientes criterios:
 
 **Criterios de Búsqueda:**
 {f'- Término de búsqueda: {search_term}' if search_term else '- Sin término de búsqueda específico'}
@@ -215,8 +226,8 @@ Por favor:
 - Lista detallada de reservas encontradas
 - Análisis por nodo/tipo de unidad
 - Información financiera consolidada
-- Recomendaciones basadas en los datos"""
-                    }
+- Recomendaciones basadas en los datos""",
+                    },
                 }
             ]
         }
@@ -227,7 +238,7 @@ Por favor:
         end_date: str,
         group_by: str = "node",
         include_financials: bool = True,
-        include_occupancy: bool = True
+        include_occupancy: bool = True,
     ) -> Dict[str, Any]:
         """Análisis avanzado de reservas con métricas y KPIs"""
         return {
@@ -236,7 +247,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": f"""Realiza un análisis completo de reservas para el período {start_date} a {end_date} usando la API V2:
+                        "text": """Realiza un análisis completo de reservas para el período {start_date} a {end_date} usando la API V2:
 
 **Parámetros de Análisis:**
 - Período: {start_date} a {end_date}
@@ -281,8 +292,8 @@ Por favor:
 - Gráficos de tendencias temporales
 - Análisis comparativo por nodo/tipo
 - Recomendaciones estratégicas
-- Identificación de oportunidades de mejora"""
-                    }
+- Identificación de oportunidades de mejora""",
+                    },
                 }
             ]
         }
@@ -291,7 +302,7 @@ Por favor:
     async def guest_experience_analysis(
         reservation_id: Optional[str] = None,
         contact_id: Optional[str] = None,
-        include_history: bool = True
+        include_history: bool = True,
     ) -> Dict[str, Any]:
         """Análisis de experiencia del huésped con información completa de la API V2"""
         return {
@@ -300,7 +311,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": f"""Analiza la experiencia del huésped con información completa de la API V2:
+                        "text": """Analiza la experiencia del huésped con información completa de la API V2:
 
 **Identificación:**
 {f'- Reserva específica ID: {reservation_id}' if reservation_id else '- Sin reserva específica'}
@@ -350,8 +361,8 @@ Por favor:
 - search_reservations para datos de reserva
 - get_contact para información de contacto
 - get_unit para detalles de unidad
-- Recursos de esquema para contexto completo"""
-                    }
+- Recursos de esquema para contexto completo""",
+                    },
                 }
             ]
         }

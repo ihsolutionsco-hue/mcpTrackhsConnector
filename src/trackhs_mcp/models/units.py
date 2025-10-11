@@ -2,22 +2,30 @@
 Modelos Pydantic para Units de Track HS API
 """
 
-from typing import Optional, Literal, List, Dict, Any, Union
+from typing import Any, Dict, List, Literal, Optional, Union
+
 from pydantic import BaseModel, Field
+
 from .base import PaginationParams, SearchParams
+
 
 class UnitType(BaseModel):
     """Modelo de UnitType"""
+
     id: int = Field(..., description="ID del tipo de unidad")
     name: str = Field(..., description="Nombre del tipo de unidad")
 
+
 class LodgingType(BaseModel):
     """Modelo de LodgingType"""
+
     id: int = Field(..., description="ID del tipo de alojamiento")
     name: str = Field(..., description="Nombre del tipo de alojamiento")
 
+
 class BedType(BaseModel):
     """Modelo de BedType"""
+
     id: int = Field(..., description="ID del tipo de cama")
     name: str = Field(..., description="Nombre del tipo de cama")
     count: int = Field(..., description="Cantidad")
@@ -25,8 +33,10 @@ class BedType(BaseModel):
     homeaway_type: Optional[str] = Field(default=None, description="Tipo de HomeAway")
     marriott_type: Optional[str] = Field(default=None, description="Tipo de Marriott")
 
+
 class RoomBedType(BaseModel):
     """Modelo de RoomBedType"""
+
     id: int = Field(..., description="ID del tipo de cama de habitación")
     name: str = Field(..., description="Nombre del tipo de cama")
     count: str = Field(..., description="Cantidad")
@@ -34,10 +44,20 @@ class RoomBedType(BaseModel):
     homeaway_type: Optional[str] = Field(default=None, description="Tipo de HomeAway")
     marriott_type: Optional[str] = Field(default=None, description="Tipo de Marriott")
 
+
 class Room(BaseModel):
     """Modelo de Room"""
+
     name: str = Field(..., description="Nombre de la habitación")
-    type: Literal["bedroom", "half_bathroom", "three_quarter_bathroom", "full_bathroom", "kitchen", "common", "outside"] = Field(..., description="Tipo de habitación")
+    type: Literal[
+        "bedroom",
+        "half_bathroom",
+        "three_quarter_bathroom",
+        "full_bathroom",
+        "kitchen",
+        "common",
+        "outside",
+    ] = Field(..., description="Tipo de habitación")
     sleeps: int = Field(..., description="Capacidad de dormir")
     description: str = Field(..., description="Descripción")
     has_attached_bathroom: bool = Field(..., description="Si tiene baño adjunto")
@@ -46,14 +66,18 @@ class Room(BaseModel):
     homeaway_type: Optional[str] = Field(default=None, description="Tipo de HomeAway")
     airbnb_type: Optional[str] = Field(default=None, description="Tipo de Airbnb")
 
+
 class Amenity(BaseModel):
     """Modelo de Amenity"""
+
     id: int = Field(..., description="ID de la amenidad")
     name: str = Field(..., description="Nombre de la amenidad")
     group: Dict[str, Union[int, str]] = Field(..., description="Grupo de la amenidad")
 
+
 class LocalOffice(BaseModel):
     """Modelo de LocalOffice"""
+
     name: str = Field(..., description="Nombre de la oficina")
     directions: str = Field(..., description="Direcciones")
     email: str = Field(..., description="Email")
@@ -67,28 +91,42 @@ class LocalOffice(BaseModel):
     postal_code: str = Field(..., description="Código postal")
     country: str = Field(..., description="País")
 
+
 class Node(BaseModel):
     """Modelo de Node"""
+
     id: int = Field(..., description="ID del nodo")
     name: str = Field(..., description="Nombre del nodo")
-    short_description: Optional[str] = Field(default=None, description="Descripción corta")
-    long_description: Optional[str] = Field(default=None, description="Descripción larga")
+    short_description: Optional[str] = Field(
+        default=None, description="Descripción corta"
+    )
+    long_description: Optional[str] = Field(
+        default=None, description="Descripción larga"
+    )
     type: Dict[str, Union[int, str]] = Field(..., description="Tipo de nodo")
     parent_id: Optional[int] = Field(default=None, description="ID del nodo padre")
     parent: Optional[Any] = Field(default=None, description="Nodo padre")
     directions: Optional[str] = Field(default=None, description="Direcciones")
-    checkin_details: Optional[str] = Field(default=None, description="Detalles de check-in")
+    checkin_details: Optional[str] = Field(
+        default=None, description="Detalles de check-in"
+    )
     timezone: str = Field(..., description="Zona horaria")
     checkin_time: str = Field(..., description="Hora de check-in")
     has_early_checkin: bool = Field(..., description="Si tiene check-in temprano")
-    early_checkin_time: Optional[str] = Field(default=None, description="Hora de check-in temprano")
+    early_checkin_time: Optional[str] = Field(
+        default=None, description="Hora de check-in temprano"
+    )
     checkout_time: str = Field(..., description="Hora de check-out")
     has_late_checkout: bool = Field(..., description="Si tiene check-out tardío")
-    late_checkout_time: Optional[str] = Field(default=None, description="Hora de check-out tardío")
+    late_checkout_time: Optional[str] = Field(
+        default=None, description="Hora de check-out tardío"
+    )
     website: Optional[str] = Field(default=None, description="Sitio web")
     phone: Optional[str] = Field(default=None, description="Teléfono")
     street_address: str = Field(..., description="Dirección de la calle")
-    extended_address: Optional[str] = Field(default=None, description="Dirección extendida")
+    extended_address: Optional[str] = Field(
+        default=None, description="Dirección extendida"
+    )
     locality: str = Field(..., description="Localidad")
     region: str = Field(..., description="Región")
     postal: str = Field(..., description="Código postal")
@@ -99,42 +137,62 @@ class Node(BaseModel):
     max_pets: Optional[int] = Field(default=None, description="Máximo de mascotas")
     smoking_allowed: bool = Field(..., description="Si se permite fumar")
     children_allowed: bool = Field(..., description="Si se permiten niños")
-    minimum_age_limit: Optional[int] = Field(default=None, description="Límite mínimo de edad")
+    minimum_age_limit: Optional[int] = Field(
+        default=None, description="Límite mínimo de edad"
+    )
     is_accessible: bool = Field(..., description="Si es accesible")
     amenities: List[Amenity] = Field(..., description="Amenidades")
     custom: List[Any] = Field(..., description="Datos personalizados")
     updated_at: str = Field(..., description="Fecha de actualización")
-    embedded: Optional[Dict[str, Any]] = Field(default=None, alias="_embedded", description="Datos embebidos")
-    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
+    embedded: Optional[Dict[str, Any]] = Field(
+        default=None, alias="_embedded", description="Datos embebidos"
+    )
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(
+        ..., alias="_links", description="Enlaces"
+    )
+
 
 class Unit(BaseModel):
     """Modelo de Unit"""
+
     id: int = Field(..., description="ID de la unidad")
     name: str = Field(..., description="Nombre de la unidad")
     short_name: str = Field(..., description="Nombre corto")
     unit_code: str = Field(..., description="Código de la unidad")
     headline: Optional[str] = Field(default=None, description="Título")
-    short_description: Optional[str] = Field(default=None, description="Descripción corta")
-    long_description: Optional[str] = Field(default=None, description="Descripción larga")
+    short_description: Optional[str] = Field(
+        default=None, description="Descripción corta"
+    )
+    long_description: Optional[str] = Field(
+        default=None, description="Descripción larga"
+    )
     house_rules: Optional[str] = Field(default=None, description="Reglas de la casa")
     node_id: int = Field(..., description="ID del nodo")
     unit_type: UnitType = Field(..., description="Tipo de unidad")
     lodging_type: LodgingType = Field(..., description="Tipo de alojamiento")
     directions: Optional[str] = Field(default=None, description="Direcciones")
-    checkin_details: Optional[str] = Field(default=None, description="Detalles de check-in")
+    checkin_details: Optional[str] = Field(
+        default=None, description="Detalles de check-in"
+    )
     timezone: str = Field(..., description="Zona horaria")
     checkin_time: str = Field(..., description="Hora de check-in")
     has_early_checkin: bool = Field(..., description="Si tiene check-in temprano")
-    early_checkin_time: Optional[str] = Field(default=None, description="Hora de check-in temprano")
+    early_checkin_time: Optional[str] = Field(
+        default=None, description="Hora de check-in temprano"
+    )
     checkout_time: str = Field(..., description="Hora de check-out")
     has_late_checkout: bool = Field(..., description="Si tiene check-out tardío")
-    late_checkout_time: Optional[str] = Field(default=None, description="Hora de check-out tardío")
+    late_checkout_time: Optional[str] = Field(
+        default=None, description="Hora de check-out tardío"
+    )
     min_booking_window: int = Field(..., description="Ventana mínima de reserva")
     max_booking_window: int = Field(..., description="Ventana máxima de reserva")
     website: Optional[str] = Field(default=None, description="Sitio web")
     phone: Optional[str] = Field(default=None, description="Teléfono")
     street_address: str = Field(..., description="Dirección de la calle")
-    extended_address: Optional[str] = Field(default=None, description="Dirección extendida")
+    extended_address: Optional[str] = Field(
+        default=None, description="Dirección extendida"
+    )
     locality: str = Field(..., description="Localidad")
     region: str = Field(..., description="Región")
     postal: str = Field(..., description="Código postal")
@@ -146,92 +204,178 @@ class Unit(BaseModel):
     events_allowed: bool = Field(..., description="Si se permiten eventos")
     smoking_allowed: bool = Field(..., description="Si se permite fumar")
     children_allowed: bool = Field(..., description="Si se permiten niños")
-    minimum_age_limit: Optional[int] = Field(default=None, description="Límite mínimo de edad")
+    minimum_age_limit: Optional[int] = Field(
+        default=None, description="Límite mínimo de edad"
+    )
     is_accessible: bool = Field(..., description="Si es accesible")
     area: Optional[int] = Field(default=None, description="Área")
     floors: Optional[int] = Field(default=None, description="Pisos")
     max_occupancy: int = Field(..., description="Ocupación máxima")
-    security_deposit: Optional[str] = Field(default=None, description="Depósito de seguridad")
+    security_deposit: Optional[str] = Field(
+        default=None, description="Depósito de seguridad"
+    )
     bedrooms: int = Field(..., description="Habitaciones")
     full_bathrooms: int = Field(..., description="Baños completos")
-    three_quarter_bathrooms: Optional[int] = Field(default=None, description="Baños de tres cuartos")
+    three_quarter_bathrooms: Optional[int] = Field(
+        default=None, description="Baños de tres cuartos"
+    )
     half_bathrooms: int = Field(..., description="Medios baños")
     bed_types: List[BedType] = Field(..., description="Tipos de cama")
     rooms: List[Room] = Field(..., description="Habitaciones")
     amenities: List[Amenity] = Field(..., description="Amenidades")
-    amenity_description: Optional[str] = Field(default=None, description="Descripción de amenidades")
-    custom: Optional[Dict[str, Any]] = Field(default=None, description="Datos personalizados")
+    amenity_description: Optional[str] = Field(
+        default=None, description="Descripción de amenidades"
+    )
+    custom: Optional[Dict[str, Any]] = Field(
+        default=None, description="Datos personalizados"
+    )
     cover_image: Optional[str] = Field(default=None, description="Imagen de portada")
     tax_id: Optional[str] = Field(default=None, description="ID de impuesto")
-    local_office: Optional[LocalOffice] = Field(default=None, description="Oficina local")
+    local_office: Optional[LocalOffice] = Field(
+        default=None, description="Oficina local"
+    )
     regulations: Optional[List[Any]] = Field(default=None, description="Regulaciones")
-    updated: Optional[Dict[str, str]] = Field(default=None, description="Información de actualización")
+    updated: Optional[Dict[str, str]] = Field(
+        default=None, description="Información de actualización"
+    )
     updated_at: str = Field(..., description="Fecha de actualización")
-    custom_data: Optional[Dict[str, Any]] = Field(default=None, description="Datos personalizados")
-    embedded: Optional[Dict[str, Any]] = Field(default=None, alias="_embedded", description="Datos embebidos")
-    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
+    custom_data: Optional[Dict[str, Any]] = Field(
+        default=None, description="Datos personalizados"
+    )
+    embedded: Optional[Dict[str, Any]] = Field(
+        default=None, alias="_embedded", description="Datos embebidos"
+    )
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(
+        ..., alias="_links", description="Enlaces"
+    )
+
 
 class GetUnitsParams(PaginationParams, SearchParams):
     """Parámetros para obtener unidades"""
-    sort_column: Optional[Literal["id", "name", "nodeName", "unitTypeName"]] = Field(default="id", description="Columna para ordenar")
-    sort_direction: Optional[Literal["asc", "desc"]] = Field(default="asc", description="Dirección de ordenamiento")
-    node_id: Optional[Union[int, List[int]]] = Field(default=None, description="ID del nodo")
-    unit_type_id: Optional[Union[int, List[int]]] = Field(default=None, description="ID del tipo de unidad")
-    amenity_id: Optional[Union[int, List[int]]] = Field(default=None, description="ID de amenidad")
+
+    sort_column: Optional[Literal["id", "name", "nodeName", "unitTypeName"]] = Field(
+        default="id", description="Columna para ordenar"
+    )
+    sort_direction: Optional[Literal["asc", "desc"]] = Field(
+        default="asc", description="Dirección de ordenamiento"
+    )
+    node_id: Optional[Union[int, List[int]]] = Field(
+        default=None, description="ID del nodo"
+    )
+    unit_type_id: Optional[Union[int, List[int]]] = Field(
+        default=None, description="ID del tipo de unidad"
+    )
+    amenity_id: Optional[Union[int, List[int]]] = Field(
+        default=None, description="ID de amenidad"
+    )
     term: Optional[str] = Field(default=None, description="Término de búsqueda")
     unit_code: Optional[str] = Field(default=None, description="Código de unidad")
     short_name: Optional[str] = Field(default=None, description="Nombre corto")
     bedrooms: Optional[int] = Field(default=None, description="Habitaciones")
-    min_bedrooms: Optional[int] = Field(default=None, description="Mínimo de habitaciones")
-    max_bedrooms: Optional[int] = Field(default=None, description="Máximo de habitaciones")
+    min_bedrooms: Optional[int] = Field(
+        default=None, description="Mínimo de habitaciones"
+    )
+    max_bedrooms: Optional[int] = Field(
+        default=None, description="Máximo de habitaciones"
+    )
     bathrooms: Optional[int] = Field(default=None, description="Baños")
     min_bathrooms: Optional[int] = Field(default=None, description="Mínimo de baños")
     max_bathrooms: Optional[int] = Field(default=None, description="Máximo de baños")
-    pets_friendly: Optional[Literal[0, 1]] = Field(default=None, description="Si acepta mascotas")
-    events_allowed: Optional[Literal[0, 1]] = Field(default=None, description="Si se permiten eventos")
-    smoking_allowed: Optional[Literal[0, 1]] = Field(default=None, description="Si se permite fumar")
-    children_allowed: Optional[Literal[0, 1]] = Field(default=None, description="Si se permiten niños")
+    pets_friendly: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si acepta mascotas"
+    )
+    events_allowed: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si se permiten eventos"
+    )
+    smoking_allowed: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si se permite fumar"
+    )
+    children_allowed: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si se permiten niños"
+    )
     arrival: Optional[str] = Field(default=None, description="Fecha de llegada")
     departure: Optional[str] = Field(default=None, description="Fecha de salida")
-    is_active: Optional[Literal[0, 1]] = Field(default=None, description="Si está activo")
-    is_bookable: Optional[Literal[0, 1]] = Field(default=None, description="Si es reservable")
-    unit_status: Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]] = Field(default=None, description="Estado de la unidad")
-    content_updated_since: Optional[str] = Field(default=None, description="Contenido actualizado desde")
+    is_active: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si está activo"
+    )
+    is_bookable: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si es reservable"
+    )
+    unit_status: Optional[
+        Literal["clean", "dirty", "occupied", "inspection", "inprogress"]
+    ] = Field(default=None, description="Estado de la unidad")
+    content_updated_since: Optional[str] = Field(
+        default=None, description="Contenido actualizado desde"
+    )
     updated_since: Optional[str] = Field(default=None, description="Actualizado desde")
-    computed: Optional[Literal[0, 1]] = Field(default=None, description="Si es computado")
-    inherited: Optional[Literal[0, 1]] = Field(default=None, description="Si es heredado")
+    computed: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si es computado"
+    )
+    inherited: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si es heredado"
+    )
     limited: Optional[Literal[0, 1]] = Field(default=None, description="Si es limitado")
-    include_descriptions: Optional[Literal[0, 1]] = Field(default=None, description="Si incluir descripciones")
-    allow_unit_rates: Optional[Literal[0, 1]] = Field(default=None, description="Si permitir tarifas de unidad")
+    include_descriptions: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si incluir descripciones"
+    )
+    allow_unit_rates: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si permitir tarifas de unidad"
+    )
     calendar_id: Optional[int] = Field(default=None, description="ID del calendario")
     role_id: Optional[int] = Field(default=None, description="ID del rol")
     id: Optional[List[int]] = Field(default=None, description="IDs específicos")
 
+
 class GetUnitsResponse(BaseModel):
     """Respuesta de obtener unidades"""
-    embedded: Dict[str, List[Unit]] = Field(..., alias="_embedded", description="Datos embebidos")
+
+    embedded: Dict[str, List[Unit]] = Field(
+        ..., alias="_embedded", description="Datos embebidos"
+    )
     page: int = Field(..., description="Página actual")
     page_count: int = Field(..., description="Total de páginas")
     page_size: int = Field(..., description="Tamaño de página")
     total_items: int = Field(..., description="Total de elementos")
-    links: Dict[str, Union[str, Dict[str, str]]] = Field(..., alias="_links", description="Enlaces")
+    links: Dict[str, Union[str, Dict[str, str]]] = Field(
+        ..., alias="_links", description="Enlaces"
+    )
+
 
 class GetUnitParams(BaseModel):
     """Parámetros para obtener una unidad específica"""
+
     unit_id: int = Field(..., description="ID de la unidad")
-    computed: Optional[Literal[0, 1]] = Field(default=None, description="Si es computado")
-    inherited: Optional[Literal[0, 1]] = Field(default=None, description="Si es heredado")
-    include_descriptions: Optional[Literal[0, 1]] = Field(default=None, description="Si incluir descripciones")
+    computed: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si es computado"
+    )
+    inherited: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si es heredado"
+    )
+    include_descriptions: Optional[Literal[0, 1]] = Field(
+        default=None, description="Si incluir descripciones"
+    )
+
 
 class UnitFilters(BaseModel):
     """Filtros para unidades"""
+
     node_id: Optional[int] = Field(default=None, description="ID del nodo")
-    unit_type_id: Optional[int] = Field(default=None, description="ID del tipo de unidad")
+    unit_type_id: Optional[int] = Field(
+        default=None, description="ID del tipo de unidad"
+    )
     amenity_id: Optional[int] = Field(default=None, description="ID de amenidad")
-    pets_friendly: Optional[bool] = Field(default=None, description="Si acepta mascotas")
-    events_allowed: Optional[bool] = Field(default=None, description="Si se permiten eventos")
-    smoking_allowed: Optional[bool] = Field(default=None, description="Si se permite fumar")
-    children_allowed: Optional[bool] = Field(default=None, description="Si se permiten niños")
+    pets_friendly: Optional[bool] = Field(
+        default=None, description="Si acepta mascotas"
+    )
+    events_allowed: Optional[bool] = Field(
+        default=None, description="Si se permiten eventos"
+    )
+    smoking_allowed: Optional[bool] = Field(
+        default=None, description="Si se permite fumar"
+    )
+    children_allowed: Optional[bool] = Field(
+        default=None, description="Si se permiten niños"
+    )
     is_active: Optional[bool] = Field(default=None, description="Si está activo")
     is_bookable: Optional[bool] = Field(default=None, description="Si es reservable")
     unit_status: Optional[str] = Field(default=None, description="Estado de la unidad")

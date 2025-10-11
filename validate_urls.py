@@ -49,7 +49,7 @@ class URLValidator:
         print("Validando URLs de TrackHS API...")
         print("=" * 60)
         
-        # URL oficial de IHVM Vacations
+        # URL oficial de TrackHS API
         urls_to_test = [
             TrackHSConfig.DEFAULT_URL
         ]
@@ -107,11 +107,11 @@ class URLValidator:
         # Recomendaciones
         print(f"\nRECOMENDACIONES:")
         if successful_urls:
-            print(f"   URL oficial de IHVM funcionando correctamente")
+            print(f"   URL oficial de TrackHS funcionando correctamente")
             print(f"   Endpoint /v2/pms/reservations disponible")
             print(f"   Configura credenciales reales en .env")
         else:
-            print("   URL de IHVM no responde. Verifica:")
+            print("   URL de TrackHS no responde. Verifica:")
             print("   - Conectividad de red")
             print("   - Credenciales validas")
             print("   - Firewall o proxy")

@@ -9,6 +9,6 @@ __version__ = "1.0.0"
 __author__ = "Track HS Team"
 __email__ = "team@trackhs.com"
 
-from .server import mcp, api_client
+from .server import api_client, mcp
 
 __all__ = ["mcp", "api_client"]

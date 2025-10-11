@@ -47,7 +47,7 @@ class LocalTester:
         
         # Configuración de testing
         self.config = TrackHSConfig(
-            base_url=os.getenv("TRACKHS_API_URL", "https://ihvmvacations.trackhs.com/api"),
+            base_url=os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api"),
             username=os.getenv("TRACKHS_USERNAME", "test_user"),
             password=os.getenv("TRACKHS_PASSWORD", "test_password"),
             timeout=int(os.getenv("TRACKHS_TIMEOUT", "30"))

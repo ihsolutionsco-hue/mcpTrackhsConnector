@@ -33,8 +33,8 @@ echo $TRACKHS_PASSWORD
 #### **Paso 3: Probar URLs Manualmente**
 ```bash
 # Probar con curl
-curl -I "https://api-integration-example.tracksandbox.io/api/v2/pms/reservations"
-curl -I "https://ihvmvacations.trackhs.com/api/v2/pms/reservations"
+curl -I "https://api-integration-example.trackproduction.io/api/v2/pms/reservations"
+curl -I "https://ihmvacations.trackhs.com/api/v2/pms/reservations"
 ```
 
 ### **2. Error 401 - Unauthorized**
@@ -133,7 +133,7 @@ pytest tests/integration/
 
 ### **Para Desarrollo:**
 ```bash
-TRACKHS_API_URL=https://api-integration-example.tracksandbox.io/api
+TRACKHS_API_URL=https://api-integration-example.trackproduction.io/api
 TRACKHS_USERNAME=test_user
 TRACKHS_PASSWORD=test_password
 ```
@@ -147,14 +147,14 @@ TRACKHS_PASSWORD=test_password
 
 ### **Para Producción:**
 ```bash
-TRACKHS_API_URL=https://api.trackhs.com/api
+TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
 TRACKHS_USERNAME=tu_usuario_real
 TRACKHS_PASSWORD=tu_password_real
 ```
 
-### **Para IHVM:**
+### **Para TrackHS:**
 ```bash
-TRACKHS_API_URL=https://ihvmvacations.trackhs.com/api
+TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
 TRACKHS_USERNAME=tu_usuario_ihvm
 TRACKHS_PASSWORD=tu_password_ihvm
 ```

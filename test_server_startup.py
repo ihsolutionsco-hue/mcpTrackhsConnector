@@ -30,9 +30,9 @@ def test_server_import():
         
         # Verificar validación de URL
         if config.validate_url():
-            print("   URL válida para IHVM")
+            print("   URL válida para TrackHS")
         else:
-            print("   WARNING: URL no válida para IHVM")
+            print("   WARNING: URL no válida para TrackHS")
         
         print("   OK: Servidor importado correctamente")
         return True
