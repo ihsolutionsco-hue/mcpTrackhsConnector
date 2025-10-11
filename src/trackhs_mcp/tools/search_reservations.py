@@ -9,10 +9,7 @@ from ..core.api_client import TrackHSApiClient
 from ..core.error_handling import (
     ValidationError,
     error_handler,
-    validate_param_types,
-    validate_required_params,
 )
-from ..models.reservations import SearchReservationsParams
 
 
 def register_search_reservations(mcp, api_client: TrackHSApiClient):
@@ -127,10 +124,14 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
         - unit_type_id: Unit type ID(s)
         - rate_type_id: Rate type ID(s)
         - reservation_type_id: Reservation type ID(s)
-        - booked_start/end: Booking date range (ISO 8601). Examples: "2025-01-01", "2025-01-01T00:00:00Z"
-        - arrival_start/end: Arrival date range (ISO 8601). Examples: "2025-01-01", "2025-01-01T00:00:00Z"
-        - departure_start/end: Departure date range (ISO 8601). Examples: "2025-01-01", "2025-01-01T00:00:00Z"
-        - updated_since: Updated since date (ISO 8601). Examples: "2025-01-01", "2025-01-01T00:00:00Z"
+        - booked_start/end: Booking date range (ISO 8601). 
+          Examples: "2025-01-01", "2025-01-01T00:00:00Z"
+        - arrival_start/end: Arrival date range (ISO 8601). 
+          Examples: "2025-01-01", "2025-01-01T00:00:00Z"
+        - departure_start/end: Departure date range (ISO 8601). 
+          Examples: "2025-01-01", "2025-01-01T00:00:00Z"
+        - updated_since: Updated since date (ISO 8601). 
+          Examples: "2025-01-01", "2025-01-01T00:00:00Z"
         - scroll: Elasticsearch scroll (1 to start, string to continue)
         - in_house_today: Filter by in-house today (0/1)
         - status: Reservation status(es) - single string or list
@@ -254,11 +255,22 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
 
         endpoint = "/v2/pms/reservations"
 
-        # Logging para debugging de filtros de fecha
+        # Logging detallado para debugging de filtros de fecha
         import logging
 
         logger = logging.getLogger(__name__)
         logger.info(f"Search reservations query params: {query_params}")
+
+        # Logging específico para parámetros de fecha
+        date_params = {
+            k: v
+            for k, v in query_params.items()
+            if "Start" in k or "End" in k or "Since" in k
+        }
+        if date_params:
+            logger.info(f"Date filter parameters: {date_params}")
+        else:
+            logger.warning("No date filter parameters found in query")
 
         try:
             # Pasar query_params directamente al cliente API
@@ -277,13 +289,15 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
                 if e.status_code == 401:
                     raise ValidationError(
                         "Unauthorized: Invalid authentication credentials. "
-                        "Please verify your TRACKHS_USERNAME and TRACKHS_PASSWORD are correct and not expired.",
+                        "Please verify your TRACKHS_USERNAME and TRACKHS_PASSWORD "
+                        "are correct and not expired.",
                         "auth",
                     )
                 elif e.status_code == 403:
                     raise ValidationError(
                         "Forbidden: Insufficient permissions for this operation. "
-                        "Please verify your account has access to PMS/Reservations endpoints.",
+                        "Please verify your account has access to "
+                        "PMS/Reservations endpoints.",
                         "permissions",
                     )
                 elif e.status_code == 404:
@@ -345,20 +359,59 @@ def _is_valid_date_format(date_string: str) -> bool:
 
 
 def _normalize_date_format(date_string: str) -> str:
-    """Normaliza formato de fecha para la API de TrackHS"""
+    """Normaliza formato de fecha para la API de TrackHS - CORREGIDO"""
     try:
-        from datetime import datetime
-
-        # Si es solo fecha, agregar tiempo
+        # Si es solo fecha, mantenerla como está (la API espera formato simple)
         if len(date_string) == 10 and date_string.count("-") == 2:
-            # Solo fecha: 2025-01-01 -> 2025-01-01T00:00:00Z
-            return f"{date_string}T00:00:00Z"
+            # Solo fecha: 2025-01-01 -> 2025-01-01 (sin normalización)
+            return date_string
 
-        # Si tiene tiempo pero no timezone, agregar Z
+        # Si tiene tiempo con T, extraer solo la fecha
+        if "T" in date_string:
+            # Extraer solo la parte de fecha: 2025-01-01T00:00:00Z -> 2025-01-01
+            return date_string.split("T")[0]
+
+        # Si tiene tiempo con espacio, extraer solo la fecha
+        if " " in date_string and len(date_string) > 10:
+            # Extraer solo la parte de fecha: 2025-01-01 00:00:00 -> 2025-01-01
+            return date_string.split(" ")[0]
+
+        # Si ya tiene formato correcto, devolverlo
+        return date_string
+
+    except Exception:
+        # Si hay error, devolver el string original
+        return date_string
+
+
+def _normalize_date_format_flexible(date_string: str) -> str:
+    """Normaliza fecha con múltiples formatos para máxima compatibilidad"""
+    try:
+        # Si es solo fecha, probar múltiples formatos
+        if len(date_string) == 10 and date_string.count("-") == 2:
+            # Formato 1: Con Z (UTC)
+            format1 = f"{date_string}T00:00:00Z"
+            # Formato 2: Con offset UTC
+            format2 = f"{date_string}T00:00:00+00:00"
+            # Formato 3: Sin timezone
+            format3 = f"{date_string}T00:00:00"
+            
+            # Por defecto usar formato 1 (con Z)
+            return format1
+
+        # Si tiene tiempo pero no timezone, probar múltiples formatos
         if "T" in date_string and not (
             date_string.endswith("Z") or "+" in date_string or "-" in date_string[-6:]
         ):
-            return f"{date_string}Z"
+            # Formato 1: Con Z
+            format1 = f"{date_string}Z"
+            # Formato 2: Con offset UTC
+            format2 = f"{date_string}+00:00"
+            # Formato 3: Sin timezone (original)
+            format3 = date_string
+            
+            # Por defecto usar formato 1 (con Z)
+            return format1
 
         # Si ya tiene formato correcto, devolverlo
         return date_string
@@ -395,7 +448,7 @@ def _parse_id_string(id_string: Union[str, int]) -> Union[int, List[int]]:
             # Dividir por comas y convertir a enteros
             ids = [int(x.strip()) for x in content.split(",")]
             return ids if len(ids) > 1 else ids[0]
-        except ValueError as e:
+        except ValueError:
             raise ValidationError(f"Invalid array format: {id_string}", "id")
 
     # Si contiene comas, es una lista de IDs
@@ -405,7 +458,7 @@ def _parse_id_string(id_string: Union[str, int]) -> Union[int, List[int]]:
             if not ids:
                 raise ValidationError("No valid IDs found", "id")
             return ids if len(ids) > 1 else ids[0]
-        except ValueError as e:
+        except ValueError:
             raise ValidationError(f"Invalid ID format: {id_string}", "id")
 
     # Es un ID único
