@@ -138,7 +138,7 @@ class TestTrackHSResponse:
         )
 
         assert response.data == {"key": "value"}
-        assert response.success == True
+        assert response.success is True
         assert response.message == "Success"
 
     @pytest.mark.unit
@@ -147,7 +147,7 @@ class TestTrackHSResponse:
         response = TrackHSResponse(data={"key": "value"}, success=True)
 
         assert response.data == {"key": "value"}
-        assert response.success == True
+        assert response.success is True
         assert response.message is None
 
     @pytest.mark.unit

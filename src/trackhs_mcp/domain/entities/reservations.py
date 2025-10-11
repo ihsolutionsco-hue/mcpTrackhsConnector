@@ -341,7 +341,7 @@ class Reservation(BaseModel):
 
 
 class SearchReservationsParams(PaginationParams, SearchParams):
-    """Parámetros para buscar reservas V2 - Basado en la especificación completa de la API"""
+    """Parámetros para buscar reservas V2 - Basado en la especificación completa"""
 
     sort_column: Optional[
         Literal[

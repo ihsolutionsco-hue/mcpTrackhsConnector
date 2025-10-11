@@ -4,7 +4,8 @@ Configuración global de pytest para Track HS MCP Connector
 
 import asyncio
 import os
-from typing import Any, Dict
+
+# No unused imports
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -279,13 +280,13 @@ def sample_search_response():
         "total_items": 1,
         "_links": {
             "self": {
-                "href": "https://api-test.trackhs.com/api/v2/pms/reservations?page=1&size=10"
+                "href": "https://api-test.trackhs.com/api/v2/pms/reservations?page=1"
             },
             "first": {
-                "href": "https://api-test.trackhs.com/api/v2/pms/reservations?page=1&size=10"
+                "href": "https://api-test.trackhs.com/api/v2/pms/reservations?page=1"
             },
             "last": {
-                "href": "https://api-test.trackhs.com/api/v2/pms/reservations?page=1&size=10"
+                "href": "https://api-test.trackhs.com/api/v2/pms/reservations?page=1"
             },
         },
     }

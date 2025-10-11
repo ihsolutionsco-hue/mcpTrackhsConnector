@@ -3,7 +3,6 @@ Sistema de logging mejorado para Track HS MCP Connector
 Incluye niveles, contexto, métricas y integración con MCP
 """
 
-import asyncio
 import json
 import logging
 import time
@@ -127,12 +126,12 @@ class TrackHSLogger:
         if self.mcp_client:
             try:
                 # Enviar log al cliente MCP de forma síncrona
-                import asyncio
+                import asyncio as _asyncio
 
-                loop = asyncio.get_event_loop()
+                loop = _asyncio.get_event_loop()
                 if loop.is_running():
                     # Si el loop está corriendo, crear una tarea
-                    asyncio.create_task(self._send_mcp_log(log_entry))
+                    _asyncio.create_task(self._send_mcp_log(log_entry))
                 else:
                     # Si no está corriendo, ejecutar directamente
                     loop.run_until_complete(self._send_mcp_log(log_entry))
@@ -250,7 +249,8 @@ class TrackHSLogger:
 
         self.log(
             level,
-            f"Tool execution: {tool_name} - {'SUCCESS' if success else 'FAILED'} ({duration_ms}ms)",
+            f"Tool execution: {tool_name} - "
+            f"{'SUCCESS' if success else 'FAILED'} ({duration_ms}ms)",
             category,
             context,
         )

@@ -3,13 +3,10 @@ Utilidad de completion para Track HS MCP Connector
 Proporciona sugerencias y autocompletado inteligente para parámetros de API
 """
 
-import asyncio
-import json
-import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional
 
 
 class CompletionType(Enum):
@@ -108,13 +105,28 @@ class TrackHSCompletion:
         suggestions.extend(
             [
                 CompletionSuggestion(
-                    "page", "Page", "Número de página", "pagination", 10, type=CompletionType.PARAMETER
+                    "page",
+                    "Page",
+                    "Número de página",
+                    "pagination",
+                    10,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
-                    "size", "Size", "Tamaño de página", "pagination", 10, type=CompletionType.PARAMETER
+                    "size",
+                    "Size",
+                    "Tamaño de página",
+                    "pagination",
+                    10,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
-                    "sortColumn", "Sort Column", "Columna para ordenar", "sorting", 9, type=CompletionType.PARAMETER
+                    "sortColumn",
+                    "Sort Column",
+                    "Columna para ordenar",
+                    "sorting",
+                    9,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
                     "sortDirection",
@@ -255,10 +267,29 @@ class TrackHSCompletion:
     ) -> List[CompletionSuggestion]:
         """Obtiene sugerencias para sortColumn"""
         suggestions = [
-            CompletionSuggestion("name", "Name", "Ordenar por nombre", "sort", 10, type=CompletionType.SORT),
-            CompletionSuggestion("status", "Status", "Ordenar por estado", "sort", 9, type=CompletionType.SORT),
             CompletionSuggestion(
-                "altCon", "Alt Con", "Ordenar por confirmación alternativa", "sort", 8, type=CompletionType.SORT
+                "name",
+                "Name",
+                "Ordenar por nombre",
+                "sort",
+                10,
+                type=CompletionType.SORT,
+            ),
+            CompletionSuggestion(
+                "status",
+                "Status",
+                "Ordenar por estado",
+                "sort",
+                9,
+                type=CompletionType.SORT,
+            ),
+            CompletionSuggestion(
+                "altCon",
+                "Alt Con",
+                "Ordenar por confirmación alternativa",
+                "sort",
+                8,
+                type=CompletionType.SORT,
             ),
             CompletionSuggestion(
                 "agreementStatus",
@@ -268,7 +299,9 @@ class TrackHSCompletion:
                 8,
                 type=CompletionType.SORT,
             ),
-            CompletionSuggestion("type", "Type", "Ordenar por tipo", "sort", 7, type=CompletionType.SORT),
+            CompletionSuggestion(
+                "type", "Type", "Ordenar por tipo", "sort", 7, type=CompletionType.SORT
+            ),
             CompletionSuggestion("guest", "Guest", "Ordenar por huésped", "sort", 7),
             CompletionSuggestion(
                 "guests", "Guests", "Ordenar por huéspedes", "sort", 7
@@ -399,7 +432,8 @@ class TrackHSCompletion:
                         suggestions.append(
                             CompletionSuggestion(
                                 str(contact["id"]),
-                                f"{contact.get('name', 'Contact')} (ID: {contact['id']})",
+                                f"{contact.get('name', 'Contact')} "
+                                f"(ID: {contact['id']})",
                                 f"Contact: {contact.get('name', 'Unnamed')}",
                                 "contact",
                                 5,
@@ -409,7 +443,7 @@ class TrackHSCompletion:
             if suggestions:
                 self._set_cache(cache_key, suggestions)
 
-        except Exception as e:
+        except Exception:
             # En caso de error, retornar sugerencias vacías
             pass
 

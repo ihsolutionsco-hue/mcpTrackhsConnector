@@ -10,7 +10,7 @@ import httpx
 
 from ...application.ports.api_client_port import ApiClientPort
 from ...domain.value_objects.config import TrackHSConfig
-from ...domain.value_objects.request import RequestOptions, TrackHSResponse
+from ...domain.value_objects.request import RequestOptions
 from ..utils.auth import TrackHSAuth
 from ..utils.error_handling import (
     ApiError,
@@ -18,7 +18,6 @@ from ..utils.error_handling import (
     NetworkError,
     TimeoutError,
     error_handler,
-    validate_required_params,
 )
 
 T = TypeVar("T")
@@ -103,7 +102,7 @@ class TrackHSApiClient(ApiClientPort):
                 logger.debug(f"Full URL: {self.client.base_url}{endpoint}")
                 logger.debug(f"Headers: {headers}")
 
-                # Realizar petición usando endpoint relativo, httpx usará base_url automáticamente
+                # Realizar petición usando endpoint relativo
                 response = await self.client.request(method, endpoint, **request_kwargs)
 
                 # Verificar si la respuesta es exitosa
@@ -121,13 +120,15 @@ class TrackHSApiClient(ApiClientPort):
                             continue
                         else:
                             raise ApiError(
-                                f"Server error: {response.status_code} {response.reason_phrase}",
+                                f"Server error: {response.status_code} "
+                                f"{response.reason_phrase}",
                                 response.status_code,
                                 endpoint,
                             )
                     else:
                         raise ApiError(
-                            f"API Error: {response.status_code} {response.reason_phrase}",
+                            f"API Error: {response.status_code} "
+                            f"{response.reason_phrase}",
                             response.status_code,
                             endpoint,
                         )

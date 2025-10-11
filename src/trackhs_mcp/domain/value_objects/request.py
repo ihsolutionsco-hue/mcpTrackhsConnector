@@ -2,7 +2,7 @@
 Value Objects para peticiones HTTP
 """
 
-from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
+from typing import Dict, Generic, List, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 

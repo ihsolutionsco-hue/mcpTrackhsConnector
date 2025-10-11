@@ -3,11 +3,11 @@ Utilidad de paginación robusta para Track HS MCP Connector
 Maneja grandes conjuntos de datos con paginación eficiente y scroll de Elasticsearch
 """
 
-import asyncio
+# asyncio import removed
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, AsyncIterator, Dict, Iterator, List, Optional, Union
+from typing import Any, AsyncIterator, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +79,8 @@ class PaginationUtility:
         total_requested = page * size
         if total_requested > self.config.max_total_results:
             raise ValueError(
-                f"Total de resultados solicitados ({total_requested}) excede el límite máximo ({self.config.max_total_results})"
+                f"Total de resultados solicitados ({total_requested}) "
+                f"excede el límite máximo ({self.config.max_total_results})"
             )
 
         return {"page": page, "size": size, "offset": (page - 1) * size}
@@ -145,6 +146,7 @@ class PaginationUtility:
             page_info=page_info,
             links=links,
             metadata={"scroll_mode": True, "scroll_id": page_info.scroll_id},
+            scroll_id=page_info.scroll_id,
         )
 
     def process_standard_response(

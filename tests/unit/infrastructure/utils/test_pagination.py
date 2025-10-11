@@ -2,7 +2,7 @@
 Tests unitarios para utilidades de paginación
 """
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock  # patch not used
 
 import pytest
 
@@ -170,10 +170,12 @@ class TestPaginationUtility:
         response_data = {"page": 2, "page_size": 10, "total_items": 50}
 
         page_info = pagination_utility.calculate_page_info(
-            response_data["page"], response_data["page_size"], response_data["total_items"]
+            response_data["page"],
+            response_data["page_size"],
+            response_data["total_items"],
         )
 
-        assert page_info.current_page == 2
+        assert page_info.page == 2
         assert page_info.page_size == 10
         assert page_info.total_pages == 5
         assert page_info.total_items == 50
@@ -186,10 +188,12 @@ class TestPaginationUtility:
         response_data = {"page": 5, "page_size": 10, "total_items": 50}
 
         page_info = pagination_utility.calculate_page_info(
-            response_data["page"], response_data["page_size"], response_data["total_items"]
+            response_data["page"],
+            response_data["page_size"],
+            response_data["total_items"],
         )
 
-        assert page_info.current_page == 5
+        assert page_info.page == 5
         assert page_info.has_next is False
         assert page_info.has_previous is True
 
@@ -199,10 +203,12 @@ class TestPaginationUtility:
         response_data = {"page": 1, "page_size": 10, "total_items": 50}
 
         page_info = pagination_utility.calculate_page_info(
-            response_data["page"], response_data["page_size"], response_data["total_items"]
+            response_data["page"],
+            response_data["page_size"],
+            response_data["total_items"],
         )
 
-        assert page_info.current_page == 1
+        assert page_info.page == 1
         assert page_info.has_next is True
         assert page_info.has_previous is False
 
@@ -220,11 +226,11 @@ class TestPaginationUtility:
         assert "next" in links
         assert "prev" in links
 
-        assert links["sel"]["hre"] == "/test?page=2&size=10"
-        assert links["first"]["hre"] == "/test?page=1&size=10"
-        assert links["last"]["hre"] == "/test?page=5&size=10"
-        assert links["next"]["hre"] == "/test?page=3&size=10"
-        assert links["prev"]["hre"] == "/test?page=1&size=10"
+        assert links["self"]["href"] == "/test?page=2&size=10"
+        assert links["first"]["href"] == "/test?page=1&size=10"
+        assert links["last"]["href"] == "/test?page=5&size=10"
+        assert links["next"]["href"] == "/test?page=3&size=10"
+        assert links["prev"]["href"] == "/test?page=1&size=10"
 
     @pytest.mark.unit
     def test_generate_links_first_page(self, pagination_utility):
@@ -389,15 +395,29 @@ class TestPaginationUtility:
 
         result1 = PaginationResult(
             data=[{"id": 1}, {"id": 2}],
-            page_info=PageInfo(page=1, size=2, total_items=4, total_pages=2, has_next=True, has_previous=False),
+            page_info=PageInfo(
+                page=1,
+                size=2,
+                total_items=4,
+                total_pages=2,
+                has_next=True,
+                has_previous=False,
+            ),
             links={},
-            metadata={}
+            metadata={},
         )
         result2 = PaginationResult(
             data=[{"id": 3}, {"id": 4}],
-            page_info=PageInfo(page=2, size=2, total_items=4, total_pages=2, has_next=False, has_previous=True),
+            page_info=PageInfo(
+                page=2,
+                size=2,
+                total_items=4,
+                total_pages=2,
+                has_next=False,
+                has_previous=True,
+            ),
             links={},
-            metadata={}
+            metadata={},
         )
 
         results = [result1, result2]

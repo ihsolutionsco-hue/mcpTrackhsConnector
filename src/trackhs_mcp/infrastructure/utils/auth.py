@@ -3,9 +3,10 @@ Módulo de autenticación para Track HS API
 """
 
 import base64
-from typing import Optional
 
 from ...domain.value_objects.config import TrackHSConfig
+
+# No unused imports
 
 
 class TrackHSAuth:

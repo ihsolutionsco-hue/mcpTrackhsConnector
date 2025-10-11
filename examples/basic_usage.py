@@ -10,14 +10,14 @@ import os
 
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
 from src.trackhs_mcp.application.use_cases.search_reservations import (
     SearchReservationsUseCase,
 )
 from src.trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+
+# Load environment variables
+load_dotenv()
 
 
 async def main():
@@ -41,10 +41,10 @@ async def main():
         # 3. Search reservations with basic filters
         print("3. Searching reservations...")
         filters = {
-            'date_from': '2024-01-01',
-            'date_to': '2024-01-31',
-            'status': 'confirmed',
-            'per_page': 10
+            "date_from": "2024-01-01",
+            "date_to": "2024-01-31",
+            "status": "confirmed",
+            "per_page": 10,
         }
 
         result = await search_use_case.execute(filters)
@@ -55,8 +55,8 @@ async def main():
         print("\n4. Reservation Results:")
         print("-" * 30)
 
-        if result['reservations']:
-            for i, reservation in enumerate(result['reservations'][:5], 1):
+        if result["reservations"]:
+            for i, reservation in enumerate(result["reservations"][:5], 1):
                 print(f"{i}. {reservation.guest_name}")
                 print(f"   Arrival: {reservation.arrival_date}")
                 print(f"   Departure: {reservation.departure_date}")
@@ -64,15 +64,15 @@ async def main():
                 print(f"   Amount: ${reservation.total_amount}")
                 print()
 
-            if len(result['reservations']) > 5:
+            if len(result["reservations"]) > 5:
                 print(f"... and {len(result['reservations']) - 5} more reservations")
         else:
             print("No reservations found for the specified criteria")
 
         # 5. Show pagination info
-        if 'pagination' in result:
-            pagination = result['pagination']
-            print(f"\nPagination Info:")
+        if "pagination" in result:
+            pagination = result["pagination"]
+            print("\nPagination Info:")
             print(f"  Current page: {pagination.get('current_page', 'N/A')}")
             print(f"  Total pages: {pagination.get('total_pages', 'N/A')}")
             print(f"  Items per page: {pagination.get('per_page', 'N/A')}")
@@ -80,12 +80,12 @@ async def main():
         # 6. Test advanced search
         print("\n5. Testing advanced search...")
         advanced_filters = {
-            'date_from': '2024-01-01',
-            'date_to': '2024-12-31',
-            'status': 'confirmed',
-            'sort_by': 'arrival_date',
-            'sort_order': 'asc',
-            'per_page': 5
+            "date_from": "2024-01-01",
+            "date_to": "2024-12-31",
+            "status": "confirmed",
+            "sort_by": "arrival_date",
+            "sort_order": "asc",
+            "per_page": 5,
         }
 
         advanced_result = await search_use_case.execute(advanced_filters)
@@ -107,17 +107,18 @@ async def main():
         print("3. Ensure network connectivity")
         print("4. Check API endpoint availability")
 
+
 def check_environment():
     """Check if environment is properly configured"""
     print("Environment Check:")
     print("-" * 20)
 
-    required_vars = ['TRACKHS_API_URL', 'TRACKHS_USERNAME', 'TRACKHS_PASSWORD']
+    required_vars = ["TRACKHS_API_URL", "TRACKHS_USERNAME", "TRACKHS_PASSWORD"]
 
     for var in required_vars:
         value = os.getenv(var)
         if value:
-            if var == 'TRACKHS_PASSWORD':
+            if var == "TRACKHS_PASSWORD":
                 print(f"✓ {var}: {'*' * len(value)}")
             else:
                 print(f"✓ {var}: {value}")
@@ -125,6 +126,7 @@ def check_environment():
             print(f"❌ {var}: Not set")
 
     print()
+
 
 if __name__ == "__main__":
     print("TrackHS MCP Connector - Basic Usage Example")

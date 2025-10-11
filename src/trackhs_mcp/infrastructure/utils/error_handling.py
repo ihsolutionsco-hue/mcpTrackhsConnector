@@ -235,7 +235,8 @@ def validate_param_types(params: Dict[str, Any], type_mapping: Dict[str, Type]) 
         if param in params and params[param] is not None:
             if not isinstance(params[param], expected_type):
                 raise ValidationError(
-                    f"Parameter '{param}' must be of type {expected_type.__name__}, got {type(params[param]).__name__}",
+                    f"Parameter '{param}' must be of type {expected_type.__name__}, "
+                    f"got {type(params[param]).__name__}",
                     field=param,
                 )
 

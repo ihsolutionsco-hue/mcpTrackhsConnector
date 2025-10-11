@@ -3,7 +3,7 @@ Tests unitarios para utilidades de completion
 """
 
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock  # patch not used
 
 import pytest
 

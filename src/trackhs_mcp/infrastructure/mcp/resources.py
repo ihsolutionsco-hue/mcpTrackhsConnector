@@ -3,8 +3,7 @@ Resources MCP para Track HS API V2
 Basado en la especificación completa de la API Search Reservations V2
 """
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from ...application.ports.api_client_port import ApiClientPort
 from ..utils.logging import get_logger
@@ -291,7 +290,7 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                     "properties": {
                         "required": {
                             "type": "string",
-                            "description": "Monto total requerido del depósito de seguridad",
+                            "description": "Monto total requerido del depósito",
                         },
                         "remaining": {
                             "type": "number",
@@ -662,16 +661,15 @@ def register_all_resources(mcp, api_client: ApiClientPort):
 - **Filtros especiales**: `inHouseToday`, `status`, `tags`
 
 ### Ordenamiento
-- **Columnas disponibles**: name, \
-     status, altConf, agreementStatus, type, guest, guests, unit, units, checkin, checkout, nights
+- **Columnas disponibles**: name, status, altConf, agreementStatus, type, guest, guests
 - **Direcciones**: asc, desc
 
 ### Parámetros de Fecha
 - **Formato**: ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ)
-- **Parámetros**: bookedStart, bookedEnd, arrivalStart, arrivalEnd, departureStart, departureEnd, updatedSince
+- **Parámetros**: bookedStart, bookedEnd, arrivalStart, arrivalEnd, updatedSince
 
 ## Autenticación
-Todas las peticiones requieren autenticación Basic Auth con las credenciales configuradas.
+Todas las peticiones requieren autenticación Basic Auth.
 
 ## Ejemplos de Uso
 
@@ -780,7 +778,7 @@ La respuesta incluye:
                 },
                 "scroll": {
                     "type": "string|integer",
-                    "description": "Scroll de Elasticsearch (1 para empezar, string para continuar)",
+                    "description": "Scroll de Elasticsearch (1 para empezar)",
                     "example": "1",
                 },
             },
@@ -891,7 +889,7 @@ La respuesta incluye:
         return {
             "basic_search": {
                 "description": "Búsqueda básica de reservas",
-                "url": "/v2/pms/reservations?page=1&size=10&sortColumn=name&sortDirection=asc",
+                "url": "/v2/pms/reservations?page=1&size=10&sortColumn=name",
                 "parameters": {
                     "page": 1,
                     "size": 10,
@@ -901,7 +899,7 @@ La respuesta incluye:
             },
             "filtered_search": {
                 "description": "Búsqueda con filtros de fecha y estado",
-                "url": "/v2/pms/reservations?status=Confirmed&arrivalStart=2024-01-01&arrivalEnd=2024-12-31&page=1&size=50",
+                "url": "/v2/pms/reservations?status=Confirmed&arrivalStart=2024-01-01",
                 "parameters": {
                     "status": "Confirmed",
                     "arrivalStart": "2024-01-01T00:00:00Z",
@@ -922,7 +920,7 @@ La respuesta incluye:
             },
             "multi_filter": {
                 "description": "Búsqueda con múltiples filtros",
-                "url": "/v2/pms/reservations?nodeId=123&unitTypeId=456&status=Confirmed&inHouseToday=1",
+                "url": "/v2/pms/reservations?nodeId=123&status=Confirmed",
                 "parameters": {
                     "nodeId": 123,
                     "unitTypeId": 456,

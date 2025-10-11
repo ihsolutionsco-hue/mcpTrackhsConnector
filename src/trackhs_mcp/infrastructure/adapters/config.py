@@ -3,7 +3,7 @@ Configuración centralizada para TrackHS MCP Connector
 """
 
 import os
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from ...domain.value_objects.config import TrackHSConfig as BaseTrackHSConfig
 

@@ -3,8 +3,8 @@ Prompts MCP para Track HS API V2
 Basado en la especificación completa de la API Search Reservations V2
 """
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+# datetime imports removed - not used
+from typing import Any, Dict, Optional
 
 from ...application.ports.api_client_port import ApiClientPort
 from ..utils.logging import get_logger
@@ -18,7 +18,7 @@ def register_all_prompts(mcp, api_client: ApiClientPort):
     @mcp.prompt("check-today-reservations")
     async def check_today_reservations(date: Optional[str] = None) -> Dict[str, Any]:
         """Revisar todas las reservas que llegan o salen hoy usando API V2"""
-        target_date = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        # target_date = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
         return {
             "messages": [
                 {
@@ -81,7 +81,7 @@ def register_all_prompts(mcp, api_client: ApiClientPort):
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Necesito verificar la disponibilidad de unidades para las fechas:
+                        "text": """Necesito verificar la disponibilidad de unidades:
 - Entrada: {check_in}
 - Salida: {check_out}
 {f'- Nodo específico: {node_id}' if node_id else ''}
@@ -107,7 +107,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Necesito obtener información de contacto de huéspedes:
+                        "text": """Necesito obtener información de contacto:
 {f'- Para la reserva ID: {reservation_id}' if reservation_id else ''}
 {f'- Filtrando por: {search_term}' if search_term else ''}
 
@@ -125,7 +125,7 @@ Por favor:
     async def maintenance_summary(
         status: str = "all", days: int = 30
     ) -> Dict[str, Any]:
-        """Obtener un resumen de las órdenes de mantenimiento pendientes y completadas"""
+        """Obtener resumen de órdenes de mantenimiento"""
         return {
             "messages": [
                 {
@@ -158,7 +158,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Necesito un análisis financiero para el período: {period}
+                        "text": """Necesito análisis financiero para: {period}
 {f'- Incluir proyecciones futuras' if include_forecast else ''}
 
 Por favor:
@@ -183,21 +183,21 @@ Por favor:
         contact_id: Optional[str] = None,
         scroll_mode: bool = False,
     ) -> Dict[str, Any]:
-        """Búsqueda avanzada de reservas usando API V2 con todos los parámetros disponibles"""
+        """Búsqueda avanzada de reservas usando API V2"""
         return {
             "messages": [
                 {
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Realiza una búsqueda avanzada de reservas usando la API V2 con los siguientes criterios:
+                        "text": """Realiza búsqueda avanzada de reservas con criterios:
 
 **Criterios de Búsqueda:**
-{f'- Término de búsqueda: {search_term}' if search_term else '- Sin término de búsqueda específico'}
-{f'- Estado: {status}' if status else '- Todos los estados'}
-{f'- Rango de fechas: {date_range}' if date_range else '- Sin filtro de fecha específico'}
-{f'- Nodo ID: {node_id}' if node_id else '- Todos los nodos'}
-{f'- Tipo de unidad ID: {unit_type_id}' if unit_type_id else '- Todos los tipos de unidad'}
+{f'- Término: {search_term}' if search_term else '- Sin término específico'}
+{f'- Estado: {status}' if status else '- Todos'}
+{f'- Fechas: {date_range}' if date_range else '- Sin filtro'}
+{f'- Nodo: {node_id}' if node_id else '- Todos'}
+{f'- Tipo de unidad ID: {unit_type_id}' if unit_type_id else '- Todos los tipos'}
 {f'- Contacto ID: {contact_id}' if contact_id else '- Todos los contactos'}
 
 **Configuración de Búsqueda:**
@@ -216,10 +216,10 @@ Por favor:
 7. **Métricas:** ADR, ocupación, ingresos por tipo
 
 **Filtros Adicionales a Considerar:**
-- Filtros de fecha: bookedStart, bookedEnd, arrivalStart, arrivalEnd, departureStart, departureEnd
+- Filtros de fecha: bookedStart, bookedEnd, arrivalStart, arrivalEnd
 - Filtros de ID: travelAgentId, campaignId, userId, rateTypeId
 - Filtros especiales: inHouseToday, tags, groupId, checkinOfficeId
-- Ordenamiento: name, status, altConf, agreementStatus, type, guest, guests, unit, units, checkin, checkout, nights
+- Ordenamiento: name, status, altConf, agreementStatus, type, guest, guests
 
 **Formato de Respuesta:**
 - Resumen ejecutivo con métricas clave
@@ -247,7 +247,7 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Realiza un análisis completo de reservas para el período {start_date} a {end_date} usando la API V2:
+                        "text": """Análisis de reservas para {start_date} a {end_date}:
 
 **Parámetros de Análisis:**
 - Período: {start_date} a {end_date}
@@ -311,10 +311,10 @@ Por favor:
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Analiza la experiencia del huésped con información completa de la API V2:
+                        "text": """Análisis de experiencia:
 
 **Identificación:**
-{f'- Reserva específica ID: {reservation_id}' if reservation_id else '- Sin reserva específica'}
+{f'- Reserva ID: {reservation_id}' if reservation_id else '- Sin reserva específica'}
 {f'- Contacto ID: {contact_id}' if contact_id else '- Sin contacto específico'}
 {f'- Incluir historial completo: {"Sí" if include_history else "No"}'}
 

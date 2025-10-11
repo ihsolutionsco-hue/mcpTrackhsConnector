@@ -5,7 +5,7 @@ Puerto (interfaz) para el cliente API
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
-from ...domain.value_objects.request import PaginationParams, SearchParams
+# PaginationParams, SearchParams imports removed - not used
 
 
 class ApiClientPort(ABC):

@@ -3,7 +3,7 @@ Tests E2E para integración MCP completa
 """
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -136,7 +136,7 @@ class TestMCPIntegrationE2E:
         # Configurar error en API
         mock_api_client.get.side_effect = Exception("API Error")
 
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
 
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
@@ -153,7 +153,7 @@ class TestMCPIntegrationE2E:
     @pytest.mark.asyncio
     async def test_resource_access(self, mock_mcp, mock_api_client):
         """Test acceso a recursos"""
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.resource = Mock()
 
         from src.trackhs_mcp.resources import register_all_resources
@@ -172,7 +172,7 @@ class TestMCPIntegrationE2E:
     @pytest.mark.asyncio
     async def test_prompt_usage(self, mock_mcp, mock_api_client):
         """Test uso de prompts"""
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.prompt = Mock()
 
         from src.trackhs_mcp.prompts import register_all_prompts
@@ -197,7 +197,7 @@ class TestMCPIntegrationE2E:
         """Test flujo completo de búsqueda"""
         mock_api_client.get.return_value = sample_search_response
 
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
 
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
@@ -254,7 +254,7 @@ class TestMCPIntegrationE2E:
 
         mock_api_client.get.side_effect = [page1_response, page2_response]
 
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
 
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
@@ -292,7 +292,7 @@ class TestMCPIntegrationE2E:
             },
         ]
 
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
 
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
@@ -317,7 +317,7 @@ class TestMCPIntegrationE2E:
         """Test requests concurrentes"""
         mock_api_client.get.return_value = sample_search_response
 
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
 
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
@@ -348,7 +348,7 @@ class TestMCPIntegrationE2E:
         mock_api_client.get.return_value = sample_search_response
 
         # Crear servidor MCP completo
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
         mock_mcp.resource = Mock()
         mock_mcp.prompt = Mock()
@@ -387,7 +387,7 @@ class TestMCPIntegrationE2E:
     @pytest.mark.asyncio
     async def test_validation_workflow(self, mock_mcp, mock_api_client):
         """Test flujo de validación"""
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
 
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
@@ -418,7 +418,7 @@ class TestMCPIntegrationE2E:
 
         mock_api_client.get.return_value = sample_search_response
 
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
 
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
@@ -454,7 +454,7 @@ class TestMCPIntegrationE2E:
 
         mock_api_client.get.return_value = sample_search_response
 
-        mcp = Mock()
+        # mcp = Mock()  # Variable not used
         mock_mcp.tool = Mock()
 
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools

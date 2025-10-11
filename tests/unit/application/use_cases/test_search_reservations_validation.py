@@ -3,7 +3,7 @@ Tests de validación para search_reservations.py
 Valida las correcciones implementadas según documentación API V2
 """
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock  # patch not used
 
 import pytest
 

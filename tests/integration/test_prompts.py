@@ -2,8 +2,8 @@
 Tests de integración para prompts MCP
 """
 
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
+# datetime imports removed - not used
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 

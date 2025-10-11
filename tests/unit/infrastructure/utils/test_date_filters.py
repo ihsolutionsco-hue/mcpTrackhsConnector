@@ -2,9 +2,9 @@
 Tests consolidados para filtros de fecha
 """
 
-from unittest.mock import AsyncMock, MagicMock
+# AsyncMock, MagicMock imports removed - not used
 
-import pytest
+# pytest import removed - not used
 
 from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
     _is_valid_date_format,
@@ -46,26 +46,26 @@ class TestDateFilters:
     def test_is_valid_date_format_solo_fecha(self):
         """Test validación de formato solo fecha"""
         # Solo fecha válida
-        assert _is_valid_date_format("2025-01-01") == True
-        assert _is_valid_date_format("2024-12-31") == True
+        assert _is_valid_date_format("2025-01-01") is True
+        assert _is_valid_date_format("2024-12-31") is True
 
         # Solo fecha inválida
-        assert _is_valid_date_format("2025-13-01") == False
-        assert _is_valid_date_format("2025-01-32") == False
-        assert _is_valid_date_format("invalid") == False
+        assert _is_valid_date_format("2025-13-01") is False
+        assert _is_valid_date_format("2025-01-32") is False
+        assert _is_valid_date_format("invalid") is False
 
     def test_is_valid_date_format_con_tiempo(self):
         """Test validación de formato con tiempo"""
         # Con tiempo válido
-        assert _is_valid_date_format("2025-01-01T00:00:00") == True
-        assert _is_valid_date_format("2025-01-01T23:59:59") == True
-        assert _is_valid_date_format("2025-01-01T00:00:00Z") == True
-        assert _is_valid_date_format("2025-01-01T00:00:00+00:00") == True
+        assert _is_valid_date_format("2025-01-01T00:00:00") is True
+        assert _is_valid_date_format("2025-01-01T23:59:59") is True
+        assert _is_valid_date_format("2025-01-01T00:00:00Z") is True
+        assert _is_valid_date_format("2025-01-01T00:00:00+00:00") is True
 
         # Con tiempo inválido
-        assert _is_valid_date_format("2025-01-01T25:00:00") == False
-        assert _is_valid_date_format("2025-01-01T00:60:00") == False
-        assert _is_valid_date_format("2025-01-01T00:00:60") == False
+        assert _is_valid_date_format("2025-01-01T25:00:00") is False
+        assert _is_valid_date_format("2025-01-01T00:60:00") is False
+        assert _is_valid_date_format("2025-01-01T00:00:60") is False
 
     def test_date_normalization_comprehensive(self):
         """Test comprehensivo de normalización de fechas"""
