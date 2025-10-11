@@ -55,7 +55,7 @@ class TestServerE2E:
         assert config is not None
         assert api_client is not None
         assert mcp is not None
-        
+
         # Verificar tipos básicos
         assert hasattr(config, 'base_url')
         assert hasattr(config, 'username')
@@ -141,7 +141,7 @@ class TestServerE2E:
         """Test servidor con variables de entorno"""
         # Test simplificado: verificar que TrackHSConfig.from_env() funciona
         from src.trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
-        
+
         # Verificar que la clase existe y tiene el método from_env
         assert hasattr(TrackHSConfig, 'from_env')
         assert callable(getattr(TrackHSConfig, 'from_env'))
@@ -150,8 +150,8 @@ class TestServerE2E:
     def test_server_error_handling(self):
         """Test manejo de errores en el servidor"""
         # Test simplificado: verificar que el servidor maneja errores básicos
-        from src.trackhs_mcp.server import config, api_client, mcp
-        
+        from src.trackhs_mcp.server import api_client, config, mcp
+
         # Verificar que los componentes existen (no hay errores de importación)
         assert config is not None
         assert api_client is not None
@@ -172,8 +172,8 @@ class TestServerE2E:
     def test_server_path_manipulation(self):
         """Test manipulación de paths en el servidor"""
         # Test simplificado: verificar que el servidor puede importar correctamente
-        from src.trackhs_mcp.server import config, api_client, mcp
-        
+        from src.trackhs_mcp.server import api_client, config, mcp
+
         # Verificar que los componentes existen
         assert config is not None
         assert api_client is not None
@@ -254,10 +254,10 @@ class TestServerE2E:
         """Test validación de configuración del servidor"""
         # Test simplificado: verificar que la configuración existe y tiene los campos correctos
         from src.trackhs_mcp.server import config
-        
+
         # Verificar que la configuración existe
         assert config is not None
-        
+
         # Verificar que tiene los campos necesarios
         assert hasattr(config, 'base_url')
         assert hasattr(config, 'username')
@@ -269,10 +269,10 @@ class TestServerE2E:
         """Test inicialización del API client"""
         # Test simplificado: verificar que el API client existe y es del tipo correcto
         from src.trackhs_mcp.server import api_client
-        
+
         # Verificar que el API client existe
         assert api_client is not None
-        
+
         # Verificar que tiene métodos básicos
         assert hasattr(api_client, 'get')
         assert hasattr(api_client, 'post')
@@ -284,10 +284,10 @@ class TestServerE2E:
         """Test inicialización de FastMCP"""
         # Test simplificado: verificar que FastMCP existe y es del tipo correcto
         from src.trackhs_mcp.server import mcp
-        
+
         # Verificar que FastMCP existe
         assert mcp is not None
-        
+
         # Verificar que tiene métodos básicos de FastMCP
         assert hasattr(mcp, 'tool')
         assert hasattr(mcp, 'resource')
