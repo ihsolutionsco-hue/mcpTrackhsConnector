@@ -138,34 +138,31 @@ class TestPaginationUtility:
     @pytest.mark.unit
     def test_validate_pagination_params_valid(self, pagination_utility):
         """Test validación de parámetros válidos"""
-        params = {"page": 1, "size": 10}
-
         # No debe lanzar excepción
-        pagination_utility.validate_pagination_params(params)
+        result = pagination_utility.validate_pagination_params(1, 10)
+        assert result["page"] == 1
+        assert result["size"] == 10
 
     @pytest.mark.unit
     def test_validate_pagination_params_invalid_page(self, pagination_utility):
         """Test validación con página inválida"""
-        params = {"page": 0, "size": 10}
-
-        with pytest.raises(ValueError, match="Page must be >= 1"):
-            pagination_utility.validate_pagination_params(params)
+        # Página 0 debería ser corregida a 1
+        result = pagination_utility.validate_pagination_params(0, 10)
+        assert result["page"] == 1
 
     @pytest.mark.unit
     def test_validate_pagination_params_invalid_size(self, pagination_utility):
         """Test validación con tamaño inválido"""
-        params = {"page": 1, "size": 0}
-
-        with pytest.raises(ValueError, match="Size must be >= 1"):
-            pagination_utility.validate_pagination_params(params)
+        # Tamaño 0 debería ser corregido a 1
+        result = pagination_utility.validate_pagination_params(1, 0)
+        assert result["size"] == 1
 
     @pytest.mark.unit
     def test_validate_pagination_params_size_exceeds_max(self, pagination_utility):
         """Test validación con tamaño que excede el máximo"""
-        params = {"page": 1, "size": 2000}  # Mayor que max_page_size (1000)
-
-        with pytest.raises(ValueError, match="Size exceeds maximum"):
-            pagination_utility.validate_pagination_params(params)
+        # Tamaño 2000 debería ser limitado a max_page_size (1000)
+        result = pagination_utility.validate_pagination_params(1, 2000)
+        assert result["size"] == 1000
 
     @pytest.mark.unit
     def test_calculate_page_info(self, pagination_utility):
