@@ -23,7 +23,7 @@ class TestTrackHSApiClient:
     @pytest.fixture
     def api_client(self, mock_trackhs_config):
         """Crear instancia de API client para testing"""
-        with patch("src.trackhs_mcp.core.api_client.TrackHSAuth") as mock_auth:
+        with patch("src.trackhs_mcp.infrastructure.utils.auth.TrackHSAuth") as mock_auth:
             mock_auth.return_value.validate_credentials.return_value = True
             mock_auth.return_value.get_headers.return_value = {
                 "Authorization": "Basic dGVzdF91c2VyOnRlc3RfcGFzc3dvcmQ=",
@@ -35,7 +35,7 @@ class TestTrackHSApiClient:
     @pytest.mark.unit
     def test_init_success(self, mock_trackhs_config):
         """Test inicialización exitosa del cliente"""
-        with patch("src.trackhs_mcp.core.api_client.TrackHSAuth") as mock_auth:
+        with patch("src.trackhs_mcp.infrastructure.utils.auth.TrackHSAuth") as mock_auth:
             mock_auth.return_value.validate_credentials.return_value = True
             client = TrackHSApiClient(mock_trackhs_config)
             assert client.config == mock_trackhs_config
@@ -44,7 +44,7 @@ class TestTrackHSApiClient:
     @pytest.mark.unit
     def test_init_invalid_credentials(self, mock_trackhs_config):
         """Test inicialización con credenciales inválidas"""
-        with patch("src.trackhs_mcp.core.api_client.TrackHSAuth") as mock_auth:
+        with patch("src.trackhs_mcp.infrastructure.utils.auth.TrackHSAuth") as mock_auth:
             mock_auth.return_value.validate_credentials.return_value = False
             with pytest.raises(
                 ValueError,
@@ -280,7 +280,7 @@ class TestTrackHSApiClient:
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_trackhs_config):
         """Test uso como context manager"""
-        with patch("src.trackhs_mcp.core.api_client.TrackHSAuth") as mock_auth:
+        with patch("src.trackhs_mcp.infrastructure.utils.auth.TrackHSAuth") as mock_auth:
             mock_auth.return_value.validate_credentials.return_value = True
             mock_auth.return_value.get_headers.return_value = {}
 
