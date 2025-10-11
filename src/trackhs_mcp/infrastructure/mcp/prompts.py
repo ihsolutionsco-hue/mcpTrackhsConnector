@@ -272,6 +272,11 @@ Por favor:
             for key, value in search_criteria.items():
                 criteria_items.append(f"- {key}: {value}")
             criteria_text = "\n".join(criteria_items)
+        
+        # Construir sección de criterios adicionales
+        additional_criteria_section = ""
+        if criteria_text:
+            additional_criteria_section = f"**Criterios Adicionales:**\n{criteria_text}"
 
         return {
             "messages": [
@@ -288,7 +293,7 @@ Por favor:
 {node_text}
 {unit_text}
 {contact_text}
-{f'**Criterios Adicionales:**\n{criteria_text}' if criteria_text else ''}
+{additional_criteria_section}
 
 **Configuración de Búsqueda:**
 - Usar search_reservations con API V2: /v2/pms/reservations
