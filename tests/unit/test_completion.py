@@ -240,7 +240,7 @@ class TestTrackHSCompletion:
     @pytest.mark.unit
     def test_get_date_suggestions(self, completion):
         """Test obtención de sugerencias de fecha"""
-        context = CompletionContext(parameter_name="arrival_start")
+        context = CompletionContext(current_input="", parameter_name="arrival_start")
 
         suggestions = completion.get_date_suggestions(context)
 
@@ -257,7 +257,7 @@ class TestTrackHSCompletion:
             }
         }
 
-        context = CompletionContext(parameter_name="node_id")
+        context = CompletionContext(current_input="", parameter_name="nodeId")
 
         suggestions = await completion.get_dynamic_suggestions(context)
 
@@ -277,7 +277,7 @@ class TestTrackHSCompletion:
             }
         }
 
-        context = CompletionContext(parameter_name="unit_id")
+        context = CompletionContext(current_input="", parameter_name="unitId")
 
         suggestions = await completion.get_dynamic_suggestions(context)
 
@@ -300,7 +300,7 @@ class TestTrackHSCompletion:
             }
         }
 
-        context = CompletionContext(parameter_name="contact_id")
+        context = CompletionContext(current_input="", parameter_name="contactId")
 
         suggestions = await completion.get_dynamic_suggestions(context)
 
@@ -312,7 +312,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_dynamic_suggestions_unknown_parameter(self, completion):
         """Test obtención de sugerencias dinámicas para parámetro desconocido"""
-        context = CompletionContext(parameter_name="unknown_param")
+        context = CompletionContext(current_input="", parameter_name="unknown_param")
 
         suggestions = await completion.get_dynamic_suggestions(context)
 
@@ -324,7 +324,7 @@ class TestTrackHSCompletion:
         """Test obtención de sugerencias dinámicas con error de API"""
         mock_api_client.get.side_effect = Exception("API Error")
 
-        context = CompletionContext(parameter_name="node_id")
+        context = CompletionContext(current_input="", parameter_name="nodeId")
 
         suggestions = await completion.get_dynamic_suggestions(context)
 
@@ -368,7 +368,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_date_parameter(self, completion):
         """Test obtención de completions para parámetros de fecha"""
-        context = CompletionContext(parameter_name="arrival_start")
+        context = CompletionContext(current_input="", parameter_name="arrival_start")
 
         suggestions = await completion.get_completions(context)
 
@@ -383,7 +383,7 @@ class TestTrackHSCompletion:
             "_embedded": {"nodes": [{"id": 1, "name": "Node 1"}]}
         }
 
-        context = CompletionContext(parameter_name="node_id")
+        context = CompletionContext(current_input="", parameter_name="nodeId")
 
         suggestions = await completion.get_completions(context)
 
@@ -393,7 +393,7 @@ class TestTrackHSCompletion:
     @pytest.mark.unit
     def test_get_endpoint_suggestions(self, completion):
         """Test obtención de sugerencias de endpoints"""
-        context = CompletionContext(parameter_name="endpoint")
+        context = CompletionContext(current_input="", parameter_name="endpoint")
 
         suggestions = completion.get_endpoint_suggestions(context)
 

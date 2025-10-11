@@ -327,21 +327,38 @@ class TestPaginationUtility:
     async def test_get_all_pages(self, pagination_utility, mock_api_client):
         """Test obtención de todas las páginas"""
         # Crear resultados de paginación simulados
-        from src.trackhs_mcp.core.pagination import PaginationResult
+        from src.trackhs_mcp.core.pagination import PaginationResult, PageInfo
+
+        page_info1 = PageInfo(
+            page=1,
+            size=2,
+            total_items=4,
+            total_pages=2,
+            has_next=True,
+            has_previous=False,
+            next_page=2
+        )
+        page_info2 = PageInfo(
+            page=2,
+            size=2,
+            total_items=4,
+            total_pages=2,
+            has_next=False,
+            has_previous=True,
+            previous_page=1
+        )
 
         result1 = PaginationResult(
             data=[{"id": 1}, {"id": 2}],
-            page=1,
-            page_size=2,
-            total_items=4,
-            has_next=True,
+            page_info=page_info1,
+            links={"self": "/page1", "next": "/page2"},
+            metadata={}
         )
         result2 = PaginationResult(
             data=[{"id": 3}, {"id": 4}],
-            page=2,
-            page_size=2,
-            total_items=4,
-            has_next=False,
+            page_info=page_info2,
+            links={"self": "/page2", "prev": "/page1"},
+            metadata={}
         )
 
         results = [result1, result2]

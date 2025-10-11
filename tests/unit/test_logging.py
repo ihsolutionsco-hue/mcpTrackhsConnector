@@ -25,12 +25,12 @@ class TestLogLevel:
     @pytest.mark.unit
     def test_log_level_values(self):
         """Test valores de LogLevel"""
-        assert LogLevel.TRACE.value == "trace"
-        assert LogLevel.DEBUG.value == "debug"
-        assert LogLevel.INFO.value == "info"
-        assert LogLevel.WARNING.value == "warning"
-        assert LogLevel.ERROR.value == "error"
-        assert LogLevel.CRITICAL.value == "critical"
+        assert LogLevel.TRACE.value == 5
+        assert LogLevel.DEBUG.value == 10
+        assert LogLevel.INFO.value == 20
+        assert LogLevel.WARNING.value == 30
+        assert LogLevel.ERROR.value == 40
+        assert LogLevel.CRITICAL.value == 50
 
 
 class TestLogCategory:
@@ -72,7 +72,7 @@ class TestLogContext:
         assert context.request_id is None
         assert context.user_id is None
         assert context.session_id is None
-        assert context.operation is None
+        assert context.tool_name is None
 
 
 class TestLogMetric:
@@ -389,10 +389,12 @@ class TestPerformanceTimer:
     @pytest.mark.unit
     def test_performance_timer_enter_exit(self):
         """Test context manager de PerformanceTimer"""
+        logger = TrackHSLogger("test_logger")
+        
         with patch("time.time") as mock_time:
             mock_time.side_effect = [0.0, 1.5]  # start_time, end_time
 
-            with PerformanceTimer("test_operation") as timer:
+            with PerformanceTimer(logger, "test_operation") as timer:
                 pass
 
             assert timer.operation == "test_operation"
