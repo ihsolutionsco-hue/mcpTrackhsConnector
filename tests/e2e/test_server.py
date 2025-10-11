@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from src.trackhs_mcp.core.api_client import TrackHSApiClient
-from src.trackhs_mcp.core.types import TrackHSConfig
+from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
 from src.trackhs_mcp.server import main, register_all_components
 
 

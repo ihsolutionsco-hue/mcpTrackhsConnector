@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from src.trackhs_mcp.core.pagination import (
+from src.trackhs_mcp.infrastructure.utils.pagination import (
     PageInfo,
     PaginationConfig,
     PaginationMode,
@@ -327,7 +327,7 @@ class TestPaginationUtility:
     async def test_get_all_pages(self, pagination_utility, mock_api_client):
         """Test obtención de todas las páginas"""
         # Crear resultados de paginación simulados
-        from src.trackhs_mcp.core.pagination import PageInfo, PaginationResult
+        from src.trackhs_mcp.infrastructure.utils.pagination import PageInfo, PaginationResult
 
         page_info1 = PageInfo(
             page=1,
@@ -373,7 +373,7 @@ class TestPaginationUtility:
     async def test_get_summary(self, pagination_utility, mock_api_client):
         """Test obtención de resumen"""
         # Crear resultados de paginación simulados
-        from src.trackhs_mcp.core.pagination import PaginationResult
+        from src.trackhs_mcp.infrastructure.utils.pagination import PaginationResult
 
         result1 = PaginationResult(
             data=[{"id": 1}, {"id": 2}],

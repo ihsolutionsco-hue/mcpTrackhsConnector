@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from src.trackhs_mcp.core.completion import (
+from src.trackhs_mcp.infrastructure.utils.completion import (
     CompletionContext,
     CompletionSuggestion,
     CompletionType,

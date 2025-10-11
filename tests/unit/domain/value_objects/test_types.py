@@ -5,12 +5,12 @@ Tests unitarios para tipos y modelos Pydantic
 import pytest
 from pydantic import ValidationError
 
-from src.trackhs_mcp.core.types import (
+from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
+from src.trackhs_mcp.domain.value_objects.request import (
     ApiError,
     PaginationParams,
     RequestOptions,
     SearchParams,
-    TrackHSConfig,
     TrackHSResponse,
 )
 

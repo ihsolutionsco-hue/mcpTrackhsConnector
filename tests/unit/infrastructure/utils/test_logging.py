@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.trackhs_mcp.core.logging import (
+from src.trackhs_mcp.infrastructure.utils.logging import (
     LogCategory,
     LogContext,
     LogLevel,

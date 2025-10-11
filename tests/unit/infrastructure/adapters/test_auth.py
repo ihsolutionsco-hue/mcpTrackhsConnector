@@ -6,8 +6,8 @@ import base64
 
 import pytest
 
-from src.trackhs_mcp.core.auth import TrackHSAuth
-from src.trackhs_mcp.core.types import TrackHSConfig
+from src.trackhs_mcp.infrastructure.utils.auth import TrackHSAuth
+from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
 
 
 class TestTrackHSAuth:

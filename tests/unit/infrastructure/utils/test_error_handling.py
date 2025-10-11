@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.trackhs_mcp.core.error_handling import (
+from src.trackhs_mcp.infrastructure.utils.error_handling import (
     ApiError,
     AuthenticationError,
     ErrorHandler,

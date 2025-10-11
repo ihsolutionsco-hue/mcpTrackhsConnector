@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from src.trackhs_mcp.core.error_handling import ValidationError
+from src.trackhs_mcp.infrastructure.utils.error_handling import ValidationError
 from src.trackhs_mcp.tools.search_reservations import (
     _is_valid_date_format,
     register_search_reservations,
