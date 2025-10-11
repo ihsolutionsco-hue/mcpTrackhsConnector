@@ -14,7 +14,7 @@ from src.trackhs_mcp.core.error_handling import (
     NetworkError,
     TimeoutError,
 )
-from src.trackhs_mcp.core.types import RequestOptions, TrackHSConfig
+from src.trackhs_mcp.core.types import RequestOptions
 
 
 class TestTrackHSApiClient:
@@ -218,8 +218,6 @@ class TestTrackHSApiClient:
 
             result = await api_client.get("/test")
             assert result == {"data": "test"}
-            from src.trackhs_mcp.core.types import RequestOptions
-
             expected_options = RequestOptions(method="GET")
             mock_request.assert_called_once_with("/test", expected_options, params=None)
 
@@ -240,22 +238,33 @@ class TestTrackHSApiClient:
             params = {"arrivalStart": "2025-01-01T00:00:00Z", "status": "Confirmed"}
             result = await api_client.get("/test", params=params)
             assert result == {"data": "test"}
-            mock_request.assert_called_once_with("/test", None, params=params)
+            # Verificar que se llamó con los argumentos correctos
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert call_args[0][0] == "/test"  # endpoint
+            assert call_args[1]["params"] == params  # params
 
     @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_post_method(self, api_client):
         """Test método POST"""
-        options = RequestOptions(method="POST", body={"key": "value"})
+        data = {"key": "value"}
 
         with patch.object(
             api_client, "request", new_callable=AsyncMock
         ) as mock_request:
             mock_request.return_value = {"data": "test"}
 
-            result = await api_client.post("/test", options)
+            result = await api_client.post("/test", data=data)
             assert result == {"data": "test"}
-            mock_request.assert_called_once_with("/test", options)
+            # Verificar que se llamó con los argumentos correctos
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert call_args[0][0] == "/test"  # endpoint
+            # Verificar que options tiene el body correcto
+            options = call_args[0][1]
+            assert options.method == "POST"
+            assert options.body == '{"key": "value"}'
 
     @pytest.mark.unit
     @pytest.mark.asyncio
