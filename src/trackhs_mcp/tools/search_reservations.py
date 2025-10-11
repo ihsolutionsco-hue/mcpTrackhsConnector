@@ -433,9 +433,9 @@ def _format_status_param(status_value: Union[str, List[str]]) -> Union[str, List
         # Validar cada status en la lista
         for status in status_value:
             if status not in valid_statuses:
+                valid_statuses_str = ", ".join(valid_statuses)
                 raise ValidationError(
-                    f"Invalid status: {status}. Must be one of: {', \
-     '.join(valid_statuses)}",
+                    f"Invalid status: {status}. Must be one of: {valid_statuses_str}",
                     "status",
                 )
         return status_value
