@@ -9,15 +9,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 
-from .infrastructure.adapters.config import TrackHSConfig
-from .infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from .infrastructure.mcp.server import register_all_components
+# Agregar el directorio src al path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Cargar variables de entorno
 load_dotenv()
 
-# Agregar el directorio src al path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Imports absolutos después de agregar al path
+from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig  # noqa: E402
+from trackhs_mcp.infrastructure.adapters.trackhs_api_client import (  # noqa: E402
+    TrackHSApiClient,
+)
+from trackhs_mcp.infrastructure.mcp.server import register_all_components  # noqa: E402
 
 
 def create_dependencies():

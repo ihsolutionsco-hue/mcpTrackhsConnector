@@ -5,11 +5,13 @@ Basado en la especificación completa de la API Search Reservations V2
 
 from typing import List, Literal, Optional, Union
 
-from ...application.ports.api_client_port import ApiClientPort
-from ...application.use_cases.search_reservations import SearchReservationsUseCase
-from ...domain.entities.reservations import SearchReservationsParams
-from ...domain.exceptions.api_exceptions import ValidationError
-from ..utils.error_handling import error_handler
+from trackhs_mcp.application.ports.api_client_port import ApiClientPort
+from trackhs_mcp.application.use_cases.search_reservations import (
+    SearchReservationsUseCase,
+)
+from trackhs_mcp.domain.entities.reservations import SearchReservationsParams
+from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
+from trackhs_mcp.infrastructure.utils.error_handling import error_handler
 
 
 def register_search_reservations(mcp, api_client: ApiClientPort):

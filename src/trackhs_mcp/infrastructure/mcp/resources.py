@@ -5,8 +5,8 @@ Basado en la especificación completa de la API Search Reservations V2
 
 from typing import Any, Dict
 
-from ...application.ports.api_client_port import ApiClientPort
-from ..utils.logging import get_logger
+from trackhs_mcp.application.ports.api_client_port import ApiClientPort
+from trackhs_mcp.infrastructure.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
