@@ -25,6 +25,19 @@ class TestResourcesIntegration:
         mcp = Mock()
         mcp.resource = Mock()
         return mcp
+    
+    def setup_resource_mock(self, mock_mcp):
+        """Configura un mock que funcione como decorador de resources"""
+        registered_functions = {}
+        
+        def mock_resource_decorator(name):
+            def decorator(func):
+                registered_functions[name] = func
+                return func
+            return decorator
+        
+        mock_mcp.resource = mock_resource_decorator
+        return registered_functions
 
     @pytest.mark.integration
     def test_register_all_resources(self, mock_mcp, mock_api_client):
@@ -38,11 +51,11 @@ class TestResourcesIntegration:
     @pytest.mark.asyncio
     async def test_reservations_schema_resource(self, mock_mcp, mock_api_client):
         """Test recurso de esquema de reservas"""
-        mock_mcp.resource = Mock()
+        registered_functions = self.setup_resource_mock(mock_mcp)
         register_all_resources(mock_mcp, mock_api_client)
 
-        # Obtener el primer recurso registrado (reservations_schema)
-        resource_func = mock_mcp.resource.call_args_list[0][0][1]
+        # Obtener la función registrada
+        resource_func = registered_functions["trackhs://schema/reservations"]
 
         result = await resource_func()
 

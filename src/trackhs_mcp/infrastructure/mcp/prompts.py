@@ -18,14 +18,15 @@ def register_all_prompts(mcp, api_client: ApiClientPort):
     @mcp.prompt("check-today-reservations")
     async def check_today_reservations(date: Optional[str] = None) -> Dict[str, Any]:
         """Revisar todas las reservas que llegan o salen hoy usando API V2"""
-        # target_date = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        from datetime import datetime, timezone
+        target_date = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
         return {
             "messages": [
                 {
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Por favor, \
+                        "text": f"""Por favor, \
      revisa todas las reservas para la fecha {target_date} usando la API V2. Incluye:
 
 **Información de Check-in (Llegadas):**
@@ -81,16 +82,18 @@ def register_all_prompts(mcp, api_client: ApiClientPort):
                     "role": "user",
                     "content": {
                         "type": "text",
-                        "text": """Necesito verificar la disponibilidad de unidades:
+                        "text": f"""Necesito verificar la disponibilidad de unidades:
 - Entrada: {check_in}
 - Salida: {check_out}
 {f'- Nodo específico: {node_id}' if node_id else ''}
 
 Por favor:
 1. Lista todas las unidades disponibles
-2. Verifica si hay reservas conflictivas en esas fechas
+2. Verifica si hay reservas conflictivas en esas fechas usando search_reservations
 3. Proporciona un resumen de disponibilidad por tipo de unidad
-4. Incluye información de capacidad y amenidades""",
+4. Incluye información de capacidad y amenidades
+5. Usa parámetros como unitId, nodeId para filtrar unidades específicas
+6. Usa arrivalStart y arrivalEnd para filtrar por fechas de llegada""",
                     },
                 }
             ]

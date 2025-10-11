@@ -27,6 +27,7 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                 },
                 "currency": {"type": "string", "description": "Moneda de la reserva"},
                 "unit_id": {"type": "integer", "description": "ID de la unidad"},
+                "unitId": {"type": "integer", "description": "ID de la unidad (camelCase)"},
                 "is_unit_locked": {
                     "type": "boolean",
                     "description": "Si la unidad está bloqueada",
@@ -48,10 +49,20 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                     "format": "date",
                     "description": "Fecha de llegada (ISO 8601)",
                 },
+                "arrivalDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Fecha de llegada (camelCase)",
+                },
                 "departure_date": {
                     "type": "string",
                     "format": "date",
                     "description": "Fecha de salida (ISO 8601)",
+                },
+                "departureDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Fecha de salida (camelCase)",
                 },
                 "early_arrival": {"type": "boolean", "description": "Llegada temprana"},
                 "late_departure": {"type": "boolean", "description": "Salida tardía"},
