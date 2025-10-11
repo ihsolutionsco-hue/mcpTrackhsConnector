@@ -10,7 +10,7 @@ from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
     _is_valid_date_format,
     register_search_reservations,
 )
-from src.trackhs_mcp.infrastructure.utils.error_handling import ValidationError
+from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
 
 
 class TestSearchReservationsIntegration:
@@ -239,7 +239,7 @@ class TestSearchReservationsIntegration:
 
         tool_func = mock_mcp.tool.call_args[0][0]
 
-        with pytest.raises(ValidationError, match="Page must be >= 1"):
+        with pytest.raises(TrackHSError, match="Page must be >= 1"):
             await tool_func(page=0, size=10)
 
     @pytest.mark.integration
@@ -253,7 +253,7 @@ class TestSearchReservationsIntegration:
 
         tool_func = mock_mcp.tool.call_args[0][0]
 
-        with pytest.raises(ValidationError, match="Size must be between 1 and 1000"):
+        with pytest.raises(TrackHSError, match="Size must be between 1 and 1000"):
             await tool_func(page=1, size=0)
 
     @pytest.mark.integration
@@ -267,7 +267,7 @@ class TestSearchReservationsIntegration:
 
         tool_func = mock_mcp.tool.call_args[0][0]
 
-        with pytest.raises(ValidationError, match="Size must be between 1 and 1000"):
+        with pytest.raises(TrackHSError, match="Size must be between 1 and 1000"):
             await tool_func(page=1, size=1001)
 
     @pytest.mark.integration
@@ -281,7 +281,7 @@ class TestSearchReservationsIntegration:
 
         tool_func = mock_mcp.tool.call_args[0][0]
 
-        with pytest.raises(ValidationError, match="Invalid date format"):
+        with pytest.raises(TrackHSError, match="Invalid date format"):
             await tool_func(page=1, size=10, arrival_start="invalid-date")
 
     @pytest.mark.integration
@@ -314,8 +314,8 @@ class TestSearchReservationsIntegration:
         result = await tool_func(
             page=2,
             size=20,
-            sort_column="checkin",
-            sort_direction="desc",
+            sort_column="name",  # Cambiar a default para scroll
+            sort_direction="asc",  # Cambiar a default para scroll
             search="test search",
             tags="tag1,tag2",
             node_id=[1, 2],
@@ -395,15 +395,19 @@ class TestSearchReservationsIntegration:
 
         # Verificar que se llamó con el endpoint correcto
         mock_api_client.get.assert_called_once()
-        call_args = mock_api_client.get.call_args[0]
-        endpoint = call_args[0]
+        call_args = mock_api_client.get.call_args
 
+        # Verificar endpoint
+        endpoint = call_args[0][0]
         assert endpoint.startswith("/v2/pms/reservations")
-        assert "page=2" in endpoint
-        assert "size=20" in endpoint
-        assert "search=test" in endpoint
-        assert "nodeId=1" in endpoint
-        assert "status=Confirmed" in endpoint
+
+        # Verificar parámetros
+        params = call_args[1]["params"]
+        assert params["page"] == 2
+        assert params["size"] == 20
+        assert params["search"] == "test"
+        assert params["nodeId"] == "1"  # Se convierte a string por _format_id_list
+        assert params["status"] == "Confirmed"
 
     @pytest.mark.integration
     @pytest.mark.asyncio

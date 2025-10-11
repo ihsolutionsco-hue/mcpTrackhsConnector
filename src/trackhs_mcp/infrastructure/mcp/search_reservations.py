@@ -151,10 +151,10 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
         - Disables sorting when using scroll
         """
         # Validar parámetros básicos según documentación API V2
-        if page < 0:
-            raise ValidationError("Page must be >= 0", "page")
-        if size < 1:
-            raise ValidationError("Size must be >= 1", "size")
+        if page < 1:
+            raise ValidationError("Page must be >= 1", "page")
+        if size < 1 or size > 1000:
+            raise ValidationError("Size must be between 1 and 1000", "size")
 
         # Validar límite total de resultados (10k máximo)
         if page * size > 10000:
@@ -322,7 +322,7 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
 
             # Ejecutar caso de uso
             result = await use_case.execute(search_params)
-            return result.dict()
+            return result
         except Exception as e:
             # Logging detallado para debugging
             import logging
@@ -505,15 +505,20 @@ def _normalize_date_format_flexible(date_string: str) -> str:
         return date_string
 
 
-def _parse_id_string(id_string: Union[str, int]) -> Union[int, List[int]]:
+def _parse_id_string(id_string: Union[str, int, List[int]]) -> Union[int, List[int]]:
     """
     Parsea un string de ID que puede ser:
     - Un entero simple: "48" o 48
     - Múltiples IDs separados por comas: "48,49,50"
     - Array en formato string: "[48,49,50]"
+    - Lista de Python: [1, 2, 3]
     """
     # Si ya es un entero, devolverlo directamente
     if isinstance(id_string, int):
+        return id_string
+
+    # Si ya es una lista, devolverla directamente
+    if isinstance(id_string, list):
         return id_string
 
     if not id_string or not str(id_string).strip():
