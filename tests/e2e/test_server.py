@@ -6,9 +6,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from src.trackhs_mcp.__main__ import main
 from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
 from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from src.trackhs_mcp.server import main, register_all_components
+from src.trackhs_mcp.infrastructure.mcp.server import register_all_components
 
 
 class TestServerE2E:
@@ -80,8 +81,8 @@ class TestServerE2E:
         """Test integración de registro de componentes"""
         # Importar las funciones de registro
         from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
-        from src.trackhs_mcp.prompts import register_all_prompts
-        from src.trackhs_mcp.resources import register_all_resources
+        from src.trackhs_mcp.infrastructure.mcp.prompts import register_all_prompts
+        from src.trackhs_mcp.infrastructure.mcp.resources import register_all_resources
 
         # Registrar todos los componentes
         register_all_tools(mock_mcp, mock_api_client)
@@ -117,7 +118,9 @@ class TestServerE2E:
             mock_fastmcp_class.return_value = mock_mcp
 
             # Importar y ejecutar la inicialización
-            from src.trackhs_mcp.server import register_all_components
+            from src.trackhs_mcp.infrastructure.mcp.server import (
+                register_all_components,
+            )
 
             # Ejecutar registro de componentes
             register_all_components()
@@ -248,7 +251,9 @@ class TestServerE2E:
             mock_fastmcp_class.return_value = mock_mcp
 
             # Simular el flujo completo
-            from src.trackhs_mcp.server import register_all_components
+            from src.trackhs_mcp.infrastructure.mcp.server import (
+                register_all_components,
+            )
 
             # Ejecutar registro
             register_all_components()
