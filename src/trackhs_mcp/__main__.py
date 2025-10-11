@@ -21,6 +21,9 @@ from trackhs_mcp.infrastructure.adapters.trackhs_api_client import (  # noqa: E4
     TrackHSApiClient,
 )
 from trackhs_mcp.infrastructure.mcp.server import register_all_components  # noqa: E402
+from trackhs_mcp.infrastructure.utils.logging import get_logger  # noqa: E402
+
+logger = get_logger(__name__)
 
 
 def create_dependencies():
@@ -30,12 +33,11 @@ def create_dependencies():
 
     # Validar URL
     if not config.validate_url():
-        print(
-            f"ADVERTENCIA: URL configurada ({config.base_url}) "
-            f"no es la URL oficial de IHVM"
+        logger.warning(
+            f"URL configurada ({config.base_url}) no es la URL oficial de IHVM"
         )
-        print(f"   URL oficial: {TrackHSConfig.DEFAULT_URL}")
-        print("   Configura TRACKHS_API_URL en .env si necesitas usar otra URL")
+        logger.warning(f"URL oficial: {TrackHSConfig.DEFAULT_URL}")
+        logger.warning("Configura TRACKHS_API_URL en .env si necesitas usar otra URL")
 
     # Cliente API
     api_client = TrackHSApiClient(config)
@@ -70,7 +72,7 @@ try:
     register_all_components(mcp, api_client)
 except Exception as e:
     # Si hay error en la inicialización, crear un servidor vacío
-    print(f"Error inicializando servidor: {e}")
+    logger.error(f"Error inicializando servidor: {e}")
     mcp = FastMCP("TrackHS MCP Server")
 
 

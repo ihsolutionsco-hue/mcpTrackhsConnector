@@ -94,10 +94,10 @@ class TestServerE2E:
         assert mock_mcp.tool.call_count >= 1  # Al menos search_reservations
 
         # Verificar que se registraron recursos
-        assert mock_mcp.resource.call_count >= 7  # Al menos 7 recursos
+        assert mock_mcp.resource.call_count >= 2  # 2 recursos esenciales
 
         # Verificar que se registraron prompts
-        assert mock_mcp.prompt.call_count >= 8  # Al menos 8 prompts
+        assert mock_mcp.prompt.call_count >= 3  # 3 prompts nuevos
 
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -128,8 +128,8 @@ class TestServerE2E:
 
             # Verificar que se registraron componentes
             assert mock_mcp.tool.call_count >= 1
-            assert mock_mcp.resource.call_count >= 7
-            assert mock_mcp.prompt.call_count >= 8
+            assert mock_mcp.resource.call_count >= 2  # 2 recursos esenciales
+            assert mock_mcp.prompt.call_count >= 3  # 3 prompts nuevos
 
     @pytest.mark.e2e
     @pytest.mark.skip(
@@ -243,19 +243,16 @@ class TestServerE2E:
                 "reservations" in str(call) for call in resource_calls
             ), "reservations resource not registered"
             assert any(
-                "units" in str(call) for call in resource_calls
-            ), "units resource not registered"
-            assert any(
-                "status" in str(call) for call in resource_calls
-            ), "status resource not registered"
+                "documentation" in str(call) for call in resource_calls
+            ), "documentation resource not registered"
 
             # Verificar prompts específicos
             assert any(
-                "check-today" in str(call) for call in prompt_calls
-            ), "check-today prompt not registered"
+                "search-reservations-by-dates" in str(call) for call in prompt_calls
+            ), "search-reservations-by-dates prompt not registered"
             assert any(
-                "unit-availability" in str(call) for call in prompt_calls
-            ), "unit-availability prompt not registered"
+                "search-reservations-by-guest" in str(call) for call in prompt_calls
+            ), "search-reservations-by-guest prompt not registered"
 
     @pytest.mark.e2e
     def test_server_configuration_validation(self, mock_config):

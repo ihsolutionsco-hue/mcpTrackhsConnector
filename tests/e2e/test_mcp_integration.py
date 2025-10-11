@@ -117,8 +117,8 @@ class TestMCPIntegrationE2E:
 
         # Verificar que se registraron componentes
         assert mock_mcp.tool.call_count >= 1
-        assert mock_mcp.resource.call_count >= 7
-        assert mock_mcp.prompt.call_count >= 8
+        assert mock_mcp.resource.call_count >= 2  # 2 resources esenciales
+        assert mock_mcp.prompt.call_count >= 3  # 3 prompts nuevos
 
         # Verificar que se registraron las herramientas correctamente
         # Las herramientas se registran como decoradores, no como funciones directas
@@ -299,8 +299,8 @@ class TestMCPIntegrationE2E:
 
         # Verificar que se registraron todos los componentes
         assert mock_mcp.tool.call_count >= 1
-        assert mock_mcp.resource.call_count >= 7
-        assert mock_mcp.prompt.call_count >= 8
+        assert mock_mcp.resource.call_count >= 2  # 2 resources esenciales
+        assert mock_mcp.prompt.call_count >= 3  # 3 prompts nuevos
 
     @pytest.mark.e2e
     @pytest.mark.asyncio

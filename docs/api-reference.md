@@ -1,36 +1,39 @@
 # API Reference
 
-Complete reference for all MCP features provided by the TrackHS MCP Connector.
+Complete reference for the focused MCP features provided by the TrackHS MCP Connector.
+
+This server follows MCP best practices by providing a focused set of tools, prompts, and resources specifically for reservation search functionality.
 
 ## Tools
 
-### search_reservations
+### search_reservations (V2 - Primary)
 
-**Description**: Advanced reservation search with comprehensive filtering options
+**Description**: Advanced reservation search using TrackHS API V2 with comprehensive filtering options
 
 **Parameters**:
-- `date_from` (string, optional): Start date for search (YYYY-MM-DD)
-- `date_to` (string, optional): End date for search (YYYY-MM-DD)
-- `booked_from` (string, optional): Booking date start (YYYY-MM-DD)
-- `booked_to` (string, optional): Booking date end (YYYY-MM-DD)
-- `arrival_from` (string, optional): Arrival date start (YYYY-MM-DD)
-- `arrival_to` (string, optional): Arrival date end (YYYY-MM-DD)
-- `departure_from` (string, optional): Departure date start (YYYY-MM-DD)
-- `departure_to` (string, optional): Departure date end (YYYY-MM-DD)
-- `node_ids` (string, optional): Comma-separated node IDs
-- `unit_ids` (string, optional): Comma-separated unit IDs
-- `contact_ids` (string, optional): Comma-separated contact IDs
-- `folio_ids` (string, optional): Comma-separated folio IDs
-- `reservation_ids` (string, optional): Comma-separated reservation IDs
-- `text` (string, optional): Text search across reservation fields
-- `status` (string, optional): Reservation status filter
-- `tags` (string, optional): Comma-separated tags
-- `in_house_today` (boolean, optional): Filter for in-house today
-- `sort_by` (string, optional): Sort field (default: "created_at")
-- `sort_order` (string, optional): Sort order ("asc" or "desc")
 - `page` (integer, optional): Page number (default: 1)
-- `per_page` (integer, optional): Items per page (default: 50)
-- `scroll_id` (string, optional): Elasticsearch scroll ID for pagination
+- `size` (integer, optional): Page size (default: 10, max: 1000)
+- `sort_column` (string, optional): Sort field (name, status, checkin, etc.)
+- `sort_direction` (string, optional): Sort order (asc/desc)
+- `search` (string, optional): Text search in names/descriptions
+- `node_id` (string, optional): Node ID(s) - single int, comma-separated, or array
+- `unit_id` (string, optional): Unit ID(s) - single int, comma-separated, or array
+- `contact_id` (string, optional): Contact ID(s) - single int, comma-separated, or array
+- `status` (string|array, optional): Reservation status(es)
+- `arrival_start` (string, optional): Arrival date start (ISO 8601)
+- `arrival_end` (string, optional): Arrival date end (ISO 8601)
+- `departure_start` (string, optional): Departure date start (ISO 8601)
+- `departure_end` (string, optional): Departure date end (ISO 8601)
+- `booked_start` (string, optional): Booking date start (ISO 8601)
+- `booked_end` (string, optional): Booking date end (ISO 8601)
+- `scroll` (integer|string, optional): Elasticsearch scroll (1 to start)
+- `in_house_today` (integer, optional): Filter by in-house today (0/1)
+
+### search_reservations_v1 (V1 - Legacy)
+
+**Description**: Legacy reservation search using TrackHS API V1 for compatibility
+
+**Parameters**: Same as search_reservations but uses V1 endpoint
 
 **Example Usage**:
 ```json
@@ -73,122 +76,66 @@ Complete reference for all MCP features provided by the TrackHS MCP Connector.
 
 ### trackhs://schema/reservations
 
-**Description**: Complete schema for Track HS reservations
+**Description**: Complete schema for TrackHS reservations V2
 
 **Content**: JSON schema defining reservation structure, fields, and validation rules
 
 **Usage**: Access via MCP resource system for understanding data structure
 
-### trackhs://api/v2/endpoints
+### trackhs://api/documentation
 
-**Description**: Available API endpoints in Track HS V2
+**Description**: Complete API V2 documentation and examples
 
-**Content**: List of all available endpoints with descriptions and parameters
-
-**Usage**: Reference for API integration and development
-
-### trackhs://api/v2/parameters
-
-**Description**: API parameters documentation
-
-**Content**: Detailed parameter descriptions, types, and validation rules
-
-**Usage**: Understanding parameter requirements and constraints
-
-### trackhs://api/v2/examples
-
-**Description**: Usage examples for Track HS API V2
-
-**Content**: Code examples and usage patterns
-
-**Usage**: Learning how to use the API effectively
-
-### trackhs://status/system
-
-**Description**: System status and connectivity information
-
-**Content**: Current system status, API connectivity, and health metrics
-
-**Usage**: Monitoring system health and connectivity
-
-### trackhs://docs/api
-
-**Description**: Complete API documentation
-
-**Content**: Comprehensive API documentation with examples
+**Content**: Comprehensive API documentation with examples and usage patterns
 
 **Usage**: Full reference for API usage and integration
 
 ## Prompts
 
-### check-today-reservations
+### search-reservations-by-dates
 
-**Description**: Check reservations for today using API V2
+**Description**: Search reservations by date range using API V2
 
 **Arguments**:
-- `node_id` (string, optional): Specific node to check
-- `include_departures` (boolean, optional): Include departing guests
-- `include_arrivals` (boolean, optional): Include arriving guests
+- `start_date` (string, required): Start date (YYYY-MM-DD)
+- `end_date` (string, required): End date (YYYY-MM-DD)
+- `date_type` (string, optional): Type of date filter (arrival, departure, booked)
 
 **Example**:
 ```
-Use the check-today-reservations prompt to see today's reservations for node 123.
+Use search-reservations-by-dates to find all reservations arriving between 2024-01-01 and 2024-01-31.
 ```
 
-### advanced-reservation-search
+### search-reservations-by-guest
 
-**Description**: Advanced reservation search with multiple filters
+**Description**: Search reservations by guest information using API V2
 
 **Arguments**:
-- `date_range` (string, optional): Date range for search
-- `filters` (object, optional): Additional search filters
-- `sort_options` (object, optional): Sorting preferences
+- `guest_name` (string, optional): Guest name to search
+- `contact_id` (string, optional): Specific contact ID
+- `email` (string, optional): Guest email
+- `phone` (string, optional): Guest phone number
 
 **Example**:
 ```
-Use advanced-reservation-search to find all confirmed reservations for next month, sorted by arrival date.
+Use search-reservations-by-guest to find all reservations for John Doe or contact ID 12345.
 ```
 
-### reservation-analytics
+### search-reservations-advanced
 
-**Description**: Generate analytics and insights from reservation data
+**Description**: Advanced reservation search with multiple filters using API V2
 
 **Arguments**:
-- `date_range` (string, optional): Analysis period
-- `metrics` (array, optional): Specific metrics to calculate
-- `group_by` (string, optional): Grouping criteria
+- `search_term` (string, optional): Text search term
+- `status` (string, optional): Reservation status filter
+- `node_id` (string, optional): Node ID filter
+- `unit_type_id` (string, optional): Unit type ID filter
+- `include_financials` (boolean, optional): Include financial data
+- `scroll_mode` (boolean, optional): Use scroll mode for large datasets
 
 **Example**:
 ```
-Use reservation-analytics to analyze occupancy rates for the past quarter, grouped by property.
-```
-
-### guest-experience-analysis
-
-**Description**: Analyze guest experience and satisfaction
-
-**Arguments**:
-- `reservation_ids` (array, optional): Specific reservations to analyze
-- `time_period` (string, optional): Analysis time period
-- `focus_areas` (array, optional): Specific areas to focus on
-
-**Example**:
-```
-Use guest-experience-analysis to understand guest satisfaction trends over the past year.
-```
-
-### financial-analysis
-
-**Description**: Perform financial analysis on reservation data
-
-**Arguments**:
-- `date_range` (string, optional): Analysis period
-- `revenue_metrics` (array, optional): Specific revenue metrics
-- `cost_analysis` (boolean, optional): Include cost analysis
-
-**Example**:
-```
-Use financial-analysis to calculate revenue per available room (RevPAR) for the current month.
+Use search-reservations-advanced to find all confirmed reservations in node 123 with financial details.
 ```
 
 ## Request/Response Examples
