@@ -178,3 +178,17 @@ yarn-error.log*
 # Vercel
 .vercel/
 .vercel
+
+# Scripts and examples logs
+scripts/*.log
+examples/*.log
+
+# Embedded repositories in docs
+docs/MCP/04-ejemplos/quickstart/
+docs/MCP/04-ejemplos/servidor-remoto-completo/
+docs/MCP/06-herramientas/inspector/
+docs/MCP/07-repositorios-originales/example-remote-server/
+docs/MCP/07-repositorios-originales/inspector/
+docs/MCP/07-repositorios-originales/modelcontextprotocol/
+docs/MCP/07-repositorios-originales/python-sdk/
+docs/MCP/07-repositorios-originales/servers/
