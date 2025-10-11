@@ -235,14 +235,38 @@ def register_search_reservations(mcp, api_client: TrackHSApiClient):
             result = await api_client.get(endpoint, params=query_params)
             return result
         except Exception as e:
+            # Logging detallado para debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"API request failed for endpoint {endpoint}: {str(e)}")
+            logger.error(f"Query params: {query_params}")
+            
             # Manejar errores específicos de la API según documentación
             if hasattr(e, 'status_code'):
                 if e.status_code == 401:
-                    raise ValidationError("Unauthorized: Invalid authentication credentials", "auth")
+                    raise ValidationError(
+                        "Unauthorized: Invalid authentication credentials. "
+                        "Please verify your TRACKHS_USERNAME and TRACKHS_PASSWORD are correct and not expired.", 
+                        "auth"
+                    )
                 elif e.status_code == 403:
-                    raise ValidationError("Forbidden: Insufficient permissions for this operation", "permissions")
+                    raise ValidationError(
+                        "Forbidden: Insufficient permissions for this operation. "
+                        "Please verify your account has access to PMS/Reservations endpoints.", 
+                        "permissions"
+                    )
+                elif e.status_code == 404:
+                    raise ValidationError(
+                        f"Endpoint not found: {endpoint}. "
+                        "Please verify the API URL and endpoint path are correct.", 
+                        "endpoint"
+                    )
                 elif e.status_code == 500:
-                    raise ValidationError("Internal Server Error: API temporarily unavailable", "api")
+                    raise ValidationError(
+                        "Internal Server Error: API temporarily unavailable. "
+                        "Please try again later or contact support.", 
+                        "api"
+                    )
             raise ValidationError(f"API request failed: {str(e)}", "api")
 
 def _is_valid_date_format(date_string: str) -> bool:

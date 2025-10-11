@@ -12,7 +12,7 @@ class TrackHSConfig:
     """Configuración centralizada para TrackHS API"""
     
     # URL base oficial - IHVM Vacations
-    DEFAULT_URL = "https://ihvmvacations.trackhs.com/api"
+    DEFAULT_URL = "https://ihmvacations.trackhs.com/api"
     
     # Configuración por defecto
     base_url: str
@@ -24,8 +24,8 @@ class TrackHSConfig:
     def from_env(cls) -> 'TrackHSConfig':
         """Crear configuración desde variables de entorno"""
         base_url = os.getenv("TRACKHS_API_URL", cls.DEFAULT_URL)
-        username = os.getenv("TRACKHS_USERNAME", "test_user")
-        password = os.getenv("TRACKHS_PASSWORD", "test_password")
+        username = os.getenv("TRACKHS_USERNAME", "aba99777416466b6bdc1a25223192ccb")
+        password = os.getenv("TRACKHS_PASSWORD", "18c87461011f355cc11000a24215cbda")
         timeout = int(os.getenv("TRACKHS_TIMEOUT", "30"))
         
         return cls(

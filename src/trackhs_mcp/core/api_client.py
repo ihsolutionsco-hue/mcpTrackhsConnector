@@ -27,8 +27,7 @@ class TrackHSApiClient:
         # Configurar cliente httpx
         self.client = httpx.AsyncClient(
             base_url=config.base_url,
-            timeout=config.timeout or 30,
-            headers=self.auth.get_headers()
+            timeout=config.timeout or 30
         )
     
     async def __aenter__(self):
@@ -92,6 +91,7 @@ class TrackHSApiClient:
                 logger.debug(f"API Request: {method} {endpoint}")
                 logger.debug(f"Params: {params}")
                 logger.debug(f"Full URL: {self.client.base_url}{endpoint}")
+                logger.debug(f"Headers: {headers}")
                 
                 # Realizar petición usando endpoint relativo, httpx usará base_url automáticamente
                 response = await self.client.request(method, endpoint, **request_kwargs)
