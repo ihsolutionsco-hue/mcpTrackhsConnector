@@ -5,7 +5,6 @@ Servidor FastMCP principal para Track HS API
 import os
 import sys
 from pathlib import Path
-from dotenv import load_dotenv
 from fastmcp import FastMCP
 
 # Agregar el directorio src al path para importaciones absolutas
@@ -14,14 +13,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from trackhs_mcp.core.api_client import TrackHSApiClient
 from trackhs_mcp.core.types import TrackHSConfig
 
-# Cargar variables de entorno
-load_dotenv()
-
 # Configurar cliente API
 config = TrackHSConfig(
     base_url=os.getenv("TRACKHS_API_URL", "https://api.trackhs.com/api"),
-    username=os.getenv("TRACKHS_USERNAME", ""),
-    password=os.getenv("TRACKHS_PASSWORD", ""),
+    username=os.getenv("TRACKHS_USERNAME", "test_user"),
+    password=os.getenv("TRACKHS_PASSWORD", "test_password"),
     timeout=int(os.getenv("TRACKHS_TIMEOUT", "30"))
 )
 
