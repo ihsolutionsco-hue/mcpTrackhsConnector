@@ -256,16 +256,7 @@ class TestSearchReservationsValidation:
     @pytest.mark.asyncio
     async def test_successful_api_call(self, search_tool, mock_api_client):
         """Test llamada exitosa a la API"""
-        mock_response = {
-            "_embedded": {"reservations": []},
-            "page": 1,
-            "page_count": 1,
-            "page_size": 10,
-            "total_items": 0,
-            "_links": {},
-        }
-        mock_api_client.get.return_value = mock_response
-
+        # El mock ya está configurado en el fixture
         result = await search_tool()
         assert result is not None
         mock_api_client.get.assert_called_once()

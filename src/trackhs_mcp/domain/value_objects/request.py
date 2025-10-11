@@ -2,7 +2,7 @@
 Value Objects para peticiones HTTP
 """
 
-from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, Field
 
@@ -12,7 +12,9 @@ T = TypeVar("T")
 class RequestOptions(BaseModel):
     """Opciones para peticiones HTTP"""
 
-    method: str = Field(default="GET", description="Método HTTP")
+    method: Literal["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"] = Field(
+        default="GET", description="Método HTTP"
+    )
     headers: Optional[Dict[str, str]] = Field(
         default=None, description="Headers adicionales"
     )

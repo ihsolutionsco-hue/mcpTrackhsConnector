@@ -104,11 +104,11 @@ class TestApiError:
     @pytest.mark.unit
     def test_api_error_creation(self):
         """Test creación de ApiError"""
-        error = ApiError("Test error", 404, "Not Found")
+        error = ApiError("Test error", status_code=404, endpoint="/test")
 
         assert error.message == "Test error"
-        assert error.status == 404
-        assert error.status_text == "Not Found"
+        assert error.context.get("status_code") == 404
+        assert error.context.get("endpoint") == "/test"
         assert str(error) == "Test error"
 
     @pytest.mark.unit
