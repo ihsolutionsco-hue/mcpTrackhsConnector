@@ -90,18 +90,20 @@ class TestPaginationResult:
     @pytest.mark.unit
     def test_pagination_result_creation(self):
         """Test creación de PaginationResult"""
-        page_info = PageInfo(1, 10, 1, 10, False, False)
+        page_info = PageInfo(1, 10, 1, 10, False, False, scroll_id="scroll123")
         data = [{"id": 1}, {"id": 2}]
-        links = {"self": {"hre": "/test"}}
+        links = {"self": "/test"}
+        metadata = {"total": 2}
 
         result = PaginationResult(
-            data=data, page_info=page_info, links=links, scroll_id="scroll123"
+            data=data, page_info=page_info, links=links, metadata=metadata
         )
 
         assert result.data == data
         assert result.page_info == page_info
         assert result.links == links
-        assert result.scroll_id == "scroll123"
+        assert result.metadata == metadata
+        assert result.page_info.scroll_id == "scroll123"
 
 
 class TestPaginationUtility:
