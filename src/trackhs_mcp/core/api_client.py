@@ -70,19 +70,19 @@ class TrackHSApiClient:
         for attempt in range(max_retries + 1):
             try:
                 # Preparar opciones de la petición
-                request_kwargs = {
-                    "method": options.method if options else "GET",
-                    "headers": self.auth.get_headers()
-                }
+                method = options.method if options else "GET"
+                headers = self.auth.get_headers()
                 
                 if options and options.headers:
-                    request_kwargs["headers"].update(options.headers)
+                    headers.update(options.headers)
+                
+                request_kwargs = {"headers": headers}
                 
                 if options and options.body:
                     request_kwargs["data"] = options.body
                 
                 # Realizar petición
-                response = await self.client.request(**request_kwargs)
+                response = await self.client.request(method, url, **request_kwargs)
                 
                 # Verificar si la respuesta es exitosa
                 if not response.is_success:
@@ -160,12 +160,32 @@ class TrackHSApiClient:
         else:
             raise ApiError("All retry attempts failed")
     
-    async def get(self, endpoint: str, options: Optional[RequestOptions] = None) -> Any:
+    async def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, options: Optional[RequestOptions] = None) -> Any:
         """Realiza una petición GET"""
         if options is None:
             options = RequestOptions(method="GET")
         else:
             options.method = "GET"
+        
+        # Agregar parámetros de consulta si se proporcionan
+        if params:
+            # Construir query string
+            query_parts = []
+            for key, value in params.items():
+                if value is not None:
+                    if isinstance(value, list):
+                        for item in value:
+                            query_parts.append(f"{key}={item}")
+                    else:
+                        query_parts.append(f"{key}={value}")
+            
+            if query_parts:
+                query_string = "&".join(query_parts)
+                if "?" in endpoint:
+                    endpoint += f"&{query_string}"
+                else:
+                    endpoint += f"?{query_string}"
+        
         return await self.request(endpoint, options)
     
     async def post(
