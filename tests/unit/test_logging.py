@@ -117,7 +117,7 @@ class TestTrackHSLogger:
     @pytest.mark.unit
     def test_get_context(self, logger):
         """Test obtención de contexto"""
-        context = logger.get_context()
+        context = logger._get_context()
 
         assert isinstance(context, LogContext)
         # Los valores específicos dependen de las variables de contexto
@@ -129,7 +129,8 @@ class TestTrackHSLogger:
         message = "Test message"
         context = LogContext(request_id="req123", tool_name="test")
 
-        formatted = logger.format_message(message, context)
+        # Use the private method for testing
+        formatted = logger._format_message(message, context, LogCategory.API, LogLevel.INFO)
 
         assert "Test message" in formatted
         assert "req123" in formatted or "test" in formatted
@@ -245,7 +246,7 @@ class TestTrackHSLogger:
     def test_log_api_response(self, logger):
         """Test logging de respuesta API"""
         with patch.object(logger.logger, "log") as mock_log:
-            logger.log_api_response(200, {"data": "test"}, 1.5)
+            logger.log_api_response("GET", "/test", 200, 1.5)
 
             mock_log.assert_called_once()
             args, kwargs = mock_log.call_args
@@ -257,7 +258,7 @@ class TestTrackHSLogger:
         """Test logging de ejecución de herramienta"""
         with patch.object(logger.logger, "log") as mock_log:
             logger.log_tool_execution(
-                "search_reservations", {"page": 1}, {"result": "success"}
+                "search_reservations", {"page": 1}, 1.5, True
             )
 
             mock_log.assert_called_once()
