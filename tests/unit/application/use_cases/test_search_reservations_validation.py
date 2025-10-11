@@ -8,7 +8,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from src.trackhs_mcp.infrastructure.utils.error_handling import ValidationError
-from src.trackhs_mcp.infrastructure.mcp.search_reservations import register_search_reservations
+from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
+    register_search_reservations,
+)
 
 
 class TestSearchReservationsValidation:
@@ -263,7 +265,9 @@ class TestDateValidation:
 
     def test_valid_iso_8601_formats(self):
         """Test formatos ISO 8601 válidos"""
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations import _is_valid_date_format
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
+            _is_valid_date_format,
+        )
 
         # Formatos válidos
         assert _is_valid_date_format("2024-01-01T00:00:00Z")
@@ -274,7 +278,9 @@ class TestDateValidation:
 
     def test_invalid_iso_8601_formats(self):
         """Test formatos ISO 8601 inválidos"""
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations import _is_valid_date_format
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
+            _is_valid_date_format,
+        )
 
         # Formatos inválidos (solo los realmente inválidos)
         assert not _is_valid_date_format("01/01/2024")
@@ -294,35 +300,45 @@ class TestIDParsing:
 
     def test_parse_single_id(self):
         """Test parsing de ID único"""
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations import _parse_id_string
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
+            _parse_id_string,
+        )
 
         assert _parse_id_string("123") == 123
         assert _parse_id_string("0") == 0
 
     def test_parse_comma_separated_ids(self):
         """Test parsing de IDs separados por comas"""
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations import _parse_id_string
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
+            _parse_id_string,
+        )
 
         assert _parse_id_string("123,456,789") == [123, 456, 789]
         assert _parse_id_string("1,2") == [1, 2]
 
     def test_parse_array_string_ids(self):
         """Test parsing de array en formato string"""
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations import _parse_id_string
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
+            _parse_id_string,
+        )
 
         assert _parse_id_string("[123,456,789]") == [123, 456, 789]
         assert _parse_id_string("[1,2]") == [1, 2]
 
     def test_parse_empty_string(self):
         """Test parsing de string vacío"""
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations import _parse_id_string
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
+            _parse_id_string,
+        )
 
         with pytest.raises(ValidationError):
             _parse_id_string("")
 
     def test_parse_invalid_formats(self):
         """Test parsing de formatos inválidos"""
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations import _parse_id_string
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
+            _parse_id_string,
+        )
 
         with pytest.raises(ValidationError):
             _parse_id_string("invalid")
