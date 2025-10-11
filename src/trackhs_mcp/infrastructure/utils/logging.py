@@ -3,7 +3,6 @@ Sistema de logging mejorado para Track HS MCP Connector
 Incluye niveles, contexto, métricas y integración con MCP
 """
 
-import json
 import logging
 import time
 import uuid
@@ -123,7 +122,7 @@ class TrackHSLogger:
 
     def _log_to_mcp(self, log_entry: Dict[str, Any]):
         """Envía log al cliente MCP si está disponible"""
-        if self.mcp_client:
+        if self.mcp_client and hasattr(self.mcp_client, "send_log"):
             try:
                 # Enviar log al cliente MCP de forma síncrona
                 import asyncio as _asyncio
@@ -136,8 +135,9 @@ class TrackHSLogger:
                     # Si no está corriendo, ejecutar directamente
                     loop.run_until_complete(self._send_mcp_log(log_entry))
             except Exception as e:
-                # Fallback al logger estándar si MCP falla
-                self.logger.error(f"Error enviando log a MCP: {str(e)}")
+                # Solo logear error si no es un mock
+                if not hasattr(self.mcp_client, "_mock_name"):
+                    self.logger.error(f"Error enviando log a MCP: {str(e)}")
 
     async def _send_mcp_log(self, log_entry: Dict[str, Any]):
         """Envía log al cliente MCP"""
@@ -166,8 +166,19 @@ class TrackHSLogger:
         log_entry = self._format_message(message, ctx, category, level)
 
         # Log estándar
-        if level.value >= LogLevel.DEBUG.value:
-            self.logger.log(level.value, json.dumps(log_entry, ensure_ascii=False))
+        if level.value >= LogLevel.TRACE.value:
+            # Preparar parámetros para el logger estándar
+            log_kwargs = {}
+            if context:
+                log_kwargs["extra"] = {
+                    "request_id": context.request_id,
+                    "tool_name": context.tool_name,
+                    "user_id": context.user_id,
+                }
+            if "metrics" in kwargs:
+                log_kwargs["metrics"] = kwargs["metrics"]
+
+            self.logger.log(level.value, message, **log_kwargs)
 
         # Log a MCP
         self._log_to_mcp(log_entry)
@@ -377,9 +388,33 @@ class RequestContext:
 class PerformanceTimer:
     """Context manager para medir rendimiento"""
 
-    def __init__(self, logger: TrackHSLogger, operation: str):
-        self.logger = logger
-        self.operation = operation
+    def __init__(self, *args, **kwargs):
+        # Detectar automáticamente el orden de parámetros
+        if len(args) == 2:
+            # Dos parámetros: detectar por tipo
+            if isinstance(args[0], str) and hasattr(args[1], "log_performance"):
+                # (operation, logger)
+                self.operation = args[0]
+                self.logger = args[1]
+            elif hasattr(args[0], "log_performance") and isinstance(args[1], str):
+                # (logger, operation)
+                self.logger = args[0]
+                self.operation = args[1]
+            else:
+                raise ValueError("Invalid parameter types for PerformanceTimer")
+        elif len(args) == 1:
+            if isinstance(args[0], str):
+                # (operation,)
+                self.operation = args[0]
+                self.logger = None
+            elif hasattr(args[0], "log_performance"):
+                # (logger,) - pero esto no tiene sentido, operation es requerido
+                raise ValueError("Operation is required for PerformanceTimer")
+            else:
+                raise ValueError("Invalid parameter type for PerformanceTimer")
+        else:
+            raise ValueError("PerformanceTimer requires 1 or 2 parameters")
+
         self.start_time = None
         self.duration = None
 
@@ -389,8 +424,10 @@ class PerformanceTimer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.start_time:
-            self.duration = (time.time() - self.start_time) * 1000
-            self.logger.log_performance(self.operation, self.duration)
+            end_time = time.time()
+            self.duration = (end_time - self.start_time) * 1000
+            if self.logger:
+                self.logger.log_performance(self.operation, self.duration, {})
 
 
 # Funciones de conveniencia

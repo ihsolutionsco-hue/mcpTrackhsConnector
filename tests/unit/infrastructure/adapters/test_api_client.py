@@ -49,7 +49,7 @@ class TestTrackHSApiClient:
     def test_init_invalid_credentials(self, mock_trackhs_config):
         """Test inicialización con credenciales inválidas"""
         with patch(
-            "src.trackhs_mcp.infrastructure.utils.auth.TrackHSAuth"
+            "src.trackhs_mcp.infrastructure.adapters.trackhs_api_client.TrackHSAuth"
         ) as mock_auth:
             mock_auth.return_value.validate_credentials.return_value = False
             with pytest.raises(

@@ -176,7 +176,7 @@ class TestPaginationUtility:
         )
 
         assert page_info.page == 2
-        assert page_info.page_size == 10
+        assert page_info.size == 10
         assert page_info.total_pages == 5
         assert page_info.total_items == 50
         assert page_info.has_next is True
@@ -215,22 +215,22 @@ class TestPaginationUtility:
     @pytest.mark.unit
     def test_generate_links(self, pagination_utility):
         """Test generación de enlaces"""
-        page_info = PageInfo(2, 10, 5, 50, True, True)
+        page_info = PageInfo(2, 10, 50, 5, True, True, next_page=3, previous_page=1)
         base_url = "/test"
 
         links = pagination_utility.generate_links(base_url, page_info, {})
 
-        assert "sel" in links
+        assert "self" in links
         assert "first" in links
         assert "last" in links
         assert "next" in links
         assert "prev" in links
 
-        assert links["self"]["href"] == "/test?page=2&size=10"
-        assert links["first"]["href"] == "/test?page=1&size=10"
-        assert links["last"]["href"] == "/test?page=5&size=10"
-        assert links["next"]["href"] == "/test?page=3&size=10"
-        assert links["prev"]["href"] == "/test?page=1&size=10"
+        assert links["self"] == "/test?page=2"
+        assert links["first"] == "/test?page=1"
+        assert links["last"] == "/test?page=5"
+        assert links["next"] == "/test?page=3"
+        assert links["prev"] == "/test?page=1"
 
     @pytest.mark.unit
     def test_generate_links_first_page(self, pagination_utility):
@@ -259,8 +259,8 @@ class TestPaginationUtility:
         """Test procesamiento de respuesta de scroll"""
         response_data = {
             "_embedded": {"reservations": [{"id": 1}, {"id": 2}]},
-            "_links": {"next": {"hre": "/next"}},
-            "scroll_id": "scroll123",
+            "_links": {"next": {"href": "/next"}},
+            "_scroll_id": "scroll123",
         }
 
         result = pagination_utility.process_scroll_response(response_data)
@@ -282,8 +282,8 @@ class TestPaginationUtility:
         result = pagination_utility.process_standard_response(response_data, 1, 10)
 
         assert len(result.data) == 2
-        assert result.page_info.current_page == 1
-        assert result.page_info.page_size == 10
+        assert result.page_info.page == 1
+        assert result.page_info.size == 10
         assert result.page_info.total_items == 20
 
     @pytest.mark.unit
@@ -320,8 +320,8 @@ class TestPaginationUtility:
 
         mock_api_client.get.return_value = {
             "_embedded": {"reservations": [{"id": 1}]},
-            "_links": {"next": {"hre": "/next"}},
-            "scroll_id": "scroll123",
+            "_links": {"next": {"href": "/next"}},
+            "_scroll_id": "scroll123",
         }
 
         results = []

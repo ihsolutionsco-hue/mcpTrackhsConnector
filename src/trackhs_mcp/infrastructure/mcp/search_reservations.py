@@ -419,28 +419,40 @@ def _normalize_date_format(date_string: str) -> str:
                 # Ya tiene Z: 2025-01-01T00:00:00Z -> mantener
                 return date_string
             elif "+" in date_string:
-                # Remover offset positivo: 2025-01-01T00:00:00+00:00 ->
+                # Si es +00:00, mantenerlo (ya está normalizado)
+                if date_string.endswith("+00:00"):
+                    return date_string
+                # Remover otros offsets positivos: 2025-01-01T00:00:00+05:00 ->
                 # 2025-01-01T00:00:00
                 return date_string.split("+")[0]
             elif "-" in date_string and len(date_string) > 19:
-                # Remover offset negativo: 2025-01-01T00:00:00-05:00 ->
-                # 2025-01-01T00:00:00
+                # Verificar si es realmente un offset negativo
+                # Los offsets negativos tienen formato: -HH:MM al final
                 # Buscar el último - que esté después de la T
                 t_pos = date_string.find("T")
                 if t_pos > 0:
                     # Buscar el último - después de la T
                     last_dash = date_string.rfind("-")
-                    # Si el - está en las últimas 6 posiciones, es un offset
+                    # Verificar si es un offset negativo real (formato -HH:MM)
                     if last_dash > t_pos and last_dash >= len(date_string) - 6:
-                        # Es un offset, removerlo
-                        return date_string[:last_dash]
+                        # Verificar si después del - hay exactamente 5 caracteres
+                        remaining = date_string[last_dash + 1 :]
+                        if len(remaining) == 5 and ":" in remaining:
+                            # Es un offset negativo real, removerlo
+                            return date_string[:last_dash]
+                        else:
+                            # No es un offset, es parte de la fecha - agregar Z
+                            return date_string + "Z"
                     else:
-                        # Es parte de la fecha, no un offset
-                        return date_string
+                        # No es un offset, es parte de la fecha - agregar Z
+                        return date_string + "Z"
                 else:
-                    return date_string
+                    # No hay T, agregar Z
+                    return date_string + "Z"
             else:
                 # Tiempo sin timezone: 2025-01-01T00:00:00 -> 2025-01-01T00:00:00Z
+                # También manejar microsegundos:
+                # 2025-01-01T00:00:00.123 -> 2025-01-01T00:00:00.123Z
                 return date_string + "Z"
 
         # Si tiene tiempo con espacio, convertir a formato T

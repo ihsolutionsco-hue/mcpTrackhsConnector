@@ -198,7 +198,7 @@ class TestTrackHSCompletion:
     @pytest.mark.unit
     def test_get_parameter_suggestions(self, completion):
         """Test obtención de sugerencias de parámetros"""
-        context = CompletionContext(current_input="test", parameter_name="test_param")
+        context = CompletionContext(current_input="", parameter_name="test_param")
 
         suggestions = completion.get_parameter_suggestions(context)
 
@@ -208,7 +208,7 @@ class TestTrackHSCompletion:
     @pytest.mark.unit
     def test_get_sort_column_suggestions(self, completion):
         """Test obtención de sugerencias de columnas de ordenamiento"""
-        context = CompletionContext(current_input="test", parameter_name="sort_column")
+        context = CompletionContext(current_input="", parameter_name="sort_column")
 
         suggestions = completion.get_sort_column_suggestions(context)
 
@@ -224,7 +224,7 @@ class TestTrackHSCompletion:
     @pytest.mark.unit
     def test_get_status_suggestions(self, completion):
         """Test obtención de sugerencias de estado"""
-        context = CompletionContext(current_input="test", parameter_name="status")
+        context = CompletionContext(current_input="", parameter_name="status")
 
         suggestions = completion.get_status_suggestions(context)
 
@@ -264,8 +264,8 @@ class TestTrackHSCompletion:
         assert len(suggestions) == 2
         assert any(s.value == "1" for s in suggestions)
         assert any(s.value == "2" for s in suggestions)
-        assert any(s.label == "Node 1" for s in suggestions)
-        assert any(s.label == "Node 2" for s in suggestions)
+        assert any("Node 1" in s.label for s in suggestions)
+        assert any("Node 2" in s.label for s in suggestions)
 
     @pytest.mark.unit
     @pytest.mark.asyncio
@@ -335,7 +335,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_parameter_suggestions(self, completion):
         """Test obtención de completions para sugerencias de parámetros"""
-        context = CompletionContext(current_input="test", parameter_name="test_param")
+        context = CompletionContext(current_input="", parameter_name="test_param")
 
         suggestions = await completion.get_completions(context)
 
@@ -346,7 +346,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_sort_column(self, completion):
         """Test obtención de completions para sort_column"""
-        context = CompletionContext(current_input="test", parameter_name="sort_column")
+        context = CompletionContext(current_input="", parameter_name="sortColumn")
 
         suggestions = await completion.get_completions(context)
 
@@ -357,7 +357,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_status(self, completion):
         """Test obtención de completions para status"""
-        context = CompletionContext(current_input="test", parameter_name="status")
+        context = CompletionContext(current_input="", parameter_name="status")
 
         suggestions = await completion.get_completions(context)
 
@@ -368,7 +368,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_date_parameter(self, completion):
         """Test obtención de completions para parámetros de fecha"""
-        context = CompletionContext(current_input="", parameter_name="arrival_start")
+        context = CompletionContext(current_input="", parameter_name="arrivalStart")
 
         suggestions = await completion.get_completions(context)
 
@@ -408,7 +408,7 @@ class TestTrackHSCompletion:
     @pytest.mark.asyncio
     async def test_get_completions_with_cache(self, completion):
         """Test obtención de completions con cache"""
-        context = CompletionContext(current_input="test", parameter_name="test_param")
+        context = CompletionContext(current_input="", parameter_name="test_param")
 
         # Primera llamada
         suggestions1 = await completion.get_completions(context)

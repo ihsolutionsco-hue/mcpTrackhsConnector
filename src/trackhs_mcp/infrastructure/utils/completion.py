@@ -143,15 +143,28 @@ class TrackHSCompletion:
         suggestions.extend(
             [
                 CompletionSuggestion(
-                    "search", "Search", "Búsqueda por texto", "search", 8
+                    "search",
+                    "Search",
+                    "Búsqueda por texto",
+                    "search",
+                    8,
+                    type=CompletionType.PARAMETER,
                 ),
-                CompletionSuggestion("tags", "Tags", "Filtro por tags", "filter", 7),
+                CompletionSuggestion(
+                    "tags",
+                    "Tags",
+                    "Filtro por tags",
+                    "filter",
+                    7,
+                    type=CompletionType.PARAMETER,
+                ),
                 CompletionSuggestion(
                     "updatedSince",
                     "Updated Since",
                     "Filtro por fecha de actualización",
                     "filter",
                     7,
+                    type=CompletionType.PARAMETER,
                 ),
             ]
         )
@@ -159,12 +172,29 @@ class TrackHSCompletion:
         # Parámetros de filtrado por ID
         suggestions.extend(
             [
-                CompletionSuggestion("nodeId", "Node ID", "ID del nodo", "filter", 6),
                 CompletionSuggestion(
-                    "unitId", "Unit ID", "ID de la unidad", "filter", 6
+                    "nodeId",
+                    "Node ID",
+                    "ID del nodo",
+                    "filter",
+                    6,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
-                    "contactId", "Contact ID", "ID del contacto", "filter", 6
+                    "unitId",
+                    "Unit ID",
+                    "ID de la unidad",
+                    "filter",
+                    6,
+                    type=CompletionType.PARAMETER,
+                ),
+                CompletionSuggestion(
+                    "contactId",
+                    "Contact ID",
+                    "ID del contacto",
+                    "filter",
+                    6,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
                     "reservationTypeId",
@@ -172,6 +202,7 @@ class TrackHSCompletion:
                     "ID del tipo de reserva",
                     "filter",
                     6,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
                     "travelAgentId",
@@ -179,18 +210,39 @@ class TrackHSCompletion:
                     "ID del agente de viajes",
                     "filter",
                     6,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
-                    "campaignId", "Campaign ID", "ID de la campaña", "filter", 6
+                    "campaignId",
+                    "Campaign ID",
+                    "ID de la campaña",
+                    "filter",
+                    6,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
-                    "userId", "User ID", "ID del usuario", "filter", 6
+                    "userId",
+                    "User ID",
+                    "ID del usuario",
+                    "filter",
+                    6,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
-                    "unitTypeId", "Unit Type ID", "ID del tipo de unidad", "filter", 6
+                    "unitTypeId",
+                    "Unit Type ID",
+                    "ID del tipo de unidad",
+                    "filter",
+                    6,
+                    type=CompletionType.PARAMETER,
                 ),
                 CompletionSuggestion(
-                    "rateTypeId", "Rate Type ID", "ID del tipo de tarifa", "filter", 6
+                    "rateTypeId",
+                    "Rate Type ID",
+                    "ID del tipo de tarifa",
+                    "filter",
+                    6,
+                    type=CompletionType.PARAMETER,
                 ),
             ]
         )
@@ -302,19 +354,62 @@ class TrackHSCompletion:
             CompletionSuggestion(
                 "type", "Type", "Ordenar por tipo", "sort", 7, type=CompletionType.SORT
             ),
-            CompletionSuggestion("guest", "Guest", "Ordenar por huésped", "sort", 7),
             CompletionSuggestion(
-                "guests", "Guests", "Ordenar por huéspedes", "sort", 7
+                "guest",
+                "Guest",
+                "Ordenar por huésped",
+                "sort",
+                7,
+                type=CompletionType.SORT,
             ),
-            CompletionSuggestion("unit", "Unit", "Ordenar por unidad", "sort", 6),
-            CompletionSuggestion("units", "Units", "Ordenar por unidades", "sort", 6),
             CompletionSuggestion(
-                "checkin", "Check-in", "Ordenar por check-in", "sort", 5
+                "guests",
+                "Guests",
+                "Ordenar por huéspedes",
+                "sort",
+                7,
+                type=CompletionType.SORT,
             ),
             CompletionSuggestion(
-                "checkout", "Check-out", "Ordenar por check-out", "sort", 5
+                "unit",
+                "Unit",
+                "Ordenar por unidad",
+                "sort",
+                6,
+                type=CompletionType.SORT,
             ),
-            CompletionSuggestion("nights", "Nights", "Ordenar por noches", "sort", 5),
+            CompletionSuggestion(
+                "units",
+                "Units",
+                "Ordenar por unidades",
+                "sort",
+                6,
+                type=CompletionType.SORT,
+            ),
+            CompletionSuggestion(
+                "checkin",
+                "Check-in",
+                "Ordenar por check-in",
+                "sort",
+                5,
+                type=CompletionType.SORT,
+            ),
+            CompletionSuggestion(
+                "checkout",
+                "Check-out",
+                "Ordenar por check-out",
+                "sort",
+                5,
+                type=CompletionType.SORT,
+            ),
+            CompletionSuggestion(
+                "nights",
+                "Nights",
+                "Ordenar por noches",
+                "sort",
+                5,
+                type=CompletionType.SORT,
+            ),
         ]
 
         return self._filter_suggestions(suggestions, context.current_input)
@@ -324,18 +419,45 @@ class TrackHSCompletion:
     ) -> List[CompletionSuggestion]:
         """Obtiene sugerencias para status"""
         suggestions = [
-            CompletionSuggestion("Hold", "Hold", "Reserva en espera", "status", 10),
             CompletionSuggestion(
-                "Confirmed", "Confirmed", "Reserva confirmada", "status", 10
+                "Hold",
+                "Hold",
+                "Reserva en espera",
+                "status",
+                10,
+                type=CompletionType.STATUS,
             ),
             CompletionSuggestion(
-                "Checked In", "Checked In", "Huésped registrado", "status", 9
+                "Confirmed",
+                "Confirmed",
+                "Reserva confirmada",
+                "status",
+                10,
+                type=CompletionType.STATUS,
             ),
             CompletionSuggestion(
-                "Checked Out", "Checked Out", "Huésped salido", "status", 9
+                "Checked In",
+                "Checked In",
+                "Huésped registrado",
+                "status",
+                9,
+                type=CompletionType.STATUS,
             ),
             CompletionSuggestion(
-                "Cancelled", "Cancelled", "Reserva cancelada", "status", 8
+                "Checked Out",
+                "Checked Out",
+                "Huésped salido",
+                "status",
+                9,
+                type=CompletionType.STATUS,
+            ),
+            CompletionSuggestion(
+                "Cancelled",
+                "Cancelled",
+                "Reserva cancelada",
+                "status",
+                8,
+                type=CompletionType.STATUS,
             ),
         ]
 
@@ -356,15 +478,37 @@ class TrackHSCompletion:
 
         suggestions.extend(
             [
-                CompletionSuggestion(today, f"Today ({today})", "Hoy", "date", 10),
                 CompletionSuggestion(
-                    tomorrow, f"Tomorrow ({tomorrow})", "Mañana", "date", 9
+                    today,
+                    f"Today ({today})",
+                    "Hoy",
+                    "date",
+                    10,
+                    type=CompletionType.DATE,
                 ),
                 CompletionSuggestion(
-                    next_week, f"Next Week ({next_week})", "Próxima semana", "date", 8
+                    tomorrow,
+                    f"Tomorrow ({tomorrow})",
+                    "Mañana",
+                    "date",
+                    9,
+                    type=CompletionType.DATE,
                 ),
                 CompletionSuggestion(
-                    next_month, f"Next Month ({next_month})", "Próximo mes", "date", 7
+                    next_week,
+                    f"Next Week ({next_week})",
+                    "Próxima semana",
+                    "date",
+                    8,
+                    type=CompletionType.DATE,
+                ),
+                CompletionSuggestion(
+                    next_month,
+                    f"Next Month ({next_month})",
+                    "Próximo mes",
+                    "date",
+                    7,
+                    type=CompletionType.DATE,
                 ),
             ]
         )
@@ -372,8 +516,12 @@ class TrackHSCompletion:
         # Patrones de fecha
         suggestions.extend(
             [
-                CompletionSuggestion("2024-", "2024-", "Año 2024", "date", 6),
-                CompletionSuggestion("2025-", "2025-", "Año 2025", "date", 6),
+                CompletionSuggestion(
+                    "2024-", "2024-", "Año 2024", "date", 6, type=CompletionType.DATE
+                ),
+                CompletionSuggestion(
+                    "2025-", "2025-", "Año 2025", "date", 6, type=CompletionType.DATE
+                ),
             ]
         )
 
@@ -481,6 +629,10 @@ class TrackHSCompletion:
             "rateTypeId",
         ]:
             suggestions = await self.get_dynamic_suggestions(context)
+        elif context.parameter_name in ["sortColumn"]:
+            suggestions = self.get_sort_column_suggestions(context)
+        elif context.parameter_name in ["status"]:
+            suggestions = self.get_status_suggestions(context)
         else:
             # Sugerencias generales de parámetros
             suggestions = self.get_parameter_suggestions(context)
@@ -498,6 +650,7 @@ class TrackHSCompletion:
                 "Buscar reservas con API V2",
                 "endpoint",
                 10,
+                type=CompletionType.ENDPOINT,
             ),
             CompletionSuggestion(
                 "/reservations",
@@ -505,12 +658,32 @@ class TrackHSCompletion:
                 "Buscar reservas (legacy)",
                 "endpoint",
                 8,
+                type=CompletionType.ENDPOINT,
             ),
-            CompletionSuggestion("/units", "Units", "Listar unidades", "endpoint", 7),
             CompletionSuggestion(
-                "/contacts", "Contacts", "Listar contactos", "endpoint", 7
+                "/units",
+                "Units",
+                "Listar unidades",
+                "endpoint",
+                7,
+                type=CompletionType.ENDPOINT,
             ),
-            CompletionSuggestion("/nodes", "Nodes", "Listar nodos", "endpoint", 6),
+            CompletionSuggestion(
+                "/contacts",
+                "Contacts",
+                "Listar contactos",
+                "endpoint",
+                7,
+                type=CompletionType.ENDPOINT,
+            ),
+            CompletionSuggestion(
+                "/nodes",
+                "Nodes",
+                "Listar nodos",
+                "endpoint",
+                6,
+                type=CompletionType.ENDPOINT,
+            ),
         ]
 
         return self._filter_suggestions(suggestions, context.current_input)

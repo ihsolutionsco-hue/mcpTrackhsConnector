@@ -114,7 +114,7 @@ class PaginationUtility:
             param_str = "&".join([f"{k}={v}" for k, v in params.items()])
             return f"{base_url}?{param_str}" if param_str else base_url
 
-        links["sel"] = build_url(page_info.page)
+        links["self"] = build_url(page_info.page)
         links["first"] = build_url(1)
         links["last"] = build_url(page_info.total_pages)
 

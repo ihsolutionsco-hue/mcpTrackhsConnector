@@ -6,9 +6,9 @@ This file is required by FastMCP Cloud deployment
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 
-from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
-from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from trackhs_mcp.infrastructure.mcp.server import register_all_components
+from .infrastructure.adapters.config import TrackHSConfig
+from .infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+from .infrastructure.mcp.server import register_all_components
 
 # Load environment variables
 load_dotenv()
