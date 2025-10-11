@@ -271,15 +271,10 @@ jobs:
       run: |
         echo "Configurando deployment para FastMCP Cloud..."
         echo "# TrackHS MCP Connector Environment Variables" > .env
-        echo "TRACKHS_API_URL=${TRACKHS_API_URL:-https://api.trackhs.com/api}" >> .env
-        echo "TRACKHS_USERNAME=${TRACKHS_USERNAME:-}" >> .env
-        echo "TRACKHS_PASSWORD=${TRACKHS_PASSWORD:-}" >> .env
-        echo "TRACKHS_TIMEOUT=${TRACKHS_TIMEOUT:-30}" >> .env
-      env:
-        TRACKHS_API_URL: ${{ secrets.TRACKHS_API_URL }}
-        TRACKHS_USERNAME: ${{ secrets.TRACKHS_USERNAME }}
-        TRACKHS_PASSWORD: ${{ secrets.TRACKHS_PASSWORD }}
-        TRACKHS_TIMEOUT: ${{ secrets.TRACKHS_TIMEOUT }}
+        echo "TRACKHS_API_URL=${{ secrets.TRACKHS_API_URL || 'https://api.trackhs.com/api' }}" >> .env
+        echo "TRACKHS_USERNAME=${{ secrets.TRACKHS_USERNAME || '' }}" >> .env
+        echo "TRACKHS_PASSWORD=${{ secrets.TRACKHS_PASSWORD || '' }}" >> .env
+        echo "TRACKHS_TIMEOUT=${{ secrets.TRACKHS_TIMEOUT || '30' }}" >> .env
 
     - name: Deploy to FastMCP Cloud
       run: |
