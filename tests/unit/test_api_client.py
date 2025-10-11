@@ -218,7 +218,9 @@ class TestTrackHSApiClient:
 
             result = await api_client.get("/test")
             assert result == {"data": "test"}
-            mock_request.assert_called_once_with("/test", None, params=None)
+            from src.trackhs_mcp.core.types import RequestOptions
+            expected_options = RequestOptions(method="GET")
+            mock_request.assert_called_once_with("/test", expected_options, params=None)
 
     @pytest.mark.unit
     @pytest.mark.asyncio
