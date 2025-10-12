@@ -138,7 +138,39 @@ class TrackHSApiClient(ApiClientPort):
                 content_type = response.headers.get("content-type", "")
 
                 if "application/json" in content_type:
-                    return response.json()
+                    try:
+                        # Intentar parsear como JSON
+                        json_data = response.json()
+                        return json_data
+                    except Exception as json_error:
+                        # Si falla el parsing JSON, intentar parsear manualmente
+                        import json
+
+                        try:
+                            response_text = response.text
+                            if os.getenv("DEBUG", "false").lower() == "true":
+                                logger = logging.getLogger(__name__)
+                                logger.debug(
+                                    f"JSON parsing failed, trying manual parse. Error: {json_error}"
+                                )
+                                logger.debug(
+                                    f"Response text (first 200 chars): {response_text[:200]}"
+                                )
+
+                            json_data = json.loads(response_text)
+                            return json_data
+                        except Exception as manual_parse_error:
+                            if os.getenv("DEBUG", "false").lower() == "true":
+                                logger = logging.getLogger(__name__)
+                                logger.debug(
+                                    f"Manual JSON parsing also failed: {manual_parse_error}"
+                                )
+                                logger.debug(
+                                    f"Response text (first 500 chars): {response_text[:500]}"
+                                )
+
+                            # Si todo falla, devolver el texto como está
+                            return response_text
                 else:
                     return response.text
 

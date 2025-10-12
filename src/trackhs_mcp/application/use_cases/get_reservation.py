@@ -69,6 +69,18 @@ class GetReservationUseCase:
                     "reservation_id",
                 )
 
+            # Manejar caso donde la respuesta llegue como string JSON
+            if isinstance(response_data, str):
+                import json
+
+                try:
+                    response_data = json.loads(response_data)
+                except json.JSONDecodeError as e:
+                    raise ValidationError(
+                        f"Error al parsear respuesta JSON: {str(e)}",
+                        "api",
+                    )
+
             # Crear objeto Reservation desde la respuesta
             reservation = Reservation.model_validate(response_data)
 
