@@ -151,7 +151,7 @@ class TestGetReservationV2Tool:
 
             mock_mcp.tool = capture_tool
 
-            register_get_reservation_v2(mcp, mock_api_client)
+            register_get_reservation_v2(mock_mcp, mock_api_client)
 
             # Act & Assert
             with pytest.raises(ValidationError) as exc_info:
