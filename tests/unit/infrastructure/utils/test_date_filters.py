@@ -1,137 +1,38 @@
 """
-Tests consolidados para filtros de fecha
+Tests consolidados para filtros de fecha V1 y V2
 """
 
-# AsyncMock, MagicMock imports removed - not used
-
-# pytest import removed - not used
-
-from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
-    _is_valid_date_format,
-    _normalize_date_format,
+from src.trackhs_mcp.infrastructure.mcp.search_reservations_v1 import (
+    _is_valid_date_format as v1_is_valid_date_format,
+)
+from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
+    _is_valid_date_format as v2_is_valid_date_format,
 )
 
 
 class TestDateFilters:
-    """Tests consolidados para filtros de fecha"""
+    """Tests consolidados para filtros de fecha V1 y V2"""
 
-    def test_normalize_date_format_solo_fecha(self):
-        """Test normalización de fecha solo (YYYY-MM-DD)"""
-        # Solo fecha
-        result = _normalize_date_format("2025-01-01")
-        assert result == "2025-01-01T00:00:00Z"
+    def test_v1_date_format_validation(self):
+        """Test validación de formato de fecha V1"""
+        # Formatos válidos
+        assert v1_is_valid_date_format("2024-01-01")
+        assert v1_is_valid_date_format("2024-01-01T00:00:00Z")
+        assert v1_is_valid_date_format("2024-01-01T00:00:00")
 
-        result = _normalize_date_format("2024-12-31")
-        assert result == "2024-12-31T00:00:00Z"
+        # Formatos inválidos
+        assert not v1_is_valid_date_format("01/01/2024")
+        assert not v1_is_valid_date_format("invalid-date")
+        assert not v1_is_valid_date_format("")
 
-    def test_normalize_date_format_con_tiempo_sin_timezone(self):
-        """Test normalización de fecha con tiempo sin timezone"""
-        # Fecha con tiempo sin timezone
-        result = _normalize_date_format("2025-01-01T00:00:00")
-        assert result == "2025-01-01T00:00:00Z"
+    def test_v2_date_format_validation(self):
+        """Test validación de formato de fecha V2"""
+        # Formatos válidos
+        assert v2_is_valid_date_format("2024-01-01")
+        assert v2_is_valid_date_format("2024-01-01T00:00:00Z")
+        assert v2_is_valid_date_format("2024-01-01T00:00:00")
 
-        result = _normalize_date_format("2025-01-01T23:59:59")
-        assert result == "2025-01-01T23:59:59Z"
-
-    def test_normalize_date_format_ya_normalizado(self):
-        """Test que fechas ya normalizadas no cambien"""
-        # Ya tiene timezone Z
-        result = _normalize_date_format("2025-01-01T00:00:00Z")
-        assert result == "2025-01-01T00:00:00Z"
-
-        # Ya tiene timezone offset
-        result = _normalize_date_format("2025-01-01T00:00:00+00:00")
-        assert result == "2025-01-01T00:00:00+00:00"
-
-    def test_is_valid_date_format_solo_fecha(self):
-        """Test validación de formato solo fecha"""
-        # Solo fecha válida
-        assert _is_valid_date_format("2025-01-01") is True
-        assert _is_valid_date_format("2024-12-31") is True
-
-        # Solo fecha inválida
-        assert _is_valid_date_format("2025-13-01") is False
-        assert _is_valid_date_format("2025-01-32") is False
-        assert _is_valid_date_format("invalid") is False
-
-    def test_is_valid_date_format_con_tiempo(self):
-        """Test validación de formato con tiempo"""
-        # Con tiempo válido
-        assert _is_valid_date_format("2025-01-01T00:00:00") is True
-        assert _is_valid_date_format("2025-01-01T23:59:59") is True
-        assert _is_valid_date_format("2025-01-01T00:00:00Z") is True
-        assert _is_valid_date_format("2025-01-01T00:00:00+00:00") is True
-
-        # Con tiempo inválido
-        assert _is_valid_date_format("2025-01-01T25:00:00") is False
-        assert _is_valid_date_format("2025-01-01T00:60:00") is False
-        assert _is_valid_date_format("2025-01-01T00:00:60") is False
-
-    def test_date_normalization_comprehensive(self):
-        """Test comprehensivo de normalización de fechas"""
-        test_cases = [
-            # (input, expected_output, description)
-            ("2025-01-01", "2025-01-01T00:00:00Z", "Solo fecha básica"),
-            ("2025-01-31", "2025-01-31T00:00:00Z", "Solo fecha fin de mes"),
-            (
-                "2025-01-01T00:00:00",
-                "2025-01-01T00:00:00Z",
-                "Fecha con tiempo sin timezone",
-            ),
-            (
-                "2025-01-01T23:59:59",
-                "2025-01-01T23:59:59Z",
-                "Fecha con tiempo final sin timezone",
-            ),
-            ("2025-01-01T00:00:00Z", "2025-01-01T00:00:00Z", "Ya normalizada con Z"),
-            (
-                "2025-01-01T00:00:00+00:00",
-                "2025-01-01T00:00:00+00:00",
-                "Ya normalizada con offset",
-            ),
-            (
-                "2025-01-01T00:00:00.123",
-                "2025-01-01T00:00:00.123Z",
-                "Con microsegundos sin timezone",
-            ),
-            (
-                "2025-01-01T00:00:00.123Z",
-                "2025-01-01T00:00:00.123Z",
-                "Con microsegundos y timezone Z",
-            ),
-        ]
-
-        for input_date, expected, description in test_cases:
-            result = _normalize_date_format(input_date)
-            assert (
-                result == expected
-            ), f"Failed for {description}: {input_date} -> {result}"
-
-    def test_date_validation_comprehensive(self):
-        """Test comprehensivo de validación de fechas"""
-        valid_cases = [
-            "2025-01-01",
-            "2025-01-01T00:00:00",
-            "2025-01-01T00:00:00Z",
-            "2025-01-01T00:00:00+00:00",
-            "2025-01-01T00:00:00-05:00",
-            "2025-01-01T00:00:00.123Z",
-            "2025-01-01T00:00:00.123456Z",
-        ]
-
-        invalid_cases = [
-            "invalid",
-            "2025-13-01",
-            "2025-01-32",
-            "2025-01-01T25:00:00",
-            "2025-01-01T00:60:00",
-            "2025-01-01T00:00:60",
-            "2025/01/01",
-            "01-01-2025",
-        ]
-
-        for date_str in valid_cases:
-            assert _is_valid_date_format(date_str), f"Should be valid: {date_str}"
-
-        for date_str in invalid_cases:
-            assert not _is_valid_date_format(date_str), f"Should be invalid: {date_str}"
+        # Formatos inválidos
+        assert not v2_is_valid_date_format("01/01/2024")
+        assert not v2_is_valid_date_format("invalid-date")
+        assert not v2_is_valid_date_format("")

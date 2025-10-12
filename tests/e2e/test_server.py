@@ -237,7 +237,7 @@ class TestServerE2E:
                 "reservations" in str(call) for call in resource_calls
             ), "reservations resource not registered"
             assert any(
-                "documentation" in str(call) for call in resource_calls
+                "docs" in str(call) for call in resource_calls
             ), "documentation resource not registered"
 
             # Verificar prompts específicos (los prompts se registran con decoradores)

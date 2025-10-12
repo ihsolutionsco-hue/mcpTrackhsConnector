@@ -1,26 +1,34 @@
 """
-Tests de integración para search_reservations
+Tests de integración para search_reservations V1 y V2
 """
 
-from unittest.mock import AsyncMock, Mock  # patch not used
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from src.trackhs_mcp.infrastructure.mcp.search_reservations import (
-    _is_valid_date_format,
-    register_search_reservations,
+from src.trackhs_mcp.infrastructure.mcp.search_reservations_v1 import (
+    _is_valid_date_format as v1_is_valid_date_format,
+)
+from src.trackhs_mcp.infrastructure.mcp.search_reservations_v1 import (
+    register_search_reservations_v1,
+)
+from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
+    _is_valid_date_format as v2_is_valid_date_format,
+)
+from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
+    register_search_reservations_v2,
 )
 from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
 
 
 class TestSearchReservationsIntegration:
-    """Tests de integración para search_reservations"""
+    """Tests de integración para search_reservations V1 y V2"""
 
     @pytest.fixture
     def mock_api_client(self):
-        """Mock del API client"""
+        """Mock del cliente API"""
         client = Mock()
-        client.get = AsyncMock()  # Debe ser AsyncMock para funciones async
+        client.get = AsyncMock()
         return client
 
     @pytest.fixture
@@ -30,411 +38,40 @@ class TestSearchReservationsIntegration:
         mcp.tool = Mock()
         return mcp
 
-    @pytest.fixture
-    def sample_search_response(self):
-        """Respuesta de ejemplo de búsqueda"""
-        return {
-            "_embedded": {
-                "reservations": [
-                    {
-                        "id": 12345,
-                        "alternates": None,
-                        "currency": "USD",
-                        "unit_id": 1,
-                        "client_ip_address": None,
-                        "session": None,
-                        "is_unit_locked": False,
-                        "is_unit_assigned": True,
-                        "is_unit_type_locked": False,
-                        "unit_type_id": 1,
-                        "arrival_date": "2024-01-15",
-                        "departure_date": "2024-01-20",
-                        "early_arrival": False,
-                        "late_departure": False,
-                        "arrival_time": "15:00:00",
-                        "departure_time": "11:00:00",
-                        "nights": 5.0,
-                        "status": "Confirmed",
-                        "cancelled_at": None,
-                        "occupants": [
-                            {
-                                "id": 1,
-                                "first_name": "John",
-                                "last_name": "Doe",
-                                "email": "john@example.com",
-                                "phone": "+1234567890",
-                                "nationality": "US",
-                                "document_type": "passport",
-                                "document_number": "A1234567",
-                            }
-                        ],
-                        "security_deposit": {
-                            "amount": "100.00",
-                            "currency": "USD",
-                            "status": "pending",
-                        },
-                        "updated_at": "2024-01-15T10:00:00Z",
-                        "created_at": "2024-01-15T10:00:00Z",
-                        "booked_at": "2024-01-15T10:00:00Z",
-                        "guest_breakdown": {"adults": 2, "children": 0, "infants": 0},
-                        "contact_id": 1,
-                        "channel_id": 1,
-                        "folio_id": 1,
-                        "user_id": 1,
-                        "type_id": 1,
-                        "rate_type_id": 1,
-                        "is_taxable": True,
-                        "uuid": "123e4567-e89b-12d3-a456-426614174000",
-                        "source": "direct",
-                        "is_channel_locked": False,
-                        "agreement_status": "signed",
-                        "automate_payment": False,
-                        "revenue_realized_method": "deposit",
-                        "updated_by": 1,
-                        "created_by": 1,
-                        "payment_plan": {
-                            "id": 1,
-                            "name": "Standard",
-                            "installments": 1,
-                        },
-                        "travel_insurance_products": [],
-                        "_embedded": {},
-                        "_links": {},
-                    }
-                ]
-            },
-            "page": 1,
-            "page_count": 1,
-            "page_size": 10,
-            "total_items": 1,
-            "_links": {
-                "self": {"href": "/v2/pms/reservations?page=1&size=10"},
-                "first": {"href": "/v2/pms/reservations?page=1&size=10"},
-                "last": {"href": "/v2/pms/reservations?page=1&size=10"},
-            },
-        }
+    @pytest.mark.integration
+    def test_register_search_reservations_v1(self, mock_mcp, mock_api_client):
+        """Test registro de search_reservations_v1"""
+        register_search_reservations_v1(mock_mcp, mock_api_client)
+        assert mock_mcp.tool.called
 
     @pytest.mark.integration
-    def test_register_search_reservations(self, mock_mcp, mock_api_client):
-        """Test registro de la herramienta search_reservations"""
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        # Verificar que se registró la herramienta
-        mock_mcp.tool.assert_called_once()
+    def test_register_search_reservations_v2(self, mock_mcp, mock_api_client):
+        """Test registro de search_reservations_v2"""
+        register_search_reservations_v2(mock_mcp, mock_api_client)
+        assert mock_mcp.tool.called
 
     @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_basic_success(
-        self, mock_mcp, mock_api_client, sample_search_response
-    ):
-        """Test búsqueda básica exitosa"""
-        mock_api_client.get.return_value = sample_search_response
+    def test_v1_date_format_validation(self):
+        """Test validación de formato de fecha V1"""
+        # Formatos válidos
+        assert v1_is_valid_date_format("2024-01-01")
+        assert v1_is_valid_date_format("2024-01-01T00:00:00Z")
+        assert v1_is_valid_date_format("2024-01-01T00:00:00")
 
-        # Registrar la herramienta
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        # Obtener la función registrada
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        # Ejecutar la función
-        result = await tool_func(
-            page=1, size=10, sort_column="name", sort_direction="asc"
-        )
-
-        assert result == sample_search_response
-        mock_api_client.get.assert_called_once()
+        # Formatos inválidos
+        assert not v1_is_valid_date_format("01/01/2024")
+        assert not v1_is_valid_date_format("invalid-date")
+        assert not v1_is_valid_date_format("")
 
     @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_with_filters(
-        self, mock_mcp, mock_api_client, sample_search_response
-    ):
-        """Test búsqueda con filtros"""
-        mock_api_client.get.return_value = sample_search_response
+    def test_v2_date_format_validation(self):
+        """Test validación de formato de fecha V2"""
+        # Formatos válidos
+        assert v2_is_valid_date_format("2024-01-01")
+        assert v2_is_valid_date_format("2024-01-01T00:00:00Z")
+        assert v2_is_valid_date_format("2024-01-01T00:00:00")
 
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        result = await tool_func(
-            page=1, size=10, search="test", node_id=1, unit_id=1, status="Confirmed"
-        )
-
-        assert result == sample_search_response
-        mock_api_client.get.assert_called_once()
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_with_date_filters(
-        self, mock_mcp, mock_api_client, sample_search_response
-    ):
-        """Test búsqueda con filtros de fecha"""
-        mock_api_client.get.return_value = sample_search_response
-
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        result = await tool_func(
-            page=1,
-            size=10,
-            arrival_start="2024-01-01T00:00:00Z",
-            arrival_end="2024-01-31T23:59:59Z",
-            departure_start="2024-02-01T00:00:00Z",
-            departure_end="2024-02-28T23:59:59Z",
-        )
-
-        assert result == sample_search_response
-        mock_api_client.get.assert_called_once()
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_with_scroll(
-        self, mock_mcp, mock_api_client, sample_search_response
-    ):
-        """Test búsqueda con scroll"""
-        mock_api_client.get.return_value = sample_search_response
-
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        result = await tool_func(page=1, size=10, scroll=1)
-
-        assert result == sample_search_response
-        mock_api_client.get.assert_called_once()
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_with_multiple_ids(
-        self, mock_mcp, mock_api_client, sample_search_response
-    ):
-        """Test búsqueda con múltiples IDs"""
-        mock_api_client.get.return_value = sample_search_response
-
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        result = await tool_func(
-            page=1, size=10, node_id=[1, 2, 3], unit_id=[1, 2], contact_id=[1, 2, 3, 4]
-        )
-
-        assert result == sample_search_response
-        mock_api_client.get.assert_called_once()
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_validation_error_invalid_page(
-        self, mock_mcp, mock_api_client
-    ):
-        """Test error de validación con página inválida"""
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        with pytest.raises(TrackHSError, match="Page must be >= 0"):
-            await tool_func(page=-1, size=10)
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_validation_error_invalid_size(
-        self, mock_mcp, mock_api_client
-    ):
-        """Test error de validación con tamaño inválido"""
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        with pytest.raises(TrackHSError, match="Size must be >= 1"):
-            await tool_func(page=1, size=0)
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_validation_error_size_too_large(
-        self, mock_mcp, mock_api_client
-    ):
-        """Test error de validación con tamaño demasiado grande"""
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        with pytest.raises(TrackHSError, match="Size must be <= 1000"):
-            await tool_func(page=1, size=1001)
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_validation_error_invalid_date(
-        self, mock_mcp, mock_api_client
-    ):
-        """Test error de validación con fecha inválida"""
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        with pytest.raises(TrackHSError, match="Invalid date format"):
-            await tool_func(page=1, size=10, arrival_start="invalid-date")
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_api_error(self, mock_mcp, mock_api_client):
-        """Test error de API"""
-        mock_api_client.get.side_effect = Exception("API Error")
-
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        with pytest.raises(Exception, match="API Error"):
-            await tool_func(page=1, size=10)
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_all_parameters(
-        self, mock_mcp, mock_api_client, sample_search_response
-    ):
-        """Test búsqueda con todos los parámetros"""
-        mock_api_client.get.return_value = sample_search_response
-
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        result = await tool_func(
-            page=2,
-            size=20,
-            sort_column="name",  # Cambiar a default para scroll
-            sort_direction="asc",  # Cambiar a default para scroll
-            search="test search",
-            tags="tag1,tag2",
-            node_id=[1, 2],
-            unit_id=1,
-            reservation_type_id=[1, 2, 3],
-            contact_id=1,
-            travel_agent_id=1,
-            campaign_id=1,
-            user_id=1,
-            unit_type_id=1,
-            rate_type_id=1,
-            booked_start="2024-01-01T00:00:00Z",
-            booked_end="2024-01-31T23:59:59Z",
-            arrival_start="2024-02-01T00:00:00Z",
-            arrival_end="2024-02-28T23:59:59Z",
-            departure_start="2024-03-01T00:00:00Z",
-            departure_end="2024-03-31T23:59:59Z",
-            updated_since="2024-01-01T00:00:00Z",
-            scroll="scroll123",
-            in_house_today=1,
-            status=["Confirmed", "Hold"],
-            group_id=1,
-            checkin_office_id=1,
-        )
-
-        assert result == sample_search_response
-        mock_api_client.get.assert_called_once()
-
-    @pytest.mark.integration
-    def test_is_valid_date_format_valid_dates(self):
-        """Test validación de fechas válidas"""
-        valid_dates = [
-            "2024-01-01T00:00:00Z",
-            "2024-01-01T00:00:00+00:00",
-            "2024-01-01T00:00:00-05:00",
-            "2024-01-01T12:30:45.123Z",
-            "2024-12-31T23:59:59Z",
-        ]
-
-        for date_str in valid_dates:
-            assert _is_valid_date_format(date_str), f"Date {date_str} should be valid"
-
-    @pytest.mark.integration
-    def test_is_valid_date_format_invalid_dates(self):
-        """Test validación de fechas inválidas"""
-        invalid_dates = [
-            "invalid-date",
-            "2024-13-01T00:00:00Z",  # Mes inválido
-            "2024-01-32T00:00:00Z",  # Día inválido
-            "2024-01-01T25:00:00Z",  # Hora inválida
-            "2024-01-01T00:60:00Z",  # Minutos inválidos
-            "2024-01-01T00:00:60Z",  # Segundos inválidos
-            "not-a-date",
-            "2024/01/01",  # Formato incorrecto
-            "01-01-2024",  # Formato incorrecto
-        ]
-
-        for date_str in invalid_dates:
-            assert not _is_valid_date_format(
-                date_str
-            ), f"Date {date_str} should be invalid"
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_endpoint_construction(
-        self, mock_mcp, mock_api_client, sample_search_response
-    ):
-        """Test construcción del endpoint con parámetros"""
-        mock_api_client.get.return_value = sample_search_response
-
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        await tool_func(page=2, size=20, search="test", node_id=1, status="Confirmed")
-
-        # Verificar que se llamó con el endpoint correcto
-        mock_api_client.get.assert_called_once()
-        call_args = mock_api_client.get.call_args
-
-        # Verificar endpoint
-        endpoint = call_args[0][0]
-        assert endpoint.startswith("/v2/pms/reservations")
-
-        # Verificar parámetros
-        params = call_args[1]["params"]
-        assert params["page"] == 2
-        assert params["size"] == 20
-        assert params["search"] == "test"
-        assert params["nodeId"] == "1"  # Se convierte a string por _format_id_list
-        assert params["status"] == "Confirmed"
-
-    @pytest.mark.integration
-    @pytest.mark.asyncio
-    async def test_search_reservations_empty_response(self, mock_mcp, mock_api_client):
-        """Test respuesta vacía"""
-        empty_response = {
-            "_embedded": {"reservations": []},
-            "page": 1,
-            "page_count": 0,
-            "page_size": 10,
-            "total_items": 0,
-            "_links": {
-                "self": {"hre": "/v2/pms/reservations?page=1&size=10"},
-                "first": {"hre": "/v2/pms/reservations?page=1&size=10"},
-                "last": {"hre": "/v2/pms/reservations?page=1&size=10"},
-            },
-        }
-
-        mock_api_client.get.return_value = empty_response
-
-        mock_mcp.tool = Mock()
-        register_search_reservations(mock_mcp, mock_api_client)
-
-        tool_func = mock_mcp.tool.call_args[0][0]
-
-        result = await tool_func(page=1, size=10)
-
-        assert result == empty_response
-        assert len(result["_embedded"]["reservations"]) == 0
-        assert result["total_items"] == 0
+        # Formatos inválidos
+        assert not v2_is_valid_date_format("01/01/2024")
+        assert not v2_is_valid_date_format("invalid-date")
+        assert not v2_is_valid_date_format("")

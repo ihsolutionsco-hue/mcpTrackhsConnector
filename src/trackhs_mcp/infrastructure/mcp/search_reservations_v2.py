@@ -12,12 +12,12 @@ from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
 
 
-def register_search_reservations(mcp, api_client: ApiClientPort):
-    """Registra la herramienta search_reservations"""
+def register_search_reservations_v2(mcp, api_client: ApiClientPort):
+    """Registra la herramienta search_reservations_v2"""
 
     @mcp.tool
-    @error_handler("search_reservations")
-    async def search_reservations(
+    @error_handler("search_reservations_v2")
+    async def search_reservations_v2(
         page: int = 1,
         size: int = 10,
         sort_column: Literal[
@@ -77,34 +77,34 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
         **Examples:**
 
         # Basic search
-        search_reservations(page=1, size=10)
+        search_reservations_v2(page=1, size=10)
 
         # Date range search (múltiples formatos soportados)
-        search_reservations(
+        search_reservations_v2(
             arrival_start="2024-01-01",  # Solo fecha
             arrival_end="2024-01-31T23:59:59Z",  # Fecha con tiempo
             status=["Confirmed", "Checked In"]
         )
 
         # Date range search (formato ISO completo)
-        search_reservations(
+        search_reservations_v2(
             arrival_start="2024-01-01T00:00:00Z",
             arrival_end="2024-01-31T23:59:59Z",
             status=["Confirmed", "Checked In"]
         )
 
         # Large dataset with scroll
-        search_reservations(scroll=1, size=1000)
+        search_reservations_v2(scroll=1, size=1000)
 
         # Multi-ID filtering
-        search_reservations(
+        search_reservations_v2(
             node_id="1,2,3",
             unit_id="10,20,30",
             status=["Confirmed"]
         )
 
         # Status filtering
-        search_reservations(
+        search_reservations_v2(
             status=["Hold", "Confirmed"],
             in_house_today=1
         )
@@ -174,8 +174,7 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
             # Cuando se usa scroll, el sorting se deshabilita
             if sort_column != "name" or sort_direction != "asc":
                 raise ValidationError(
-                    "When using scroll, \
-     sorting is disabled. Use default sort_column='name' and sort_direction='asc'",
+                    "When using scroll, sorting is disabled. Use default sort_column='name' and sort_direction='asc'",
                     "scroll",
                 )
 
@@ -196,90 +195,6 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
                     f"Invalid date format for {param_name}. Use ISO 8601 format.",
                     param_name,
                 )
-
-        query_params = {
-            "page": page,
-            "size": size,
-            "sortColumn": sort_column,
-            "sortDirection": sort_direction,
-        }
-
-        # Agregar parámetros opcionales con validación correcta
-        if search:
-            query_params["search"] = search
-        if tags:
-            query_params["tags"] = tags
-        if node_id is not None:
-            query_params["nodeId"] = _parse_id_string(node_id)
-        if unit_id:
-            query_params["unitId"] = _parse_id_string(unit_id)
-        if reservation_type_id:
-            query_params["reservationTypeId"] = _parse_id_string(reservation_type_id)
-        if contact_id:
-            query_params["contactId"] = _parse_id_string(contact_id)
-        if travel_agent_id:
-            query_params["travelAgentId"] = _parse_id_string(travel_agent_id)
-        if campaign_id:
-            query_params["campaignId"] = _parse_id_string(campaign_id)
-        if user_id:
-            query_params["userId"] = _parse_id_string(user_id)
-        if unit_type_id:
-            query_params["unitTypeId"] = _parse_id_string(unit_type_id)
-        if rate_type_id:
-            query_params["rateTypeId"] = _parse_id_string(rate_type_id)
-        if booked_start:
-            query_params["bookedStart"] = _normalize_date_format(booked_start)
-        if booked_end:
-            query_params["bookedEnd"] = _normalize_date_format(booked_end)
-        if arrival_start:
-            query_params["arrivalStart"] = _normalize_date_format(arrival_start)
-        if arrival_end:
-            query_params["arrivalEnd"] = _normalize_date_format(arrival_end)
-        if departure_start:
-            query_params["departureStart"] = _normalize_date_format(departure_start)
-        if departure_end:
-            query_params["departureEnd"] = _normalize_date_format(departure_end)
-        if updated_since:
-            query_params["updatedSince"] = _normalize_date_format(updated_since)
-        if scroll:
-            query_params["scroll"] = scroll
-        if in_house_today is not None:
-            # Validar que in_house_today sea 0 o 1
-            if in_house_today not in [0, 1]:
-                raise ValidationError("in_house_today must be 0 or 1", "in_house_today")
-            # Asegurar que in_house_today sea un entero
-            query_params["inHouseToday"] = int(in_house_today)
-        if status:
-            formatted_status = _format_status_param(status)
-            if isinstance(formatted_status, list):
-                # Para múltiples estados, httpx maneja automáticamente arrays
-                # convirtiéndolos a múltiples parámetros con el mismo nombre
-                query_params["status"] = formatted_status
-            else:
-                query_params["status"] = formatted_status
-        if group_id:
-            query_params["groupId"] = group_id
-        if checkin_office_id:
-            query_params["checkinOfficeId"] = checkin_office_id
-
-        endpoint = "/v2/pms/reservations"
-
-        # Logging detallado para debugging de filtros de fecha
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.info(f"Search reservations query params: {query_params}")
-
-        # Logging específico para parámetros de fecha
-        date_params = {
-            k: v
-            for k, v in query_params.items()
-            if "Start" in k or "End" in k or "Since" in k
-        }
-        if date_params:
-            logger.info(f"Date filter parameters: {date_params}")
-        else:
-            logger.warning("No date filter parameters found in query")
 
         try:
             # Crear caso de uso
@@ -326,13 +241,6 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
             result = await use_case.execute(search_params)
             return result
         except Exception as e:
-            # Logging detallado para debugging
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.error(f"API request failed for endpoint {endpoint}: {str(e)}")
-            logger.error(f"Query params: {query_params}")
-
             # Manejar errores específicos de la API según documentación
             if hasattr(e, "status_code"):
                 if e.status_code == 401:
@@ -351,7 +259,7 @@ def register_search_reservations(mcp, api_client: ApiClientPort):
                     )
                 elif e.status_code == 404:
                     raise ValidationError(
-                        f"Endpoint not found: {endpoint}. "
+                        "Endpoint not found: /v2/pms/reservations. "
                         "Please verify the API URL and endpoint path are correct.",
                         "endpoint",
                     )
@@ -407,106 +315,6 @@ def _is_valid_date_format(date_string: str) -> bool:
         return False
 
 
-def _normalize_date_format(date_string: str) -> str:
-    """Normaliza formato de fecha para la API de TrackHS - CORREGIDO FINAL"""
-    try:
-        # Si es solo fecha, agregar tiempo con timezone UTC
-        if len(date_string) == 10 and date_string.count("-") == 2:
-            # Solo fecha: 2025-01-01 -> 2025-01-01T00:00:00Z
-            return f"{date_string}T00:00:00Z"
-
-        # Si tiene tiempo con timezone, remover timezone
-        if "T" in date_string:
-            if date_string.endswith("Z") or date_string.endswith("z"):
-                # Ya tiene Z: 2025-01-01T00:00:00Z -> mantener
-                return date_string
-            elif "+" in date_string:
-                # Si es +00:00, mantenerlo (ya está normalizado)
-                if date_string.endswith("+00:00"):
-                    return date_string
-                # Remover otros offsets positivos: 2025-01-01T00:00:00+05:00 ->
-                # 2025-01-01T00:00:00
-                return date_string.split("+")[0]
-            elif "-" in date_string and len(date_string) > 19:
-                # Verificar si es realmente un offset negativo
-                # Los offsets negativos tienen formato: -HH:MM al final
-                # Buscar el último - que esté después de la T
-                t_pos = date_string.find("T")
-                if t_pos > 0:
-                    # Buscar el último - después de la T
-                    last_dash = date_string.rfind("-")
-                    # Verificar si es un offset negativo real (formato -HH:MM)
-                    if last_dash > t_pos and last_dash >= len(date_string) - 6:
-                        # Verificar si después del - hay exactamente 5 caracteres
-                        remaining = date_string[last_dash + 1 :]
-                        if len(remaining) == 5 and ":" in remaining:
-                            # Es un offset negativo real, removerlo
-                            return date_string[:last_dash]
-                        else:
-                            # No es un offset, es parte de la fecha - agregar Z
-                            return date_string + "Z"
-                    else:
-                        # No es un offset, es parte de la fecha - agregar Z
-                        return date_string + "Z"
-                else:
-                    # No hay T, agregar Z
-                    return date_string + "Z"
-            else:
-                # Tiempo sin timezone: 2025-01-01T00:00:00 -> 2025-01-01T00:00:00Z
-                # También manejar microsegundos:
-                # 2025-01-01T00:00:00.123 -> 2025-01-01T00:00:00.123Z
-                return date_string + "Z"
-
-        # Si tiene tiempo con espacio, convertir a formato T
-        if " " in date_string and len(date_string) > 10:
-            # Convertir espacio a T: 2025-01-01 00:00:00 -> 2025-01-01T00:00:00Z
-            return date_string.replace(" ", "T") + "Z"
-
-        # Si ya tiene formato correcto, devolverlo
-        return date_string
-
-    except Exception:
-        # Si hay error, devolver el string original
-        return date_string
-
-
-def _normalize_date_format_flexible(date_string: str) -> str:
-    """Normaliza fecha con múltiples formatos para máxima compatibilidad"""
-    try:
-        # Si es solo fecha, probar múltiples formatos
-        if len(date_string) == 10 and date_string.count("-") == 2:
-            # Formato 1: Con Z (UTC)
-            format1 = f"{date_string}T00:00:00Z"
-            # Formato 2: Con offset UTC (no usado)
-            # format2 = f"{date_string}T00:00:00+00:00"
-            # Formato 3: Sin timezone (no usado)
-            # format3 = f"{date_string}T00:00:00"
-
-            # Por defecto usar formato 1 (con Z)
-            return format1
-
-        # Si tiene tiempo pero no timezone, probar múltiples formatos
-        if "T" in date_string and not (
-            date_string.endswith("Z") or "+" in date_string or "-" in date_string[-6:]
-        ):
-            # Formato 1: Con Z
-            format1 = f"{date_string}Z"
-            # Formato 2: Con offset UTC (no usado)
-            # format2 = f"{date_string}+00:00"
-            # Formato 3: Sin timezone (original) (no usado)
-            # format3 = date_string
-
-            # Por defecto usar formato 1 (con Z)
-            return format1
-
-        # Si ya tiene formato correcto, devolverlo
-        return date_string
-
-    except Exception:
-        # Si hay error, devolver el string original
-        return date_string
-
-
 def _parse_id_string(id_string: Union[str, int, List[int]]) -> Union[int, List[int]]:
     """
     Parsea un string de ID que puede ser:
@@ -557,19 +365,6 @@ def _parse_id_string(id_string: Union[str, int, List[int]]) -> Union[int, List[i
         return int(id_string)
     except ValueError:
         raise ValidationError(f"Invalid ID format: {id_string}", "id")
-
-
-def _format_id_param(param_value: Union[int, List[int]]) -> Union[int, List[int]]:
-    """
-    Formatea parámetros de ID para la API.
-    Asegura que los enteros se mantengan como enteros y los arrays como arrays.
-    """
-    if isinstance(param_value, list):
-        # Asegurar que todos los elementos sean enteros
-        return [int(x) for x in param_value]
-    else:
-        # Asegurar que sea entero
-        return int(param_value)
 
 
 def _format_status_param(status_value: Union[str, List[str]]) -> Union[str, List[str]]:

@@ -1,7 +1,6 @@
 """
-Resources MCP para Track HS API V2
-Basado en la especificación completa de la API Search Reservations V2
-Enfocado en recursos esenciales para búsqueda de reservas
+Resources MCP para TrackHS API V1 y V2
+Basados en la documentación oficial de TrackHS
 """
 
 from typing import Any, Dict
@@ -13,10 +12,125 @@ logger = get_logger(__name__)
 
 
 def register_all_resources(mcp, api_client: ApiClientPort):
-    """Registra los resources MCP esenciales para búsqueda de reservas"""
+    """Registra los resources MCP esenciales para TrackHS V1 y V2"""
 
-    @mcp.resource("trackhs://schema/reservations")
-    async def reservations_schema() -> Dict[str, Any]:
+    # Schema para API V1
+    @mcp.resource("trackhs://schema/reservations-v1")
+    async def reservations_v1_schema() -> Dict[str, Any]:
+        """Esquema completo de datos para reservas en TrackHS API V1"""
+        return {
+            "schema": {
+                "id": {"type": "integer", "description": "ID único de la reserva"},
+                "name": {"type": "string", "description": "Nombre de la reserva"},
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "Hold",
+                        "Confirmed",
+                        "Checked Out",
+                        "Checked In",
+                        "Cancelled",
+                    ],
+                    "description": "Estado de la reserva",
+                },
+                "unit_id": {"type": "integer", "description": "ID de la unidad"},
+                "contact_id": {"type": "integer", "description": "ID del contacto"},
+                "arrival_date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Fecha de llegada (ISO 8601)",
+                },
+                "departure_date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Fecha de salida (ISO 8601)",
+                },
+                "nights": {"type": "number", "description": "Número de noches"},
+                "created_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha de creación (ISO 8601)",
+                },
+                "updated_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha de actualización (ISO 8601)",
+                },
+                "booked_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha de reserva (ISO 8601)",
+                },
+                "guest_breakdown": {
+                    "type": "object",
+                    "description": "Desglose financiero del huésped",
+                },
+                "owner_breakdown": {
+                    "type": "object",
+                    "description": "Desglose financiero del propietario",
+                },
+                "_embedded": {"type": "object", "description": "Datos embebidos"},
+                "_links": {"type": "object", "description": "Enlaces"},
+            },
+            "description": "Esquema de datos para reservas en TrackHS API V1",
+            "version": "1.0.0",
+            "api_endpoint": "/pms/reservations",
+            "supported_operations": ["GET"],
+            "pagination": {
+                "supported": True,
+                "modes": ["standard", "scroll"],
+                "max_page_size": 1000,
+                "max_total_results": 10000,
+            },
+            "filtering": {
+                "supported_parameters": [
+                    "search",
+                    "tags",
+                    "nodeId",
+                    "unitId",
+                    "reservationTypeId",
+                    "contactId",
+                    "travelAgentId",
+                    "campaignId",
+                    "userId",
+                    "unitTypeId",
+                    "rateTypeId",
+                    "bookedStart",
+                    "bookedEnd",
+                    "arrivalStart",
+                    "arrivalEnd",
+                    "departureStart",
+                    "departureEnd",
+                    "updatedSince",
+                    "scroll",
+                    "inHouseToday",
+                    "status",
+                    "groupId",
+                    "checkinOfficeId",
+                ]
+            },
+            "sorting": {
+                "supported_columns": [
+                    "name",
+                    "status",
+                    "altConf",
+                    "agreementStatus",
+                    "type",
+                    "guest",
+                    "guests",
+                    "unit",
+                    "units",
+                    "checkin",
+                    "checkout",
+                    "nights",
+                ],
+                "supported_directions": ["asc", "desc"],
+            },
+        }
+
+    # Schema para API V2
+    @mcp.resource("trackhs://schema/reservations-v2")
+    async def reservations_v2_schema() -> Dict[str, Any]:
         """Esquema completo de datos para reservas en TrackHS API V2"""
         return {
             "schema": {
@@ -100,11 +214,11 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                 },
                 "occupants": {
                     "type": "array",
-                    "items": {"$re": "#/definitions/Occupant"},
+                    "items": {"$ref": "#/definitions/Occupant"},
                     "description": "Ocupantes",
                 },
                 "security_deposit": {
-                    "$re": "#/definitions/SecurityDeposit",
+                    "$ref": "#/definitions/SecurityDeposit",
                     "description": "Depósito de seguridad",
                 },
                 "updated_at": {
@@ -123,11 +237,11 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                     "description": "Fecha de reserva (ISO 8601)",
                 },
                 "guest_breakdown": {
-                    "$re": "#/definitions/GuestBreakdown",
+                    "$ref": "#/definitions/GuestBreakdown",
                     "description": "Desglose del huésped",
                 },
                 "owner_breakdown": {
-                    "$re": "#/definitions/OwnerBreakdown",
+                    "$ref": "#/definitions/OwnerBreakdown",
                     "description": "Desglose del propietario",
                 },
                 "contact_id": {"type": "integer", "description": "ID del contacto"},
@@ -254,12 +368,12 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                 },
                 "payment_plan": {
                     "type": "array",
-                    "items": {"$re": "#/definitions/PaymentPlan"},
+                    "items": {"$ref": "#/definitions/PaymentPlan"},
                     "description": "Plan de pagos",
                 },
                 "travel_insurance_products": {
                     "type": "array",
-                    "items": {"$re": "#/definitions/TravelInsuranceProduct"},
+                    "items": {"$ref": "#/definitions/TravelInsuranceProduct"},
                     "description": "Productos de seguro de viaje",
                 },
                 "_embedded": {"type": "object", "description": "Datos embebidos"},
@@ -392,17 +506,17 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                         "balance": {"type": "string", "description": "Balance"},
                         "rates": {
                             "type": "array",
-                            "items": {"$re": "#/definitions/Rate"},
+                            "items": {"$ref": "#/definitions/Rate"},
                             "description": "Tarifas",
                         },
                         "guest_fees": {
                             "type": "array",
-                            "items": {"$re": "#/definitions/GuestFee"},
+                            "items": {"$ref": "#/definitions/GuestFee"},
                             "description": "Tarifas del huésped",
                         },
                         "taxes": {
                             "type": "array",
-                            "items": {"$re": "#/definitions/Tax"},
+                            "items": {"$ref": "#/definitions/Tax"},
                             "description": "Impuestos",
                         },
                     },
@@ -436,7 +550,7 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                         },
                         "owner_fees": {
                             "type": "array",
-                            "items": {"$re": "#/definitions/OwnerFee"},
+                            "items": {"$ref": "#/definitions/OwnerFee"},
                             "description": "Tarifas del propietario",
                         },
                     },
@@ -607,56 +721,109 @@ def register_all_resources(mcp, api_client: ApiClientPort):
             },
         }
 
-    @mcp.resource("trackhs://api/documentation")
-    async def api_documentation() -> str:
+    # Documentación API V1
+    @mcp.resource("trackhs://docs/api-v1")
+    async def api_v1_documentation() -> str:
+        """Documentación completa de la API de TrackHS V1"""
+        return """# TrackHS API V1 Documentation
+
+## Endpoint Principal
+- `GET /pms/reservations` - Buscar reservas con API V1
+
+## Características V1
+- **Paginación**: Estándar con page/size
+- **Scroll**: Elasticsearch scroll para grandes datasets
+- **Filtros**: Búsqueda por texto, IDs, fechas, estado
+- **Ordenamiento**: Múltiples columnas disponibles
+
+## Parámetros Principales
+- `page`: Número de página (0-based)
+- `size`: Tamaño de página (máximo 1000)
+- `sortColumn`: Columna para ordenar
+- `sortDirection`: Dirección (asc/desc)
+- `search`: Búsqueda por texto
+- `status`: Estado de reserva
+- `arrivalStart/End`: Rango de fechas de llegada
+- `departureStart/End`: Rango de fechas de salida
+- `nodeId`: ID del nodo/propiedad
+- `unitId`: ID de la unidad
+- `contactId`: ID del contacto
+
+## Limitaciones V1
+- Máximo 10,000 resultados totales
+- Máximo 1,000 elementos por página
+- Scroll timeout de 1 minuto
+- Ordenamiento deshabilitado con scroll
+
+## Ejemplos de Uso
+
+### Búsqueda Básica
+```
+GET /pms/reservations?page=1&size=10&sortColumn=name&sortDirection=asc
+```
+
+### Búsqueda con Filtros
+```
+GET /pms/reservations?status=Confirmed&arrivalStart=2024-01-01&arrivalEnd=2024-12-31
+```
+
+### Scroll para Grandes Conjuntos
+```
+GET /pms/reservations?scroll=1&size=100
+```
+"""
+
+    # Documentación API V2
+    @mcp.resource("trackhs://docs/api-v2")
+    async def api_v2_documentation() -> str:
         """Documentación completa de la API de TrackHS V2"""
         return """# TrackHS API V2 Documentation
 
-## Endpoints Principales
-
-### Reservas V2
+## Endpoint Principal
 - `GET /v2/pms/reservations` - Buscar reservas con API V2 (recomendado)
-- `GET /reservations` - Listar reservas (legacy)
-- `GET /reservations/{id}` - Obtener reserva específica
-- `GET /reservations/search` - Buscar reservas (legacy)
 
-### Unidades
-- `GET /units` - Listar unidades
-- `GET /units/{id}` - Obtener unidad específica
+## Características V2
+- **Paginación Avanzada**: Estándar + Elasticsearch scroll
+- **Filtros Mejorados**: Más parámetros y mejor rendimiento
+- **Datos Enriquecidos**: Información financiera detallada
+- **Compatibilidad**: Mantiene compatibilidad con V1
 
-### Contactos
-- `GET /crm/contacts` - Listar contactos
+## Parámetros Principales
+- `page`: Número de página (0-based)
+- `size`: Tamaño de página (máximo 1000)
+- `sortColumn`: Columna para ordenar
+- `sortDirection`: Dirección (asc/desc)
+- `search`: Búsqueda por texto
+- `status`: Estado de reserva (múltiples valores)
+- `arrivalStart/End`: Rango de fechas de llegada
+- `departureStart/End`: Rango de fechas de salida
+- `nodeId`: ID del nodo/propiedad
+- `unitId`: ID de la unidad
+- `contactId`: ID del contacto
+- `travelAgentId`: ID del agente de viajes
+- `campaignId`: ID de la campaña
+- `userId`: ID del usuario
+- `unitTypeId`: ID del tipo de unidad
+- `rateTypeId`: ID del tipo de tarifa
+- `reservationTypeId`: ID del tipo de reserva
+- `bookedStart/End`: Rango de fechas de reserva
+- `updatedSince`: Actualizadas desde fecha
+- `scroll`: Scroll de Elasticsearch
+- `inHouseToday`: Filtro de huéspedes en casa
+- `groupId`: ID del grupo
+- `checkinOfficeId`: ID de la oficina de check-in
 
-### Contabilidad
-- `GET /pms/accounting/accounts` - Listar cuentas contables
-- `GET /pms/accounting/folios` - Listar folios
+## Mejoras V2 vs V1
+- **Más parámetros**: 25+ parámetros vs 20 en V1
+- **Mejor rendimiento**: Optimizaciones de consulta
+- **Datos enriquecidos**: Información financiera completa
+- **Flexibilidad**: Múltiples valores para algunos parámetros
 
-### Mantenimiento
-- `GET /maintenance/work-orders` - Listar órdenes de trabajo
-
-## API V2 - Características Principales
-
-### Paginación Avanzada
-- **Paginación estándar**: `page` y `size` para resultados limitados
-- **Scroll de Elasticsearch**: Para grandes conjuntos de datos
-- **Límites**: Máximo 10k resultados totales, 1k por página
-
-### Filtrado Completo
-- **Búsqueda de texto**: `search` para búsqueda por substring
-- **Filtros por ID**: `nodeId`, `unitId`, `contactId`, etc.
-- **Filtros de fecha**: `bookedStart`, `arrivalStart`, `departureStart`
-- **Filtros especiales**: `inHouseToday`, `status`, `tags`
-
-### Ordenamiento
-- **Columnas disponibles**: name, status, altConf, agreementStatus, type, guest, guests
-- **Direcciones**: asc, desc
-
-### Parámetros de Fecha
-- **Formato**: ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ)
-- **Parámetros**: bookedStart, bookedEnd, arrivalStart, arrivalEnd, updatedSince
-
-## Autenticación
-Todas las peticiones requieren autenticación Basic Auth.
+## Limitaciones V2
+- Máximo 10,000 resultados totales
+- Máximo 1,000 elementos por página
+- Scroll timeout de 1 minuto
+- Ordenamiento deshabilitado con scroll
 
 ## Ejemplos de Uso
 
@@ -665,9 +832,9 @@ Todas las peticiones requieren autenticación Basic Auth.
 GET /v2/pms/reservations?page=1&size=10&sortColumn=name&sortDirection=asc
 ```
 
-### Búsqueda con Filtros
+### Búsqueda con Filtros Múltiples
 ```
-GET /v2/pms/reservations?status=Confirmed&arrivalStart=2024-01-01&arrivalEnd=2024-12-31
+GET /v2/pms/reservations?status=Confirmed&arrivalStart=2024-01-01&arrivalEnd=2024-12-31&nodeId=1,2,3
 ```
 
 ### Scroll para Grandes Conjuntos
@@ -675,17 +842,570 @@ GET /v2/pms/reservations?status=Confirmed&arrivalStart=2024-01-01&arrivalEnd=202
 GET /v2/pms/reservations?scroll=1&size=100
 ```
 
-## Respuesta de la API V2
-
-La respuesta incluye:
-- `_embedded.reservations`: Array de reservas
-- `page`, `page_count`, `page_size`, `total_items`: Información de paginación
-- `_links`: Enlaces de navegación (self, first, last, next, prev)
-
-## Limitaciones
-
-- Máximo 10,000 resultados totales por consulta
-- Máximo 1,000 elementos por página
-- Scroll timeout de 1 minuto
-- Rate limiting según configuración del servidor
+### Búsqueda por Múltiples Estados
+```
+GET /v2/pms/reservations?status=Confirmed,Checked In&arrivalStart=2024-01-01
+```
 """
+
+    # Guía de migración V1 → V2
+    @mcp.resource("trackhs://docs/migration-guide")
+    async def migration_guide() -> str:
+        """Guía de migración de API V1 a V2"""
+        return """# Guía de Migración V1 → V2
+
+## Cambios Principales
+
+### Endpoints
+- **V1**: `/pms/reservations`
+- **V2**: `/v2/pms/reservations`
+
+### Nuevos Parámetros en V2
+- `travelAgentId`: ID del agente de viajes
+- `campaignId`: ID de la campaña
+- `userId`: ID del usuario
+- `unitTypeId`: ID del tipo de unidad
+- `rateTypeId`: ID del tipo de tarifa
+- `reservationTypeId`: ID del tipo de reserva
+- `bookedStart/End`: Rango de fechas de reserva
+- `updatedSince`: Actualizadas desde fecha
+- `groupId`: ID del grupo
+- `checkinOfficeId`: ID de la oficina de check-in
+
+### Mejoras en V2
+- **Mejor rendimiento**: Consultas optimizadas
+- **Datos enriquecidos**: Información financiera completa
+- **Flexibilidad**: Múltiples valores para algunos parámetros
+- **Compatibilidad**: Mantiene todos los parámetros de V1
+
+## Migración Paso a Paso
+
+### 1. Cambiar Endpoint
+```python
+# V1
+endpoint = "/pms/reservations"
+
+# V2
+endpoint = "/v2/pms/reservations"
+```
+
+### 2. Aprovechar Nuevos Parámetros
+```python
+# V2 - Nuevos filtros disponibles
+params = {
+    "status": ["Confirmed", "Checked In"],  # Múltiples valores
+    "travelAgentId": 123,
+    "campaignId": 456,
+    "unitTypeId": 789,
+    "updatedSince": "2024-01-01T00:00:00Z"
+}
+```
+
+### 3. Optimizar Consultas
+```python
+# V2 - Mejor rendimiento
+params = {
+    "arrivalStart": "2024-01-01",
+    "arrivalEnd": "2024-12-31",
+    "nodeId": "1,2,3",  # Múltiples IDs
+    "status": "Confirmed"
+}
+```
+
+## Compatibilidad
+- Todos los parámetros de V1 funcionan en V2
+- Misma estructura de respuesta
+- Mismos códigos de error
+- Misma autenticación
+
+## Recomendaciones
+1. **Usar V2 para nuevas implementaciones**
+2. **Migrar gradualmente desde V1**
+3. **Aprovechar nuevos parámetros para mejor rendimiento**
+4. **Mantener V1 para compatibilidad legacy**
+"""
+
+    # Ejemplos de uso
+    @mcp.resource("trackhs://docs/examples")
+    async def usage_examples() -> str:
+        """Ejemplos de uso para TrackHS API V1 y V2"""
+        return """# Ejemplos de Uso TrackHS API
+
+## Búsquedas Comunes
+
+### 1. Reservas por Rango de Fechas
+```python
+# V1
+search_reservations_v1(
+    arrival_start="2024-01-01",
+    arrival_end="2024-01-31",
+    sort_column="checkin",
+    sort_direction="asc"
+)
+
+# V2
+search_reservations_v2(
+    arrival_start="2024-01-01",
+    arrival_end="2024-01-31",
+    sort_column="checkin",
+    sort_direction="asc"
+)
+```
+
+### 2. Reservas por Estado
+```python
+# V1
+search_reservations_v1(
+    status="Confirmed",
+    sort_column="checkin",
+    sort_direction="desc"
+)
+
+# V2 - Múltiples estados
+search_reservations_v2(
+    status=["Confirmed", "Checked In"],
+    sort_column="checkin",
+    sort_direction="desc"
+)
+```
+
+### 3. Reservas por Unidad/Nodo
+```python
+# V1
+search_reservations_v1(
+    unit_id="123",
+    node_id="456"
+)
+
+# V2 - Múltiples IDs
+search_reservations_v2(
+    unit_id="123,124,125",
+    node_id="456,457"
+)
+```
+
+### 4. Scroll para Grandes Datasets
+```python
+# V1 y V2 - Mismo comportamiento
+search_reservations_v2(
+    scroll=1,
+    size=1000
+)
+
+# Continuar con scroll
+search_reservations_v2(
+    scroll="scroll_token_from_previous_response",
+    size=1000
+)
+```
+
+### 5. Búsqueda Combinada
+```python
+# V2 - Filtros múltiples
+search_reservations_v2(
+    arrival_start="2024-01-01",
+    arrival_end="2024-12-31",
+    status=["Confirmed", "Checked In"],
+    node_id="1,2,3",
+    unit_type_id="10",
+    sort_column="checkin",
+    sort_direction="asc"
+)
+```
+
+### 6. Reservas Actualizadas
+```python
+# V2 - Nuevo en V2
+search_reservations_v2(
+    updated_since="2024-01-01T00:00:00Z",
+    sort_column="updated_at",
+    sort_direction="desc"
+)
+```
+
+## Casos de Uso Comunes
+
+### Reportes Mensuales
+```python
+search_reservations_v2(
+    arrival_start="2024-01-01",
+    arrival_end="2024-01-31",
+    status="Confirmed",
+    sort_column="checkin",
+    sort_direction="asc"
+)
+```
+
+### Huéspedes Actualmente en Casa
+```python
+search_reservations_v2(
+    status="Checked In",
+    in_house_today=1,
+    sort_column="checkin",
+    sort_direction="asc"
+)
+```
+
+### Exportación Masiva
+```python
+search_reservations_v2(
+    scroll=1,
+    size=1000
+)
+```
+
+### Análisis por Canal
+```python
+search_reservations_v2(
+    arrival_start="2024-01-01",
+    arrival_end="2024-12-31",
+    channel_id="1,2,3",  # Múltiples canales
+    sort_column="channel_id",
+    sort_direction="asc"
+)
+```
+"""
+
+    # Referencia de parámetros
+    @mcp.resource("trackhs://reference/parameters")
+    async def parameters_reference() -> Dict[str, Any]:
+        """Referencia completa de parámetros para V1 y V2"""
+        return {
+            "v1_parameters": {
+                "pagination": {
+                    "page": {
+                        "type": "integer",
+                        "description": "Número de página (0-based)",
+                        "max": 10000,
+                    },
+                    "size": {
+                        "type": "integer",
+                        "description": "Tamaño de página",
+                        "max": 1000,
+                    },
+                },
+                "sorting": {
+                    "sortColumn": {
+                        "type": "string",
+                        "enum": [
+                            "name",
+                            "status",
+                            "altConf",
+                            "agreementStatus",
+                            "type",
+                            "guest",
+                            "guests",
+                            "unit",
+                            "units",
+                            "checkin",
+                            "checkout",
+                            "nights",
+                        ],
+                    },
+                    "sortDirection": {"type": "string", "enum": ["asc", "desc"]},
+                },
+                "filtering": {
+                    "search": {"type": "string", "description": "Búsqueda por texto"},
+                    "tags": {"type": "string", "description": "Búsqueda por tags"},
+                    "nodeId": {"type": "integer|array", "description": "ID del nodo"},
+                    "unitId": {
+                        "type": "integer|array",
+                        "description": "ID de la unidad",
+                    },
+                    "contactId": {
+                        "type": "integer|array",
+                        "description": "ID del contacto",
+                    },
+                    "status": {
+                        "type": "string|array",
+                        "description": "Estado de reserva",
+                    },
+                    "arrivalStart": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de llegada inicio",
+                    },
+                    "arrivalEnd": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de llegada fin",
+                    },
+                    "departureStart": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de salida inicio",
+                    },
+                    "departureEnd": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de salida fin",
+                    },
+                    "bookedStart": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de reserva inicio",
+                    },
+                    "bookedEnd": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de reserva fin",
+                    },
+                    "updatedSince": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Actualizadas desde",
+                    },
+                    "scroll": {
+                        "type": "integer|string",
+                        "description": "Scroll de Elasticsearch",
+                    },
+                    "inHouseToday": {
+                        "type": "integer",
+                        "enum": [0, 1],
+                        "description": "Huéspedes en casa hoy",
+                    },
+                },
+            },
+            "v2_parameters": {
+                "pagination": {
+                    "page": {
+                        "type": "integer",
+                        "description": "Número de página (0-based)",
+                        "max": 10000,
+                    },
+                    "size": {
+                        "type": "integer",
+                        "description": "Tamaño de página",
+                        "max": 1000,
+                    },
+                },
+                "sorting": {
+                    "sortColumn": {
+                        "type": "string",
+                        "enum": [
+                            "name",
+                            "status",
+                            "altCon",
+                            "agreementStatus",
+                            "type",
+                            "guest",
+                            "guests",
+                            "unit",
+                            "units",
+                            "checkin",
+                            "checkout",
+                            "nights",
+                        ],
+                    },
+                    "sortDirection": {"type": "string", "enum": ["asc", "desc"]},
+                },
+                "filtering": {
+                    "search": {"type": "string", "description": "Búsqueda por texto"},
+                    "tags": {"type": "string", "description": "Búsqueda por tags"},
+                    "nodeId": {"type": "integer|array", "description": "ID del nodo"},
+                    "unitId": {
+                        "type": "integer|array",
+                        "description": "ID de la unidad",
+                    },
+                    "contactId": {
+                        "type": "integer|array",
+                        "description": "ID del contacto",
+                    },
+                    "travelAgentId": {
+                        "type": "integer|array",
+                        "description": "ID del agente de viajes",
+                    },
+                    "campaignId": {
+                        "type": "integer|array",
+                        "description": "ID de la campaña",
+                    },
+                    "userId": {
+                        "type": "integer|array",
+                        "description": "ID del usuario",
+                    },
+                    "unitTypeId": {
+                        "type": "integer|array",
+                        "description": "ID del tipo de unidad",
+                    },
+                    "rateTypeId": {
+                        "type": "integer|array",
+                        "description": "ID del tipo de tarifa",
+                    },
+                    "reservationTypeId": {
+                        "type": "integer|array",
+                        "description": "ID del tipo de reserva",
+                    },
+                    "status": {
+                        "type": "string|array",
+                        "description": "Estado de reserva",
+                    },
+                    "arrivalStart": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de llegada inicio",
+                    },
+                    "arrivalEnd": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de llegada fin",
+                    },
+                    "departureStart": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de salida inicio",
+                    },
+                    "departureEnd": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de salida fin",
+                    },
+                    "bookedStart": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de reserva inicio",
+                    },
+                    "bookedEnd": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha de reserva fin",
+                    },
+                    "updatedSince": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Actualizadas desde",
+                    },
+                    "scroll": {
+                        "type": "integer|string",
+                        "description": "Scroll de Elasticsearch",
+                    },
+                    "inHouseToday": {
+                        "type": "integer",
+                        "enum": [0, 1],
+                        "description": "Huéspedes en casa hoy",
+                    },
+                    "groupId": {"type": "integer", "description": "ID del grupo"},
+                    "checkinOfficeId": {
+                        "type": "integer",
+                        "description": "ID de la oficina de check-in",
+                    },
+                },
+            },
+            "common_parameters": {
+                "date_formats": [
+                    "YYYY-MM-DD",
+                    "YYYY-MM-DDTHH:MM:SSZ",
+                    "YYYY-MM-DDTHH:MM:SS",
+                ],
+                "status_values": [
+                    "Hold",
+                    "Confirmed",
+                    "Checked Out",
+                    "Checked In",
+                    "Cancelled",
+                ],
+                "sort_columns": [
+                    "name",
+                    "status",
+                    "altConf",
+                    "agreementStatus",
+                    "type",
+                    "guest",
+                    "guests",
+                    "unit",
+                    "units",
+                    "checkin",
+                    "checkout",
+                    "nights",
+                ],
+                "sort_directions": ["asc", "desc"],
+            },
+        }
+
+    # Valores válidos de status
+    @mcp.resource("trackhs://reference/status-values")
+    async def status_values() -> Dict[str, Any]:
+        """Valores válidos para el parámetro status"""
+        return {
+            "valid_statuses": [
+                {
+                    "value": "Hold",
+                    "description": "Reserva en espera de confirmación",
+                    "color": "#FFA500",
+                    "is_active": True,
+                },
+                {
+                    "value": "Confirmed",
+                    "description": "Reserva confirmada",
+                    "color": "#28A745",
+                    "is_active": True,
+                },
+                {
+                    "value": "Checked In",
+                    "description": "Huésped registrado",
+                    "color": "#007BFF",
+                    "is_active": True,
+                },
+                {
+                    "value": "Checked Out",
+                    "description": "Huésped salido",
+                    "color": "#6C757D",
+                    "is_active": False,
+                },
+                {
+                    "value": "Cancelled",
+                    "description": "Reserva cancelada",
+                    "color": "#DC3545",
+                    "is_active": False,
+                },
+            ],
+            "usage_examples": {
+                "single_status": "status=Confirmed",
+                "multiple_statuses": "status=Confirmed,Checked In",
+                "array_format": 'status=["Confirmed", "Checked In"]',
+            },
+        }
+
+    # Formatos de fecha soportados
+    @mcp.resource("trackhs://reference/date-formats")
+    async def date_formats() -> Dict[str, Any]:
+        """Formatos de fecha soportados por la API"""
+        return {
+            "supported_formats": [
+                {
+                    "format": "YYYY-MM-DD",
+                    "example": "2024-01-01",
+                    "description": "Solo fecha",
+                    "usage": "Para rangos de fechas básicos",
+                },
+                {
+                    "format": "YYYY-MM-DDTHH:MM:SS",
+                    "example": "2024-01-01T00:00:00",
+                    "description": "Fecha y hora sin timezone",
+                    "usage": "Para fechas específicas",
+                },
+                {
+                    "format": "YYYY-MM-DDTHH:MM:SSZ",
+                    "example": "2024-01-01T00:00:00Z",
+                    "description": "Fecha y hora con timezone UTC",
+                    "usage": "Para fechas con timezone explícito",
+                },
+                {
+                    "format": "YYYY-MM-DDTHH:MM:SS+HH:MM",
+                    "example": "2024-01-01T00:00:00+00:00",
+                    "description": "Fecha y hora con offset",
+                    "usage": "Para fechas con timezone específico",
+                },
+            ],
+            "examples": {
+                "arrival_start": "2024-01-01",
+                "arrival_end": "2024-01-31T23:59:59Z",
+                "booked_start": "2024-01-01T00:00:00",
+                "updated_since": "2024-01-01T00:00:00Z",
+            },
+            "best_practices": [
+                "Usar formato ISO 8601 completo para fechas específicas",
+                "Usar solo fecha (YYYY-MM-DD) para rangos de días completos",
+                "Especificar timezone cuando sea relevante",
+                "Usar Z para UTC cuando no se especifique timezone",
+            ],
+        }
