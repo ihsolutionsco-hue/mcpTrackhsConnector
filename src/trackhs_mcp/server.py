@@ -3,8 +3,17 @@ FastMCP Cloud entrypoint for TrackHS MCP Connector
 This file is required by FastMCP Cloud deployment
 """
 
+import sys
+from pathlib import Path
+
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+
+# Agregar el directorio src al PYTHONPATH para que FastMCP pueda encontrar el módulo
+current_dir = Path(__file__).parent
+src_dir = current_dir.parent
+if str(src_dir) not in sys.path:
+    sys.path.insert(0, str(src_dir))
 
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
