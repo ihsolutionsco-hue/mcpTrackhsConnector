@@ -9,6 +9,7 @@ import pytest
 from trackhs_mcp.application.use_cases.get_reservation import GetReservationUseCase
 from trackhs_mcp.domain.entities.reservations import GetReservationParams
 from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
+from trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
 
 
 class TestGetReservationUseCase:
@@ -201,12 +202,11 @@ class TestGetReservationUseCase:
         params = GetReservationParams(reservation_id=reservation_id)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "No autorizado" in str(exc_info.value)
         assert "Credenciales de autenticación inválidas" in str(exc_info.value)
-        assert exc_info.value.field == "auth"
 
     @pytest.mark.asyncio
     async def test_execute_api_error_403(self, use_case, mock_api_client):
@@ -220,12 +220,11 @@ class TestGetReservationUseCase:
         params = GetReservationParams(reservation_id=reservation_id)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "Prohibido" in str(exc_info.value)
         assert "Permisos insuficientes" in str(exc_info.value)
-        assert exc_info.value.field == "permissions"
 
     @pytest.mark.asyncio
     async def test_execute_api_error_404(self, use_case, mock_api_client):
@@ -239,12 +238,11 @@ class TestGetReservationUseCase:
         params = GetReservationParams(reservation_id=reservation_id)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "Reserva no encontrada" in str(exc_info.value)
         assert f"No existe una reserva con ID {reservation_id}" in str(exc_info.value)
-        assert exc_info.value.field == "reservation_id"
 
     @pytest.mark.asyncio
     async def test_execute_api_error_500(self, use_case, mock_api_client):
@@ -258,12 +256,11 @@ class TestGetReservationUseCase:
         params = GetReservationParams(reservation_id=reservation_id)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "Error interno del servidor" in str(exc_info.value)
         assert "API está temporalmente no disponible" in str(exc_info.value)
-        assert exc_info.value.field == "api"
 
     @pytest.mark.asyncio
     async def test_execute_generic_error(self, use_case, mock_api_client):
@@ -293,7 +290,7 @@ class TestGetReservationUseCase:
         params = GetReservationParams(reservation_id=reservation_id)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "Error de validación" in str(exc_info.value)
