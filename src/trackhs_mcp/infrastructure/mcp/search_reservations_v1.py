@@ -263,20 +263,23 @@ def register_search_reservations_v1(mcp, api_client: ApiClientPort):
 
         # Logging detallado para debugging de filtros de fecha
         import logging
+        import os
 
-        logger = logging.getLogger(__name__)
-        logger.info(f"Search reservations V1 query params: {query_params}")
+        # Solo loggear en modo DEBUG
+        if os.getenv("DEBUG", "false").lower() == "true":
+            logger = logging.getLogger(__name__)
+            logger.debug(f"Search reservations V1 query params: {query_params}")
 
-        # Logging específico para parámetros de fecha
-        date_params = {
-            k: v
-            for k, v in query_params.items()
-            if "Start" in k or "End" in k or "Since" in k
-        }
-        if date_params:
-            logger.info(f"Date filter parameters: {date_params}")
-        else:
-            logger.warning("No date filter parameters found in query")
+            # Logging específico para parámetros de fecha
+            date_params = {
+                k: v
+                for k, v in query_params.items()
+                if "Start" in k or "End" in k or "Since" in k
+            }
+            if date_params:
+                logger.debug(f"Date filter parameters: {date_params}")
+            else:
+                logger.debug("No date filter parameters found in query")
 
         try:
             # Pasar query_params directamente al cliente API
