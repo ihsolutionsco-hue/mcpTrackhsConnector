@@ -116,8 +116,8 @@ def check_folio_exceptions(folio_id):
 def get_contact_from_folio(folio_id):
     folio = get_folio(folio_id)
 
-    if "contact" in folio.get("_embedded", {}):
-        contact = folio["_embedded"]["contact"]
+    if "contact" in folio.get("embedded", {}):
+        contact = folio["embedded"]["contact"]
         return {
             "contact_id": contact["id"],
             "name": f"{contact.get('firstName', '')} {contact.get('lastName', '')}",

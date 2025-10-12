@@ -12,13 +12,13 @@ from ...application.ports.api_client_port import ApiClientPort
 from ...domain.value_objects.config import TrackHSConfig
 from ...domain.value_objects.request import RequestOptions
 from ..utils.auth import TrackHSAuth
-from ..utils.error_handling import (
+from ...domain.exceptions.api_exceptions import (
     ApiError,
     AuthenticationError,
     NetworkError,
     TimeoutError,
-    error_handler,
 )
+from ..utils.error_handling import error_handler
 
 T = TypeVar("T")
 

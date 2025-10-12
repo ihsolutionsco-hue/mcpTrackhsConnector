@@ -90,9 +90,9 @@ class TestGetFolioIntegration:
         assert result.id == 67890
         assert result.status == "closed"
         assert result.type == "master"
-        assert result._embedded is not None
-        assert result._embedded.company is not None
-        assert result._embedded.master_folio_rule is not None
+        assert result.embedded is not None
+        assert result.embedded.company is not None
+        assert result.embedded.master_folio_rule is not None
 
         # Verificar que se llamó el método get
         api_client.get.assert_called_once()
@@ -113,10 +113,12 @@ class TestGetFolioIntegration:
         params = GetFolioParams(folio_id=12345)
 
         # Act & Assert
-        with pytest.raises(Exception) as exc_info:
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "Unauthorized" in str(exc_info.value)
+        assert "No autorizado" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_error_handling_404(self, api_client):
@@ -134,10 +136,12 @@ class TestGetFolioIntegration:
         params = GetFolioParams(folio_id=99999)
 
         # Act & Assert
-        with pytest.raises(Exception) as exc_info:
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "Not Found" in str(exc_info.value)
+        assert "Folio no encontrado" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_timeout_handling(self, api_client):
@@ -151,8 +155,12 @@ class TestGetFolioIntegration:
         params = GetFolioParams(folio_id=12345)
 
         # Act & Assert
-        with pytest.raises(httpx.TimeoutException):
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
+        
+        assert "Request timeout" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_network_error(self, api_client):
@@ -166,8 +174,12 @@ class TestGetFolioIntegration:
         params = GetFolioParams(folio_id=12345)
 
         # Act & Assert
-        with pytest.raises(httpx.ConnectError):
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
+        
+        assert "Connection failed" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_json_parsing(self, api_client):

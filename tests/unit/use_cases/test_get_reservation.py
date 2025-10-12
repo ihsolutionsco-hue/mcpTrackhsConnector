@@ -9,7 +9,7 @@ import pytest
 from trackhs_mcp.application.use_cases.get_reservation import GetReservationUseCase
 from trackhs_mcp.domain.entities.reservations import GetReservationParams
 from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
-from trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+from trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
 
 
 class TestGetReservationUseCase:

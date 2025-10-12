@@ -52,7 +52,7 @@ class TestGetFolioUseCase:
         params = GetFolioParams(folio_id=0)
 
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        from src.trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
 
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
@@ -95,7 +95,7 @@ class TestGetFolioUseCase:
         params = GetFolioParams(folio_id=99999)
 
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        from src.trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
 
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
@@ -113,7 +113,7 @@ class TestGetFolioUseCase:
         params = GetFolioParams(folio_id=12345)
 
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        from src.trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
 
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
@@ -131,7 +131,7 @@ class TestGetFolioUseCase:
         params = GetFolioParams(folio_id=12345)
 
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        from src.trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
 
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
