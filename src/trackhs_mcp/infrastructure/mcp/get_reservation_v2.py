@@ -17,7 +17,7 @@ def register_get_reservation_v2(mcp, api_client: ApiClientPort):
 
     @mcp.tool
     @error_handler("get_reservation_v2")
-    async def get_reservation_v2(reservation_id: int) -> Dict[str, Any]:
+    async def get_reservation_v2(reservation_id: str) -> Dict[str, Any]:
         """
         Obtiene una reserva específica por ID desde TrackHS API V2.
 
@@ -52,7 +52,7 @@ def register_get_reservation_v2(mcp, api_client: ApiClientPort):
         get_reservation_v2(reservation_id=11111)
 
         **Parámetros:**
-        - reservation_id: ID único de la reserva (entero positivo requerido)
+        - reservation_id: ID único de la reserva (string que representa un entero positivo requerido)
 
         **Respuesta:**
         Objeto completo de reserva con:
@@ -69,15 +69,26 @@ def register_get_reservation_v2(mcp, api_client: ApiClientPort):
         - 500: Error interno del servidor de TrackHS
 
         **Notas Importantes:**
-        - El ID debe ser un entero positivo válido
+        - El ID debe ser un string que represente un entero positivo válido
         - La respuesta incluye todos los datos embebidos disponibles
         - Los datos financieros están en formato de string para precisión
         - Las fechas están en formato ISO 8601
         """
         # Validar parámetros de entrada
-        if not reservation_id or reservation_id <= 0:
+        if not reservation_id or not reservation_id.strip():
             raise ValidationError(
-                "reservation_id debe ser un entero positivo mayor que 0",
+                "reservation_id es requerido y no puede estar vacío",
+                "reservation_id",
+            )
+
+        # Validar que sea un número entero positivo válido
+        try:
+            reservation_id_int = int(reservation_id.strip())
+            if reservation_id_int <= 0:
+                raise ValueError("ID debe ser positivo")
+        except (ValueError, TypeError):
+            raise ValidationError(
+                "reservation_id debe ser un número entero positivo válido",
                 "reservation_id",
             )
 
@@ -85,8 +96,8 @@ def register_get_reservation_v2(mcp, api_client: ApiClientPort):
             # Crear caso de uso
             use_case = GetReservationUseCase(api_client)
 
-            # Crear parámetros
-            params = GetReservationParams(reservation_id=reservation_id)
+            # Crear parámetros con el ID convertido a entero
+            params = GetReservationParams(reservation_id=reservation_id_int)
 
             # Ejecutar caso de uso
             reservation = await use_case.execute(params)
