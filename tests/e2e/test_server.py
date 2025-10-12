@@ -2,11 +2,19 @@
 Tests E2E para el servidor MCP completo
 """
 
+import sys
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 
-from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
+# Agregar el directorio src al PYTHONPATH para los tests
+current_dir = Path(__file__).parent
+src_dir = current_dir.parent.parent / "src"
+if str(src_dir) not in sys.path:
+    sys.path.insert(0, str(src_dir))
+
+from trackhs_mcp.domain.value_objects.config import TrackHSConfig
 
 
 class TestServerE2E:
@@ -46,7 +54,7 @@ class TestServerE2E:
     def test_server_initialization(self, mock_config):
         """Test inicialización del servidor"""
         # Verificar que los componentes del servidor están disponibles
-        from src.trackhs_mcp.server import api_client, config, mcp
+        from trackhs_mcp.server import api_client, config, mcp
 
         # Verificar que existen y son del tipo correcto
         assert config is not None
@@ -75,9 +83,9 @@ class TestServerE2E:
     def test_register_all_components_integration(self, mock_mcp, mock_api_client):
         """Test integración de registro de componentes"""
         # Importar las funciones de registro
-        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
-        from src.trackhs_mcp.infrastructure.mcp.prompts import register_all_prompts
-        from src.trackhs_mcp.infrastructure.mcp.resources import register_all_resources
+        from trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+        from trackhs_mcp.infrastructure.mcp.prompts import register_all_prompts
+        from trackhs_mcp.infrastructure.mcp.resources import register_all_resources
 
         # Registrar todos los componentes
         register_all_tools(mock_mcp, mock_api_client)
@@ -113,9 +121,7 @@ class TestServerE2E:
             mock_fastmcp_class.return_value = mock_mcp
 
             # Importar y ejecutar la inicialización
-            from src.trackhs_mcp.infrastructure.mcp.server import (
-                register_all_components,
-            )
+            from trackhs_mcp.infrastructure.mcp.server import register_all_components
 
             # Ejecutar registro de componentes
             register_all_components(mock_mcp, mock_api_client)
@@ -139,7 +145,7 @@ class TestServerE2E:
     def test_server_with_environment_variables(self):
         """Test servidor con variables de entorno"""
         # Test simplificado: verificar que TrackHSConfig.from_env() funciona
-        from src.trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
+        from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 
         # Verificar que la clase existe y tiene el método from_env
         assert hasattr(TrackHSConfig, "from_env")
@@ -149,7 +155,7 @@ class TestServerE2E:
     def test_server_error_handling(self):
         """Test manejo de errores en el servidor"""
         # Test simplificado: verificar que el servidor maneja errores básicos
-        from src.trackhs_mcp.server import api_client, config, mcp
+        from trackhs_mcp.server import api_client, config, mcp
 
         # Verificar que los componentes existen (no hay errores de importación)
         assert config is not None
@@ -161,7 +167,7 @@ class TestServerE2E:
         """Test estructura de imports del servidor"""
         # Verificar que todos los imports necesarios están disponibles
         try:
-            # from src.trackhs_mcp.server import main  # Not used
+            # from trackhs_mcp.server import main  # Not used
 
             assert True  # Si llegamos aquí, todos los imports funcionan
         except ImportError as e:
@@ -171,7 +177,7 @@ class TestServerE2E:
     def test_server_path_manipulation(self):
         """Test manipulación de paths en el servidor"""
         # Test simplificado: verificar que el servidor puede importar correctamente
-        from src.trackhs_mcp.server import api_client, config, mcp
+        from trackhs_mcp.server import api_client, config, mcp
 
         # Verificar que los componentes existen
         assert config is not None
@@ -210,9 +216,7 @@ class TestServerE2E:
             mock_fastmcp_class.return_value = mock_mcp
 
             # Simular el flujo completo
-            from src.trackhs_mcp.infrastructure.mcp.server import (
-                register_all_components,
-            )
+            from trackhs_mcp.infrastructure.mcp.server import register_all_components
 
             # Ejecutar registro
             register_all_components(mock_mcp, mock_api_client)
@@ -248,7 +252,7 @@ class TestServerE2E:
     def test_server_configuration_validation(self, mock_config):
         """Test validación de configuración del servidor"""
         # Test simplificado: verificar que la configuración existe y tiene los campos
-        from src.trackhs_mcp.server import config
+        from trackhs_mcp.server import config
 
         # Verificar que la configuración existe
         assert config is not None
@@ -263,7 +267,7 @@ class TestServerE2E:
     def test_server_api_client_initialization(self, mock_config):
         """Test inicialización del API client"""
         # Test simplificado: verificar que el API client existe y es del tipo correcto
-        from src.trackhs_mcp.server import api_client
+        from trackhs_mcp.server import api_client
 
         # Verificar que el API client existe
         assert api_client is not None
@@ -278,7 +282,7 @@ class TestServerE2E:
     def test_server_fastmcp_initialization(self):
         """Test inicialización de FastMCP"""
         # Test simplificado: verificar que FastMCP existe y es del tipo correcto
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         # Verificar que FastMCP existe
         assert mcp is not None

@@ -4,11 +4,19 @@ Configuración global de pytest para Track HS MCP Connector
 
 import asyncio
 import os
+import sys
+from pathlib import Path
 
 # No unused imports
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+
+# Agregar el directorio src al PYTHONPATH para todos los tests
+current_dir = Path(__file__).parent
+src_dir = current_dir.parent / "src"
+if str(src_dir) not in sys.path:
+    sys.path.insert(0, str(src_dir))
 
 # Configurar variables de entorno para testing
 os.environ.setdefault("TRACKHS_API_URL", "https://api-test.trackhs.com/api")
@@ -295,7 +303,7 @@ def sample_search_response():
 @pytest.fixture
 def mock_trackhs_config():
     """Configuración mock de Track HS"""
-    from src.trackhs_mcp.domain.value_objects.config import TrackHSConfig
+    from trackhs_mcp.domain.value_objects.config import TrackHSConfig
 
     return TrackHSConfig(
         base_url="https://api-test.trackhs.com/api",
