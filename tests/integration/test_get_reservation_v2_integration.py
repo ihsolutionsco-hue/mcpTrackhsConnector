@@ -237,5 +237,5 @@ class TestGetReservationV2Integration:
             assert isinstance(result_dict, dict)
             assert "id" in result_dict
             assert "status" in result_dict
-            assert "arrival_date" in result_dict
-            assert "departure_date" in result_dict
+            assert "arrivalDate" in result_dict
+            assert "departureDate" in result_dict

@@ -190,12 +190,12 @@ class TestGetReservationV2E2E:
             assert result is not None
             assert result["id"] == int(reservation_id)
             assert result["status"] == "Confirmed"
-            assert result["arrival_date"] == "2024-01-15"
-            assert result["departure_date"] == "2024-01-20"
+            assert result["arrivalDate"] == "2024-01-15"
+            assert result["departureDate"] == "2024-01-20"
             assert result["nights"] == 5
             assert result["currency"] == "USD"
-            assert result["unit_id"] == 1
-            assert result["contact_id"] == 1
+            assert result["unitId"] == 1
+            assert result["contactId"] == 1
 
             # Verificar datos embebidos
             assert "_embedded" in result
@@ -204,15 +204,15 @@ class TestGetReservationV2E2E:
             assert "contact" in embedded
 
             # Verificar información financiera
-            assert "guest_breakdown" in result
-            guest_breakdown = result["guest_breakdown"]
-            assert guest_breakdown["gross_rent"] == "1000.00"
-            assert guest_breakdown["net_rent"] == "950.00"
-            assert guest_breakdown["grand_total"] == "1000.00"
+            assert "guestBreakdown" in result
+            guest_breakdown = result["guestBreakdown"]
+            assert guest_breakdown["grossRent"] == "1000.00"
+            assert guest_breakdown["netRent"] == "950.00"
+            assert guest_breakdown["grandTotal"] == "1000.00"
             assert guest_breakdown["balance"] == "0.00"
 
-            assert "security_deposit" in result
-            security_deposit = result["security_deposit"]
+            assert "securityDeposit" in result
+            security_deposit = result["securityDeposit"]
             assert security_deposit["required"] == "100.00"
             assert security_deposit["remaining"] == 100
 
