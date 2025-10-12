@@ -2,7 +2,7 @@
 
 Complete reference for the focused MCP features provided by the TrackHS MCP Connector.
 
-This server follows MCP best practices by providing a focused set of tools, prompts, and resources specifically for reservation search functionality.
+This server follows MCP best practices by providing a focused set of tools, prompts, and resources specifically for reservation and folio management functionality.
 
 ## Tools
 
@@ -68,6 +68,70 @@ This server follows MCP best practices by providing a focused set of tools, prom
     "total_pages": 10,
     "total_items": 500,
     "per_page": 50
+  }
+}
+```
+
+## Tools (Additional)
+
+### get_folio
+
+**Description**: Get a specific folio by ID with complete financial information
+
+**Parameters**:
+- `folio_id` (string, required): Unique folio ID
+
+**Features**:
+- Supports guest and master folio types
+- Includes financial data (balances, commissions, revenue)
+- Embedded contact, company, and travel agent information
+- Master folio rules and exception handling
+
+**Example Usage**:
+```json
+{
+  "name": "get_folio",
+  "arguments": {
+    "folio_id": "12345"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "id": 12345,
+  "status": "open",
+  "type": "guest",
+  "currentBalance": 150.00,
+  "realizedBalance": 100.00,
+  "contactId": 1,
+  "companyId": 1,
+  "reservationId": 37165851,
+  "travelAgentId": 1,
+  "name": "Guest Folio - John Doe",
+  "agentCommission": 10.00,
+  "ownerCommission": 5.00,
+  "ownerRevenue": 500.00,
+  "checkInDate": "2024-01-15",
+  "checkOutDate": "2024-01-20",
+  "_embedded": {
+    "contact": {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "primaryEmail": "john@example.com"
+    },
+    "travelAgent": {
+      "id": 1,
+      "type": "agent",
+      "name": "Travel Agency Inc"
+    },
+    "company": {
+      "id": 1,
+      "type": "company",
+      "name": "Property Management Co"
+    }
   }
 }
 ```

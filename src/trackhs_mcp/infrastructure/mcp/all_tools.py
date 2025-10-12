@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
+
+from .get_folio import register_get_folio
 from .get_reservation_v2 import register_get_reservation_v2
 
 # Importar solo las herramientas V1 y V2
@@ -21,6 +23,8 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     **Herramientas Incluidas:**
     - search_reservations_v1 (API V1 - endpoint /pms/reservations)
     - search_reservations_v2 (API V2 - endpoint /v2/pms/reservations)
+    - get_reservation_v2 (API V2 - endpoint /v2/pms/reservations/{id})
+    - get_folio (API - endpoint /pms/folios/{id})
 
     Args:
         mcp: Instancia del servidor FastMCP
@@ -30,3 +34,4 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     register_search_reservations_v1(mcp, api_client)
     register_search_reservations_v2(mcp, api_client)
     register_get_reservation_v2(mcp, api_client)
+    register_get_folio(mcp, api_client)

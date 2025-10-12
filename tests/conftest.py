@@ -588,6 +588,146 @@ def mock_mcp():
     return mcp
 
 
+@pytest.fixture
+def sample_folio_guest():
+    """Folio de tipo guest con datos completos"""
+    return {
+        "id": 12345,
+        "status": "open",
+        "type": "guest",
+        "currentBalance": 150.00,
+        "realizedBalance": 100.00,
+        "startDate": "2024-01-15",
+        "endDate": "2024-01-20",
+        "closedDate": None,
+        "contactId": 1,
+        "companyId": 1,
+        "reservationId": 37165851,
+        "travelAgentId": 1,
+        "name": "Guest Folio - John Doe",
+        "taxEmpty": False,
+        "hasException": False,
+        "exceptionMessage": None,
+        "agentCommission": 10.00,
+        "ownerCommission": 5.00,
+        "ownerRevenue": 500.00,
+        "checkInDate": "2024-01-15",
+        "checkOutDate": "2024-01-20",
+        "masterFolioRuleId": None,
+        "masterFolioId": None,
+        "createdAt": "2024-01-10T10:00:00Z",
+        "updatedAt": "2024-01-10T10:00:00Z",
+        "createdBy": "system",
+        "updatedBy": "system",
+        "_embedded": {
+            "contact": {
+                "id": 1,
+                "firstName": "John",
+                "lastName": "Doe",
+                "primaryEmail": "john@example.com",
+                "homePhone": "+1234567890",
+                "country": "US",
+                "isVip": False,
+                "isBlacklist": False,
+            },
+            "travelAgent": {
+                "id": 1,
+                "type": "agent",
+                "name": "Travel Agency Inc",
+                "isActive": True,
+                "email": "agent@example.com",
+                "phone": "+1234567890",
+            },
+            "company": {
+                "id": 1,
+                "type": "company",
+                "name": "Property Management Co",
+                "isActive": True,
+                "email": "company@example.com",
+                "phone": "+1234567890",
+            },
+        },
+        "_links": {
+            "self": {"href": "/api/pms/folios/12345"},
+            "logs": {"href": "/api/pms/folios/12345/logs"},
+        },
+    }
+
+
+@pytest.fixture
+def sample_folio_master():
+    """Folio de tipo master con datos completos"""
+    return {
+        "id": 67890,
+        "status": "closed",
+        "type": "master",
+        "currentBalance": 0.00,
+        "realizedBalance": 2500.00,
+        "startDate": "2024-01-01",
+        "endDate": "2024-01-31",
+        "closedDate": "2024-02-01",
+        "contactId": None,
+        "companyId": 1,
+        "reservationId": None,
+        "travelAgentId": None,
+        "name": "Master Folio - January 2024",
+        "taxEmpty": False,
+        "hasException": True,
+        "exceptionMessage": "Payment processing delay",
+        "agentCommission": None,
+        "ownerCommission": None,
+        "ownerRevenue": None,
+        "checkInDate": None,
+        "checkOutDate": None,
+        "masterFolioRuleId": 1,
+        "masterFolioId": None,
+        "createdAt": "2024-01-01T00:00:00Z",
+        "updatedAt": "2024-02-01T00:00:00Z",
+        "createdBy": "admin",
+        "updatedBy": "admin",
+        "_embedded": {
+            "company": {
+                "id": 1,
+                "type": "company",
+                "name": "Property Management Co",
+                "isActive": True,
+                "email": "company@example.com",
+                "phone": "+1234567890",
+            },
+            "masterFolioRule": {
+                "id": 1,
+                "ruleId": 1,
+                "startDate": "2024-01-01",
+                "endDate": "2024-01-31",
+                "minNights": 1,
+                "maxNights": 30,
+                "maxSpend": 10000.00,
+                "rule": {
+                    "id": 1,
+                    "name": "Monthly Master Rule",
+                    "code": "MONTHLY_MASTER",
+                    "isActive": True,
+                    "type": "percent",
+                    "percentAmount": 10.0,
+                },
+            },
+        },
+        "_links": {
+            "self": {"href": "/api/pms/folios/67890"},
+            "logs": {"href": "/api/pms/folios/67890/logs"},
+        },
+    }
+
+
+@pytest.fixture
+def sample_folio_minimal():
+    """Folio con campos mínimos requeridos"""
+    return {
+        "id": 11111,
+        "status": "open",
+    }
+
+
 # Marcadores para diferentes tipos de tests
 def pytest_configure(config):
     """Configurar marcadores personalizados"""

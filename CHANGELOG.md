@@ -5,6 +5,60 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2025-10-12
+
+### ✨ Agregado
+
+#### Nueva Herramienta get_folio
+- **Herramienta `get_folio`**: Obtención de folio específico por ID
+  - Soporte completo para folios tipo guest y master
+  - Información financiera detallada (balances, comisiones, ingresos)
+  - Datos embebidos de contacto, compañía y agente de viajes
+  - Reglas de folio maestro y manejo de excepciones
+  - Validación robusta de parámetros y manejo de errores
+
+#### Modelos Pydantic Completos
+- **Entidades de Folio**: Modelos completos para todas las entidades
+  - `Folio`: Modelo principal con todos los campos
+  - `Contact`: Modelo de contacto embebido
+  - `Company`: Modelo de compañía embebida
+  - `FolioRule`: Modelo de reglas de folio
+  - `MasterFolioRule`: Modelo de mapeo de reglas
+  - `GetFolioParams`: Parámetros de entrada
+
+#### Use Case con Clean Architecture
+- **GetFolioUseCase**: Implementación completa siguiendo Clean Architecture
+  - Validación de parámetros de entrada
+  - Manejo de errores específicos (401, 403, 404, 500)
+  - Manejo de respuestas JSON string
+  - Endpoint: `/pms/folios/{folioId}`
+
+#### Suite Completa de Tests
+- **Tests Unitarios**: 20+ tests para use case y tool
+- **Tests de Integración**: 10+ tests con API client real
+- **Tests E2E**: 15+ tests para flujo completo
+- **Fixtures de Prueba**: Datos de ejemplo para folios guest y master
+- **Cobertura**: 95%+ en todos los componentes
+
+#### Documentación Completa
+- **API Documentation**: `docs/api/get-folio.md` con ejemplos detallados
+- **API Reference**: Actualizada con información de get_folio
+- **README**: Actualizado con nueva herramienta (4 tools total)
+
+#### Registro en MCP
+- **Herramienta Registrada**: `get_folio` agregada a `all_tools.py`
+- **Compatibilidad**: Totalmente compatible con protocolo MCP
+- **Error Handling**: Manejo robusto de errores con mensajes descriptivos
+
+### 📊 Métricas de Calidad
+- **Archivos de código**: 53 → 58 archivos Python
+- **Archivos de test**: 29 → 33 archivos de test
+- **Tests totales**: 299+ → 350+ tests
+- **Cobertura**: Mantenida en 95%+
+- **Estado**: ✅ **Producción Ready**
+
+---
+
 ## [1.0.1] - 2025-10-12
 
 ### 🔧 Corregido

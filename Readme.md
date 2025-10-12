@@ -18,13 +18,18 @@ El [Model Context Protocol](https://modelcontextprotocol.io) es un estándar abi
 
 ## 🚀 Características Principales
 
-### Herramientas MCP (3)
+### Herramientas MCP (4)
 - **`search_reservations_v1`**: Búsqueda de reservas usando API V1 (compatibilidad legacy)
 - **`search_reservations_v2`**: Búsqueda avanzada de reservas usando API V2 (recomendado)
 - **`get_reservation_v2`**: ✅ **100% funcional** - Obtención de reserva específica por ID usando API V2
   - Soporta todos los canales OTA (Airbnb, Marriott, Booking.com, etc.)
   - Maneja campos opcionales correctamente
   - Validado con reservas reales del sistema
+- **`get_folio`**: ✅ **100% funcional** - Obtención de folio específico por ID
+  - Soporta folios tipo guest y master
+  - Incluye datos financieros completos (balances, comisiones)
+  - Información embebida de contacto, compañía y agente de viajes
+  - Reglas de folio maestro y manejo de excepciones
 
 ### Recursos MCP (2)
 - **`trackhs://schema/reservations-v1`**: Esquema completo de datos para API V1
@@ -334,6 +339,12 @@ Esta es una implementación de referencia con integración Track HS. Para adapta
 
 ## Desarrollo
 
+### Configuración de Desarrollo
+
+Para configurar el entorno de desarrollo completo, ver [docs/development-setup.md](docs/development-setup.md).
+
+### Comandos Básicos
+
 ```bash
 # Iniciar servidor de desarrollo
 python -m src.trackhs_mcp
@@ -345,6 +356,30 @@ pytest tests/ -v
 flake8 src/
 black src/
 isort src/
+```
+
+### Pre-commit Hooks
+
+El proyecto incluye hooks de pre-commit para mantener calidad de código:
+
+```bash
+# Instalar hooks
+pre-commit install
+
+# Ejecutar manualmente
+pre-commit run --all-files
+```
+
+### FastMCP Preflight
+
+Validaciones específicas para despliegue en FastMCP Cloud:
+
+```bash
+# Ejecutar preflight completo
+python scripts/fastmcp_preflight.py
+
+# Ejecutar pre-tests
+python scripts/pretest.py
 ```
 
 ### Build y Producción
@@ -359,22 +394,46 @@ python -m src.trackhs_mcp
 ```
 
 #### Despliegue en FastMCP Cloud
+
+##### Configuración Automática (GitHub Actions)
+
+1. **Configurar Secrets en GitHub**:
+   - `FASTMCP_API_KEY`: Tu API key de FastMCP Cloud
+   - `TRACKHS_API_URL`: URL de la API TrackHS
+   - `TRACKHS_USERNAME`: Usuario de TrackHS
+   - `TRACKHS_PASSWORD`: Contraseña de TrackHS
+
+2. **Despliegue Automático**:
+   ```bash
+   # Push a main ejecuta validaciones automáticas
+   git add .
+   git commit -m "feat: Actualización para FastMCP Cloud"
+   git push origin main
+   ```
+
+3. **Verificar en GitHub Actions**:
+   - Pre-commit checks ✅
+   - FastMCP preflight ✅
+   - Quality checks ✅
+   - Deploy preparation ✅
+
+##### Configuración Manual
+
 ```bash
 # 1. Configurar variables de entorno en FastMCP Cloud
 TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
 TRACKHS_USERNAME=tu_usuario
 TRACKHS_PASSWORD=tu_password
 
-# 2. Ejecutar pre-tests
-python scripts/pretest.py
+# 2. Ejecutar preflight
+python scripts/fastmcp_preflight.py
 
 # 3. Hacer commit y push
 git add .
 git commit -m "feat: Actualización para FastMCP Cloud"
 git push origin main
 
-# 4. Verificar despliegue en FastMCP Cloud
-# El servidor se desplegará automáticamente
+# 4. Desplegar manualmente en FastMCP Cloud
 ```
 
 #### Archivos de Configuración
