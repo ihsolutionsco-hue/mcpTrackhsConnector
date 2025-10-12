@@ -395,29 +395,25 @@ python -m src.trackhs_mcp
 
 #### Despliegue en FastMCP Cloud
 
-##### Configuración Automática (GitHub Actions)
+##### Despliegue Automático (GitHub Actions)
 
-1. **Configurar Secrets en GitHub**:
-   - `FASTMCP_API_KEY`: Tu API key de FastMCP Cloud
-   - `TRACKHS_API_URL`: URL de la API TrackHS
-   - `TRACKHS_USERNAME`: Usuario de TrackHS
-   - `TRACKHS_PASSWORD`: Contraseña de TrackHS
+1. **Conectar FastMCP Cloud con GitHub**:
+   - Conectar repositorio en FastMCP Cloud dashboard
+   - FastMCP detecta automáticamente los push a main
 
-2. **Despliegue Automático**:
+2. **Hacer push a main**:
    ```bash
-   # Push a main ejecuta validaciones automáticas
    git add .
-   git commit -m "feat: Actualización para FastMCP Cloud"
+   git commit -m "feat: Nueva funcionalidad"
    git push origin main
    ```
 
-3. **Verificar en GitHub Actions**:
-   - Pre-commit checks ✅
-   - FastMCP preflight ✅
-   - Quality checks ✅
-   - Deploy preparation ✅
+3. **Validación automática**:
+   - GitHub Actions ejecuta tests y validaciones
+   - Si todo pasa, FastMCP Cloud despliega automáticamente
+   - No se requieren secretos en GitHub (están en FastMCP)
 
-##### Configuración Manual
+##### Configuración Manual (Opcional)
 
 ```bash
 # 1. Configurar variables de entorno en FastMCP Cloud
@@ -433,7 +429,7 @@ git add .
 git commit -m "feat: Actualización para FastMCP Cloud"
 git push origin main
 
-# 4. Desplegar manualmente en FastMCP Cloud
+# 4. FastMCP Cloud detecta automáticamente el push
 ```
 
 #### Archivos de Configuración

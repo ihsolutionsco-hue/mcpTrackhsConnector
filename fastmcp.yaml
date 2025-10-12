@@ -47,3 +47,10 @@ resources:
   memory: "512Mi"
   cpu: "0.5"
   timeout: 300
+
+# Configuración de CI/CD
+ci_cd:
+  auto_deploy: true
+  branch: "main"
+  tests_required: true
+  security_scan: true
