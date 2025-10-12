@@ -398,6 +398,7 @@ def register_all_resources(mcp, api_client: ApiClientPort):
                         "quantity": {"type": "number", "description": "Cantidad"},
                         "included": {
                             "type": "boolean",
+                            "nullable": True,
                             "description": "Si está incluido en el precio de renta",
                         },
                         "extra_quantity": {
@@ -1521,7 +1522,11 @@ search_reservations_v2(
                     "description": "Desglose del propietario",
                 },
                 "contactId": {"type": "integer", "description": "ID del contacto"},
-                "channelId": {"type": "integer", "description": "ID del canal"},
+                "channelId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID del canal",
+                },
                 "subChannel": {
                     "type": "string",
                     "nullable": True,
@@ -1690,6 +1695,7 @@ search_reservations_v2(
                         "quantity": {"type": "number", "description": "Cantidad"},
                         "included": {
                             "type": "boolean",
+                            "nullable": True,
                             "description": "Si está incluido en el precio de renta",
                         },
                         "extraQuantity": {
