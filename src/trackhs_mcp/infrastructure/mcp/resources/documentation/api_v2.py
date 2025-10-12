@@ -3,12 +3,13 @@ Documentation resources para API V2
 Información concisa de la documentación de API V2
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ....application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-def register_api_v2_documentation(mcp, api_client: ApiClientPort):
+def register_api_v2_documentation(mcp, api_client: "ApiClientPort"):
     """Registra la documentación de API V2"""
 
     @mcp.resource(

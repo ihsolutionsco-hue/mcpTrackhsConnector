@@ -3,16 +3,18 @@ Herramienta MCP para obtener una reserva específica por ID en TrackHS API V2
 Basado en el endpoint GET /v2/pms/reservations/{reservationId}
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ...application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ...application.ports.api_client_port import ApiClientPort
+
 from ...application.use_cases.get_reservation import GetReservationUseCase
 from ...domain.entities.reservations import GetReservationParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
 
 
-def register_get_reservation_v2(mcp, api_client: ApiClientPort):
+def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta get_reservation_v2"""
 
     @mcp.tool

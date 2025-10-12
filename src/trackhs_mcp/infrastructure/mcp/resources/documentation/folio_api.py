@@ -3,12 +3,13 @@ Documentation resources para Folio API
 Información concisa de la documentación de Folio API
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ....application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-def register_folio_api_documentation(mcp, api_client: ApiClientPort):
+def register_folio_api_documentation(mcp, api_client: "ApiClientPort"):
     """Registra la documentación de Folio API"""
 
     @mcp.resource(

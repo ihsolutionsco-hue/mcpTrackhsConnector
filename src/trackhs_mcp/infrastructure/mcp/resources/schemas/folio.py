@@ -3,12 +3,13 @@ Schema resources para Get Folio
 Información esencial del esquema de datos para obtener folio
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ....application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-def register_folio_schema(mcp, api_client: ApiClientPort):
+def register_folio_schema(mcp, api_client: "ApiClientPort"):
     """Registra el schema de Get Folio"""
 
     @mcp.resource(

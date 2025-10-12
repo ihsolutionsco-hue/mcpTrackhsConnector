@@ -3,12 +3,13 @@ Schema resources para Search Reservations V1
 Información esencial del esquema de datos para API V1
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ....application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-def register_reservations_v1_schema(mcp, api_client: ApiClientPort):
+def register_reservations_v1_schema(mcp, api_client: "ApiClientPort"):
     """Registra el schema de Search Reservations V1"""
 
     @mcp.resource(

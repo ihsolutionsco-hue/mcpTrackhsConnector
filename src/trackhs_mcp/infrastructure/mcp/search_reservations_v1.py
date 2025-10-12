@@ -3,14 +3,16 @@ Herramienta MCP para buscar reservas en Track HS API V1
 Basado en la especificación completa de la API Search Reservations V1
 """
 
-from typing import List, Literal, Optional, Union
+from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
-from ...application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ...application.ports.api_client_port import ApiClientPort
+
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
 
 
-def register_search_reservations_v1(mcp, api_client: ApiClientPort):
+def register_search_reservations_v1(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_reservations_v1"""
 
     @mcp.tool

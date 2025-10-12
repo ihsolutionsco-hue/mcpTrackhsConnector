@@ -3,12 +3,13 @@ Schema resources para Get Reservation V2
 Información esencial del esquema de datos para obtener reserva individual
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ....application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-def register_reservation_detail_v2_schema(mcp, api_client: ApiClientPort):
+def register_reservation_detail_v2_schema(mcp, api_client: "ApiClientPort"):
     """Registra el schema de Get Reservation V2"""
 
     @mcp.resource(

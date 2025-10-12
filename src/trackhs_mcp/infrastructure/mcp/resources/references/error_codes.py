@@ -3,12 +3,13 @@ Reference resources para Error Codes
 Códigos de error comunes de la API
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ....application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-def register_error_codes(mcp, api_client: ApiClientPort):
+def register_error_codes(mcp, api_client: "ApiClientPort"):
     """Registra los códigos de error comunes"""
 
     @mcp.resource(

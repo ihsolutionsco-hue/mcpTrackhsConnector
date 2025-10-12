@@ -3,12 +3,13 @@ Reference resources para Status Values
 Valores válidos para el parámetro status
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ....application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-def register_status_values(mcp, api_client: ApiClientPort):
+def register_status_values(mcp, api_client: "ApiClientPort"):
     """Registra los valores válidos de status"""
 
     @mcp.resource(

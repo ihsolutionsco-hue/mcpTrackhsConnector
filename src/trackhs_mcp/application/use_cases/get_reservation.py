@@ -3,9 +3,11 @@ Use Case para obtener una reserva específica por ID desde TrackHS API V2
 Implementa la lógica de negocio para el endpoint GET /v2/pms/reservations/{reservationId}
 """
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from ...application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ...application.ports.api_client_port import ApiClientPort
+
 from ...domain.entities.reservations import GetReservationParams, Reservation
 from ...domain.exceptions.api_exceptions import ValidationError
 from ...infrastructure.utils.error_handling import error_handler
@@ -14,7 +16,7 @@ from ...infrastructure.utils.error_handling import error_handler
 class GetReservationUseCase:
     """Use Case para obtener una reserva específica por ID"""
 
-    def __init__(self, api_client: ApiClientPort):
+    def __init__(self, api_client: "ApiClientPort"):
         self.api_client = api_client
 
     @error_handler("get_reservation")

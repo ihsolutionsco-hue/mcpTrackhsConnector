@@ -3,12 +3,13 @@ Examples resources para Search Queries
 Ejemplos de búsquedas comunes para las APIs
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ....application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-def register_search_examples(mcp, api_client: ApiClientPort):
+def register_search_examples(mcp, api_client: "ApiClientPort"):
     """Registra los ejemplos de búsquedas"""
 
     @mcp.resource(

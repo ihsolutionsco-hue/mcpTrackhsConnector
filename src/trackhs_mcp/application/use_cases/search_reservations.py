@@ -2,17 +2,19 @@
 Caso de uso para buscar reservas
 """
 
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from ...domain.entities.reservations import SearchReservationsParams
 from ...domain.exceptions.api_exceptions import ValidationError
-from ..ports.api_client_port import ApiClientPort
+
+if TYPE_CHECKING:
+    from ..ports.api_client_port import ApiClientPort
 
 
 class SearchReservationsUseCase:
     """Caso de uso para buscar reservas"""
 
-    def __init__(self, api_client: ApiClientPort):
+    def __init__(self, api_client: "ApiClientPort"):
         self.api_client = api_client
 
     async def execute(self, params: SearchReservationsParams) -> Dict[str, Any]:

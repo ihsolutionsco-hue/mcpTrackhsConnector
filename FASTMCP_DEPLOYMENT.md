@@ -98,6 +98,10 @@ git push origin main
 - ✅ **Solucionado**: Se mejoró el manejo de errores en `__main__.py`
 - ✅ **Solucionado**: Se agregó validación de variables de entorno
 
+### Error: "No module named 'trackhs_mcp.infrastructure.application'"
+- ✅ **Solucionado**: Se corrigieron las importaciones circulares usando el patrón `TYPE_CHECKING`
+- ✅ **Patrón correcto**: Usar `TYPE_CHECKING` para importaciones de tipos, no en tiempo de ejecución
+
 ## 📋 Checklist Pre-Despliegue
 
 - [ ] Variables de entorno configuradas en FastMCP Cloud
@@ -125,6 +129,36 @@ Si encuentras problemas:
 2. Ejecuta `python scripts/pretest.py` localmente
 3. Verifica que las variables de entorno estén configuradas
 4. Asegúrate de que las credenciales de TrackHS sean válidas
+
+## 🔧 Patrón de Importación Correcto
+
+Para evitar errores de importación circular, siempre usa el patrón `TYPE_CHECKING`:
+
+```python
+# ✅ CORRECTO
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ...application.ports.api_client_port import ApiClientPort
+
+def register_something(mcp, api_client: "ApiClientPort"):
+    # ...
+
+# ❌ INCORRECTO (causa importaciones circulares)
+from ...application.ports.api_client_port import ApiClientPort
+
+def register_something(mcp, api_client: ApiClientPort):
+    # ...
+```
+
+**Excepción:** Solo importa directamente cuando necesitas herencia de clases:
+```python
+# ✅ CORRECTO para herencia
+from ...application.ports.api_client_port import ApiClientPort
+
+class TrackHSApiClient(ApiClientPort):
+    # ...
+```
 
 ---
 

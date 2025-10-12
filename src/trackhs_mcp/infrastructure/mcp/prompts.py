@@ -3,12 +3,13 @@ Prompts MCP para TrackHS API V1 y V2
 Basados en la documentación oficial de TrackHS
 """
 
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
-from ...application.ports.api_client_port import ApiClientPort
+if TYPE_CHECKING:
+    from ...application.ports.api_client_port import ApiClientPort
 
 
-def register_all_prompts(mcp, api_client: ApiClientPort):
+def register_all_prompts(mcp, api_client: "ApiClientPort"):
     """Registra todos los prompts MCP para TrackHS V1 y V2"""
 
     # Prompt para búsqueda por rango de fechas
