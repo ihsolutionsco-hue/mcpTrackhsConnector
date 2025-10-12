@@ -24,14 +24,14 @@ class TrackHSConfig(BaseTrackHSConfig):
     def from_env(cls) -> "TrackHSConfig":
         """Crear configuración desde variables de entorno"""
         base_url = os.getenv("TRACKHS_API_URL", cls.DEFAULT_URL)
-        username = os.getenv("TRACKHS_USERNAME", "aba99777416466b6bdc1a25223192ccb")
-        password = os.getenv("TRACKHS_PASSWORD", "18c87461011f355cc11000a24215cbda")
+        username = os.getenv("TRACKHS_USERNAME")
+        password = os.getenv("TRACKHS_PASSWORD")
         timeout = int(os.getenv("TRACKHS_TIMEOUT", "30"))
 
-        # Validar que las credenciales no sean las de ejemplo
-        if username == "your_username_here" or password == "your_password_here":
+        # Validar que las credenciales estén configuradas
+        if not username or not password:
             raise ValueError(
-                "Credenciales de ejemplo detectadas. "
+                "Credenciales de TrackHS no configuradas. "
                 "Configura TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno."
             )
 

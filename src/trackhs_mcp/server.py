@@ -6,9 +6,9 @@ This file is required by FastMCP Cloud deployment
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 
-from .infrastructure.adapters.config import TrackHSConfig
-from .infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from .infrastructure.mcp.server import register_all_components
+from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
+from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+from trackhs_mcp.infrastructure.mcp.server import register_all_components
 
 # Load environment variables
 load_dotenv()
@@ -17,11 +17,12 @@ load_dotenv()
 config = TrackHSConfig.from_env()
 api_client = TrackHSApiClient(config)
 
-# Create MCP server instance (required by FastMCP Cloud)
+# Create MCP server instance
 mcp = FastMCP("TrackHS MCP Server")
 
 # Register all components
 register_all_components(mcp, api_client)
 
-# FastMCP Cloud expects the mcp instance to be available at module level
-# The server will be started automatically by FastMCP Cloud
+# Start the server
+if __name__ == "__main__":
+    mcp.run()
