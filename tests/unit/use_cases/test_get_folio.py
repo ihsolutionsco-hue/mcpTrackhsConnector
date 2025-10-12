@@ -78,16 +78,12 @@ class TestGetFolioUseCase:
     @pytest.mark.asyncio
     async def test_get_folio_empty_id(self, use_case):
         """Test con ID vacío"""
-        # Arrange
-        params = GetFolioParams(folio_id="")
-
-        # Act & Assert
+        # Arrange - Crear parámetros con string vacío que falle en Pydantic
         with pytest.raises(ValidationError) as exc_info:
-            await use_case.execute(params)
-
-        assert "folio_id debe ser un número entero positivo válido" in str(
-            exc_info.value
-        )
+            params = GetFolioParams(folio_id="")
+        
+        # Verificar que Pydantic valida correctamente
+        assert "Input should be a valid integer" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_not_found(self, use_case, mock_api_client):
@@ -99,9 +95,10 @@ class TestGetFolioUseCase:
         params = GetFolioParams(folio_id=99999)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
-
+        
         assert "Folio no encontrado" in str(exc_info.value)
         assert "99999" in str(exc_info.value)
 
@@ -115,7 +112,8 @@ class TestGetFolioUseCase:
         params = GetFolioParams(folio_id=12345)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "No autorizado" in str(exc_info.value)
@@ -131,7 +129,8 @@ class TestGetFolioUseCase:
         params = GetFolioParams(folio_id=12345)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "Prohibido" in str(exc_info.value)

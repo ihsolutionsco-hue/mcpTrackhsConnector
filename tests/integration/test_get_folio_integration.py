@@ -27,7 +27,23 @@ class TestGetFolioIntegration:
         with patch(
             "src.trackhs_mcp.infrastructure.adapters.trackhs_api_client.httpx.AsyncClient"
         ) as mock_client:
-            mock_client.return_value.__aenter__.return_value = mock_httpx_client
+            # Configurar el mock para ser awaitable
+            mock_client_instance = Mock()
+            mock_client_instance.get = AsyncMock()
+            mock_client_instance.request = AsyncMock()
+            
+            # Configurar el mock response
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.is_success = True
+            mock_response.json.return_value = {"id": 12345, "status": "open"}
+            mock_response.text = '{"id": 12345, "status": "open"}'
+            mock_response.headers = {"content-type": "application/json"}
+            
+            mock_client_instance.request.return_value = mock_response
+            mock_client_instance.get.return_value = mock_response
+            
+            mock_client.return_value.__aenter__.return_value = mock_client_instance
             config = Mock()
             config.base_url = "https://api-test.trackhs.com/api"
             config.timeout = 30

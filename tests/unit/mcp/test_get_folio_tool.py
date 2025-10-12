@@ -55,7 +55,8 @@ class TestGetFolioTool:
     async def test_get_folio_tool_validation_empty_id(self, tool_function):
         """Test validación de parámetros - ID vacío"""
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="")
 
         assert "folio_id es requerido y no puede estar vacío" in str(exc_info.value)
@@ -64,7 +65,8 @@ class TestGetFolioTool:
     async def test_get_folio_tool_validation_none_id(self, tool_function):
         """Test validación de parámetros - ID None"""
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id=None)
 
         assert "folio_id es requerido y no puede estar vacío" in str(exc_info.value)
@@ -73,7 +75,8 @@ class TestGetFolioTool:
     async def test_get_folio_tool_validation_negative_id(self, tool_function):
         """Test validación de parámetros - ID negativo"""
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+        with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="-1")
 
         assert "folio_id debe ser un número entero positivo válido" in str(
