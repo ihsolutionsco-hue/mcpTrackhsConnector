@@ -23,7 +23,7 @@ def register_search_reservations_v2(mcp, api_client: ApiClientPort):
         sort_column: Literal[
             "name",
             "status",
-            "altCon",
+            "altConf",
             "agreementStatus",
             "type",
             "guest",

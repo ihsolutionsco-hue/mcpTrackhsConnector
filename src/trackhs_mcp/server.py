@@ -15,6 +15,11 @@ src_dir = current_dir.parent
 if str(src_dir) not in sys.path:
     sys.path.insert(0, str(src_dir))
 
+# También agregar el directorio raíz del proyecto
+project_root = src_dir.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
 from trackhs_mcp.infrastructure.mcp.server import register_all_components
