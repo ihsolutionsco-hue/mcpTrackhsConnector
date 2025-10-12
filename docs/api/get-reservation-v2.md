@@ -32,17 +32,33 @@ La herramienta retorna un objeto completo de reserva con la siguiente estructura
 ```json
 {
   "id": 12345,
-  "alternates": ["ALT123", "ALT456"],
+  "alternates": [
+    {"type": "airbnb", "id": "HMCNNSE3SJ"},
+    {"type": "booking", "id": "BKG123456"}
+  ],
   "currency": "USD",
   "unitId": 789,
   "status": "Confirmed",
   "arrivalDate": "2024-01-15",
   "departureDate": "2024-01-20",
   "nights": 5,
+  "paymentPlan": null,
   "createdAt": "2024-01-01T10:00:00Z",
   "updatedAt": "2024-01-10T15:30:00Z"
 }
 ```
+
+**Nota sobre `alternates`:**
+Este campo puede contener:
+- Objetos con estructura `{"type": "canal", "id": "código"}` (formato más común)
+- Strings simples (formato legacy)
+- Mezcla de ambos formatos
+
+**Nota sobre `paymentPlan`:**
+Este campo es **opcional** y puede ser:
+- `null` (no presente)
+- `[]` (array vacío)
+- Array de objetos con plan de pagos
 
 ### Información Financiera
 

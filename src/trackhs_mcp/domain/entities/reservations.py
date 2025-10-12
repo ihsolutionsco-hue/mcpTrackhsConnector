@@ -282,8 +282,9 @@ class Reservation(BaseModel):
     model_config = {"populate_by_name": True}
 
     id: int = Field(..., description="ID único de la reserva")
-    alternates: Optional[List[str]] = Field(
-        default=None, description="IDs de confirmación alternativos"
+    alternates: Optional[List[Union[str, dict]]] = Field(
+        default=None,
+        description="IDs de confirmación alternativos (pueden ser strings o objetos con type e id)",
     )
     currency: str = Field(..., description="Moneda de la reserva")
     unit_id: int = Field(..., alias="unitId", description="ID de la unidad")
@@ -452,8 +453,8 @@ class Reservation(BaseModel):
     group_id: Optional[int] = Field(
         default=None, alias="groupId", description="ID del grupo"
     )
-    payment_plan: List[PaymentPlan] = Field(
-        ..., alias="paymentPlan", description="Plan de pagos"
+    payment_plan: Optional[List[PaymentPlan]] = Field(
+        default=None, alias="paymentPlan", description="Plan de pagos (opcional)"
     )
     travel_insurance_products: List[TravelInsuranceProduct] = Field(
         ..., alias="travelInsuranceProducts", description="Productos de seguro de viaje"
