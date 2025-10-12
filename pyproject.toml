@@ -129,7 +129,8 @@ markers = [
     "slow: Slow running tests",
     "api: Tests that require API access",
     "auth: Authentication tests",
-    "network: Tests that require network access"
+    "network: Tests that require network access",
+    "asyncio: Async tests"
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
