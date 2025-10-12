@@ -61,7 +61,9 @@ class Occupant(BaseModel):
     name: str = Field(..., description="Nombre del ocupante")
     handle: str = Field(..., description="Handle del ocupante")
     quantity: float = Field(..., description="Cantidad")
-    included: bool = Field(..., description="Si está incluido en el precio de renta")
+    included: Optional[bool] = Field(
+        default=None, description="Si está incluido en el precio de renta"
+    )
     extra_quantity: float = Field(
         ..., alias="extraQuantity", description="Cantidad extra permitida"
     )
@@ -359,7 +361,9 @@ class Reservation(BaseModel):
         default=None, alias="discountNotes", description="Notas del descuento"
     )
     contact_id: int = Field(..., alias="contactId", description="ID del contacto")
-    channel_id: int = Field(..., alias="channelId", description="ID del canal")
+    channel_id: Optional[int] = Field(
+        default=None, alias="channelId", description="ID del canal"
+    )
     sub_channel: Optional[str] = Field(
         default=None, alias="subChannel", description="Subcanal"
     )
