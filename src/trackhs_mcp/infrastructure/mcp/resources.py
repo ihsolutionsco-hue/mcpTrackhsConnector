@@ -1409,3 +1409,735 @@ search_reservations_v2(
                 "Usar Z para UTC cuando no se especifique timezone",
             ],
         }
+
+    # Schema para reserva individual V2
+    @mcp.resource("trackhs://schema/reservation-detail-v2")
+    async def reservation_detail_v2_schema() -> Dict[str, Any]:
+        """Esquema completo para obtener una reserva individual en TrackHS API V2"""
+        return {
+            "schema": {
+                "id": {"type": "integer", "description": "ID único de la reserva"},
+                "alternates": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "IDs de confirmación alternativos",
+                },
+                "currency": {"type": "string", "description": "Moneda de la reserva"},
+                "unitId": {"type": "integer", "description": "ID de la unidad"},
+                "clientIPAddress": {
+                    "type": "string",
+                    "description": "Dirección IP del cliente para detección de fraude",
+                },
+                "session": {
+                    "type": "string",
+                    "description": "Datos de sesión para detección de fraude",
+                },
+                "isUnitLocked": {
+                    "type": "boolean",
+                    "description": "Si la unidad está bloqueada",
+                },
+                "isUnitAssigned": {
+                    "type": "boolean",
+                    "description": "Si la unidad está asignada",
+                },
+                "isUnitTypeLocked": {
+                    "type": "boolean",
+                    "description": "Si el tipo de unidad está bloqueado",
+                },
+                "unitTypeId": {
+                    "type": "integer",
+                    "description": "ID del tipo de unidad",
+                },
+                "arrivalDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Fecha de llegada (ISO 8601)",
+                },
+                "departureDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Fecha de salida (ISO 8601)",
+                },
+                "earlyArrival": {"type": "boolean", "description": "Llegada temprana"},
+                "lateDeparture": {"type": "boolean", "description": "Salida tardía"},
+                "arrivalTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Hora de llegada (ISO 8601)",
+                },
+                "departureTime": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Hora de salida (ISO 8601)",
+                },
+                "nights": {"type": "number", "description": "Número de noches"},
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "Hold",
+                        "Confirmed",
+                        "Checked Out",
+                        "Checked In",
+                        "Cancelled",
+                    ],
+                    "description": "Estado de la reserva",
+                },
+                "cancelledAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": True,
+                    "description": "Fecha de cancelación (ISO 8601)",
+                },
+                "occupants": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/Occupant"},
+                    "description": "Ocupantes",
+                },
+                "securityDeposit": {
+                    "$ref": "#/definitions/SecurityDeposit",
+                    "description": "Depósito de seguridad",
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha de actualización (ISO 8601)",
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha de creación (ISO 8601)",
+                },
+                "bookedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha de reserva (ISO 8601)",
+                },
+                "guestBreakdown": {
+                    "$ref": "#/definitions/GuestBreakdown",
+                    "description": "Desglose del huésped",
+                },
+                "ownerBreakdown": {
+                    "$ref": "#/definitions/OwnerBreakdown",
+                    "description": "Desglose del propietario",
+                },
+                "contactId": {"type": "integer", "description": "ID del contacto"},
+                "channelId": {"type": "integer", "description": "ID del canal"},
+                "subChannel": {
+                    "type": "string",
+                    "nullable": True,
+                    "description": "Subcanal",
+                },
+                "folioId": {"type": "integer", "description": "ID del folio"},
+                "guaranteePolicyId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID de la política de garantía",
+                },
+                "cancellationPolicyId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID de la política de cancelación",
+                },
+                "cancellationReasonId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID de la razón de cancelación",
+                },
+                "userId": {"type": "integer", "description": "ID del usuario"},
+                "travelAgentId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID del agente de viajes",
+                },
+                "campaignId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID de la campaña",
+                },
+                "typeId": {"type": "integer", "description": "ID del tipo"},
+                "rateTypeId": {
+                    "type": "integer",
+                    "description": "ID del tipo de tarifa",
+                },
+                "unitCodeId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID del código de unidad",
+                },
+                "cancelledById": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID de quien canceló",
+                },
+                "paymentMethodId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID del método de pago",
+                },
+                "quoteId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID de la cotización",
+                },
+                "holdExpiresAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "nullable": True,
+                    "description": "Fecha de expiración de la retención",
+                },
+                "isTaxable": {"type": "boolean", "description": "Si es gravable"},
+                "inviteUuid": {
+                    "type": "string",
+                    "nullable": True,
+                    "description": "UUID de la invitación",
+                },
+                "uuid": {"type": "string", "description": "UUID de la reserva"},
+                "source": {"type": "string", "description": "Fuente de la reserva"},
+                "isChannelLocked": {
+                    "type": "boolean",
+                    "description": "Si el canal está bloqueado",
+                },
+                "agreementStatus": {
+                    "type": "string",
+                    "enum": ["not-needed", "not-sent", "sent", "viewed", "received"],
+                    "description": "Estado del acuerdo",
+                },
+                "automatePayment": {
+                    "type": "boolean",
+                    "description": "Si el pago es automático",
+                },
+                "revenueRealizedMethod": {
+                    "type": "string",
+                    "description": "Método de realización de ingresos",
+                },
+                "scheduleType1": {
+                    "type": "string",
+                    "nullable": True,
+                    "description": "Tipo de programación 1",
+                },
+                "schedulePercentage1": {
+                    "type": "number",
+                    "nullable": True,
+                    "description": "Porcentaje de programación 1",
+                },
+                "scheduleType2": {
+                    "type": "string",
+                    "nullable": True,
+                    "description": "Tipo de programación 2",
+                },
+                "schedulePercentage2": {
+                    "type": "number",
+                    "nullable": True,
+                    "description": "Porcentaje de programación 2",
+                },
+                "promoCodeId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID del código promocional",
+                },
+                "updatedBy": {"type": "string", "description": "Actualizado por"},
+                "createdBy": {"type": "string", "description": "Creado por"},
+                "groupId": {
+                    "type": "integer",
+                    "nullable": True,
+                    "description": "ID del grupo",
+                },
+                "paymentPlan": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/PaymentPlan"},
+                    "description": "Plan de pagos",
+                },
+                "travelInsuranceProducts": {
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/TravelInsuranceProduct"},
+                    "description": "Productos de seguro de viaje",
+                },
+                "_embedded": {
+                    "type": "object",
+                    "description": "Datos embebidos incluyendo unit, contact, policies, user, type, rateType",
+                    "properties": {
+                        "unit": {"$ref": "#/definitions/UnitEmbedded"},
+                        "contact": {"$ref": "#/definitions/ContactEmbedded"},
+                        "guaranteePolicy": {
+                            "$ref": "#/definitions/GuaranteePolicyEmbedded"
+                        },
+                        "cancellationPolicy": {
+                            "$ref": "#/definitions/CancellationPolicyEmbedded"
+                        },
+                        "user": {"$ref": "#/definitions/UserEmbedded"},
+                        "type": {"$ref": "#/definitions/ReservationTypeEmbedded"},
+                        "rateType": {"$ref": "#/definitions/RateTypeEmbedded"},
+                    },
+                },
+                "_links": {"type": "object", "description": "Enlaces relacionados"},
+            },
+            "definitions": {
+                "Occupant": {
+                    "type": "object",
+                    "properties": {
+                        "typeId": {
+                            "type": "integer",
+                            "description": "ID del tipo de ocupante",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Nombre del ocupante",
+                        },
+                        "handle": {
+                            "type": "string",
+                            "description": "Handle del ocupante",
+                        },
+                        "quantity": {"type": "number", "description": "Cantidad"},
+                        "included": {
+                            "type": "boolean",
+                            "description": "Si está incluido en el precio de renta",
+                        },
+                        "extraQuantity": {
+                            "type": "number",
+                            "description": "Cantidad extra permitida",
+                        },
+                        "ratePerPersonPerStay": {
+                            "type": "string",
+                            "description": "Tarifa por persona por estadía",
+                        },
+                        "ratePerStay": {
+                            "type": "string",
+                            "description": "Tarifa por estadía",
+                        },
+                    },
+                },
+                "SecurityDeposit": {
+                    "type": "object",
+                    "properties": {
+                        "required": {
+                            "type": "string",
+                            "description": "Monto total requerido del depósito",
+                        },
+                        "remaining": {
+                            "type": "number",
+                            "description": "Monto restante del depósito de seguridad",
+                        },
+                    },
+                },
+                "GuestBreakdown": {
+                    "type": "object",
+                    "properties": {
+                        "grossRent": {"type": "string", "description": "Renta bruta"},
+                        "guestGrossDisplayRent": {
+                            "type": "string",
+                            "description": "Renta bruta mostrada al huésped",
+                        },
+                        "discount": {"type": "string", "description": "Descuento"},
+                        "promoValue": {
+                            "type": "string",
+                            "description": "Valor promocional",
+                        },
+                        "discountTotal": {
+                            "type": "number",
+                            "description": "Total de descuentos",
+                        },
+                        "netRent": {"type": "string", "description": "Renta neta"},
+                        "guestNetDisplayRent": {
+                            "type": "string",
+                            "description": "Renta neta mostrada al huésped",
+                        },
+                        "actualAdr": {"type": "string", "description": "ADR actual"},
+                        "guestAdr": {
+                            "type": "string",
+                            "description": "ADR del huésped",
+                        },
+                        "totalGuestFees": {
+                            "type": "string",
+                            "description": "Total de tarifas del huésped",
+                        },
+                        "totalRentFees": {
+                            "type": "string",
+                            "description": "Total de tarifas de renta",
+                        },
+                        "totalItemizedFees": {
+                            "type": "string",
+                            "description": "Total de tarifas detalladas",
+                        },
+                        "totalTaxFees": {
+                            "type": "string",
+                            "description": "Total de tarifas de impuestos",
+                        },
+                        "totalServiceFees": {
+                            "type": "string",
+                            "description": "Total de tarifas de servicio",
+                        },
+                        "folioCharges": {
+                            "type": "string",
+                            "description": "Cargos del folio",
+                        },
+                        "subtotal": {"type": "string", "description": "Subtotal"},
+                        "guestSubtotal": {
+                            "type": "string",
+                            "description": "Subtotal del huésped",
+                        },
+                        "totalTaxes": {
+                            "type": "string",
+                            "description": "Total de impuestos",
+                        },
+                        "totalGuestTaxes": {
+                            "type": "string",
+                            "description": "Total de impuestos del huésped",
+                        },
+                        "total": {"type": "string", "description": "Total"},
+                        "grandTotal": {"type": "string", "description": "Gran total"},
+                        "netPayments": {"type": "string", "description": "Pagos netos"},
+                        "payments": {"type": "string", "description": "Pagos"},
+                        "refunds": {"type": "string", "description": "Reembolsos"},
+                        "netTransfers": {
+                            "type": "string",
+                            "description": "Transferencias netas",
+                        },
+                        "balance": {"type": "string", "description": "Balance"},
+                        "rates": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Rate"},
+                            "description": "Tarifas",
+                        },
+                        "guestFees": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/GuestFee"},
+                            "description": "Tarifas del huésped",
+                        },
+                        "taxes": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/Tax"},
+                            "description": "Impuestos",
+                        },
+                    },
+                },
+                "OwnerBreakdown": {
+                    "type": "object",
+                    "properties": {
+                        "grossRent": {
+                            "type": "string",
+                            "description": "Renta bruta del propietario",
+                        },
+                        "feeRevenue": {
+                            "type": "string",
+                            "description": "Ingresos por tarifas",
+                        },
+                        "grossRevenue": {
+                            "type": "string",
+                            "description": "Ingresos brutos",
+                        },
+                        "managerCommission": {
+                            "type": "string",
+                            "description": "Comisión del manager",
+                        },
+                        "agentCommission": {
+                            "type": "string",
+                            "description": "Comisión del agente",
+                        },
+                        "netRevenue": {
+                            "type": "string",
+                            "description": "Ingresos netos",
+                        },
+                        "ownerFees": {
+                            "type": "array",
+                            "items": {"$ref": "#/definitions/OwnerFee"},
+                            "description": "Tarifas del propietario",
+                        },
+                    },
+                },
+                "Rate": {
+                    "type": "object",
+                    "properties": {
+                        "date": {
+                            "type": "string",
+                            "format": "date",
+                            "description": "Fecha",
+                        },
+                        "rate": {"type": "string", "description": "Tarifa"},
+                        "nights": {"type": "integer", "description": "Noches"},
+                        "isQuoted": {
+                            "type": "boolean",
+                            "description": "Si está cotizada",
+                        },
+                    },
+                },
+                "GuestFee": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string", "description": "ID de la tarifa"},
+                        "name": {
+                            "type": "string",
+                            "description": "Nombre de la tarifa",
+                        },
+                        "displayAs": {
+                            "type": "string",
+                            "enum": ["itemize", "rent", "tax", "service"],
+                            "description": "Cómo mostrar",
+                        },
+                        "quantity": {"type": "string", "description": "Cantidad"},
+                        "unitValue": {
+                            "type": "string",
+                            "description": "Valor unitario",
+                        },
+                        "value": {"type": "string", "description": "Valor"},
+                    },
+                },
+                "Tax": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer", "description": "ID del impuesto"},
+                        "name": {
+                            "type": "string",
+                            "description": "Nombre del impuesto",
+                        },
+                        "amount": {
+                            "type": "string",
+                            "description": "Monto del impuesto",
+                        },
+                    },
+                },
+                "OwnerFee": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string", "description": "ID de la tarifa"},
+                        "name": {
+                            "type": "string",
+                            "description": "Nombre de la tarifa",
+                        },
+                        "displayAs": {
+                            "type": "string",
+                            "enum": ["itemize", "rent", "tax", "service"],
+                            "description": "Cómo mostrar",
+                        },
+                        "quantity": {"type": "string", "description": "Cantidad"},
+                        "unitValue": {
+                            "type": "string",
+                            "description": "Valor unitario",
+                        },
+                        "value": {"type": "string", "description": "Valor"},
+                    },
+                },
+                "PaymentPlan": {
+                    "type": "object",
+                    "properties": {
+                        "date": {
+                            "type": "string",
+                            "format": "date",
+                            "description": "Fecha",
+                        },
+                        "amount": {"type": "string", "description": "Monto"},
+                    },
+                },
+                "TravelInsuranceProduct": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer", "description": "ID del producto"},
+                        "status": {
+                            "type": "string",
+                            "enum": ["optin", "funded", "cancelled"],
+                            "description": "Estado",
+                        },
+                        "type": {
+                            "type": "string",
+                            "enum": [
+                                "Travel Insurance",
+                                "Master Cancel",
+                                "Damage Deposit",
+                            ],
+                            "description": "Tipo",
+                        },
+                        "provider": {"type": "string", "description": "Proveedor"},
+                        "providerId": {
+                            "type": "integer",
+                            "description": "ID del proveedor",
+                        },
+                        "amount": {"type": "string", "description": "Monto"},
+                    },
+                },
+                "UnitEmbedded": {
+                    "type": "object",
+                    "description": "Información completa de la unidad embebida",
+                    "properties": {
+                        "id": {"type": "integer", "description": "ID de la unidad"},
+                        "name": {
+                            "type": "string",
+                            "description": "Nombre de la unidad",
+                        },
+                        "headline": {"type": "string", "description": "Título"},
+                        "shortDescription": {
+                            "type": "string",
+                            "description": "Descripción corta",
+                        },
+                        "longDescription": {
+                            "type": "string",
+                            "description": "Descripción larga",
+                        },
+                        "streetAddress": {"type": "string", "description": "Dirección"},
+                        "locality": {"type": "string", "description": "Ciudad"},
+                        "region": {"type": "string", "description": "Región"},
+                        "country": {"type": "string", "description": "País"},
+                        "maxOccupancy": {
+                            "type": "integer",
+                            "description": "Ocupación máxima",
+                        },
+                        "bedrooms": {"type": "integer", "description": "Habitaciones"},
+                        "fullBathrooms": {
+                            "type": "integer",
+                            "description": "Baños completos",
+                        },
+                        "halfBathrooms": {
+                            "type": "integer",
+                            "description": "Medios baños",
+                        },
+                        "checkinTime": {
+                            "type": "string",
+                            "description": "Hora de check-in",
+                        },
+                        "checkoutTime": {
+                            "type": "string",
+                            "description": "Hora de check-out",
+                        },
+                        "timezone": {"type": "string", "description": "Zona horaria"},
+                        "petsFriendly": {
+                            "type": "boolean",
+                            "description": "Permite mascotas",
+                        },
+                        "smokingAllowed": {
+                            "type": "boolean",
+                            "description": "Permite fumar",
+                        },
+                        "childrenAllowed": {
+                            "type": "boolean",
+                            "description": "Permite niños",
+                        },
+                    },
+                },
+                "ContactEmbedded": {
+                    "type": "object",
+                    "description": "Información del contacto embebida",
+                    "properties": {
+                        "id": {"type": "integer", "description": "ID del contacto"},
+                        "name": {"type": "string", "description": "Nombre completo"},
+                        "firstName": {"type": "string", "description": "Nombre"},
+                        "lastName": {"type": "string", "description": "Apellido"},
+                        "primaryEmail": {
+                            "type": "string",
+                            "description": "Email principal",
+                        },
+                        "secondaryEmail": {
+                            "type": "string",
+                            "description": "Email secundario",
+                        },
+                        "cellPhone": {
+                            "type": "string",
+                            "description": "Teléfono celular",
+                        },
+                        "homePhone": {"type": "string", "description": "Teléfono casa"},
+                        "streetAddress": {"type": "string", "description": "Dirección"},
+                        "locality": {"type": "string", "description": "Ciudad"},
+                        "region": {"type": "string", "description": "Región"},
+                        "country": {"type": "string", "description": "País"},
+                        "isVip": {"type": "boolean", "description": "Es VIP"},
+                        "isBlacklist": {
+                            "type": "boolean",
+                            "description": "Está en lista negra",
+                        },
+                        "notes": {"type": "string", "description": "Notas"},
+                    },
+                },
+                "GuaranteePolicyEmbedded": {
+                    "type": "object",
+                    "description": "Política de garantía embebida",
+                    "properties": {
+                        "id": {"type": "integer", "description": "ID de la política"},
+                        "name": {"type": "string", "description": "Nombre"},
+                        "type": {
+                            "type": "string",
+                            "enum": ["Hold", "Guarantee", "FullDeposit"],
+                            "description": "Tipo",
+                        },
+                        "amount": {"type": "string", "description": "Monto"},
+                        "isActive": {"type": "boolean", "description": "Está activa"},
+                    },
+                },
+                "CancellationPolicyEmbedded": {
+                    "type": "object",
+                    "description": "Política de cancelación embebida",
+                    "properties": {
+                        "id": {"type": "integer", "description": "ID de la política"},
+                        "name": {"type": "string", "description": "Nombre"},
+                        "chargeAs": {
+                            "type": "string",
+                            "enum": ["fee", "split"],
+                            "description": "Cobrar como",
+                        },
+                        "cancelTime": {
+                            "type": "string",
+                            "description": "Hora de cancelación",
+                        },
+                        "isActive": {"type": "boolean", "description": "Está activa"},
+                    },
+                },
+                "UserEmbedded": {
+                    "type": "object",
+                    "description": "Usuario embebido",
+                    "properties": {
+                        "id": {"type": "integer", "description": "ID del usuario"},
+                        "name": {"type": "string", "description": "Nombre"},
+                        "email": {"type": "string", "description": "Email"},
+                        "isActive": {"type": "boolean", "description": "Está activo"},
+                    },
+                },
+                "ReservationTypeEmbedded": {
+                    "type": "object",
+                    "description": "Tipo de reservación embebido",
+                    "properties": {
+                        "id": {"type": "integer", "description": "ID del tipo"},
+                        "name": {"type": "string", "description": "Nombre del sistema"},
+                        "publicName": {
+                            "type": "string",
+                            "description": "Nombre público",
+                        },
+                        "code": {"type": "string", "description": "Código"},
+                        "isActive": {"type": "boolean", "description": "Está activo"},
+                    },
+                },
+                "RateTypeEmbedded": {
+                    "type": "object",
+                    "description": "Tipo de tarifa embebido",
+                    "properties": {
+                        "id": {
+                            "type": "integer",
+                            "description": "ID del tipo de tarifa",
+                        },
+                        "name": {"type": "string", "description": "Nombre"},
+                        "code": {"type": "string", "description": "Código"},
+                        "isActive": {"type": "boolean", "description": "Está activo"},
+                    },
+                },
+            },
+            "description": "Esquema completo para obtener una reserva individual en TrackHS API V2",
+            "version": "2.0.0",
+            "api_endpoint": "/v2/pms/reservations/{reservationId}",
+            "supported_operations": ["GET"],
+            "error_codes": {
+                "401": "No autorizado - Credenciales inválidas o expiradas",
+                "403": "Prohibido - Permisos insuficientes para acceder a la reserva",
+                "404": "No encontrado - Reserva no existe con el ID especificado",
+                "500": "Error interno del servidor - API temporalmente no disponible",
+            },
+            "embedded_objects": [
+                "unit",
+                "contact",
+                "guaranteePolicy",
+                "cancellationPolicy",
+                "user",
+                "type",
+                "rateType",
+            ],
+            "financial_data": {
+                "guest_breakdown": "Desglose financiero completo del huésped",
+                "owner_breakdown": "Desglose financiero del propietario",
+                "security_deposit": "Información del depósito de seguridad",
+                "payment_plan": "Plan de pagos programado",
+            },
+        }

@@ -370,3 +370,143 @@ def register_all_prompts(mcp, api_client: ApiClientPort):
                 }
             ]
         }
+
+    # Prompt para obtener detalles de reserva
+    @mcp.prompt
+    def create_get_reservation_prompt(reservation_id: int) -> Dict[str, Any]:
+        """
+        Crea un prompt para obtener detalles completos de una reserva específica.
+
+        **Casos de Uso:**
+        - Verificar estado de una reserva específica
+        - Obtener información completa de reserva
+        - Validar datos de reserva antes de procesamiento
+        """
+        return {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": {
+                        "type": "text",
+                        "text": f"""Obtener detalles completos de reserva:
+
+**Parámetros:**
+- ID de Reserva: {reservation_id}
+
+**Instrucciones:**
+1. Usa get_reservation_v2 con reservation_id={reservation_id}
+2. Extrae toda la información disponible de la reserva
+3. Incluye datos embebidos (unit, contact, policies, user, etc.)
+4. Proporciona análisis completo de la información
+
+**Información a Incluir:**
+- Datos básicos: ID, estado, fechas, huésped, unidad
+- Información financiera: guest_breakdown, owner_breakdown, security_deposit
+- Datos embebidos: unit, contact, guaranteePolicy, cancellationPolicy, user, type, rateType
+- Ocupantes y políticas
+- Estado de acuerdos y pagos
+- Enlaces y metadatos
+
+**Formato de Respuesta:**
+- Resumen ejecutivo de la reserva
+- Información detallada por sección
+- Análisis de estado y políticas
+- Información de contacto y unidad
+- Desglose financiero completo""",
+                    },
+                }
+            ]
+        }
+
+    # Prompt para análisis financiero de reserva
+    @mcp.prompt
+    def create_reservation_analysis_prompt(reservation_id: int) -> Dict[str, Any]:
+        """
+        Crea un prompt para análisis financiero detallado de una reserva.
+
+        **Casos de Uso:**
+        - Análisis de rentabilidad de reserva
+        - Verificación de pagos y balances
+        - Auditoría financiera de reserva específica
+        """
+        return {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": {
+                        "type": "text",
+                        "text": f"""Análisis financiero de reserva:
+
+**Parámetros:**
+- ID de Reserva: {reservation_id}
+
+**Instrucciones:**
+1. Usa get_reservation_v2 con reservation_id={reservation_id}
+2. Enfócate en la información financiera de la reserva
+3. Analiza guest_breakdown y owner_breakdown
+4. Verifica pagos, balances y depósitos
+
+**Análisis Financiero a Incluir:**
+- Desglose del huésped: renta bruta, descuentos, renta neta, impuestos, total
+- Desglose del propietario: renta bruta, comisiones, ingresos netos
+- Depósito de seguridad: requerido vs restante
+- Plan de pagos: fechas y montos programados
+- Balance actual y estado de pagos
+- Productos de seguro de viaje
+
+**Formato de Respuesta:**
+- Resumen financiero ejecutivo
+- Análisis de rentabilidad
+- Estado de pagos y balances
+- Recomendaciones financieras""",
+                    },
+                }
+            ]
+        }
+
+    # Prompt para resumen ejecutivo de reserva
+    @mcp.prompt
+    def create_reservation_summary_prompt(reservation_id: int) -> Dict[str, Any]:
+        """
+        Crea un prompt para generar un resumen ejecutivo de una reserva.
+
+        **Casos de Uso:**
+        - Reportes ejecutivos de reserva
+        - Resúmenes para stakeholders
+        - Información de alto nivel para toma de decisiones
+        """
+        return {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": {
+                        "type": "text",
+                        "text": f"""Resumen ejecutivo de reserva:
+
+**Parámetros:**
+- ID de Reserva: {reservation_id}
+
+**Instrucciones:**
+1. Usa get_reservation_v2 con reservation_id={reservation_id}
+2. Crea un resumen ejecutivo conciso y claro
+3. Incluye solo la información más relevante
+4. Enfócate en métricas clave y estado actual
+
+**Información Clave a Incluir:**
+- Estado actual de la reserva
+- Fechas de llegada y salida
+- Información del huésped principal
+- Unidad asignada
+- Total financiero y balance
+- Estado de políticas y acuerdos
+- Métricas de ocupación
+
+**Formato de Respuesta:**
+- Resumen ejecutivo en formato ejecutivo
+- Métricas clave destacadas
+- Estado actual y próximos pasos
+- Alertas o recomendaciones importantes""",
+                    },
+                }
+            ]
+        }

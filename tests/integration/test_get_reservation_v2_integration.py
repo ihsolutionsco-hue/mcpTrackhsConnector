@@ -1,0 +1,349 @@
+"""
+Tests de integración para get_reservation_v2
+Valida el funcionamiento completo con la API real de TrackHS
+"""
+
+import asyncio
+from unittest.mock import AsyncMock, patch
+
+import pytest
+
+from trackhs_mcp.application.use_cases.get_reservation import GetReservationUseCase
+from trackhs_mcp.domain.entities.reservations import GetReservationParams
+from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
+from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
+from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+
+
+class TestGetReservationV2Integration:
+    """Tests de integración para get_reservation_v2"""
+
+    @pytest.fixture
+    def config(self):
+        """Configuración de prueba"""
+        return TrackHSConfig(
+            base_url="https://api-integration-example.tracksandbox.io",
+            username="test_user",
+            password="test_password",
+            timeout=30,
+        )
+
+    @pytest.fixture
+    def api_client(self, config):
+        """Cliente API de prueba"""
+        return TrackHSApiClient(config)
+
+    @pytest.fixture
+    def use_case(self, api_client):
+        """Use case con cliente real"""
+        return GetReservationUseCase(api_client)
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_get_reservation_success_integration(self, use_case):
+        """Test de integración exitoso (requiere API real)"""
+        # Arrange
+        reservation_id = 12345  # ID de reserva de prueba
+
+        # Act
+        try:
+            result = await use_case.execute(
+                GetReservationParams(reservation_id=reservation_id)
+            )
+
+            # Assert
+            assert result is not None
+            assert hasattr(result, "id")
+            assert hasattr(result, "status")
+            assert hasattr(result, "arrival_date")
+            assert hasattr(result, "departure_date")
+
+        except ValidationError as e:
+            # Si la reserva no existe, es esperado en ambiente de prueba
+            if "Reserva no encontrada" in str(e):
+                pytest.skip("Reserva de prueba no existe en ambiente de integración")
+            else:
+                raise
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_get_reservation_not_found_integration(self, use_case):
+        """Test de integración con reserva inexistente"""
+        # Arrange
+        reservation_id = 999999  # ID que no existe
+
+        # Act & Assert
+        with pytest.raises(ValidationError) as exc_info:
+            await use_case.execute(GetReservationParams(reservation_id=reservation_id))
+
+        assert "Reserva no encontrada" in str(exc_info.value)
+        assert exc_info.value.field == "reservation_id"
+
+    @pytest.mark.asyncio
+    @pytest.mark.integration
+    async def test_get_reservation_auth_error_integration(self, config):
+        """Test de integración con credenciales inválidas"""
+        # Arrange
+        invalid_config = TrackHSConfig(
+            base_url=config.base_url,
+            username="invalid_user",
+            password="invalid_password",
+            timeout=30,
+        )
+
+        with pytest.raises(ValueError):
+            TrackHSApiClient(invalid_config)
+
+    @pytest.mark.asyncio
+    async def test_get_reservation_mock_integration(self, use_case):
+        """Test de integración con mock de API"""
+        # Arrange
+        reservation_id = 12345
+        mock_response = {
+            "id": reservation_id,
+            "status": "Confirmed",
+            "arrivalDate": "2024-01-15",
+            "departureDate": "2024-01-20",
+            "nights": 5,
+            "currency": "USD",
+            "unitId": 789,
+            "contactId": 456,
+            "guestBreakdown": {
+                "grossRent": "1000.00",
+                "netRent": "950.00",
+                "grandTotal": "1045.00",
+                "balance": "0.00",
+            },
+            "ownerBreakdown": {"grossRent": "1000.00", "netRevenue": "850.00"},
+            "securityDeposit": {"required": "200.00", "remaining": 200},
+            "_embedded": {
+                "unit": {
+                    "id": 789,
+                    "name": "Casa de Playa",
+                    "streetAddress": "123 Ocean Drive",
+                    "maxOccupancy": 8,
+                    "bedrooms": 3,
+                    "fullBathrooms": 2,
+                    "checkinTime": "15:00",
+                    "checkoutTime": "11:00",
+                    "timezone": "America/New_York",
+                    "petsFriendly": True,
+                    "smokingAllowed": False,
+                    "childrenAllowed": True,
+                },
+                "contact": {
+                    "id": 456,
+                    "name": "Juan Pérez",
+                    "firstName": "Juan",
+                    "lastName": "Pérez",
+                    "primaryEmail": "juan@email.com",
+                    "cellPhone": "+1234567890",
+                    "streetAddress": "456 Main St",
+                    "locality": "Miami",
+                    "region": "FL",
+                    "country": "USA",
+                    "isVip": False,
+                    "isBlacklist": False,
+                    "notes": "Cliente frecuente",
+                },
+                "guaranteePolicy": {
+                    "id": 1,
+                    "name": "Política Estándar",
+                    "type": "Guarantee",
+                    "amount": "200.00",
+                    "isActive": True,
+                },
+                "cancellationPolicy": {
+                    "id": 2,
+                    "name": "Cancelación Flexible",
+                    "chargeAs": "fee",
+                    "cancelTime": "24:00",
+                    "isActive": True,
+                },
+                "user": {
+                    "id": 1,
+                    "name": "Admin User",
+                    "email": "admin@trackhs.com",
+                    "isActive": True,
+                },
+                "type": {
+                    "id": 1,
+                    "name": "Reserva Estándar",
+                    "publicName": "Reserva Regular",
+                    "code": "STD",
+                    "isActive": True,
+                },
+                "rateType": {
+                    "id": 1,
+                    "name": "Tarifa Base",
+                    "code": "BASE",
+                    "isActive": True,
+                },
+            },
+        }
+
+        # Mock del cliente API
+        with patch.object(use_case.api_client, "get", return_value=mock_response):
+            # Act
+            result = await use_case.execute(
+                GetReservationParams(reservation_id=reservation_id)
+            )
+
+            # Assert
+            assert result is not None
+            assert result.id == reservation_id
+            assert result.status == "Confirmed"
+            assert result.arrival_date == "2024-01-15"
+            assert result.departure_date == "2024-01-20"
+            assert result.nights == 5
+            assert result.currency == "USD"
+            assert result.unit_id == 789
+            assert result.contact_id == 456
+
+            # Verificar datos embebidos
+            assert result.embedded is not None
+            assert "unit" in result.embedded
+            assert "contact" in result.embedded
+            assert "guaranteePolicy" in result.embedded
+            assert "cancellationPolicy" in result.embedded
+            assert "user" in result.embedded
+            assert "type" in result.embedded
+            assert "rateType" in result.embedded
+
+            # Verificar información financiera
+            assert result.guest_breakdown is not None
+            assert result.guest_breakdown.gross_rent == "1000.00"
+            assert result.guest_breakdown.net_rent == "950.00"
+            assert result.guest_breakdown.grand_total == "1045.00"
+            assert result.guest_breakdown.balance == "0.00"
+
+            assert result.owner_breakdown is not None
+            assert result.owner_breakdown.gross_rent == "1000.00"
+            assert result.owner_breakdown.net_revenue == "850.00"
+
+            assert result.security_deposit is not None
+            assert result.security_deposit.required == "200.00"
+            assert result.security_deposit.remaining == 200
+
+    @pytest.mark.asyncio
+    async def test_get_reservation_error_handling_integration(self, use_case):
+        """Test de integración de manejo de errores"""
+        # Arrange
+        reservation_id = 12345
+        error_response = {
+            "type": "https://tools.ietf.org/html/rfc2616/rfc2616-sec10.html",
+            "title": "Not Found",
+            "status": 404,
+            "detail": "Reservation not found",
+        }
+
+        # Mock del cliente API para simular error 404
+        with patch.object(
+            use_case.api_client, "get", side_effect=Exception("404 Not Found")
+        ):
+            # Act & Assert
+            with pytest.raises(Exception):
+                await use_case.execute(
+                    GetReservationParams(reservation_id=reservation_id)
+                )
+
+    @pytest.mark.asyncio
+    async def test_get_reservation_validation_integration(self, use_case):
+        """Test de integración de validaciones"""
+        # Test con ID inválido
+        with pytest.raises(ValidationError) as exc_info:
+            await use_case.execute(GetReservationParams(reservation_id=0))
+
+        assert "reservation_id debe ser un entero positivo mayor que 0" in str(
+            exc_info.value
+        )
+        assert exc_info.value.field == "reservation_id"
+
+        # Test con ID negativo
+        with pytest.raises(ValidationError) as exc_info:
+            await use_case.execute(GetReservationParams(reservation_id=-1))
+
+        assert "reservation_id debe ser un entero positivo mayor que 0" in str(
+            exc_info.value
+        )
+        assert exc_info.value.field == "reservation_id"
+
+    @pytest.mark.asyncio
+    async def test_get_reservation_timeout_integration(self, use_case):
+        """Test de integración con timeout"""
+        # Arrange
+        reservation_id = 12345
+
+        # Mock del cliente API para simular timeout
+        with patch.object(
+            use_case.api_client,
+            "get",
+            side_effect=asyncio.TimeoutError("Request timeout"),
+        ):
+            # Act & Assert
+            with pytest.raises(Exception):
+                await use_case.execute(
+                    GetReservationParams(reservation_id=reservation_id)
+                )
+
+    @pytest.mark.asyncio
+    async def test_get_reservation_network_error_integration(self, use_case):
+        """Test de integración con error de red"""
+        # Arrange
+        reservation_id = 12345
+
+        # Mock del cliente API para simular error de red
+        with patch.object(
+            use_case.api_client, "get", side_effect=ConnectionError("Network error")
+        ):
+            # Act & Assert
+            with pytest.raises(Exception):
+                await use_case.execute(
+                    GetReservationParams(reservation_id=reservation_id)
+                )
+
+    @pytest.mark.asyncio
+    async def test_get_reservation_complete_workflow_integration(self, use_case):
+        """Test de integración del flujo completo"""
+        # Arrange
+        reservation_id = 12345
+        mock_response = {
+            "id": reservation_id,
+            "status": "Confirmed",
+            "arrivalDate": "2024-01-15",
+            "departureDate": "2024-01-20",
+            "nights": 5,
+            "currency": "USD",
+            "unitId": 789,
+            "contactId": 456,
+            "guestBreakdown": {
+                "grossRent": "1000.00",
+                "netRent": "950.00",
+                "grandTotal": "1045.00",
+                "balance": "0.00",
+            },
+            "_embedded": {
+                "unit": {"id": 789, "name": "Casa de Playa"},
+                "contact": {"id": 456, "name": "Juan Pérez"},
+            },
+        }
+
+        # Mock del cliente API
+        with patch.object(use_case.api_client, "get", return_value=mock_response):
+            # Act
+            result = await use_case.execute(
+                GetReservationParams(reservation_id=reservation_id)
+            )
+
+            # Assert - Verificar que el resultado es válido
+            assert result is not None
+            assert result.id == reservation_id
+            assert result.status == "Confirmed"
+
+            # Verificar que se puede convertir a diccionario
+            result_dict = result.model_dump(by_alias=True, exclude_none=True)
+            assert isinstance(result_dict, dict)
+            assert "id" in result_dict
+            assert "status" in result_dict
+            assert "arrivalDate" in result_dict
+            assert "departureDate" in result_dict

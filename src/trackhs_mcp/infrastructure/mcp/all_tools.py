@@ -4,6 +4,7 @@ Solo incluye las herramientas esenciales basadas en la documentación oficial
 """
 
 from ...application.ports.api_client_port import ApiClientPort
+from .get_reservation_v2 import register_get_reservation_v2
 
 # Importar solo las herramientas V1 y V2
 from .search_reservations_v1 import register_search_reservations_v1
@@ -25,3 +26,4 @@ def register_all_tools(mcp, api_client: ApiClientPort):
     # Registrar solo las herramientas V1 y V2
     register_search_reservations_v1(mcp, api_client)
     register_search_reservations_v2(mcp, api_client)
+    register_get_reservation_v2(mcp, api_client)

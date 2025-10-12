@@ -14,6 +14,7 @@ def register_all_components(mcp, api_client: "ApiClientPort"):
     from .all_tools import register_all_tools
     from .prompts import register_all_prompts
     from .resources import register_all_resources
+    from .templates import register_all_templates
 
     # Registrar herramientas
     register_all_tools(mcp, api_client)
@@ -23,3 +24,6 @@ def register_all_components(mcp, api_client: "ApiClientPort"):
 
     # Registrar prompts
     register_all_prompts(mcp, api_client)
+
+    # Registrar templates
+    register_all_templates(mcp, api_client)
