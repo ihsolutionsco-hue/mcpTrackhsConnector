@@ -101,6 +101,24 @@ class SearchReservationsUseCase:
         if params.updated_since:
             request_params["updatedSince"] = params.updated_since
 
+        # Parámetros adicionales de filtrado
+        if params.travel_agent_id:
+            request_params["travelAgentId"] = self._format_id_list(
+                params.travel_agent_id
+            )
+        if params.campaign_id:
+            request_params["campaignId"] = self._format_id_list(params.campaign_id)
+        if params.user_id:
+            request_params["userId"] = self._format_id_list(params.user_id)
+        if params.unit_type_id:
+            request_params["unitTypeId"] = self._format_id_list(params.unit_type_id)
+        if params.rate_type_id:
+            request_params["rateTypeId"] = self._format_id_list(params.rate_type_id)
+        if params.reservation_type_id:
+            request_params["reservationTypeId"] = self._format_id_list(
+                params.reservation_type_id
+            )
+
         # Parámetros especiales
         if params.scroll is not None:
             request_params["scroll"] = params.scroll

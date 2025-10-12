@@ -276,11 +276,13 @@ class TestSearchReservationsToolsE2EFixed:
         call_args = mock_api_client.get.call_args
         assert call_args[0][0] == "/v2/pms/reservations"
         params = call_args[1]["params"]
-        assert params["status"] == ["Confirmed", "Checked In"]
+        # V2 formatea status como string separado por comas
+        assert params["status"] == "Confirmed,Checked In"
         assert params["arrivalStart"] == "2024-01-01T00:00:00Z"
         assert params["arrivalEnd"] == "2024-01-31T23:59:59Z"
-        assert params["nodeId"] == [1, 2, 3]
-        assert params["unitId"] == [101, 102]
+        # V2 formatea IDs como string separado por comas
+        assert params["nodeId"] == "1,2,3"
+        assert params["unitId"] == "101,102"
         assert params["search"] == "Juan Pérez"
 
     @pytest.mark.e2e
@@ -550,11 +552,11 @@ class TestSearchReservationsToolsE2EFixed:
 
         # Test diferentes formatos de ID
         test_cases = [
-            ("1", 1),
-            ("1,2,3", [1, 2, 3]),
-            ("[1,2,3]", [1, 2, 3]),
-            (1, 1),
-            ([1, 2, 3], [1, 2, 3]),
+            ("1", "1"),  # V2 formatea como string
+            ("1,2,3", "1,2,3"),  # V2 mantiene como string
+            ("[1,2,3]", "1,2,3"),  # V2 parsea y formatea como string
+            (1, "1"),  # V2 convierte a string
+            ([1, 2, 3], "1,2,3"),  # V2 formatea array como string
         ]
 
         for input_id, expected_id in test_cases:
@@ -615,10 +617,16 @@ class TestSearchReservationsToolsE2EFixed:
 
         # Test diferentes formatos de status
         test_cases = [
-            ("Confirmed", "Confirmed"),
-            (["Confirmed", "Checked In"], ["Confirmed", "Checked In"]),
-            ('["Confirmed", "Checked In"]', ["Confirmed", "Checked In"]),
-            ("Confirmed,Checked In", ["Confirmed", "Checked In"]),
+            ("Confirmed", "Confirmed"),  # V2 mantiene como string
+            (
+                ["Confirmed", "Checked In"],
+                "Confirmed,Checked In",
+            ),  # V2 formatea como string
+            (
+                '["Confirmed", "Checked In"]',
+                "Confirmed,Checked In",
+            ),  # V2 parsea y formatea
+            ("Confirmed,Checked In", "Confirmed,Checked In"),  # V2 mantiene como string
         ]
 
         for input_status, expected_status in test_cases:
@@ -733,8 +741,8 @@ class TestSearchReservationsToolsE2EFixed:
         params = call_args[1]["params"]
         assert params["inHouseToday"] == 0
 
-        # Test error con valor inválido
-        with pytest.raises(TrackHSError, match="in_house_today must be 0 or 1"):
+        # Test error con valor inválido - V2 usa Pydantic validation
+        with pytest.raises(TrackHSError, match="Input should be 0 or 1"):
             await tool_func(in_house_today=2)
 
     @pytest.mark.e2e
@@ -879,15 +887,16 @@ class TestSearchReservationsToolsE2EFixed:
         assert params["sortDirection"] == "desc"
         assert params["search"] == "Juan"
         assert params["tags"] == "vip"
-        assert params["nodeId"] == [1, 2, 3]
-        assert params["unitId"] == [101, 102, 103]
-        assert params["contactId"] == [1001, 1002]
-        assert params["travelAgentId"] == 2001
-        assert params["campaignId"] == 3001
-        assert params["userId"] == 4001
-        assert params["unitTypeId"] == 5001
-        assert params["rateTypeId"] == 6001
-        assert params["reservationTypeId"] == 7001
+        # V2 formatea IDs como strings separados por comas
+        assert params["nodeId"] == "1,2,3"
+        assert params["unitId"] == "101,102,103"
+        assert params["contactId"] == "1001,1002"
+        assert params["travelAgentId"] == "2001"
+        assert params["campaignId"] == "3001"
+        assert params["userId"] == "4001"
+        assert params["unitTypeId"] == "5001"
+        assert params["rateTypeId"] == "6001"
+        assert params["reservationTypeId"] == "7001"
         assert params["bookedStart"] == "2024-01-01T00:00:00Z"
         assert params["bookedEnd"] == "2024-01-31T23:59:59Z"
         assert params["arrivalStart"] == "2024-02-01T00:00:00Z"
@@ -895,6 +904,7 @@ class TestSearchReservationsToolsE2EFixed:
         assert params["departureStart"] == "2024-03-01T00:00:00Z"
         assert params["departureEnd"] == "2024-03-31T23:59:59Z"
         assert params["updatedSince"] == "2024-01-01T00:00:00Z"
-        assert params["status"] == ["Confirmed", "Checked In"]
+        # V2 formatea status como string separado por comas
+        assert params["status"] == "Confirmed,Checked In"
         assert params["groupId"] == 100
         assert params["checkinOfficeId"] == 200
