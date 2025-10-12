@@ -42,7 +42,7 @@ class TestGetReservationUseCase:
         result = await use_case.execute(params)
 
         # Assert
-        assert result.id == reservation_id
+        assert result.id == int(reservation_id)
         assert result.status == "Confirmed"
         assert result.arrival_date == "2024-01-15"
         assert result.departure_date == "2024-01-20"
@@ -61,9 +61,7 @@ class TestGetReservationUseCase:
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "reservation_id debe ser un entero positivo mayor que 0" in str(
-            exc_info.value
-        )
+        assert "reservation_id es requerido" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_execute_invalid_id_negative(self, use_case):
@@ -75,9 +73,7 @@ class TestGetReservationUseCase:
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "reservation_id debe ser un entero positivo mayor que 0" in str(
-            exc_info.value
-        )
+        assert "reservation_id es requerido" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_execute_empty_response(self, use_case, mock_api_client):
@@ -331,7 +327,7 @@ class TestGetReservationUseCase:
         result = await use_case.execute(params)
 
         # Assert
-        assert result.id == reservation_id
+        assert result.id == int(reservation_id)
         assert result.status == "Confirmed"
         assert result.arrival_date == "2024-01-15"
         assert result.departure_date == "2024-01-20"
