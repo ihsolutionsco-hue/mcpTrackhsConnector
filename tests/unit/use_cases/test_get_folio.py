@@ -81,7 +81,7 @@ class TestGetFolioUseCase:
         # Arrange - Crear parámetros con string vacío que falle en Pydantic
         with pytest.raises(ValidationError) as exc_info:
             params = GetFolioParams(folio_id="")
-        
+
         # Verificar que Pydantic valida correctamente
         assert "Input should be a valid integer" in str(exc_info.value)
 
@@ -96,9 +96,10 @@ class TestGetFolioUseCase:
 
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
-        
+
         assert "Folio no encontrado" in str(exc_info.value)
         assert "99999" in str(exc_info.value)
 
@@ -113,6 +114,7 @@ class TestGetFolioUseCase:
 
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
@@ -130,6 +132,7 @@ class TestGetFolioUseCase:
 
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 

@@ -56,6 +56,7 @@ class TestGetFolioTool:
         """Test validación de parámetros - ID vacío"""
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+
         with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="")
 
@@ -66,6 +67,7 @@ class TestGetFolioTool:
         """Test validación de parámetros - ID None"""
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+
         with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id=None)
 
@@ -76,6 +78,7 @@ class TestGetFolioTool:
         """Test validación de parámetros - ID negativo"""
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
+
         with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="-1")
 
