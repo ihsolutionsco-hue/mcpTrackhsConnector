@@ -5,9 +5,8 @@ Siguiendo las mejores prácticas MCP para servidores empresariales
 """
 
 from ...application.ports.api_client_port import ApiClientPort
-from .prompts_enhanced import register_enhanced_prompts
 
-# Importar recursos y prompts mejorados
+# Importar recursos mejorados
 from .resources_enhanced import register_enhanced_resources
 
 # Importar las herramientas básicas
@@ -53,5 +52,4 @@ def register_all_tools(mcp, api_client: ApiClientPort):
     # Registrar recursos mejorados
     register_enhanced_resources(mcp, api_client)
 
-    # Registrar prompts especializados
-    register_enhanced_prompts(mcp)
+    # Los prompts se registran en register_all_prompts

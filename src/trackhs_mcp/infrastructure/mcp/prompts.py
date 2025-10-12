@@ -4,6 +4,8 @@ Prompts para el servidor MCP de TrackHS
 
 from typing import Any, Dict
 
+from ...application.ports.api_client_port import ApiClientPort
+
 
 def create_search_reservations_prompt(
     filters: Dict[str, Any],
@@ -169,7 +171,7 @@ def create_search_reservations_by_unit_prompt(
 - ID de unidad: {unit_id}{name_filter}
 - Incluir información financiera: {'Sí' if include_financials else 'No'}
 
-**Instrucciones:**
+**Instrucciones:
 1. Usa search_reservations con filtros de unidad
 2. Busca por ID exacto de unidad
 3. Incluye reservas históricas y futuras
@@ -318,3 +320,16 @@ def create_search_reservations_by_status_prompt(
             }
         ]
     }
+
+
+def register_all_prompts(mcp, api_client: ApiClientPort):
+    """Registra todos los prompts MCP para TrackHS"""
+
+    # Los prompts básicos son funciones de utilidad que se pueden usar
+    # para crear prompts dinámicos. Los prompts reales están en prompts_enhanced.py
+    # que se registran automáticamente con el decorador @mcp.prompt
+
+    # Importar y registrar prompts mejorados
+    from .prompts_enhanced import register_enhanced_prompts
+
+    register_enhanced_prompts(mcp)

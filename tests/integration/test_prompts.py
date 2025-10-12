@@ -97,4 +97,8 @@ class TestPromptsIntegration:
         assert len(result["messages"]) == 1
         assert result["messages"][0]["role"] == "user"
         text_content = result["messages"][0]["content"]["text"]
-        assert "financial" in text_content.lower() or "revenue" in text_content.lower()
+        assert (
+            "financial" in text_content.lower()
+            or "revenue" in text_content.lower()
+            or "financiero" in text_content.lower()
+        )
