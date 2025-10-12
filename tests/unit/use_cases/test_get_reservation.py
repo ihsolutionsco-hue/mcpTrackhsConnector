@@ -67,13 +67,15 @@ class TestGetReservationUseCase:
     async def test_execute_invalid_id_negative(self, use_case):
         """Test con ID inválido (negativo)"""
         # Arrange
-        params = GetReservationParams(reservation_id=-1)
+        params = GetReservationParams(reservation_id="-1")
 
         # Act & Assert
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "reservation_id es requerido" in str(exc_info.value)
+        assert "reservation_id debe ser un número entero positivo válido" in str(
+            exc_info.value
+        )
 
     @pytest.mark.asyncio
     async def test_execute_empty_response(self, use_case, mock_api_client):
