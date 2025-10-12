@@ -39,7 +39,7 @@ class TestGetReservationV2Tool:
     async def test_tool_success(self, mock_api_client):
         """Test ejecución exitosa del tool"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_response = {
             "id": reservation_id,
             "status": "Confirmed",
@@ -98,7 +98,7 @@ class TestGetReservationV2Tool:
     async def test_tool_invalid_id_zero(self, mock_api_client):
         """Test con ID inválido (cero)"""
         # Arrange
-        reservation_id = 0
+        reservation_id = "0"
 
         with patch(
             "trackhs_mcp.infrastructure.mcp.get_reservation_v2.GetReservationUseCase"
@@ -166,7 +166,7 @@ class TestGetReservationV2Tool:
     async def test_tool_api_error_401(self, mock_api_client):
         """Test error 401 (no autorizado)"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error = Mock()
         error.status_code = 401
 
@@ -205,7 +205,7 @@ class TestGetReservationV2Tool:
     async def test_tool_api_error_403(self, mock_api_client):
         """Test error 403 (prohibido)"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error = Mock()
         error.status_code = 403
 
@@ -244,7 +244,7 @@ class TestGetReservationV2Tool:
     async def test_tool_api_error_404(self, mock_api_client):
         """Test error 404 (no encontrado)"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error = Mock()
         error.status_code = 404
 
@@ -285,7 +285,7 @@ class TestGetReservationV2Tool:
     async def test_tool_api_error_500(self, mock_api_client):
         """Test error 500 (error interno)"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error = Mock()
         error.status_code = 500
 
@@ -326,7 +326,7 @@ class TestGetReservationV2Tool:
     async def test_tool_generic_error(self, mock_api_client):
         """Test error genérico"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
 
         with patch(
             "trackhs_mcp.infrastructure.mcp.get_reservation_v2.GetReservationUseCase"
@@ -363,7 +363,7 @@ class TestGetReservationV2Tool:
     async def test_tool_with_complete_data(self, mock_api_client):
         """Test con datos completos incluyendo embebidos"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_response = {
             "id": reservation_id,
             "status": "Confirmed",

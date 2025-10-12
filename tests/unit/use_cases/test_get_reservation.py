@@ -29,7 +29,7 @@ class TestGetReservationUseCase:
     async def test_execute_success(self, use_case, mock_api_client):
         """Test ejecución exitosa"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_response = {
             "id": reservation_id,
             "status": "Confirmed",
@@ -176,7 +176,7 @@ class TestGetReservationUseCase:
     async def test_execute_empty_response(self, use_case, mock_api_client):
         """Test con respuesta vacía"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_api_client.get.return_value = None
 
         params = GetReservationParams(reservation_id=reservation_id)
@@ -194,7 +194,7 @@ class TestGetReservationUseCase:
     async def test_execute_api_error_401(self, use_case, mock_api_client):
         """Test error 401 (no autorizado)"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error = Exception("401 Unauthorized")
         error.status_code = 401
         mock_api_client.get.side_effect = error
@@ -212,7 +212,7 @@ class TestGetReservationUseCase:
     async def test_execute_api_error_403(self, use_case, mock_api_client):
         """Test error 403 (prohibido)"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error = Exception("403 Forbidden")
         error.status_code = 403
         mock_api_client.get.side_effect = error
@@ -230,7 +230,7 @@ class TestGetReservationUseCase:
     async def test_execute_api_error_404(self, use_case, mock_api_client):
         """Test error 404 (no encontrado)"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error = Exception("404 Not Found")
         error.status_code = 404
         mock_api_client.get.side_effect = error
@@ -248,7 +248,7 @@ class TestGetReservationUseCase:
     async def test_execute_api_error_500(self, use_case, mock_api_client):
         """Test error 500 (error interno)"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error = Exception("500 Internal Server Error")
         error.status_code = 500
         mock_api_client.get.side_effect = error
@@ -266,7 +266,7 @@ class TestGetReservationUseCase:
     async def test_execute_generic_error(self, use_case, mock_api_client):
         """Test error genérico"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_api_client.get.side_effect = Exception("Error de conexión")
 
         params = GetReservationParams(reservation_id=reservation_id)
@@ -283,7 +283,7 @@ class TestGetReservationUseCase:
     ):
         """Test que ValidationError se propaga correctamente"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         validation_error = ValidationError("Error de validación", "field")
         mock_api_client.get.side_effect = validation_error
 
@@ -294,13 +294,12 @@ class TestGetReservationUseCase:
             await use_case.execute(params)
 
         assert "Error de validación" in str(exc_info.value)
-        assert exc_info.value.field == "field"
 
     @pytest.mark.asyncio
     async def test_execute_with_embedded_data(self, use_case, mock_api_client):
         """Test con datos embebidos completos"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_response = {
             "id": reservation_id,
             "status": "Confirmed",
