@@ -45,7 +45,7 @@ class TestGetReservationV2E2E:
     async def test_get_reservation_v2_e2e_success(self, mock_mcp, api_client):
         """Test E2E exitoso del tool MCP"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_response = {
             "id": reservation_id,
             "status": "Confirmed",
@@ -118,7 +118,7 @@ class TestGetReservationV2E2E:
     async def test_get_reservation_v2_e2e_validation_error(self, mock_mcp, api_client):
         """Test E2E con error de validación"""
         # Arrange
-        invalid_reservation_id = 0
+        invalid_reservation_id = "0"
 
         # Act
         register_get_reservation_v2(mock_mcp, api_client)
@@ -130,7 +130,7 @@ class TestGetReservationV2E2E:
         with pytest.raises(Exception) as exc_info:
             await tool_func(invalid_reservation_id)
 
-        assert "reservation_id debe ser un entero positivo mayor que 0" in str(
+        assert "reservation_id debe ser un número entero positivo válido" in str(
             exc_info.value
         )
 
@@ -139,7 +139,7 @@ class TestGetReservationV2E2E:
     async def test_get_reservation_v2_e2e_api_error(self, mock_mcp, api_client):
         """Test E2E con error de API"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error_response = {
             "type": "https://tools.ietf.org/html/rfc2616/rfc2616-sec10.html",
             "title": "Not Found",
@@ -164,7 +164,7 @@ class TestGetReservationV2E2E:
     async def test_get_reservation_v2_e2e_timeout(self, mock_mcp, api_client):
         """Test E2E con timeout"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
 
         # Mock del cliente API para simular timeout
         with patch.object(
@@ -185,7 +185,7 @@ class TestGetReservationV2E2E:
     async def test_get_reservation_v2_e2e_network_error(self, mock_mcp, api_client):
         """Test E2E con error de red"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
 
         # Mock del cliente API para simular error de red
         with patch.object(
@@ -206,7 +206,7 @@ class TestGetReservationV2E2E:
     async def test_get_reservation_v2_e2e_complete_workflow(self, mock_mcp, api_client):
         """Test E2E del flujo completo"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_response = {
             "id": reservation_id,
             "status": "Confirmed",
@@ -349,7 +349,7 @@ class TestGetReservationV2E2E:
     async def test_get_reservation_v2_e2e_error_handling(self, mock_mcp, api_client):
         """Test E2E de manejo de errores"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
 
         # Test con diferentes tipos de errores
         error_scenarios = [
@@ -377,7 +377,7 @@ class TestGetReservationV2E2E:
     async def test_get_reservation_v2_e2e_performance(self, mock_mcp, api_client):
         """Test E2E de rendimiento"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         mock_response = {
             "id": reservation_id,
             "status": "Confirmed",

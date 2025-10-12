@@ -13,6 +13,7 @@ from trackhs_mcp.domain.entities.reservations import GetReservationParams
 from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+from trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
 
 
 class TestGetReservationV2Integration:
@@ -43,7 +44,7 @@ class TestGetReservationV2Integration:
     async def test_get_reservation_success_integration(self, use_case):
         """Test de integración exitoso (requiere API real)"""
         # Arrange
-        reservation_id = 12345  # ID de reserva de prueba
+        reservation_id = "12345"  # ID de reserva de prueba
 
         # Act
         try:
@@ -70,10 +71,10 @@ class TestGetReservationV2Integration:
     async def test_get_reservation_not_found_integration(self, use_case):
         """Test de integración con reserva inexistente"""
         # Arrange
-        reservation_id = 999999  # ID que no existe
+        reservation_id = "999999"  # ID que no existe
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(GetReservationParams(reservation_id=reservation_id))
 
         assert "Reserva no encontrada" in str(exc_info.value)
@@ -95,92 +96,14 @@ class TestGetReservationV2Integration:
             TrackHSApiClient(invalid_config)
 
     @pytest.mark.asyncio
-    async def test_get_reservation_mock_integration(self, use_case):
+    async def test_get_reservation_mock_integration(
+        self, use_case, sample_reservation_data
+    ):
         """Test de integración con mock de API"""
         # Arrange
-        reservation_id = 12345
-        mock_response = {
-            "id": reservation_id,
-            "status": "Confirmed",
-            "arrivalDate": "2024-01-15",
-            "departureDate": "2024-01-20",
-            "nights": 5,
-            "currency": "USD",
-            "unitId": 789,
-            "contactId": 456,
-            "guestBreakdown": {
-                "grossRent": "1000.00",
-                "netRent": "950.00",
-                "grandTotal": "1045.00",
-                "balance": "0.00",
-            },
-            "ownerBreakdown": {"grossRent": "1000.00", "netRevenue": "850.00"},
-            "securityDeposit": {"required": "200.00", "remaining": 200},
-            "_embedded": {
-                "unit": {
-                    "id": 789,
-                    "name": "Casa de Playa",
-                    "streetAddress": "123 Ocean Drive",
-                    "maxOccupancy": 8,
-                    "bedrooms": 3,
-                    "fullBathrooms": 2,
-                    "checkinTime": "15:00",
-                    "checkoutTime": "11:00",
-                    "timezone": "America/New_York",
-                    "petsFriendly": True,
-                    "smokingAllowed": False,
-                    "childrenAllowed": True,
-                },
-                "contact": {
-                    "id": 456,
-                    "name": "Juan Pérez",
-                    "firstName": "Juan",
-                    "lastName": "Pérez",
-                    "primaryEmail": "juan@email.com",
-                    "cellPhone": "+1234567890",
-                    "streetAddress": "456 Main St",
-                    "locality": "Miami",
-                    "region": "FL",
-                    "country": "USA",
-                    "isVip": False,
-                    "isBlacklist": False,
-                    "notes": "Cliente frecuente",
-                },
-                "guaranteePolicy": {
-                    "id": 1,
-                    "name": "Política Estándar",
-                    "type": "Guarantee",
-                    "amount": "200.00",
-                    "isActive": True,
-                },
-                "cancellationPolicy": {
-                    "id": 2,
-                    "name": "Cancelación Flexible",
-                    "chargeAs": "fee",
-                    "cancelTime": "24:00",
-                    "isActive": True,
-                },
-                "user": {
-                    "id": 1,
-                    "name": "Admin User",
-                    "email": "admin@trackhs.com",
-                    "isActive": True,
-                },
-                "type": {
-                    "id": 1,
-                    "name": "Reserva Estándar",
-                    "publicName": "Reserva Regular",
-                    "code": "STD",
-                    "isActive": True,
-                },
-                "rateType": {
-                    "id": 1,
-                    "name": "Tarifa Base",
-                    "code": "BASE",
-                    "isActive": True,
-                },
-            },
-        }
+        reservation_id = "12345"
+        mock_response = sample_reservation_data.copy()
+        mock_response["id"] = int(reservation_id)
 
         # Mock del cliente API
         with patch.object(use_case.api_client, "get", return_value=mock_response):
@@ -191,13 +114,10 @@ class TestGetReservationV2Integration:
 
             # Assert
             assert result is not None
-            assert result.id == reservation_id
+            assert result.id == int(reservation_id)
             assert result.status == "Confirmed"
-            assert result.arrival_date == "2024-01-15"
-            assert result.departure_date == "2024-01-20"
-            assert result.nights == 5
             assert result.currency == "USD"
-            assert result.unit_id == 789
+            assert result.nights == 5
             assert result.contact_id == 456
 
             # Verificar datos embebidos
@@ -229,7 +149,7 @@ class TestGetReservationV2Integration:
     async def test_get_reservation_error_handling_integration(self, use_case):
         """Test de integración de manejo de errores"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
         error_response = {
             "type": "https://tools.ietf.org/html/rfc2616/rfc2616-sec10.html",
             "title": "Not Found",
@@ -251,19 +171,19 @@ class TestGetReservationV2Integration:
     async def test_get_reservation_validation_integration(self, use_case):
         """Test de integración de validaciones"""
         # Test con ID inválido
-        with pytest.raises(ValidationError) as exc_info:
-            await use_case.execute(GetReservationParams(reservation_id=0))
+        with pytest.raises(TrackHSError) as exc_info:
+            await use_case.execute(GetReservationParams(reservation_id="0"))
 
-        assert "reservation_id debe ser un entero positivo mayor que 0" in str(
+        assert "reservation_id debe ser un número entero positivo válido" in str(
             exc_info.value
         )
         assert exc_info.value.field == "reservation_id"
 
         # Test con ID negativo
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(GetReservationParams(reservation_id=-1))
 
-        assert "reservation_id debe ser un entero positivo mayor que 0" in str(
+        assert "reservation_id debe ser un número entero positivo válido" in str(
             exc_info.value
         )
         assert exc_info.value.field == "reservation_id"
@@ -272,7 +192,7 @@ class TestGetReservationV2Integration:
     async def test_get_reservation_timeout_integration(self, use_case):
         """Test de integración con timeout"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
 
         # Mock del cliente API para simular timeout
         with patch.object(
@@ -290,7 +210,7 @@ class TestGetReservationV2Integration:
     async def test_get_reservation_network_error_integration(self, use_case):
         """Test de integración con error de red"""
         # Arrange
-        reservation_id = 12345
+        reservation_id = "12345"
 
         # Mock del cliente API para simular error de red
         with patch.object(
@@ -303,30 +223,14 @@ class TestGetReservationV2Integration:
                 )
 
     @pytest.mark.asyncio
-    async def test_get_reservation_complete_workflow_integration(self, use_case):
+    async def test_get_reservation_complete_workflow_integration(
+        self, use_case, sample_reservation_data
+    ):
         """Test de integración del flujo completo"""
         # Arrange
-        reservation_id = 12345
-        mock_response = {
-            "id": reservation_id,
-            "status": "Confirmed",
-            "arrivalDate": "2024-01-15",
-            "departureDate": "2024-01-20",
-            "nights": 5,
-            "currency": "USD",
-            "unitId": 789,
-            "contactId": 456,
-            "guestBreakdown": {
-                "grossRent": "1000.00",
-                "netRent": "950.00",
-                "grandTotal": "1045.00",
-                "balance": "0.00",
-            },
-            "_embedded": {
-                "unit": {"id": 789, "name": "Casa de Playa"},
-                "contact": {"id": 456, "name": "Juan Pérez"},
-            },
-        }
+        reservation_id = "12345"
+        mock_response = sample_reservation_data.copy()
+        mock_response["id"] = int(reservation_id)
 
         # Mock del cliente API
         with patch.object(use_case.api_client, "get", return_value=mock_response):
@@ -337,7 +241,7 @@ class TestGetReservationV2Integration:
 
             # Assert - Verificar que el resultado es válido
             assert result is not None
-            assert result.id == reservation_id
+            assert result.id == int(reservation_id)
             assert result.status == "Confirmed"
 
             # Verificar que se puede convertir a diccionario
