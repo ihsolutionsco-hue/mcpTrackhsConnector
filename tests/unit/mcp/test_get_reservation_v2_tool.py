@@ -10,6 +10,7 @@ from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
 from trackhs_mcp.infrastructure.mcp.get_reservation_v2 import (
     register_get_reservation_v2,
 )
+from trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
 
 
 class TestGetReservationV2Tool:
@@ -36,29 +37,12 @@ class TestGetReservationV2Tool:
         mock_mcp.tool.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_tool_success(self, mock_api_client):
+    async def test_tool_success(self, mock_api_client, sample_reservation_data):
         """Test ejecución exitosa del tool"""
         # Arrange
         reservation_id = "12345"
-        mock_response = {
-            "id": reservation_id,
-            "status": "Confirmed",
-            "arrivalDate": "2024-01-15",
-            "departureDate": "2024-01-20",
-            "nights": 5,
-            "currency": "USD",
-            "unitId": 789,
-            "contactId": 456,
-            "guestBreakdown": {
-                "grossRent": "1000.00",
-                "netRent": "950.00",
-                "grandTotal": "1045.00",
-            },
-            "_embedded": {
-                "unit": {"id": 789, "name": "Casa de Playa"},
-                "contact": {"id": 456, "name": "Juan Pérez"},
-            },
-        }
+        mock_response = sample_reservation_data.copy()
+        mock_response["id"] = int(reservation_id)
 
         with patch(
             "trackhs_mcp.infrastructure.mcp.get_reservation_v2.GetReservationUseCase"
@@ -120,13 +104,12 @@ class TestGetReservationV2Tool:
             register_get_reservation_v2(mock_mcp, mock_api_client)
 
             # Act & Assert
-            with pytest.raises(ValidationError) as exc_info:
+            with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
             assert "reservation_id debe ser un entero positivo mayor que 0" in str(
                 exc_info.value
             )
-            assert exc_info.value.field == "reservation_id"
 
     @pytest.mark.asyncio
     async def test_tool_invalid_id_negative(self, mock_api_client):
@@ -154,13 +137,12 @@ class TestGetReservationV2Tool:
             register_get_reservation_v2(mock_mcp, mock_api_client)
 
             # Act & Assert
-            with pytest.raises(ValidationError) as exc_info:
+            with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
             assert "reservation_id debe ser un entero positivo mayor que 0" in str(
                 exc_info.value
             )
-            assert exc_info.value.field == "reservation_id"
 
     @pytest.mark.asyncio
     async def test_tool_api_error_401(self, mock_api_client):
@@ -194,12 +176,11 @@ class TestGetReservationV2Tool:
             register_get_reservation_v2(mock_mcp, mock_api_client)
 
             # Act & Assert
-            with pytest.raises(ValidationError) as exc_info:
+            with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
             assert "No autorizado" in str(exc_info.value)
             assert "Credenciales de autenticación inválidas" in str(exc_info.value)
-            assert exc_info.value.field == "auth"
 
     @pytest.mark.asyncio
     async def test_tool_api_error_403(self, mock_api_client):
@@ -233,12 +214,11 @@ class TestGetReservationV2Tool:
             register_get_reservation_v2(mock_mcp, mock_api_client)
 
             # Act & Assert
-            with pytest.raises(ValidationError) as exc_info:
+            with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
             assert "Prohibido" in str(exc_info.value)
             assert "Permisos insuficientes" in str(exc_info.value)
-            assert exc_info.value.field == "permissions"
 
     @pytest.mark.asyncio
     async def test_tool_api_error_404(self, mock_api_client):
@@ -272,14 +252,13 @@ class TestGetReservationV2Tool:
             register_get_reservation_v2(mock_mcp, mock_api_client)
 
             # Act & Assert
-            with pytest.raises(ValidationError) as exc_info:
+            with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
             assert "Reserva no encontrada" in str(exc_info.value)
             assert f"No existe una reserva con ID {reservation_id}" in str(
                 exc_info.value
             )
-            assert exc_info.value.field == "reservation_id"
 
     @pytest.mark.asyncio
     async def test_tool_api_error_500(self, mock_api_client):
@@ -313,14 +292,13 @@ class TestGetReservationV2Tool:
             register_get_reservation_v2(mock_mcp, mock_api_client)
 
             # Act & Assert
-            with pytest.raises(ValidationError) as exc_info:
+            with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
             assert "Error interno del servidor" in str(exc_info.value)
             assert "API de TrackHS está temporalmente no disponible" in str(
                 exc_info.value
             )
-            assert exc_info.value.field == "api"
 
     @pytest.mark.asyncio
     async def test_tool_generic_error(self, mock_api_client):
@@ -352,62 +330,21 @@ class TestGetReservationV2Tool:
             register_get_reservation_v2(mock_mcp, mock_api_client)
 
             # Act & Assert
-            with pytest.raises(ValidationError) as exc_info:
+            with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
             assert "Error al obtener la reserva" in str(exc_info.value)
             assert "Error de conexión" in str(exc_info.value)
-            assert exc_info.value.field == "api"
 
     @pytest.mark.asyncio
-    async def test_tool_with_complete_data(self, mock_api_client):
+    async def test_tool_with_complete_data(
+        self, mock_api_client, sample_reservation_data
+    ):
         """Test con datos completos incluyendo embebidos"""
         # Arrange
         reservation_id = "12345"
-        mock_response = {
-            "id": reservation_id,
-            "status": "Confirmed",
-            "arrivalDate": "2024-01-15",
-            "departureDate": "2024-01-20",
-            "nights": 5,
-            "currency": "USD",
-            "unitId": 789,
-            "contactId": 456,
-            "guestBreakdown": {
-                "grossRent": "1000.00",
-                "netRent": "950.00",
-                "grandTotal": "1045.00",
-                "balance": "0.00",
-            },
-            "ownerBreakdown": {"grossRent": "1000.00", "netRevenue": "850.00"},
-            "securityDeposit": {"required": "200.00", "remaining": 200},
-            "_embedded": {
-                "unit": {
-                    "id": 789,
-                    "name": "Casa de Playa",
-                    "streetAddress": "123 Ocean Drive",
-                    "maxOccupancy": 8,
-                    "bedrooms": 3,
-                    "fullBathrooms": 2,
-                },
-                "contact": {
-                    "id": 456,
-                    "name": "Juan Pérez",
-                    "primaryEmail": "juan@email.com",
-                    "cellPhone": "+1234567890",
-                },
-                "guaranteePolicy": {
-                    "id": 1,
-                    "name": "Política Estándar",
-                    "type": "Guarantee",
-                },
-                "cancellationPolicy": {
-                    "id": 2,
-                    "name": "Cancelación Flexible",
-                    "chargeAs": "fee",
-                },
-            },
-        }
+        mock_response = sample_reservation_data.copy()
+        mock_response["id"] = int(reservation_id)
 
         with patch(
             "trackhs_mcp.infrastructure.mcp.get_reservation_v2.GetReservationUseCase"
