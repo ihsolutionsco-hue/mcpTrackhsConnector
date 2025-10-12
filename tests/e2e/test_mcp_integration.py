@@ -49,6 +49,7 @@ class TestMCPIntegrationE2E:
         }
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_search_reservations_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -65,6 +66,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_search_reservations_by_guest_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -81,6 +83,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_search_reservations_by_unit_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -97,6 +100,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_search_reservations_by_date_range_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -113,6 +117,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_search_reservations_by_status_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -129,6 +134,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_error_handling_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -146,6 +152,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_performance_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -164,6 +171,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_memory_usage_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -191,6 +199,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_concurrent_requests_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -207,6 +216,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_large_dataset_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -230,6 +240,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_configuration_validation_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -246,6 +257,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_authentication_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -262,6 +274,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_rate_limiting_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -278,6 +291,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_data_validation_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -294,6 +308,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_logging_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -310,6 +325,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_monitoring_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
@@ -326,6 +342,7 @@ class TestMCPIntegrationE2E:
         assert mock_mcp.tool.call_count > 0
 
     @pytest.mark.e2e
+    @pytest.mark.asyncio
     async def test_cleanup_workflow(
         self, mock_mcp, mock_api_client, sample_search_response
     ):
