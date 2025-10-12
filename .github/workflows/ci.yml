@@ -70,9 +70,9 @@ jobs:
               from mcp.server.fastmcp import FastMCP  # SDK
           except Exception:
               from fastmcp import FastMCP  # framework
-          mod = importlib.import_module("src.server")
+          mod = importlib.import_module("src.trackhs_mcp.server")
           mcp = getattr(mod, "mcp", None)
-          assert mcp is not None, "No se encontró 'mcp' en src/server.py"
+          assert mcp is not None, "No se encontró 'mcp' en src/trackhs_mcp/server.py"
           assert isinstance(mcp, FastMCP), f"'mcp' no es FastMCP: {type(mcp)}"
           print("FastMCP OK")
           PY
