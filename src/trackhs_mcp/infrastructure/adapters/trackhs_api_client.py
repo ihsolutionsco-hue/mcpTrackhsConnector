@@ -93,18 +93,15 @@ class TrackHSApiClient(ApiClientPort):
                 if options and options.body:
                     request_kwargs["data"] = options.body
 
-                # Logging de debug
+                # Logging de debug (solo en desarrollo)
                 import logging
+                import os
 
-                logger = logging.getLogger(__name__)
-                logger.info(f"API Request: {method} {endpoint}")
-                logger.info(f"Params: {params}")
-                logger.info(f"Full URL: {self.client.base_url}{endpoint}")
-                logger.info(f"Headers: {headers}")
-                logger.info(f"Username from config: {self.config.username}")
-                logger.info(
-                    f"Password length: {len(self.config.password) if self.config.password else 0}"
-                )
+                if os.getenv("DEBUG", "false").lower() == "true":
+                    logger = logging.getLogger(__name__)
+                    logger.debug(f"API Request: {method} {endpoint}")
+                    logger.debug(f"Params: {params}")
+                    logger.debug(f"Full URL: {self.client.base_url}{endpoint}")
 
                 # Realizar petición usando endpoint relativo
                 response = await self.client.request(method, endpoint, **request_kwargs)
