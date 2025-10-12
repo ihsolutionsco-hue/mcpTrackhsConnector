@@ -339,6 +339,98 @@ Esta es una implementación de referencia con integración Track HS. Para adapta
 
 ## Desarrollo
 
+### Flujo de Trabajo con Tests Pre-commit
+
+1. **Hacer cambios en el código**
+   ```bash
+   # Editar archivos...
+   ```
+
+2. **Commit local (pre-commit hooks CON TESTS)**
+   ```bash
+   git add .
+   git commit -m "feat: Nueva funcionalidad"
+
+   # Pre-commit hooks ejecutan automáticamente (20-40s):
+   # ✓ Formateo con black e isort (3-5s)
+   # ✓ Validación de sintaxis (2-3s)
+   # ✓ Tests optimizados (15-30s)
+   #   - Solo tests que fallaron antes
+   #   - En paralelo (usa todos los cores)
+   #   - Detiene al primer fallo
+   # ✓ Checks básicos (1-2s)
+   ```
+
+3. **Optimización de Tests**
+
+   **Primera vez después de cambios**:
+   - Ejecuta todos los tests relevantes: 30-40s
+
+   **Si todos pasaron**:
+   - Solo ejecuta tests que fallaron antes: 5-15s
+   - Si no hay fallos previos, ejecuta todo pero rápido
+
+   **Si algo falla**:
+   - Detiene inmediatamente
+   - Muestra el error claramente
+   - Próximo commit solo ejecuta ese test
+
+4. **Saltar tests si es necesario**
+   ```bash
+   # Solo durante desarrollo iterativo muy rápido
+   git commit --no-verify -m "WIP: probando algo"
+   ```
+
+5. **Validación completa antes de push**
+   ```bash
+   # Ejecuta tests COMPLETOS con cobertura
+   ./scripts/validate.sh  # Linux/Mac
+   .\scripts\validate.ps1 # Windows
+
+   # Incluye cobertura 80% y todas las validaciones
+   ```
+
+6. **Push a GitHub**
+   ```bash
+   git push origin main
+   # GitHub Actions ejecuta validación completa
+   # Probabilidad de fallo: MUY BAJA (tests ya pasaron localmente)
+   ```
+
+### Ventajas de Tests en Pre-commit
+
+✅ **Mayor seguridad**: Tests pasan antes de commit
+✅ **Feedback rápido**: Detección temprana de errores
+✅ **Menos fallos en CI**: 90%+ de probabilidad de pasar GitHub Actions
+✅ **Commits limpios**: Historia de git sin commits rotos
+✅ **Optimizado**: 20-40s primera vez, 5-15s después
+
+### Pre-commit Hooks
+
+Los hooks incluyen tests optimizados:
+- ✅ Formateo automático (black, isort)
+- ✅ Validación de sintaxis (flake8)
+- ✅ **Tests rápidos e inteligentes** (pytest optimizado)
+- ✅ Checks básicos de archivos
+- ⚡ Tiempo: 20-40s (primera), 5-15s (siguientes)
+
+**Saltar hooks solo si es necesario:**
+```bash
+git commit --no-verify -m "WIP: desarrollo iterativo"
+```
+
+### Validación Completa Local
+
+Antes de hacer push importante, ejecuta la validación completa:
+
+```bash
+# Ejecuta TODAS las validaciones de GitHub Actions localmente
+./scripts/validate.sh  # Linux/Mac
+.\scripts\validate.ps1 # Windows
+```
+
+Esto garantiza que tu código pasará GitHub Actions y se desplegará exitosamente.
+
 ### Configuración de Desarrollo
 
 Para configurar el entorno de desarrollo completo, ver [docs/development-setup.md](docs/development-setup.md).

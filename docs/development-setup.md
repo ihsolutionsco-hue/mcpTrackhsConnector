@@ -191,7 +191,106 @@ TRACKHS_PASSWORD=tu_contraseña
 
 ## 🐛 Solución de Problemas
 
-### Pre-commit Hooks Fallan
+### Pre-commit Hooks con Tests
+
+#### Configuración Inicial
+
+```bash
+# 1. Activar entorno virtual
+source venv/bin/activate  # Linux/Mac
+.\venv\Scripts\activate   # Windows
+
+# 2. Instalar dependencias incluyendo pytest-xdist
+pip install -r requirements-dev.txt
+
+# 3. Instalar pre-commit hooks
+pre-commit install
+```
+
+#### Qué Hacen los Hooks
+
+Los pre-commit hooks ejecutan validaciones completas:
+
+1. **Formateo automático** (3-5s)
+   - Black: Formatea código Python
+   - isort: Ordena imports
+
+2. **Validación de sintaxis** (2-3s)
+   - flake8: Solo errores críticos
+
+3. **Tests optimizados** (15-30s)
+   - `--lf`: Solo tests que fallaron antes
+   - `--ff`: Tests fallidos primero
+   - `-x`: Detener al primer fallo
+   - `-n auto`: Paralelo (usa todos los cores)
+   - Sin cobertura (más rápido)
+
+4. **Checks básicos** (1-2s)
+   - Espacios, merge conflicts, YAML
+
+**Tiempo total**:
+- Primera vez: 30-40s
+- Siguientes (sin fallos): 5-15s
+- Con fallos previos: 10-20s
+
+#### Optimización de Tests
+
+**Comportamiento inteligente:**
+
+```bash
+# Escenario 1: Primera vez
+git commit  # Ejecuta todos los tests: 30-40s
+
+# Escenario 2: Todos pasaron
+git commit  # Solo verifica: 5-15s
+
+# Escenario 3: Algo falló antes
+git commit  # Solo ejecuta tests que fallaron: 10-20s
+
+# Escenario 4: Desarrollo rápido
+git commit --no-verify  # Sin tests: < 5s
+```
+
+#### Troubleshooting
+
+**Tests muy lentos (> 60s)**
+```bash
+# Verificar que pytest-xdist esté instalado
+pip install pytest-xdist
+
+# Ver cuántos cores está usando
+pytest tests/ -n auto -v
+```
+
+**Tests fallan en pre-commit pero pasan manualmente**
+```bash
+# Limpiar cache de pytest
+pytest --cache-clear
+
+# Ejecutar exactamente como pre-commit
+pytest tests/ --lf --ff -x -n auto --no-cov
+```
+
+**Saltar tests temporalmente**
+```bash
+# Para desarrollo iterativo rápido
+git commit --no-verify -m "WIP"
+
+# O configurar alias
+git config --local alias.cfast "commit --no-verify"
+git cfast -m "WIP"
+```
+
+**Error: "pytest: command not found"**
+```bash
+# Asegurar que el venv esté activado
+source venv/bin/activate
+
+# Reinstalar dependencias
+pip install -r requirements-dev.txt
+```
+
+**Pre-commit Hooks Fallan**
 
 ```bash
 # Ver logs detallados
