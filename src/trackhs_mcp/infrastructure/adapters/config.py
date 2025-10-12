@@ -35,6 +35,24 @@ class TrackHSConfig(BaseTrackHSConfig):
                 "Configura TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno."
             )
 
+        # Intentar decodificar credenciales si están encriptadas
+        try:
+            # Verificar si las credenciales parecen estar encriptadas (hex)
+            if len(username) == 32 and all(
+                c in "0123456789ABCDEF" for c in username.upper()
+            ):
+                import logging
+
+                logger = logging.getLogger(__name__)
+                logger.warning(
+                    "Credenciales parecen estar encriptadas. Usando valores tal como están."
+                )
+                # Si están encriptadas, podrías implementar decodificación aquí
+                # Por ahora, usamos los valores tal como están
+        except Exception:
+            # Si hay error en la verificación, continuar con los valores originales
+            pass
+
         return cls(
             base_url=base_url, username=username, password=password, timeout=timeout
         )

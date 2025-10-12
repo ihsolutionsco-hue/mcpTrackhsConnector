@@ -97,10 +97,14 @@ class TrackHSApiClient(ApiClientPort):
                 import logging
 
                 logger = logging.getLogger(__name__)
-                logger.debug(f"API Request: {method} {endpoint}")
-                logger.debug(f"Params: {params}")
-                logger.debug(f"Full URL: {self.client.base_url}{endpoint}")
-                logger.debug(f"Headers: {headers}")
+                logger.info(f"API Request: {method} {endpoint}")
+                logger.info(f"Params: {params}")
+                logger.info(f"Full URL: {self.client.base_url}{endpoint}")
+                logger.info(f"Headers: {headers}")
+                logger.info(f"Username from config: {self.config.username}")
+                logger.info(
+                    f"Password length: {len(self.config.password) if self.config.password else 0}"
+                )
 
                 # Realizar petición usando endpoint relativo
                 response = await self.client.request(method, endpoint, **request_kwargs)
