@@ -52,6 +52,11 @@ jobs:
         run: flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
 
       - name: Tests + coverage
+        env:
+          TRACKHS_API_URL: "https://ihmvacations.trackhs.com/api"
+          TRACKHS_USERNAME: "test_user"
+          TRACKHS_PASSWORD: "test_password"
+          TRACKHS_TIMEOUT: "30"
         run: pytest -q --cov=src --cov-report=xml --cov-report=term-missing
 
       - name: Save coverage xml
@@ -63,6 +68,11 @@ jobs:
 
       # Smoke test: comprueba que el objeto `mcp` existe y es FastMCP
       - name: FastMCP smoke
+        env:
+          TRACKHS_API_URL: "https://ihmvacations.trackhs.com/api"
+          TRACKHS_USERNAME: "test_user"
+          TRACKHS_PASSWORD: "test_password"
+          TRACKHS_TIMEOUT: "30"
         run: |
           python - <<'PY'
           import importlib, sys
