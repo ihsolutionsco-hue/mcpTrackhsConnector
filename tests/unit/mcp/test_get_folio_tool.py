@@ -2,11 +2,12 @@
 Tests unitarios para la herramienta MCP get_folio
 """
 
-import pytest
 from unittest.mock import AsyncMock, Mock
 
-from src.trackhs_mcp.infrastructure.mcp.get_folio import register_get_folio
+import pytest
+
 from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
+from src.trackhs_mcp.infrastructure.mcp.get_folio import register_get_folio
 
 
 class TestGetFolioTool:

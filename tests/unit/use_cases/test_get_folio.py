@@ -2,11 +2,12 @@
 Tests unitarios para GetFolioUseCase
 """
 
-import pytest
 from unittest.mock import AsyncMock, Mock
 
+import pytest
+
 from src.trackhs_mcp.application.use_cases.get_folio import GetFolioUseCase
-from src.trackhs_mcp.domain.entities.folios import GetFolioParams, Folio
+from src.trackhs_mcp.domain.entities.folios import Folio, GetFolioParams
 from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
 
 

@@ -2,11 +2,12 @@
 Tests end-to-end para get_folio
 """
 
-import pytest
 from unittest.mock import AsyncMock, Mock, patch
 
-from src.trackhs_mcp.infrastructure.mcp.get_folio import register_get_folio
+import pytest
+
 from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+from src.trackhs_mcp.infrastructure.mcp.get_folio import register_get_folio
 
 
 class TestGetFolioE2E:

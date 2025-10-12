@@ -2,12 +2,13 @@
 Tests de integración para get_folio
 """
 
-import pytest
 from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+
 from src.trackhs_mcp.application.use_cases.get_folio import GetFolioUseCase
+from src.trackhs_mcp.domain.entities.folios import Folio, GetFolioParams
 from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from src.trackhs_mcp.domain.entities.folios import GetFolioParams, Folio
 
 
 class TestGetFolioIntegration:
