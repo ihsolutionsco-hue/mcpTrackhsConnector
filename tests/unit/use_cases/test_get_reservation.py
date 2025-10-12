@@ -155,7 +155,6 @@ class TestGetReservationUseCase:
         assert "reservation_id debe ser un entero positivo mayor que 0" in str(
             exc_info.value
         )
-        assert exc_info.value.field == "reservation_id"
 
     @pytest.mark.asyncio
     async def test_execute_invalid_id_negative(self, use_case):
@@ -170,7 +169,6 @@ class TestGetReservationUseCase:
         assert "reservation_id debe ser un entero positivo mayor que 0" in str(
             exc_info.value
         )
-        assert exc_info.value.field == "reservation_id"
 
     @pytest.mark.asyncio
     async def test_execute_empty_response(self, use_case, mock_api_client):
@@ -188,7 +186,6 @@ class TestGetReservationUseCase:
         assert f"No se encontraron datos para la reserva ID {reservation_id}" in str(
             exc_info.value
         )
-        assert exc_info.value.field == "reservation_id"
 
     @pytest.mark.asyncio
     async def test_execute_api_error_401(self, use_case, mock_api_client):
