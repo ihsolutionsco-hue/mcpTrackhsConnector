@@ -76,22 +76,30 @@ class Occupant(BaseModel):
 class Rate(BaseModel):
     """Modelo de Rate"""
 
+    model_config = {"populate_by_name": True}
+
     date: str = Field(..., description="Fecha")
     rate: str = Field(..., description="Tarifa")
     nights: int = Field(..., description="Noches")
-    is_quoted: bool = Field(..., description="Si está cotizada")
+    is_quoted: bool = Field(..., alias="isQuoted", description="Si está cotizada")
 
 
 class GuestFee(BaseModel):
     """Modelo de GuestFee"""
 
-    id: str = Field(..., description="ID de la tarifa")
-    name: str = Field(..., description="Nombre de la tarifa")
-    display_as: Literal["itemize", "rent", "tax", "service"] = Field(
-        ..., description="Cómo mostrar"
+    model_config = {"populate_by_name": True}
+
+    id: Union[str, int] = Field(
+        ..., description="ID de la tarifa (puede ser string o int)"
     )
-    quantity: str = Field(..., description="Cantidad")
-    unit_value: str = Field(..., description="Valor unitario")
+    name: str = Field(..., description="Nombre de la tarifa")
+    display_as: Optional[Literal["itemize", "rent", "tax", "service"]] = Field(
+        default=None, description="Cómo mostrar"
+    )
+    quantity: Union[str, int] = Field(
+        ..., description="Cantidad (puede ser string o int)"
+    )
+    unit_value: Optional[str] = Field(default=None, description="Valor unitario")
     value: str = Field(..., description="Valor")
 
 
@@ -106,26 +114,44 @@ class Tax(BaseModel):
 class OwnerFee(BaseModel):
     """Modelo de OwnerFee"""
 
-    id: str = Field(..., description="ID de la tarifa")
-    name: str = Field(..., description="Nombre de la tarifa")
-    display_as: Literal["itemize", "rent", "tax", "service"] = Field(
-        ..., description="Cómo mostrar"
+    model_config = {"populate_by_name": True}
+
+    id: Union[str, int] = Field(
+        ..., description="ID de la tarifa (puede ser string o int)"
     )
-    quantity: str = Field(..., description="Cantidad")
-    unit_value: str = Field(..., description="Valor unitario")
+    name: str = Field(..., description="Nombre de la tarifa")
+    display_as: Optional[Literal["itemize", "rent", "tax", "service"]] = Field(
+        default=None, description="Cómo mostrar"
+    )
+    quantity: Union[str, int] = Field(
+        ..., description="Cantidad (puede ser string o int)"
+    )
+    unit_value: Optional[str] = Field(default=None, description="Valor unitario")
     value: str = Field(..., description="Valor")
 
 
 class OwnerBreakdown(BaseModel):
     """Modelo de OwnerBreakdown"""
 
-    gross_rent: str = Field(..., description="Renta bruta del propietario")
-    fee_revenue: str = Field(..., description="Ingresos por tarifas")
-    gross_revenue: str = Field(..., description="Ingresos brutos")
-    manager_commission: str = Field(..., description="Comisión del manager")
-    agent_commission: str = Field(..., description="Comisión del agente")
-    net_revenue: str = Field(..., description="Ingresos netos")
-    owner_fees: List[OwnerFee] = Field(..., description="Tarifas del propietario")
+    model_config = {"populate_by_name": True}
+
+    gross_rent: str = Field(
+        ..., alias="grossRent", description="Renta bruta del propietario"
+    )
+    fee_revenue: str = Field(
+        ..., alias="feeRevenue", description="Ingresos por tarifas"
+    )
+    gross_revenue: str = Field(..., alias="grossRevenue", description="Ingresos brutos")
+    manager_commission: str = Field(
+        ..., alias="managerCommission", description="Comisión del manager"
+    )
+    agent_commission: str = Field(
+        ..., alias="agentCommission", description="Comisión del agente"
+    )
+    net_revenue: str = Field(..., alias="netRevenue", description="Ingresos netos")
+    owner_fees: List[OwnerFee] = Field(
+        ..., alias="ownerFees", description="Tarifas del propietario"
+    )
 
 
 class GuestBreakdown(BaseModel):
@@ -139,8 +165,10 @@ class GuestBreakdown(BaseModel):
         alias="guestGrossDisplayRent",
         description="Renta bruta mostrada al huésped",
     )
-    discount: str = Field(..., description="Descuento")
-    promo_value: str = Field(..., alias="promoValue", description="Valor promocional")
+    discount: Optional[str] = Field(default=None, description="Descuento")
+    promo_value: Optional[str] = Field(
+        default=None, alias="promoValue", description="Valor promocional"
+    )
     discount_total: float = Field(
         ..., alias="discountTotal", description="Total de descuentos"
     )
@@ -274,8 +302,8 @@ class Reservation(BaseModel):
     is_unit_type_locked: bool = Field(
         ..., alias="isUnitTypeLocked", description="Si el tipo de unidad está bloqueado"
     )
-    unit_type_id: int = Field(
-        ..., alias="unitTypeId", description="ID del tipo de unidad"
+    unit_type_id: Optional[int] = Field(
+        default=None, alias="unitTypeId", description="ID del tipo de unidad"
     )
     arrival_date: str = Field(
         ..., alias="arrivalDate", description="Fecha de llegada (ISO 8601)"
@@ -350,7 +378,9 @@ class Reservation(BaseModel):
         alias="cancellationReasonId",
         description="ID de la razón de cancelación",
     )
-    user_id: int = Field(..., alias="userId", description="ID del usuario")
+    user_id: Optional[int] = Field(
+        default=None, alias="userId", description="ID del usuario"
+    )
     travel_agent_id: Optional[int] = Field(
         default=None, alias="travelAgentId", description="ID del agente de viajes"
     )
