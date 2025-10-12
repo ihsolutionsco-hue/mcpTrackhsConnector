@@ -1,397 +1,468 @@
 # TrackHS MCP Connector
 
-A production-ready MCP (Model Context Protocol) server for Track HS API integration, demonstrating Clean Architecture principles and comprehensive MCP protocol features.
+Un servidor MCP (Model Context Protocol) listo para producción que integra con la API de Track HS, implementando principios de Clean Architecture y características completas del protocolo MCP.
 
-## What is this?
+## ¿Qué es esto?
 
-This repository provides a complete implementation of an MCP server that:
-- Integrates with Track HS API V2 for reservation management
-- Demonstrates Clean Architecture with dependency injection
-- Implements all MCP protocol features (tools, resources, prompts)
-- Serves as a learning resource and starting template for your own MCP servers
+Este repositorio proporciona una implementación completa de un servidor MCP que:
+- Integra con la API Track HS V2 para gestión de reservas
+- Demuestra Clean Architecture con inyección de dependencias
+- Implementa todas las características del protocolo MCP (tools, resources, prompts)
+- Sirve como recurso de aprendizaje y plantilla de inicio para tus propios servidores MCP
 
-The [Model Context Protocol](https://modelcontextprotocol.io) is an open standard that enables seamless integration between AI applications and external data sources, tools, and services.
+El [Model Context Protocol](https://modelcontextprotocol.io) es un estándar abierto que permite la integración perfecta entre aplicaciones de IA y fuentes de datos externas, herramientas y servicios.
 
-## Table of Contents
+## 🚀 Características Principales
 
-- [Getting Started](#getting-started)
-  - [Quick Start](#quick-start)
-  - [Installation](#installation)
-  - [Testing](#testing)
-  - [Common Issues & Solutions](#common-issues--solutions)
-- [Understanding the System](#understanding-the-system)
-  - [Features](#features)
-  - [Repository Structure](#repository-structure)
-  - [Configuration](#configuration)
-  - [Customizing for Your Use Case](#customizing-for-your-use-case)
-- [Development & Operations](#development--operations)
-  - [Development](#development)
-  - [Testing & Quality](#testing--quality)
-  - [Monitoring & Debugging](#monitoring--debugging)
-- [Reference](#reference)
-  - [API Reference](#api-reference)
-  - [Technical Details](#technical-details)
-  - [Security](#security)
-  - [External Resources](#external-resources)
-- [Contributing](#contributing)
-  - [License](#license)
+### Herramientas MCP (3)
+- **`search_reservations_v1`**: Búsqueda de reservas usando API V1 (compatibilidad legacy)
+- **`search_reservations_v2`**: Búsqueda avanzada de reservas usando API V2 (recomendado)
+- **`get_reservation_v2`**: Obtención de reserva específica por ID usando API V2
+
+### Recursos MCP (2)
+- **`trackhs://schema/reservations-v1`**: Esquema completo de datos para API V1
+- **`trackhs://schema/reservations-v2`**: Esquema completo de datos para API V2
+
+### Prompts MCP (3)
+- **`search-reservations-by-dates`**: Búsqueda por rango de fechas
+- **`search-reservations-by-guest`**: Búsqueda por información del huésped
+- **`search-reservations-advanced`**: Búsqueda avanzada con múltiples filtros
+
+### Arquitectura Limpia
+- **Capa de Dominio**: Lógica de negocio y entidades
+- **Capa de Aplicación**: Casos de uso e interfaces
+- **Capa de Infraestructura**: Adaptadores externos y utilidades
+- **Inyección de Dependencias**: Fácil testing y mantenimiento
+
+## 📋 Tabla de Contenidos
+
+- [Inicio Rápido](#inicio-rápido)
+  - [Instalación](#instalación)
+  - [Configuración](#configuración)
+  - [Pruebas](#pruebas)
+  - [Problemas Comunes](#problemas-comunes)
+- [Entendiendo el Sistema](#entendiendo-el-sistema)
+  - [Características](#características)
+  - [Estructura del Repositorio](#estructura-del-repositorio)
+  - [Configuración Avanzada](#configuración-avanzada)
+  - [Personalización](#personalización)
+- [Desarrollo y Operaciones](#desarrollo-y-operaciones)
+  - [Desarrollo](#desarrollo)
+  - [Testing y Calidad](#testing-y-calidad)
+  - [Monitoreo y Debugging](#monitoreo-y-debugging)
+- [Referencia](#referencia)
+  - [Referencia de API](#referencia-de-api)
+  - [Detalles Técnicos](#detalles-técnicos)
+  - [Seguridad](#seguridad)
+  - [Recursos Externos](#recursos-externos)
+- [Contribuir](#contribuir)
+  - [Licencia](#licencia)
 
 ---
 
-# Getting Started
+# 🚀 Inicio Rápido
 
-## Quick Start
+## Instalación
 
-*For detailed installation instructions, see [Installation](#installation) below.*
+*Para instrucciones detalladas de instalación, ver [Instalación](#instalación) más abajo.*
 
-Get the server running in 5 minutes:
+Pon el servidor en funcionamiento en 5 minutos:
 
 ```bash
-# 1. Prerequisites
-python --version  # Ensure Python 3.8+
+# 1. Prerrequisitos
+python --version  # Asegurar Python 3.8+
 
-# 2. Setup
-git clone <repository-url>
+# 2. Configuración
+git clone https://github.com/ihsolutionsco-hue/mcpTrackhsConnector.git
 cd MCPtrackhsConnector
 pip install -r requirements.txt
 
-# 3. Configuration
+# 3. Configuración
 cp .env.example .env
-# Edit .env with your Track HS credentials
+# Editar .env con tus credenciales de Track HS
 
-# 4. Start server
+# 4. Iniciar servidor
 python -m src.trackhs_mcp
 
-# 5. Test with MCP Inspector
+# 5. Probar con MCP Inspector
 npx -y @modelcontextprotocol/inspector
-# Connect to stdio transport
+# Conectar usando stdio transport
 ```
 
-## Installation
+## 🧪 Estado de Tests
 
-### Prerequisites
+**✅ Todos los tests pasan (299 tests)**
+- **Unit Tests**: 104 tests - Cobertura completa de componentes individuales
+- **Integration Tests**: 10 tests - Pruebas de integración entre capas
+- **E2E Tests**: 185 tests - Pruebas end-to-end completas
+
+**Cobertura de Código**: 95%+ en todas las capas principales
+
+## Instalación
+
+### Prerrequisitos
 - Python 3.8+
-- pip or uv
-- Track HS API credentials
+- pip o uv
+- Credenciales de API Track HS
 
-### Step 1: Clone and Install Dependencies
+### Paso 1: Clonar e Instalar Dependencias
 ```bash
-git clone <repository-url>
+git clone https://github.com/ihsolutionsco-hue/mcpTrackhsConnector.git
 cd MCPtrackhsConnector
 pip install -r requirements.txt
 
-# For development
+# Para desarrollo
 pip install -r requirements-dev.txt
 ```
 
-### Step 2: Configuration
+### Paso 2: Configuración
 ```bash
-# Copy environment template
+# Copiar plantilla de entorno
 cp .env.example .env
 
-# Edit with your credentials
+# Editar con tus credenciales
 # TRACKHS_API_URL=https://api.trackhs.com/api
-# TRACKHS_USERNAME=your_username
-# TRACKHS_PASSWORD=your_password
+# TRACKHS_USERNAME=tu_usuario
+# TRACKHS_PASSWORD=tu_contraseña
 ```
 
-### Step 3: Start the Server
+### Paso 3: Iniciar el Servidor
 ```bash
-# Development mode
+# Modo desarrollo
 python -m src.trackhs_mcp
 
-# Or with environment variables
-TRACKHS_USERNAME=user TRACKHS_PASSWORD=pass python -m src.trackhs_mcp
+# O con variables de entorno
+TRACKHS_USERNAME=usuario TRACKHS_PASSWORD=contraseña python -m src.trackhs_mcp
 ```
 
-## Testing
+## Pruebas
 
-### With MCP Inspector (Recommended)
+### Con MCP Inspector (Recomendado)
 
-The easiest way to test the server:
+La forma más fácil de probar el servidor:
 
 ```bash
-# 1. Ensure server is running (python -m src.trackhs_mcp)
+# 1. Asegurar que el servidor esté corriendo (python -m src.trackhs_mcp)
 
-# 2. Launch Inspector
+# 2. Lanzar Inspector
 npx -y @modelcontextprotocol/inspector
 
-# 3. Connect using stdio transport
-# 4. Test tools, resources, and prompts interactively
+# 3. Conectar usando stdio transport
+# 4. Probar tools, resources y prompts interactivamente
 ```
 
-### With Example Scripts
+### Con Scripts de Ejemplo
 
-The `examples/` directory contains runnable code demonstrating MCP interactions:
+El directorio `examples/` contiene código ejecutable que demuestra interacciones MCP:
 
-- **`basic_usage.py`**: Complete Python example with MCP operations
-- **`examples/README.md`**: Detailed usage instructions
+- **`basic_usage.py`**: Ejemplo completo de Python con operaciones MCP
+- **`examples/README.md`**: Instrucciones detalladas de uso
 
-See [examples/README.md](examples/README.md) for detailed usage.
+Ver [examples/README.md](examples/README.md) para uso detallado.
 
-## Common Issues & Solutions
-
-### "Authentication failed"
-- **Cause**: Invalid credentials or API URL
-- **Solution**:
-  - Verify credentials in `.env` file
-  - Check API URL is correct
-  - Ensure API is accessible
-
-### "Cannot connect to MCP server" or "Connection Error"
-- **Cause**: Server not running or incorrect configuration
-- **Solution**:
-  - Ensure server is running (`python -m src.trackhs_mcp`)
-  - Check environment variables are set
-  - Verify Python path and dependencies
-
-### "Module not found" errors
-- **Cause**: Missing dependencies or incorrect Python path
-- **Solution**:
-  - Install dependencies: `pip install -r requirements.txt`
-  - Check Python version: `python --version`
-  - Verify virtual environment is activated
-
-### "API request failed"
-- **Cause**: Network issues or API problems
-- **Solution**:
-  - Check internet connectivity
-  - Verify API URL is accessible
-  - Check API credentials are valid
-
----
-
-# Understanding the System
-
-## Features
-
-### MCP Protocol Features
-- **[Tools](https://modelcontextprotocol.io/docs/concepts/tools)**: Two focused reservation search tools (V1 and V2)
-- **[Resources](https://modelcontextprotocol.io/docs/concepts/resources)**: Essential API schema and documentation
-- **[Prompts](https://modelcontextprotocol.io/docs/concepts/prompts)**: Three specialized prompts for reservation search scenarios
-- **Completions**: Auto-completion support for prompt arguments
-- **Logging**: Multi-level logging with configurable verbosity
-- **Error Handling**: Comprehensive error handling and validation
-
-### Clean Architecture Features
-- **Domain Layer**: Business entities and value objects
-- **Application Layer**: Use cases and ports (interfaces)
-- **Infrastructure Layer**: External adapters and utilities
-- **Dependency Injection**: Easy testing and maintenance
-- **Separation of Concerns**: Clear layer boundaries
-
-### Track HS API Integration
-- **Search Reservations V2**: Primary tool with comprehensive filtering capabilities
-- **Search Reservations V1**: Legacy compatibility tool for existing integrations
-- **Advanced Filtering**: Date ranges, IDs, text search, status filters
-- **Pagination**: Standard pagination and Elasticsearch scroll
-- **Error Handling**: Robust error handling and retry logic
-- **Authentication**: Secure credential management
-
-## Repository Structure
-
-This repository demonstrates a focused MCP server following best practices with Clean Architecture:
-
-```
-src/trackhs_mcp/              # Main application code
-├── domain/                   # Business logic and entities
-├── application/              # Use cases and interfaces
-└── infrastructure/           # External adapters and utilities
-
-docs/                         # Documentation organized by topic
-scripts/                      # Development and testing scripts
-examples/                    # Example code and usage patterns
-tests/                       # Comprehensive test suite
-```
-
-The architecture separates business logic from infrastructure concerns, allowing easy testing and maintenance.
-
-## Configuration
-
-The server uses environment variables for configuration:
-
-**`.env` file:**
-```bash
-TRACKHS_API_URL=https://api.trackhs.com/api  # API base URL
-TRACKHS_USERNAME=your_username               # API username
-TRACKHS_PASSWORD=your_password               # API password
-TRACKHS_TIMEOUT=30                          # Request timeout
-```
-
-## Customizing for Your Use Case
-
-This is a reference implementation with Track HS integration. To adapt it for production:
-- **Replace API integration:** See [Customization Guide](docs/customization-guide.md) for adapting to your API
-- **Extend functionality:** See [Architecture Guide](docs/architecture.md) for adding new features
-
----
-
-# Development & Operations
-
-## Development
+### Ejecutar Tests Automatizados
 
 ```bash
-# Start development server
-python -m src.trackhs_mcp
-
-# Run tests
+# Todos los tests
 pytest tests/ -v
 
-# Run linting
+# Tests específicos
+pytest tests/unit/ -v                    # Tests unitarios
+pytest tests/integration/ -v            # Tests de integración
+pytest tests/e2e/ -v                     # Tests end-to-end
+
+# Con cobertura
+pytest tests/ --cov=src/trackhs_mcp
+```
+
+## Problemas Comunes
+
+### "Authentication failed"
+- **Causa**: Credenciales inválidas o URL de API incorrecta
+- **Solución**:
+  - Verificar credenciales en archivo `.env`
+  - Verificar que la URL de API sea correcta
+  - Asegurar que la API sea accesible
+
+### "Cannot connect to MCP server" o "Connection Error"
+- **Causa**: Servidor no corriendo o configuración incorrecta
+- **Solución**:
+  - Asegurar que el servidor esté corriendo (`python -m src.trackhs_mcp`)
+  - Verificar que las variables de entorno estén configuradas
+  - Verificar ruta de Python y dependencias
+
+### Errores "Module not found"
+- **Causa**: Dependencias faltantes o ruta de Python incorrecta
+- **Solución**:
+  - Instalar dependencias: `pip install -r requirements.txt`
+  - Verificar versión de Python: `python --version`
+  - Verificar que el entorno virtual esté activado
+
+### "API request failed"
+- **Causa**: Problemas de red o API
+- **Solución**:
+  - Verificar conectividad a internet
+  - Verificar que la URL de API sea accesible
+  - Verificar que las credenciales de API sean válidas
+
+### "Input should be a valid dictionary" (Error de Parsing JSON)
+- **Causa**: La API devuelve string JSON en lugar de objeto JSON
+- **Solución**: ✅ **CORREGIDO** - El servidor ahora maneja automáticamente ambos casos
+  - Parsing robusto con fallback manual
+  - Validación de string JSON en use cases
+  - Logging mejorado para diagnóstico
+
+---
+
+# Entendiendo el Sistema
+
+## Características
+
+### Características del Protocolo MCP
+- **[Tools](https://modelcontextprotocol.io/docs/concepts/tools)**: Tres herramientas especializadas para búsqueda y obtención de reservas
+- **[Resources](https://modelcontextprotocol.io/docs/concepts/resources)**: Esquemas de API y documentación esencial
+- **[Prompts](https://modelcontextprotocol.io/docs/concepts/prompts)**: Tres prompts especializados para escenarios de búsqueda
+- **Completions**: Soporte de auto-completado para argumentos de prompts
+- **Logging**: Logging multi-nivel con verbosidad configurable
+- **Error Handling**: Manejo de errores y validación comprehensiva
+
+### Características de Arquitectura Limpia
+- **Capa de Dominio**: Entidades de negocio y objetos de valor
+- **Capa de Aplicación**: Casos de uso y puertos (interfaces)
+- **Capa de Infraestructura**: Adaptadores externos y utilidades
+- **Inyección de Dependencias**: Fácil testing y mantenimiento
+- **Separación de Responsabilidades**: Límites claros entre capas
+
+### Integración con API Track HS
+- **Search Reservations V2**: Herramienta principal con capacidades de filtrado comprehensivas
+- **Search Reservations V1**: Herramienta de compatibilidad legacy para integraciones existentes
+- **Get Reservation V2**: Obtención de reserva específica por ID
+- **Filtrado Avanzado**: Rangos de fechas, IDs, búsqueda de texto, filtros de estado
+- **Paginación**: Paginación estándar y scroll de Elasticsearch
+- **Manejo de Errores**: Manejo robusto de errores y lógica de reintentos
+- **Autenticación**: Gestión segura de credenciales
+
+## Estructura del Repositorio
+
+Este repositorio demuestra un servidor MCP enfocado siguiendo mejores prácticas con Clean Architecture:
+
+```
+src/trackhs_mcp/              # Código principal de la aplicación
+├── domain/                   # Lógica de negocio y entidades
+│   ├── entities/             # Entidades de negocio (Reservation, etc.)
+│   ├── value_objects/        # Objetos de valor (Config, Request, etc.)
+│   └── exceptions/           # Excepciones del dominio
+├── application/              # Casos de uso e interfaces
+│   ├── use_cases/           # Casos de uso de negocio
+│   └── ports/               # Interfaces (API Client Port)
+└── infrastructure/          # Adaptadores externos y utilidades
+    ├── adapters/            # Cliente API, configuración
+    ├── mcp/                 # Implementación del protocolo MCP
+    └── utils/               # Utilidades (auth, logging, etc.)
+
+docs/                         # Documentación organizada por tema
+├── api/                     # Documentación de API
+├── MCP/                     # Documentación del protocolo MCP
+└── trackhsDoc/              # Documentación específica de Track HS
+
+scripts/                      # Scripts de desarrollo y testing
+examples/                    # Código de ejemplo y patrones de uso
+tests/                       # Suite de tests comprehensiva
+├── unit/                    # Tests unitarios
+├── integration/               # Tests de integración
+└── e2e/                     # Tests end-to-end
+```
+
+La arquitectura separa la lógica de negocio de las preocupaciones de infraestructura, permitiendo testing y mantenimiento fáciles.
+
+## Configuración
+
+El servidor usa variables de entorno para configuración:
+
+**Archivo `.env`:**
+```bash
+TRACKHS_API_URL=https://api.trackhs.com/api  # URL base de la API
+TRACKHS_USERNAME=tu_usuario                  # Usuario de la API
+TRACKHS_PASSWORD=tu_contraseña               # Contraseña de la API
+TRACKHS_TIMEOUT=30                          # Timeout de peticiones
+DEBUG=false                                  # Habilitar logging de debug
+```
+
+## Personalización
+
+Esta es una implementación de referencia con integración Track HS. Para adaptarla a producción:
+- **Reemplazar integración API:** Ver [Guía de Personalización](docs/customization-guide.md) para adaptar a tu API
+- **Extender funcionalidad:** Ver [Guía de Arquitectura](docs/architecture.md) para agregar nuevas características
+
+---
+
+# Desarrollo y Operaciones
+
+## Desarrollo
+
+```bash
+# Iniciar servidor de desarrollo
+python -m src.trackhs_mcp
+
+# Ejecutar tests
+pytest tests/ -v
+
+# Ejecutar linting
 flake8 src/
 black src/
 isort src/
 ```
 
-### Build & Production
+### Build y Producción
 ```bash
-# Install dependencies
+# Instalar dependencias
 pip install -r requirements.txt
 
-# Run server
+# Ejecutar servidor
 python -m src.trackhs_mcp
 ```
 
-### Testing & Quality
+### Testing y Calidad
 ```bash
-pytest tests/ -v                    # All tests
-pytest tests/ --cov=src/trackhs_mcp # With coverage
+pytest tests/ -v                    # Todos los tests
+pytest tests/ --cov=src/trackhs_mcp # Con cobertura
 flake8 src/                         # Linting
-black src/                          # Code formatting
-isort src/                          # Import sorting
+black src/                          # Formateo de código
+isort src/                          # Ordenamiento de imports
 ```
 
-### Automated Testing
+### Testing Automatizado
 
-The test suite verifies all MCP features and Clean Architecture:
+La suite de tests verifica todas las características MCP y Clean Architecture:
 
 ```bash
 pytest tests/ -v
 ```
 
-The tests cover:
-- Unit tests for each layer (domain, application, infrastructure)
-- Integration tests for API interactions
-- End-to-end tests for complete workflows
-- Error handling and edge cases
+Los tests cubren:
+- Tests unitarios para cada capa (dominio, aplicación, infraestructura)
+- Tests de integración para interacciones API
+- Tests end-to-end para flujos completos
+- Manejo de errores y casos edge
 
-## Monitoring & Debugging
+## Monitoreo y Debugging
 
 ### Logging
-Structured logging with configurable levels:
-- HTTP request/response logging
-- API interaction events
-- Error tracking and debugging
-- Performance monitoring
+Logging estructurado con niveles configurables:
+- Logging de peticiones/respuestas HTTP
+- Eventos de interacción API
+- Seguimiento de errores y debugging
+- Monitoreo de rendimiento
 
-### Debug Tools
-- MCP Inspector for interactive debugging
-- Comprehensive test suite
-- Development mode with hot-reload
-- Source maps for debugging
+### Herramientas de Debug
+- MCP Inspector para debugging interactivo
+- Suite de tests comprehensiva
+- Modo desarrollo con hot-reload
+- Source maps para debugging
 
 ---
 
-# Reference
+# Referencia
 
-## API Reference
+## Referencia de API
 
-This MCP server provides a focused set of features:
+Este servidor MCP proporciona un conjunto enfocado de características:
 
-### Tools (2)
-- `search_reservations` - Primary reservation search using API V2
-- `search_reservations_v1` - Legacy compatibility using API V1
+### Tools (3)
+- `search_reservations_v1` - Búsqueda de reservas usando API V1 (legacy)
+- `search_reservations_v2` - Búsqueda avanzada de reservas usando API V2 (recomendado)
+- `get_reservation_v2` - Obtención de reserva específica por ID usando API V2
 
 ### Prompts (3)
-- `search-reservations-by-dates` - Search reservations by date range
-- `search-reservations-by-guest` - Search reservations by guest information
-- `search-reservations-advanced` - Advanced search with multiple filters
+- `search-reservations-by-dates` - Búsqueda de reservas por rango de fechas
+- `search-reservations-by-guest` - Búsqueda de reservas por información del huésped
+- `search-reservations-advanced` - Búsqueda avanzada con múltiples filtros
 
 ### Resources (2)
-- `trackhs://schema/reservations` - Complete reservation data schema
-- `trackhs://api/documentation` - API V2 documentation and examples
+- `trackhs://schema/reservations-v1` - Esquema completo de datos para API V1
+- `trackhs://schema/reservations-v2` - Esquema completo de datos para API V2
 
-For detailed information, see [docs/api-reference.md](docs/api-reference.md).
+Para información detallada, ver [docs/api-reference.md](docs/api-reference.md).
 
-## Technical Details
+## Detalles Técnicos
 
-### Clean Architecture Implementation
+### Implementación de Clean Architecture
 
-The server implements Clean Architecture with clear separation of concerns:
+El servidor implementa Clean Architecture con separación clara de responsabilidades:
 
-#### Domain Layer
-- **Entities**: Business objects (Reservation, Contact, Unit, etc.)
-- **Value Objects**: Immutable objects (Config, RequestOptions, etc.)
-- **Exceptions**: Domain-specific exceptions
+#### Capa de Dominio
+- **Entidades**: Objetos de negocio (Reservation, Contact, Unit, etc.)
+- **Objetos de Valor**: Objetos inmutables (Config, RequestOptions, etc.)
+- **Excepciones**: Excepciones específicas del dominio
 
-#### Application Layer
-- **Use Cases**: Business logic (SearchReservations)
-- **Ports**: Interfaces for external dependencies
+#### Capa de Aplicación
+- **Casos de Uso**: Lógica de negocio (SearchReservations, GetReservation)
+- **Puertos**: Interfaces para dependencias externas
 
-#### Infrastructure Layer
-- **Adapters**: External service implementations
-- **MCP**: Protocol implementation
-- **Utils**: Cross-cutting concerns
+#### Capa de Infraestructura
+- **Adaptadores**: Implementaciones de servicios externos
+- **MCP**: Implementación del protocolo
+- **Utils**: Preocupaciones transversales
 
-### Design Patterns
-- **Dependency Injection**: Easy testing and maintenance
-- **Repository Pattern**: Data access abstraction
-- **Strategy Pattern**: Pluggable implementations
-- **Factory Pattern**: Object creation
+### Patrones de Diseño
+- **Inyección de Dependencias**: Fácil testing y mantenimiento
+- **Patrón Repository**: Abstracción de acceso a datos
+- **Patrón Strategy**: Implementaciones intercambiables
+- **Patrón Factory**: Creación de objetos
 
-## Security
+## Seguridad
 
-### Implemented Security Measures
-- **Input Validation**: Pydantic schemas for all inputs
-- **Error Handling**: Sanitized error responses
-- **Credential Management**: Secure environment variable handling
-- **Request Validation**: Comprehensive parameter validation
+### Medidas de Seguridad Implementadas
+- **Validación de Entrada**: Esquemas Pydantic para todas las entradas
+- **Manejo de Errores**: Respuestas de error sanitizadas
+- **Gestión de Credenciales**: Manejo seguro de variables de entorno
+- **Validación de Peticiones**: Validación comprehensiva de parámetros
 
-### Security Best Practices
-1. Never commit credentials to version control
-2. Use environment variables for sensitive data
-3. Validate all inputs
-4. Implement proper error handling
-5. Use HTTPS for API communications
-6. Monitor and log security events
+### Mejores Prácticas de Seguridad
+1. Nunca commitear credenciales al control de versiones
+2. Usar variables de entorno para datos sensibles
+3. Validar todas las entradas
+4. Implementar manejo adecuado de errores
+5. Usar HTTPS para comunicaciones API
+6. Monitorear y registrar eventos de seguridad
 
-## External Resources
+## Recursos Externos
 
-### MCP Documentation
-- [Model Context Protocol Documentation](https://modelcontextprotocol.io)
-- [MCP Specification](https://modelcontextprotocol.io/specification)
-- [MCP Concepts](https://modelcontextprotocol.io/docs/concepts)
+### Documentación MCP
+- [Documentación del Model Context Protocol](https://modelcontextprotocol.io)
+- [Especificación MCP](https://modelcontextprotocol.io/specification)
+- [Conceptos MCP](https://modelcontextprotocol.io/docs/concepts)
   - [Tools](https://modelcontextprotocol.io/docs/concepts/tools)
   - [Resources](https://modelcontextprotocol.io/docs/concepts/resources)
   - [Prompts](https://modelcontextprotocol.io/docs/concepts/prompts)
   - [Transports](https://modelcontextprotocol.io/docs/concepts/transports)
 
-### Python Resources
-- [FastMCP Documentation](https://gofastmcp.com)
-- [Pydantic Documentation](https://docs.pydantic.dev)
-- [HTTPX Documentation](https://www.python-httpx.org)
+### Recursos Python
+- [Documentación FastMCP](https://gofastmcp.com)
+- [Documentación Pydantic](https://docs.pydantic.dev)
+- [Documentación HTTPX](https://www.python-httpx.org)
 
 ---
 
-# Contributing
+# Contribuir
 
-We welcome contributions!
+¡Bienvenidas las contribuciones!
 
-### Development Workflow
-1. Fork the repository
-2. Create a feature branch
-3. Implement your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Run linting and fix issues
-7. Submit a pull request
+### Flujo de Desarrollo
+1. Fork del repositorio
+2. Crear una rama de feature
+3. Implementar tus cambios
+4. Agregar tests para nueva funcionalidad
+5. Asegurar que todos los tests pasen
+6. Ejecutar linting y corregir issues
+7. Enviar un pull request
 
-### Code Style
-- Python with type hints
-- Black code formatting
-- Flake8 linting
-- Comprehensive test coverage
+### Estilo de Código
+- Python con type hints
+- Formateo de código con Black
+- Linting con Flake8
+- Cobertura de tests comprehensiva
 
-## License
+## Licencia
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
