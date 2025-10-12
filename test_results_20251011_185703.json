@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-10-11T18:57:03.695138",
+  "total_time": 3.530177116394043,
+  "results": {
+    "functionality": [
+      {
+        "test": "imports",
+        "status": "PASS"
+      },
+      {
+        "test": "cache",
+        "status": "PASS"
+      },
+      {
+        "test": "metrics",
+        "status": "PASS"
+      },
+      {
+        "test": "enhanced_tools",
+        "status": "PASS"
+      },
+      {
+        "test": "resources",
+        "status": "PASS"
+      },
+      {
+        "test": "integration",
+        "status": "PASS"
+      }
+    ],
+    "performance": {
+      "cache": {
+        "time_without_cache": 0.11264395713806152,
+        "time_with_cache": 0.001168966293334961,
+        "improvement_percent": 98.96224677911286,
+        "api_calls": 1
+      },
+      "metrics": {
+        "avg_record_time": 2.701282501220703e-06,
+        "max_record_time": 3.790855407714844e-05,
+        "min_record_time": 9.5367431640625e-07,
+        "summary_time": 2.47955322265625e-05,
+        "total_requests": 100,
+        "cache_hit_rate": 0.5
+      },
+      "enhanced_tools": {
+        "avg_search_time": 0.10979788303375244,
+        "max_search_time": 0.11731696128845215,
+        "min_search_time": 0.10270977020263672,
+        "total_searches": 10
+      },
+      "advanced_tools": {
+        "avg_search_time": 0.10623221397399903,
+        "max_search_time": 0.11107683181762695,
+        "min_search_time": 0.10158061981201172,
+        "total_searches": 5
+      },
+      "resources": {
+        "avg_access_time": 0.017328250408172607,
+        "max_access_time": 0.025216102600097656,
+        "min_access_time": 0.010770559310913086,
+        "total_accesses": 20
+      }
+    },
+    "validation": {
+      "parameter_validation": {
+        "status": "PASS"
+      },
+      "filter_validation": {
+        "status": "PASS"
+      },
+      "date_validation": {
+        "status": "PASS"
+      },
+      "format_validation": {
+        "status": "PASS"
+      },
+      "data_validation": {
+        "status": "PASS"
+      }
+    }
+  }
+}
