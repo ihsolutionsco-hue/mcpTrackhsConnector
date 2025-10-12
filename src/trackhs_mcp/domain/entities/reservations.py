@@ -55,16 +55,22 @@ class SecurityDeposit(BaseModel):
 class Occupant(BaseModel):
     """Modelo de Occupant"""
 
-    type_id: int = Field(..., description="ID del tipo de ocupante")
+    model_config = {"populate_by_name": True}
+
+    type_id: int = Field(..., alias="typeId", description="ID del tipo de ocupante")
     name: str = Field(..., description="Nombre del ocupante")
     handle: str = Field(..., description="Handle del ocupante")
     quantity: float = Field(..., description="Cantidad")
     included: bool = Field(..., description="Si está incluido en el precio de renta")
-    extra_quantity: float = Field(..., description="Cantidad extra permitida")
-    rate_per_person_per_stay: str = Field(
-        ..., description="Tarifa por persona por estadía"
+    extra_quantity: float = Field(
+        ..., alias="extraQuantity", description="Cantidad extra permitida"
     )
-    rate_per_stay: str = Field(..., description="Tarifa por estadía")
+    rate_per_person_per_stay: str = Field(
+        ..., alias="ratePerPersonPerStay", description="Tarifa por persona por estadía"
+    )
+    rate_per_stay: str = Field(
+        ..., alias="ratePerStay", description="Tarifa por estadía"
+    )
 
 
 class Rate(BaseModel):
@@ -125,38 +131,64 @@ class OwnerBreakdown(BaseModel):
 class GuestBreakdown(BaseModel):
     """Modelo de GuestBreakdown"""
 
-    gross_rent: str = Field(..., description="Renta bruta")
+    model_config = {"populate_by_name": True}
+
+    gross_rent: str = Field(..., alias="grossRent", description="Renta bruta")
     guest_gross_display_rent: str = Field(
-        ..., description="Renta bruta mostrada al huésped"
+        ...,
+        alias="guestGrossDisplayRent",
+        description="Renta bruta mostrada al huésped",
     )
     discount: str = Field(..., description="Descuento")
-    promo_value: str = Field(..., description="Valor promocional")
-    discount_total: float = Field(..., description="Total de descuentos")
-    net_rent: str = Field(..., description="Renta neta")
-    guest_net_display_rent: str = Field(
-        ..., description="Renta neta mostrada al huésped"
+    promo_value: str = Field(..., alias="promoValue", description="Valor promocional")
+    discount_total: float = Field(
+        ..., alias="discountTotal", description="Total de descuentos"
     )
-    actual_adr: str = Field(..., description="ADR actual")
-    guest_adr: str = Field(..., description="ADR del huésped")
-    total_guest_fees: str = Field(..., description="Total de tarifas del huésped")
-    total_rent_fees: str = Field(..., description="Total de tarifas de renta")
-    total_itemized_fees: str = Field(..., description="Total de tarifas detalladas")
-    total_tax_fees: str = Field(..., description="Total de tarifas de impuestos")
-    total_service_fees: str = Field(..., description="Total de tarifas de servicio")
-    folio_charges: str = Field(..., description="Cargos del folio")
+    net_rent: str = Field(..., alias="netRent", description="Renta neta")
+    guest_net_display_rent: str = Field(
+        ..., alias="guestNetDisplayRent", description="Renta neta mostrada al huésped"
+    )
+    actual_adr: str = Field(..., alias="actualAdr", description="ADR actual")
+    guest_adr: str = Field(..., alias="guestAdr", description="ADR del huésped")
+    total_guest_fees: str = Field(
+        ..., alias="totalGuestFees", description="Total de tarifas del huésped"
+    )
+    total_rent_fees: str = Field(
+        ..., alias="totalRentFees", description="Total de tarifas de renta"
+    )
+    total_itemized_fees: str = Field(
+        ..., alias="totalItemizedFees", description="Total de tarifas detalladas"
+    )
+    total_tax_fees: str = Field(
+        ..., alias="totalTaxFees", description="Total de tarifas de impuestos"
+    )
+    total_service_fees: str = Field(
+        ..., alias="totalServiceFees", description="Total de tarifas de servicio"
+    )
+    folio_charges: str = Field(
+        ..., alias="folioCharges", description="Cargos del folio"
+    )
     subtotal: str = Field(..., description="Subtotal")
-    guest_subtotal: str = Field(..., description="Subtotal del huésped")
-    total_taxes: str = Field(..., description="Total de impuestos")
-    total_guest_taxes: str = Field(..., description="Total de impuestos del huésped")
+    guest_subtotal: str = Field(
+        ..., alias="guestSubtotal", description="Subtotal del huésped"
+    )
+    total_taxes: str = Field(..., alias="totalTaxes", description="Total de impuestos")
+    total_guest_taxes: str = Field(
+        ..., alias="totalGuestTaxes", description="Total de impuestos del huésped"
+    )
     total: str = Field(..., description="Total")
-    grand_total: str = Field(..., description="Gran total")
-    net_payments: str = Field(..., description="Pagos netos")
+    grand_total: str = Field(..., alias="grandTotal", description="Gran total")
+    net_payments: str = Field(..., alias="netPayments", description="Pagos netos")
     payments: str = Field(..., description="Pagos")
     refunds: str = Field(..., description="Reembolsos")
-    net_transfers: str = Field(..., description="Transferencias netas")
+    net_transfers: str = Field(
+        ..., alias="netTransfers", description="Transferencias netas"
+    )
     balance: str = Field(..., description="Balance")
     rates: List[Rate] = Field(..., description="Tarifas")
-    guest_fees: List[GuestFee] = Field(..., description="Tarifas del huésped")
+    guest_fees: List[GuestFee] = Field(
+        ..., alias="guestFees", description="Tarifas del huésped"
+    )
     taxes: List[Tax] = Field(..., description="Impuestos")
 
 
@@ -219,120 +251,182 @@ class TravelInsuranceProduct(BaseModel):
 class Reservation(BaseModel):
     """Modelo de Reservation V2 - Basado en la especificación completa de la API"""
 
+    model_config = {"populate_by_name": True}
+
     id: int = Field(..., description="ID único de la reserva")
     alternates: Optional[List[str]] = Field(
         default=None, description="IDs de confirmación alternativos"
     )
     currency: str = Field(..., description="Moneda de la reserva")
-    unit_id: int = Field(..., description="ID de la unidad")
+    unit_id: int = Field(..., alias="unitId", description="ID de la unidad")
     client_ip_address: Optional[str] = Field(
-        default=None, description="Dirección IP del cliente"
+        default=None, alias="clientIPAddress", description="Dirección IP del cliente"
     )
     session: Optional[str] = Field(
         default=None, description="Datos de sesión para detección de fraude"
     )
-    is_unit_locked: bool = Field(..., description="Si la unidad está bloqueada")
-    is_unit_assigned: bool = Field(..., description="Si la unidad está asignada")
-    is_unit_type_locked: bool = Field(
-        ..., description="Si el tipo de unidad está bloqueado"
+    is_unit_locked: bool = Field(
+        ..., alias="isUnitLocked", description="Si la unidad está bloqueada"
     )
-    unit_type_id: int = Field(..., description="ID del tipo de unidad")
-    arrival_date: str = Field(..., description="Fecha de llegada (ISO 8601)")
-    departure_date: str = Field(..., description="Fecha de salida (ISO 8601)")
-    early_arrival: bool = Field(..., description="Llegada temprana")
-    late_departure: bool = Field(..., description="Salida tardía")
-    arrival_time: str = Field(..., description="Hora de llegada (ISO 8601)")
-    departure_time: str = Field(..., description="Hora de salida (ISO 8601)")
+    is_unit_assigned: bool = Field(
+        ..., alias="isUnitAssigned", description="Si la unidad está asignada"
+    )
+    is_unit_type_locked: bool = Field(
+        ..., alias="isUnitTypeLocked", description="Si el tipo de unidad está bloqueado"
+    )
+    unit_type_id: int = Field(
+        ..., alias="unitTypeId", description="ID del tipo de unidad"
+    )
+    arrival_date: str = Field(
+        ..., alias="arrivalDate", description="Fecha de llegada (ISO 8601)"
+    )
+    departure_date: str = Field(
+        ..., alias="departureDate", description="Fecha de salida (ISO 8601)"
+    )
+    early_arrival: bool = Field(
+        ..., alias="earlyArrival", description="Llegada temprana"
+    )
+    late_departure: bool = Field(
+        ..., alias="lateDeparture", description="Salida tardía"
+    )
+    arrival_time: str = Field(
+        ..., alias="arrivalTime", description="Hora de llegada (ISO 8601)"
+    )
+    departure_time: str = Field(
+        ..., alias="departureTime", description="Hora de salida (ISO 8601)"
+    )
     nights: float = Field(..., description="Número de noches")
     status: Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"] = (
         Field(..., description="Estado de la reserva")
     )
     cancelled_at: Optional[str] = Field(
-        default=None, description="Fecha de cancelación (ISO 8601)"
+        default=None, alias="cancelledAt", description="Fecha de cancelación (ISO 8601)"
     )
     occupants: List[Occupant] = Field(..., description="Ocupantes")
-    security_deposit: SecurityDeposit = Field(..., description="Depósito de seguridad")
-    updated_at: str = Field(..., description="Fecha de actualización (ISO 8601)")
-    created_at: str = Field(..., description="Fecha de creación (ISO 8601)")
-    booked_at: str = Field(..., description="Fecha de reserva (ISO 8601)")
-    guest_breakdown: GuestBreakdown = Field(..., description="Desglose del huésped")
+    security_deposit: SecurityDeposit = Field(
+        ..., alias="securityDeposit", description="Depósito de seguridad"
+    )
+    updated_at: str = Field(
+        ..., alias="updatedAt", description="Fecha de actualización (ISO 8601)"
+    )
+    created_at: str = Field(
+        ..., alias="createdAt", description="Fecha de creación (ISO 8601)"
+    )
+    booked_at: str = Field(
+        ..., alias="bookedAt", description="Fecha de reserva (ISO 8601)"
+    )
+    guest_breakdown: GuestBreakdown = Field(
+        ..., alias="guestBreakdown", description="Desglose del huésped"
+    )
     owner_breakdown: Optional[OwnerBreakdown] = Field(
-        default=None, description="Desglose del propietario"
+        default=None, alias="ownerBreakdown", description="Desglose del propietario"
     )
     discount_reason_id: Optional[int] = Field(
-        default=None, description="ID de la razón del descuento"
+        default=None,
+        alias="discountReasonId",
+        description="ID de la razón del descuento",
     )
     discount_notes: Optional[str] = Field(
-        default=None, description="Notas del descuento"
+        default=None, alias="discountNotes", description="Notas del descuento"
     )
-    contact_id: int = Field(..., description="ID del contacto")
-    channel_id: int = Field(..., description="ID del canal")
-    sub_channel: Optional[str] = Field(default=None, description="Subcanal")
-    folio_id: int = Field(..., description="ID del folio")
+    contact_id: int = Field(..., alias="contactId", description="ID del contacto")
+    channel_id: int = Field(..., alias="channelId", description="ID del canal")
+    sub_channel: Optional[str] = Field(
+        default=None, alias="subChannel", description="Subcanal"
+    )
+    folio_id: int = Field(..., alias="folioId", description="ID del folio")
     guarantee_policy_id: Optional[int] = Field(
-        default=None, description="ID de la política de garantía"
+        default=None,
+        alias="guaranteePolicyId",
+        description="ID de la política de garantía",
     )
     cancellation_policy_id: Optional[int] = Field(
-        default=None, description="ID de la política de cancelación"
+        default=None,
+        alias="cancellationPolicyId",
+        description="ID de la política de cancelación",
     )
     cancellation_reason_id: Optional[int] = Field(
-        default=None, description="ID de la razón de cancelación"
+        default=None,
+        alias="cancellationReasonId",
+        description="ID de la razón de cancelación",
     )
-    user_id: int = Field(..., description="ID del usuario")
+    user_id: int = Field(..., alias="userId", description="ID del usuario")
     travel_agent_id: Optional[int] = Field(
-        default=None, description="ID del agente de viajes"
+        default=None, alias="travelAgentId", description="ID del agente de viajes"
     )
-    campaign_id: Optional[int] = Field(default=None, description="ID de la campaña")
-    type_id: int = Field(..., description="ID del tipo")
-    rate_type_id: int = Field(..., description="ID del tipo de tarifa")
+    campaign_id: Optional[int] = Field(
+        default=None, alias="campaignId", description="ID de la campaña"
+    )
+    type_id: int = Field(..., alias="typeId", description="ID del tipo")
+    rate_type_id: int = Field(
+        ..., alias="rateTypeId", description="ID del tipo de tarifa"
+    )
     unit_code_id: Optional[int] = Field(
-        default=None, description="ID del código de unidad"
+        default=None, alias="unitCodeId", description="ID del código de unidad"
     )
     cancelled_by_id: Optional[int] = Field(
-        default=None, description="ID de quien canceló"
+        default=None, alias="cancelledById", description="ID de quien canceló"
     )
     payment_method_id: Optional[int] = Field(
-        default=None, description="ID del método de pago"
+        default=None, alias="paymentMethodId", description="ID del método de pago"
     )
-    quote_id: Optional[int] = Field(default=None, description="ID de la cotización")
+    quote_id: Optional[int] = Field(
+        default=None, alias="quoteId", description="ID de la cotización"
+    )
     hold_expires_at: Optional[str] = Field(
-        default=None, description="Fecha de expiración de la retención"
+        default=None,
+        alias="holdExpiresAt",
+        description="Fecha de expiración de la retención",
     )
-    is_taxable: bool = Field(..., description="Si es gravable")
+    is_taxable: bool = Field(..., alias="isTaxable", description="Si es gravable")
     invite_uuid: Optional[str] = Field(
-        default=None, description="UUID de la invitación"
+        default=None, alias="inviteUuid", description="UUID de la invitación"
     )
     uuid: str = Field(..., description="UUID de la reserva")
     source: str = Field(..., description="Fuente de la reserva")
-    is_channel_locked: bool = Field(..., description="Si el canal está bloqueado")
+    is_channel_locked: bool = Field(
+        ..., alias="isChannelLocked", description="Si el canal está bloqueado"
+    )
     agreement_status: Literal[
         "not-needed", "not-sent", "sent", "viewed", "received"
-    ] = Field(..., description="Estado del acuerdo")
-    automate_payment: bool = Field(..., description="Si el pago es automático")
+    ] = Field(..., alias="agreementStatus", description="Estado del acuerdo")
+    automate_payment: bool = Field(
+        ..., alias="automatePayment", description="Si el pago es automático"
+    )
     revenue_realized_method: str = Field(
-        ..., description="Método de realización de ingresos"
+        ...,
+        alias="revenueRealizedMethod",
+        description="Método de realización de ingresos",
     )
     schedule_type1: Optional[str] = Field(
-        default=None, description="Tipo de programación 1"
+        default=None, alias="scheduleType1", description="Tipo de programación 1"
     )
     schedule_percentage1: Optional[float] = Field(
-        default=None, description="Porcentaje de programación 1"
+        default=None,
+        alias="schedulePercentage1",
+        description="Porcentaje de programación 1",
     )
     schedule_type2: Optional[str] = Field(
-        default=None, description="Tipo de programación 2"
+        default=None, alias="scheduleType2", description="Tipo de programación 2"
     )
     schedule_percentage2: Optional[float] = Field(
-        default=None, description="Porcentaje de programación 2"
+        default=None,
+        alias="schedulePercentage2",
+        description="Porcentaje de programación 2",
     )
     promo_code_id: Optional[int] = Field(
-        default=None, description="ID del código promocional"
+        default=None, alias="promoCodeId", description="ID del código promocional"
     )
-    updated_by: str = Field(..., description="Actualizado por")
-    created_by: str = Field(..., description="Creado por")
-    group_id: Optional[int] = Field(default=None, description="ID del grupo")
-    payment_plan: List[PaymentPlan] = Field(..., description="Plan de pagos")
+    updated_by: str = Field(..., alias="updatedBy", description="Actualizado por")
+    created_by: str = Field(..., alias="createdBy", description="Creado por")
+    group_id: Optional[int] = Field(
+        default=None, alias="groupId", description="ID del grupo"
+    )
+    payment_plan: List[PaymentPlan] = Field(
+        ..., alias="paymentPlan", description="Plan de pagos"
+    )
     travel_insurance_products: List[TravelInsuranceProduct] = Field(
-        ..., description="Productos de seguro de viaje"
+        ..., alias="travelInsuranceProducts", description="Productos de seguro de viaje"
     )
     embedded: Dict[str, Any] = Field(
         ..., alias="_embedded", description="Datos embebidos"
