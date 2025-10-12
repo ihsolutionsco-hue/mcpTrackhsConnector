@@ -5,7 +5,6 @@ No emoji.
 
 
 
-Excelente pregunta. Basándome en todo el trabajo que hemos realizado, aquí está la información fundamental que debe documentarse para futuros desarrolladores:
 
 ## 📚 **Guía de Conocimiento Crítico para Desarrolladores**
 
@@ -232,6 +231,222 @@ python -m src.trackhs_mcp
 - Datos mock completos y realistas
 - Verificar tipos de datos correctos
 - Cobertura de código >95%
+```
+
+### 🔧 **9. Lecciones de Validación de Modelos Pydantic (Nuevo)**
+
+#### **A. Validación de Tipos Flexibles con Union**
+```markdown
+**PROBLEMA CRÍTICO**: API devuelve diferentes tipos para el mismo campo
+- Campo `alternates` puede ser: `["string"]` o `[{"type": "airbnb", "id": "123"}]`
+- Modelo esperaba solo `List[str]` pero API devuelve `List[dict]`
+
+**SOLUCIÓN IMPLEMENTADA**:
+```python
+# ANTES (RÍGIDO - FALLA)
+alternates: Optional[List[str]] = Field(...)
+
+# DESPUÉS (FLEXIBLE - FUNCIONA)
+alternates: Optional[List[Union[str, dict]]] = Field(
+    default=None,
+    description="IDs alternativos (strings o objetos con type e id)"
+)
+```
+
+**BENEFICIOS**:
+- ✅ Acepta formato real de la API
+- ✅ Mantiene retrocompatibilidad
+- ✅ Permite acceso directo a propiedades: `alt['type']`, `alt['id']`
+```
+
+#### **B. Campos Opcionales vs Requeridos - Alineación con OpenAPI**
+```markdown
+**PROBLEMA CRÍTICO**: Modelo marca campos como requeridos cuando API no los incluye
+- Campo `payment_plan` marcado como requerido
+- API no siempre incluye este campo en la respuesta
+- Especificación OpenAPI no lo marca como `required`
+
+**SOLUCIÓN IMPLEMENTADA**:
+```python
+# ANTES (RÍGIDO - FALLA)
+payment_plan: List[PaymentPlan] = Field(..., alias="paymentPlan")
+
+# DESPUÉS (FLEXIBLE - FUNCIONA)
+payment_plan: Optional[List[PaymentPlan]] = Field(
+    default=None,
+    alias="paymentPlan",
+    description="Plan de pagos (opcional)"
+)
+```
+
+**REGLAS DE ORO**:
+- ✅ Verificar especificación OpenAPI antes de marcar campos como requeridos
+- ✅ Usar `Optional[]` para campos que pueden estar ausentes
+- ✅ Usar `default=None` para campos opcionales
+```
+
+#### **C. Validación de Datos Reales vs Datos Mock**
+```markdown
+**PROBLEMA**: Tests pasan con datos mock pero fallan con datos reales
+- Datos mock: `"alternates": ["ALT123"]`
+- Datos reales: `"alternates": [{"type": "airbnb", "id": "HMCNNSE3SJ"}]`
+
+**SOLUCIÓN IMPLEMENTADA**:
+- Crear fixture `sample_reservation_data_v2` con formato real de API
+- Mantener fixture original para retrocompatibilidad
+- Validar con reservas reales del sistema
+
+**CÓDIGO DE REFERENCIA**:
+```python
+# tests/conftest.py - Fixture con datos reales
+@pytest.fixture
+def sample_reservation_data_v2():
+    return {
+        "id": 37165851,
+        "alternates": [{"type": "airbnb", "id": "HMCNNSE3SJ"}],
+        # ... resto de campos
+    }
+```
+
+#### **D. Impacto de Errores de Validación en Producción**
+```markdown
+**PROBLEMA CRÍTICO**: Errores de validación bloquean 100% de reservas
+- Error en `alternates`: Bloquea todas las reservas de canales OTA
+- Error en `payment_plan`: Bloquea reservas sin plan de pagos
+- Resultado: 0% de reservas funcionan
+
+**LECCIÓN APRENDIDA**:
+- ✅ Errores de validación son BLOQUEANTES para producción
+- ✅ Siempre validar con datos reales de la API
+- ✅ Implementar tipos flexibles con `Union[]`
+- ✅ Verificar especificación OpenAPI oficial
+```
+
+### 🧪 **10. Testing de Validación de Modelos (Nuevo)**
+
+#### **A. Tests de Validación Específicos**
+```markdown
+**PROBLEMA**: Tests generales no detectan errores de validación específicos
+**SOLUCIÓN**: Crear tests específicos para validación de modelos
+
+**EJEMPLO DE TEST DE VALIDACIÓN**:
+```python
+def test_alternates_as_objects():
+    """Test que alternates acepta objetos con type e id"""
+    data = {
+        "id": 37165851,
+        "alternates": [{"type": "airbnb", "id": "HMCNNSE3SJ"}],
+        # ... resto de campos requeridos
+    }
+
+    reservation = Reservation(**data)
+    assert reservation.alternates[0]['type'] == 'airbnb'
+    assert reservation.alternates[0]['id'] == 'HMCNNSE3SJ'
+```
+
+#### **B. Validación con Datos Reales**
+```markdown
+**REGLAS**:
+- ✅ Siempre probar con IDs de reservas reales del sistema
+- ✅ Validar con diferentes canales (Airbnb, Marriott, Booking.com)
+- ✅ Probar casos con y sin campos opcionales
+- ✅ Verificar que todos los campos se mapean correctamente
+```
+
+### 📋 **11. Checklist de Validación de Modelos (Nuevo)**
+
+#### **Antes de Implementar Modelo Pydantic:**
+```markdown
+□ Verificar especificación OpenAPI oficial
+□ Identificar campos que pueden estar ausentes
+□ Usar `Optional[]` para campos no marcados como `required`
+□ Implementar tipos flexibles con `Union[]` para campos con múltiples formatos
+□ Agregar alias para campos con nomenclatura diferente
+□ Configurar `populate_by_name=True`
+```
+
+#### **Antes de Deploy a Producción:**
+```markdown
+□ Probar con datos reales de la API (no solo mocks)
+□ Validar con diferentes tipos de reservas (diferentes canales)
+□ Verificar que campos opcionales manejan valores `None`
+□ Confirmar que tipos flexibles aceptan todos los formatos
+□ Ejecutar tests de validación específicos
+□ Documentar cambios en tipos de datos
+```
+
+### 🚨 **12. Errores de Validación Críticos (Nuevo)**
+
+#### **A. "Input should be a valid string [type=string_type, input_value={'type': 'airbnb'}]"**
+```markdown
+**CAUSA**: Modelo espera `List[str]` pero API devuelve `List[dict]`
+**SOLUCIÓN**: Usar `List[Union[str, dict]]`
+**IMPACTO**: Bloquea 100% de reservas con IDs alternativos
+```
+
+#### **B. "Field required [type=missing, input_value={...}]"**
+```markdown
+**CAUSA**: Campo marcado como requerido pero API no lo incluye
+**SOLUCIÓN**: Usar `Optional[]` y `default=None`
+**IMPACTO**: Bloquea reservas sin ese campo
+```
+
+#### **C. "35 validation errors for Reservation"**
+```markdown
+**CAUSA**: Múltiples errores de validación por tipos incorrectos
+**SOLUCIÓN**: Revisar todos los campos y tipos de datos
+**IMPACTO**: Bloquea completamente la funcionalidad
+```
+
+### 📖 **13. Archivos de Referencia Actualizados**
+
+#### **Archivos Críticos para Validación:**
+```markdown
+- src/trackhs_mcp/domain/entities/reservations.py (modelos con tipos flexibles)
+- tests/conftest.py (fixtures con datos reales)
+- docs/api/v2-bugfixes-alternates-paymentplan.md (documentación de correcciones)
+- CHANGELOG.md (historial de cambios de validación)
+```
+
+#### **Comandos de Validación:**
+```bash
+# Tests específicos de validación
+pytest tests/unit/mcp/test_get_reservation_v2_tool.py -v
+
+# Tests de integración
+pytest tests/integration/test_get_reservation_v2_integration.py -v
+
+# Tests E2E
+pytest tests/e2e/test_get_reservation_v2_e2e.py -v
+
+# Validación con datos reales
+python scripts/test_reservation_validation.py
+```
+
+### 🎯 **14. Principios de Validación de Modelos**
+
+#### **A. Flexibilidad vs Rigidez**
+```markdown
+- ✅ Usar `Union[]` para campos con múltiples formatos
+- ✅ Usar `Optional[]` para campos que pueden estar ausentes
+- ✅ Mantener retrocompatibilidad con formatos anteriores
+- ❌ No asumir formato único de la API
+```
+
+#### **B. Validación Exhaustiva**
+```markdown
+- ✅ Probar con datos reales de la API
+- ✅ Validar con diferentes tipos de reservas
+- ✅ Verificar manejo de campos opcionales
+- ✅ Confirmar que todos los campos se mapean correctamente
+```
+
+#### **C. Documentación de Cambios**
+```markdown
+- ✅ Documentar cambios en tipos de datos
+- ✅ Crear documentación de correcciones
+- ✅ Actualizar CHANGELOG con cambios críticos
+- ✅ Mantener ejemplos actualizados
 ```
 
 Esta documentación debe mantenerse actualizada y ser la primera referencia para cualquier desarrollador que trabaje en el proyecto.
