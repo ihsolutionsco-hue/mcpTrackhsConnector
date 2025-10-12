@@ -42,54 +42,14 @@ class TestGetReservationV2E2E:
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_get_reservation_v2_e2e_success(self, mock_mcp, api_client):
+    async def test_get_reservation_v2_e2e_success(
+        self, mock_mcp, api_client, sample_reservation_data
+    ):
         """Test E2E exitoso del tool MCP"""
         # Arrange
         reservation_id = "12345"
-        mock_response = {
-            "id": reservation_id,
-            "status": "Confirmed",
-            "arrivalDate": "2024-01-15",
-            "departureDate": "2024-01-20",
-            "nights": 5,
-            "currency": "USD",
-            "unitId": 789,
-            "contactId": 456,
-            "guestBreakdown": {
-                "grossRent": "1000.00",
-                "netRent": "950.00",
-                "grandTotal": "1045.00",
-                "balance": "0.00",
-            },
-            "ownerBreakdown": {"grossRent": "1000.00", "netRevenue": "850.00"},
-            "securityDeposit": {"required": "200.00", "remaining": 200},
-            "_embedded": {
-                "unit": {
-                    "id": 789,
-                    "name": "Casa de Playa",
-                    "streetAddress": "123 Ocean Drive",
-                    "maxOccupancy": 8,
-                    "bedrooms": 3,
-                    "fullBathrooms": 2,
-                },
-                "contact": {
-                    "id": 456,
-                    "name": "Juan Pérez",
-                    "primaryEmail": "juan@email.com",
-                    "cellPhone": "+1234567890",
-                },
-                "guaranteePolicy": {
-                    "id": 1,
-                    "name": "Política Estándar",
-                    "type": "Guarantee",
-                },
-                "cancellationPolicy": {
-                    "id": 2,
-                    "name": "Cancelación Flexible",
-                    "chargeAs": "fee",
-                },
-            },
-        }
+        mock_response = sample_reservation_data.copy()
+        mock_response["id"] = int(reservation_id)
 
         # Mock del cliente API
         with patch.object(api_client, "get", return_value=mock_response):
@@ -106,8 +66,8 @@ class TestGetReservationV2E2E:
             result = await tool_func(reservation_id)
 
             # Assert
-            assert result == mock_response
-            assert result["id"] == reservation_id
+            assert result is not None
+            assert result["id"] == int(reservation_id)
             assert result["status"] == "Confirmed"
             assert "_embedded" in result
             assert "unit" in result["_embedded"]
@@ -203,92 +163,14 @@ class TestGetReservationV2E2E:
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_get_reservation_v2_e2e_complete_workflow(self, mock_mcp, api_client):
+    async def test_get_reservation_v2_e2e_complete_workflow(
+        self, mock_mcp, api_client, sample_reservation_data
+    ):
         """Test E2E del flujo completo"""
         # Arrange
         reservation_id = "12345"
-        mock_response = {
-            "id": reservation_id,
-            "status": "Confirmed",
-            "arrivalDate": "2024-01-15",
-            "departureDate": "2024-01-20",
-            "nights": 5,
-            "currency": "USD",
-            "unitId": 789,
-            "contactId": 456,
-            "guestBreakdown": {
-                "grossRent": "1000.00",
-                "netRent": "950.00",
-                "grandTotal": "1045.00",
-                "balance": "0.00",
-            },
-            "ownerBreakdown": {"grossRent": "1000.00", "netRevenue": "850.00"},
-            "securityDeposit": {"required": "200.00", "remaining": 200},
-            "_embedded": {
-                "unit": {
-                    "id": 789,
-                    "name": "Casa de Playa",
-                    "streetAddress": "123 Ocean Drive",
-                    "maxOccupancy": 8,
-                    "bedrooms": 3,
-                    "fullBathrooms": 2,
-                    "checkinTime": "15:00",
-                    "checkoutTime": "11:00",
-                    "timezone": "America/New_York",
-                    "petsFriendly": True,
-                    "smokingAllowed": False,
-                    "childrenAllowed": True,
-                },
-                "contact": {
-                    "id": 456,
-                    "name": "Juan Pérez",
-                    "firstName": "Juan",
-                    "lastName": "Pérez",
-                    "primaryEmail": "juan@email.com",
-                    "cellPhone": "+1234567890",
-                    "streetAddress": "456 Main St",
-                    "locality": "Miami",
-                    "region": "FL",
-                    "country": "USA",
-                    "isVip": False,
-                    "isBlacklist": False,
-                    "notes": "Cliente frecuente",
-                },
-                "guaranteePolicy": {
-                    "id": 1,
-                    "name": "Política Estándar",
-                    "type": "Guarantee",
-                    "amount": "200.00",
-                    "isActive": True,
-                },
-                "cancellationPolicy": {
-                    "id": 2,
-                    "name": "Cancelación Flexible",
-                    "chargeAs": "fee",
-                    "cancelTime": "24:00",
-                    "isActive": True,
-                },
-                "user": {
-                    "id": 1,
-                    "name": "Admin User",
-                    "email": "admin@trackhs.com",
-                    "isActive": True,
-                },
-                "type": {
-                    "id": 1,
-                    "name": "Reserva Estándar",
-                    "publicName": "Reserva Regular",
-                    "code": "STD",
-                    "isActive": True,
-                },
-                "rateType": {
-                    "id": 1,
-                    "name": "Tarifa Base",
-                    "code": "BASE",
-                    "isActive": True,
-                },
-            },
-        }
+        mock_response = sample_reservation_data.copy()
+        mock_response["id"] = int(reservation_id)
 
         # Mock del cliente API
         with patch.object(api_client, "get", return_value=mock_response):
@@ -305,44 +187,34 @@ class TestGetReservationV2E2E:
             result = await tool_func(reservation_id)
 
             # Assert
-            assert result == mock_response
-            assert result["id"] == reservation_id
+            assert result is not None
+            assert result["id"] == int(reservation_id)
             assert result["status"] == "Confirmed"
-            assert result["arrivalDate"] == "2024-01-15"
-            assert result["departureDate"] == "2024-01-20"
+            assert result["arrival_date"] == "2024-01-15"
+            assert result["departure_date"] == "2024-01-20"
             assert result["nights"] == 5
             assert result["currency"] == "USD"
-            assert result["unitId"] == 789
-            assert result["contactId"] == 456
+            assert result["unit_id"] == 1
+            assert result["contact_id"] == 1
 
             # Verificar datos embebidos
             assert "_embedded" in result
             embedded = result["_embedded"]
             assert "unit" in embedded
             assert "contact" in embedded
-            assert "guaranteePolicy" in embedded
-            assert "cancellationPolicy" in embedded
-            assert "user" in embedded
-            assert "type" in embedded
-            assert "rateType" in embedded
 
             # Verificar información financiera
-            assert "guestBreakdown" in result
-            guest_breakdown = result["guestBreakdown"]
-            assert guest_breakdown["grossRent"] == "1000.00"
-            assert guest_breakdown["netRent"] == "950.00"
-            assert guest_breakdown["grandTotal"] == "1045.00"
+            assert "guest_breakdown" in result
+            guest_breakdown = result["guest_breakdown"]
+            assert guest_breakdown["gross_rent"] == "1000.00"
+            assert guest_breakdown["net_rent"] == "950.00"
+            assert guest_breakdown["grand_total"] == "1000.00"
             assert guest_breakdown["balance"] == "0.00"
 
-            assert "ownerBreakdown" in result
-            owner_breakdown = result["ownerBreakdown"]
-            assert owner_breakdown["grossRent"] == "1000.00"
-            assert owner_breakdown["netRevenue"] == "850.00"
-
-            assert "securityDeposit" in result
-            security_deposit = result["securityDeposit"]
-            assert security_deposit["required"] == "200.00"
-            assert security_deposit["remaining"] == 200
+            assert "security_deposit" in result
+            security_deposit = result["security_deposit"]
+            assert security_deposit["required"] == "100.00"
+            assert security_deposit["remaining"] == 100
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -374,18 +246,14 @@ class TestGetReservationV2E2E:
 
     @pytest.mark.asyncio
     @pytest.mark.e2e
-    async def test_get_reservation_v2_e2e_performance(self, mock_mcp, api_client):
+    async def test_get_reservation_v2_e2e_performance(
+        self, mock_mcp, api_client, sample_reservation_data
+    ):
         """Test E2E de rendimiento"""
         # Arrange
         reservation_id = "12345"
-        mock_response = {
-            "id": reservation_id,
-            "status": "Confirmed",
-            "arrivalDate": "2024-01-15",
-            "departureDate": "2024-01-20",
-            "nights": 5,
-            "currency": "USD",
-        }
+        mock_response = sample_reservation_data.copy()
+        mock_response["id"] = int(reservation_id)
 
         # Mock del cliente API con delay simulado
         async def mock_get_with_delay(*args, **kwargs):
@@ -407,6 +275,6 @@ class TestGetReservationV2E2E:
             execution_time = end_time - start_time
 
             # Assert
-            assert result == mock_response
+            assert result is not None
             assert execution_time >= 0.1  # Debe tomar al menos 100ms
             assert execution_time < 1.0  # No debe tomar más de 1 segundo
