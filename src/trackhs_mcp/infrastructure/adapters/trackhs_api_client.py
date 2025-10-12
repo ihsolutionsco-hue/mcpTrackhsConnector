@@ -9,15 +9,15 @@ from typing import Any, Dict, Optional, TypeVar
 import httpx
 
 from ...application.ports.api_client_port import ApiClientPort
-from ...domain.value_objects.config import TrackHSConfig
-from ...domain.value_objects.request import RequestOptions
-from ..utils.auth import TrackHSAuth
 from ...domain.exceptions.api_exceptions import (
     ApiError,
     AuthenticationError,
     NetworkError,
     TimeoutError,
 )
+from ...domain.value_objects.config import TrackHSConfig
+from ...domain.value_objects.request import RequestOptions
+from ..utils.auth import TrackHSAuth
 from ..utils.error_handling import error_handler
 
 T = TypeVar("T")
@@ -73,7 +73,7 @@ class TrackHSApiClient(ApiClientPort):
         Raises:
             ApiError: Si la petición falla después de todos los reintentos
         """
-        last_error = None
+        last_error: Optional[Exception] = None
 
         for attempt in range(max_retries + 1):
             try:
@@ -151,10 +151,12 @@ class TrackHSApiClient(ApiClientPort):
                             if os.getenv("DEBUG", "false").lower() == "true":
                                 logger = logging.getLogger(__name__)
                                 logger.debug(
-                                    f"JSON parsing failed, trying manual parse. Error: {json_error}"
+                                    f"JSON parsing failed, trying manual parse. "
+                                    f"Error: {json_error}"
                                 )
                                 logger.debug(
-                                    f"Response text (first 200 chars): {response_text[:200]}"
+                                    f"Response text (first 200 chars): "
+                                    f"{response_text[:200]}"
                                 )
 
                             json_data = json.loads(response_text)
@@ -163,10 +165,12 @@ class TrackHSApiClient(ApiClientPort):
                             if os.getenv("DEBUG", "false").lower() == "true":
                                 logger = logging.getLogger(__name__)
                                 logger.debug(
-                                    f"Manual JSON parsing also failed: {manual_parse_error}"
+                                    f"Manual JSON parsing also failed: "
+                                    f"{manual_parse_error}"
                                 )
                                 logger.debug(
-                                    f"Response text (first 500 chars): {response_text[:500]}"
+                                    f"Response text (first 500 chars): "
+                                    f"{response_text[:500]}"
                                 )
 
                             # Si todo falla, devolver el texto como está

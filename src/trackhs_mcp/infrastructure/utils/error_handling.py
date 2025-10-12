@@ -10,13 +10,13 @@ from typing import Any, Callable, Dict, Optional, Type
 
 # Importar excepciones del dominio siguiendo Clean Architecture
 from ...domain.exceptions.api_exceptions import (
-    TrackHSError,
     ApiError,
     AuthenticationError,
-    ValidationError,
+    ErrorSeverity,
     NetworkError,
     TimeoutError,
-    ErrorSeverity,
+    TrackHSError,
+    ValidationError,
 )
 
 
@@ -172,7 +172,9 @@ def get_error_stats() -> Dict[str, Any]:
 
 
 # Funciones de conveniencia para errores comunes
-def raise_api_error(message: str, status_code: int = None, endpoint: str = None):
+def raise_api_error(
+    message: str, status_code: Optional[int] = None, endpoint: Optional[str] = None
+):
     """Lanza un ApiError"""
     raise ApiError(message, status_code, endpoint)
 
@@ -182,7 +184,7 @@ def raise_auth_error(message: str = "Authentication failed"):
     raise AuthenticationError(message)
 
 
-def raise_validation_error(message: str, field: str = None):
+def raise_validation_error(message: str, field: Optional[str] = None):
     """Lanza un ValidationError"""
     raise ValidationError(message, field)
 
@@ -192,6 +194,6 @@ def raise_network_error(message: str):
     raise NetworkError(message)
 
 
-def raise_timeout_error(message: str, timeout_seconds: float = None):
+def raise_timeout_error(message: str, timeout_seconds: Optional[float] = None):
     """Lanza un TimeoutError"""
     raise TimeoutError(message, timeout_seconds)

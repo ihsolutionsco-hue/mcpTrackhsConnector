@@ -137,7 +137,7 @@ class TestGetFolioIntegration:
 
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
-        
+
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
@@ -156,10 +156,10 @@ class TestGetFolioIntegration:
 
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
-        
+
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
-        
+
         assert "Request timeout" in str(exc_info.value)
 
     @pytest.mark.asyncio
@@ -175,10 +175,10 @@ class TestGetFolioIntegration:
 
         # Act & Assert
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
-        
+
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
-        
+
         assert "Connection failed" in str(exc_info.value)
 
     @pytest.mark.asyncio

@@ -3,13 +3,14 @@ Excepciones del dominio para la API
 Siguiendo Clean Architecture - Domain Layer
 """
 
-from typing import Optional, Dict, Any
 from datetime import datetime, timezone
 from enum import Enum
+from typing import Any, Dict, Optional
 
 
 class ErrorSeverity(Enum):
     """Niveles de severidad de errores"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"

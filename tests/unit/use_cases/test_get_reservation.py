@@ -2,14 +2,13 @@
 Tests unitarios para GetReservationUseCase
 """
 
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock
 
 import pytest
 
 from trackhs_mcp.application.use_cases.get_reservation import GetReservationUseCase
 from trackhs_mcp.domain.entities.reservations import GetReservationParams
-from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
-from trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
+from trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError, ValidationError
 
 
 class TestGetReservationUseCase:
@@ -99,8 +98,9 @@ class TestGetReservationUseCase:
         """Test error 401 (no autorizado)"""
         # Arrange
         reservation_id = "12345"
-        error = Exception("401 Unauthorized")
-        error.status_code = 401
+        from trackhs_mcp.domain.exceptions.api_exceptions import AuthenticationError
+
+        error = AuthenticationError("401 Unauthorized")
         mock_api_client.get.side_effect = error
 
         params = GetReservationParams(reservation_id=reservation_id)
@@ -117,8 +117,9 @@ class TestGetReservationUseCase:
         """Test error 403 (prohibido)"""
         # Arrange
         reservation_id = "12345"
-        error = Exception("403 Forbidden")
-        error.status_code = 403
+        from trackhs_mcp.domain.exceptions.api_exceptions import AuthenticationError
+
+        error = AuthenticationError("403 Forbidden")
         mock_api_client.get.side_effect = error
 
         params = GetReservationParams(reservation_id=reservation_id)
@@ -135,8 +136,9 @@ class TestGetReservationUseCase:
         """Test error 404 (no encontrado)"""
         # Arrange
         reservation_id = "12345"
-        error = Exception("404 Not Found")
-        error.status_code = 404
+        from trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
+
+        error = ValidationError("404 Not Found")
         mock_api_client.get.side_effect = error
 
         params = GetReservationParams(reservation_id=reservation_id)
@@ -153,8 +155,9 @@ class TestGetReservationUseCase:
         """Test error 500 (error interno)"""
         # Arrange
         reservation_id = "12345"
-        error = Exception("500 Internal Server Error")
-        error.status_code = 500
+        from trackhs_mcp.domain.exceptions.api_exceptions import ApiError
+
+        error = ApiError("500 Internal Server Error", status_code=500)
         mock_api_client.get.side_effect = error
 
         params = GetReservationParams(reservation_id=reservation_id)
