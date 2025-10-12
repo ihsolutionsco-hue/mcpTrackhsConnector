@@ -26,105 +26,14 @@ class TestGetReservationUseCase:
         return GetReservationUseCase(mock_api_client)
 
     @pytest.mark.asyncio
-    async def test_execute_success(self, use_case, mock_api_client):
+    async def test_execute_success(
+        self, use_case, mock_api_client, sample_reservation_data
+    ):
         """Test ejecución exitosa"""
         # Arrange
         reservation_id = "12345"
-        mock_response = {
-            "id": reservation_id,
-            "status": "Confirmed",
-            "arrival_date": "2024-01-15",
-            "departure_date": "2024-01-20",
-            "nights": 5,
-            "currency": "USD",
-            "unit_id": 789,
-            "contact_id": 456,
-            "unit_type_id": 1,
-            "is_unit_locked": False,
-            "is_unit_assigned": True,
-            "is_unit_type_locked": False,
-            "early_arrival": False,
-            "late_departure": False,
-            "arrival_time": "2024-01-15T15:00:00Z",
-            "departure_time": "2024-01-20T11:00:00Z",
-            "occupants": [
-                {
-                    "type_id": 1,
-                    "name": "Adult",
-                    "handle": "adult",
-                    "quantity": 2,
-                    "included": True,
-                    "extra_quantity": 0,
-                    "rate_per_person_per_stay": "0.00",
-                    "rate_per_stay": "0.00",
-                }
-            ],
-            "security_deposit": {"required": "200.00", "remaining": 200.0},
-            "updated_at": "2024-01-10T10:00:00Z",
-            "created_at": "2024-01-10T10:00:00Z",
-            "booked_at": "2024-01-10T10:00:00Z",
-            "guest_breakdown": {
-                "gross_rent": "1000.00",
-                "guest_gross_display_rent": "1000.00",
-                "discount": "0.00",
-                "promo_value": "0.00",
-                "discount_total": 0,
-                "net_rent": "950.00",
-                "guest_net_display_rent": "950.00",
-                "actual_adr": "190.00",
-                "guest_adr": "190.00",
-                "total_guest_fees": "50.00",
-                "total_rent_fees": "0.00",
-                "total_itemized_fees": "0.00",
-                "total_tax_fees": "0.00",
-                "total_service_fees": "0.00",
-                "folio_charges": "0.00",
-                "subtotal": "1000.00",
-                "guest_subtotal": "1000.00",
-                "total_taxes": "0.00",
-                "total_guest_taxes": "0.00",
-                "total": "1000.00",
-                "grand_total": "1000.00",
-                "net_payments": "1000.00",
-                "payments": "1000.00",
-                "refunds": "0.00",
-                "net_transfers": "0.00",
-                "balance": "0.00",
-                "rates": [],
-                "guest_fees": [],
-                "taxes": [],
-            },
-            "owner_breakdown": {
-                "gross_rent": "1000.00",
-                "fee_revenue": "0.00",
-                "gross_revenue": "1000.00",
-                "manager_commission": "100.00",
-                "agent_commission": "0.00",
-                "net_revenue": "900.00",
-                "owner_fees": [],
-            },
-            "channel_id": 1,
-            "folio_id": 1,
-            "user_id": 1,
-            "type_id": 1,
-            "rate_type_id": 1,
-            "is_taxable": True,
-            "uuid": "123e4567-e89b-12d3-a456-426614174000",
-            "source": "direct",
-            "is_channel_locked": False,
-            "agreement_status": "not-needed",
-            "automate_payment": False,
-            "revenue_realized_method": "nightly",
-            "updated_by": "admin",
-            "created_by": "admin",
-            "payment_plan": [],
-            "travel_insurance_products": [],
-            "_embedded": {
-                "unit": {"id": 789, "name": "Casa de Playa"},
-                "contact": {"id": 456, "name": "Juan Pérez"},
-            },
-            "_links": {},
-        }
+        mock_response = sample_reservation_data.copy()
+        mock_response["id"] = int(reservation_id)
         mock_api_client.get.return_value = mock_response
 
         params = GetReservationParams(reservation_id=reservation_id)
@@ -149,7 +58,7 @@ class TestGetReservationUseCase:
         params = GetReservationParams(reservation_id=0)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "reservation_id debe ser un entero positivo mayor que 0" in str(
@@ -163,7 +72,7 @@ class TestGetReservationUseCase:
         params = GetReservationParams(reservation_id=-1)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert "reservation_id debe ser un entero positivo mayor que 0" in str(
@@ -180,7 +89,7 @@ class TestGetReservationUseCase:
         params = GetReservationParams(reservation_id=reservation_id)
 
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
         assert f"No se encontraron datos para la reserva ID {reservation_id}" in str(
