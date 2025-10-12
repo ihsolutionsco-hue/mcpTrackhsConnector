@@ -2,7 +2,7 @@
 Tests end-to-end para get_folio
 """
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -14,39 +14,25 @@ class TestGetFolioE2E:
     """Tests end-to-end para get_folio"""
 
     @pytest.fixture
-    def mock_httpx_client(self):
-        """Mock del cliente HTTPX"""
-        client = Mock()
+    def api_client(self):
+        """Cliente API mock - CORREGIDO sin patching de httpx"""
+        # Crear mock directo del TrackHSApiClient siguiendo patrón de tests unitarios
+        client = Mock(spec=TrackHSApiClient)
         client.get = AsyncMock()
-        return client
+        client.post = AsyncMock()
+        client.request = AsyncMock()
+        client.close = AsyncMock()
 
-    @pytest.fixture
-    def api_client(self, mock_httpx_client):
-        """Cliente API con mock HTTPX"""
-        with patch(
-            "src.trackhs_mcp.infrastructure.adapters.trackhs_api_client.httpx.AsyncClient"
-        ) as mock_client:
-            # Configurar el mock para ser awaitable
-            mock_client_instance = Mock()
-            mock_client_instance.get = AsyncMock()
-            mock_client_instance.request = AsyncMock()
-            
-            # Configurar el mock response
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.is_success = True
-            mock_response.json.return_value = {"id": 12345, "status": "open"}
-            mock_response.text = '{"id": 12345, "status": "open"}'
-            mock_response.headers = {"content-type": "application/json"}
-            
-            mock_client_instance.request.return_value = mock_response
-            mock_client_instance.get.return_value = mock_response
-            
-            mock_client.return_value.__aenter__.return_value = mock_client_instance
-            config = Mock()
-            config.base_url = "https://api-test.trackhs.com/api"
-            config.timeout = 30
-            return TrackHSApiClient(config)
+        # Context manager async support
+        client.__aenter__ = AsyncMock(return_value=client)
+        client.__aexit__ = AsyncMock(return_value=None)
+
+        # Configurar config mock
+        client.config = Mock()
+        client.config.base_url = "https://api-test.trackhs.com/api"
+        client.config.timeout = 30
+
+        return client
 
     @pytest.fixture
     def mock_mcp(self):
@@ -63,14 +49,11 @@ class TestGetFolioE2E:
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_success(
-        self, tool_function, mock_httpx_client, sample_folio_guest
+        self, tool_function, api_client, sample_folio_guest
     ):
         """Test flujo completo exitoso"""
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = sample_folio_guest
-        mock_httpx_client.get.return_value = mock_response
+        api_client.get.return_value = sample_folio_guest
 
         # Act
         result = await tool_function(folio_id="12345")
@@ -87,19 +70,11 @@ class TestGetFolioE2E:
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_different_types(
-        self, tool_function, mock_httpx_client, sample_folio_guest, sample_folio_master
+        self, tool_function, api_client, sample_folio_guest, sample_folio_master
     ):
         """Test folios tipo guest y master"""
         # Arrange
-        mock_response_guest = Mock()
-        mock_response_guest.status_code = 200
-        mock_response_guest.json.return_value = sample_folio_guest
-
-        mock_response_master = Mock()
-        mock_response_master.status_code = 200
-        mock_response_master.json.return_value = sample_folio_master
-
-        mock_httpx_client.get.side_effect = [mock_response_guest, mock_response_master]
+        api_client.get.side_effect = [sample_folio_guest, sample_folio_master]
 
         # Act - Test guest folio
         result_guest = await tool_function(folio_id="12345")
@@ -119,14 +94,11 @@ class TestGetFolioE2E:
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_with_exceptions(
-        self, tool_function, mock_httpx_client, sample_folio_master
+        self, tool_function, api_client, sample_folio_master
     ):
         """Test folios con excepciones"""
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = sample_folio_master
-        mock_httpx_client.get.return_value = mock_response
+        api_client.get.return_value = sample_folio_master
 
         # Act
         result = await tool_function(folio_id="67890")
@@ -139,15 +111,16 @@ class TestGetFolioE2E:
         assert result["status"] == "closed"
 
     @pytest.mark.asyncio
-    async def test_get_folio_e2e_error_scenarios_401(
-        self, tool_function, mock_httpx_client
-    ):
+    async def test_get_folio_e2e_error_scenarios_401(self, tool_function, api_client):
         """Test escenarios de error completos - 401"""
+
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 401
-        mock_response.raise_for_status.side_effect = Exception("Unauthorized")
-        mock_httpx_client.get.return_value = mock_response
+        class UnauthorizedError(Exception):
+            def __init__(self, message):
+                super().__init__(message)
+                self.status_code = 401
+
+        api_client.get.side_effect = UnauthorizedError("Unauthorized")
 
         # Act & Assert
         from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
@@ -159,15 +132,16 @@ class TestGetFolioE2E:
         assert "Credenciales de autenticación inválidas" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    async def test_get_folio_e2e_error_scenarios_403(
-        self, tool_function, mock_httpx_client
-    ):
+    async def test_get_folio_e2e_error_scenarios_403(self, tool_function, api_client):
         """Test escenarios de error completos - 403"""
+
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 403
-        mock_response.raise_for_status.side_effect = Exception("Forbidden")
-        mock_httpx_client.get.return_value = mock_response
+        class ForbiddenError(Exception):
+            def __init__(self, message):
+                super().__init__(message)
+                self.status_code = 403
+
+        api_client.get.side_effect = ForbiddenError("Forbidden")
 
         # Act & Assert
         from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
@@ -179,15 +153,16 @@ class TestGetFolioE2E:
         assert "Permisos insuficientes" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    async def test_get_folio_e2e_error_scenarios_404(
-        self, tool_function, mock_httpx_client
-    ):
+    async def test_get_folio_e2e_error_scenarios_404(self, tool_function, api_client):
         """Test escenarios de error completos - 404"""
+
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 404
-        mock_response.raise_for_status.side_effect = Exception("Not Found")
-        mock_httpx_client.get.return_value = mock_response
+        class NotFoundError(Exception):
+            def __init__(self, message):
+                super().__init__(message)
+                self.status_code = 404
+
+        api_client.get.side_effect = NotFoundError("Not Found")
 
         # Act & Assert
         from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
@@ -199,15 +174,16 @@ class TestGetFolioE2E:
         assert "99999" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    async def test_get_folio_e2e_error_scenarios_500(
-        self, tool_function, mock_httpx_client
-    ):
+    async def test_get_folio_e2e_error_scenarios_500(self, tool_function, api_client):
         """Test escenarios de error completos - 500"""
+
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 500
-        mock_response.raise_for_status.side_effect = Exception("Internal Server Error")
-        mock_httpx_client.get.return_value = mock_response
+        class InternalServerError(Exception):
+            def __init__(self, message):
+                super().__init__(message)
+                self.status_code = 500
+
+        api_client.get.side_effect = InternalServerError("Internal Server Error")
 
         # Act & Assert
         from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
@@ -244,14 +220,11 @@ class TestGetFolioE2E:
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_with_embedded_data(
-        self, tool_function, mock_httpx_client, sample_folio_guest
+        self, tool_function, api_client, sample_folio_guest
     ):
         """Test con datos embebidos completos"""
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = sample_folio_guest
-        mock_httpx_client.get.return_value = mock_response
+        api_client.get.return_value = sample_folio_guest
 
         # Act
         result = await tool_function(folio_id="12345")
@@ -272,14 +245,11 @@ class TestGetFolioE2E:
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_with_master_folio_rule(
-        self, tool_function, mock_httpx_client, sample_folio_master
+        self, tool_function, api_client, sample_folio_master
     ):
         """Test con regla de folio maestro"""
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = sample_folio_master
-        mock_httpx_client.get.return_value = mock_response
+        api_client.get.return_value = sample_folio_master
 
         # Act
         result = await tool_function(folio_id="67890")
@@ -297,14 +267,11 @@ class TestGetFolioE2E:
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_minimal_folio(
-        self, tool_function, mock_httpx_client, sample_folio_minimal
+        self, tool_function, api_client, sample_folio_minimal
     ):
         """Test con folio mínimo"""
         # Arrange
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = sample_folio_minimal
-        mock_httpx_client.get.return_value = mock_response
+        api_client.get.return_value = sample_folio_minimal
 
         # Act
         result = await tool_function(folio_id="11111")
@@ -317,14 +284,12 @@ class TestGetFolioE2E:
         assert "type" not in result or result["type"] is None
 
     @pytest.mark.asyncio
-    async def test_get_folio_e2e_network_timeout(
-        self, tool_function, mock_httpx_client
-    ):
+    async def test_get_folio_e2e_network_timeout(self, tool_function, api_client):
         """Test timeout de red en E2E"""
         # Arrange
         import httpx
 
-        mock_httpx_client.get.side_effect = httpx.TimeoutException("Request timeout")
+        api_client.get.side_effect = httpx.TimeoutException("Request timeout")
 
         # Act & Assert
         from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
@@ -337,13 +302,13 @@ class TestGetFolioE2E:
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_network_connection_error(
-        self, tool_function, mock_httpx_client
+        self, tool_function, api_client
     ):
         """Test error de conexión en E2E"""
         # Arrange
         import httpx
 
-        mock_httpx_client.get.side_effect = httpx.ConnectError("Connection failed")
+        api_client.get.side_effect = httpx.ConnectError("Connection failed")
 
         # Act & Assert
         from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError

@@ -35,11 +35,22 @@ def event_loop():
 
 @pytest.fixture
 def mock_api_client():
-    """Mock del API client para tests unitarios"""
+    """Mock del API client para tests unitarios - CORREGIDO con soporte async"""
     client = Mock()
     client.get = AsyncMock()
     client.post = AsyncMock()
     client.request = AsyncMock()
+    client.close = AsyncMock()
+
+    # Context manager async support
+    client.__aenter__ = AsyncMock(return_value=client)
+    client.__aexit__ = AsyncMock(return_value=None)
+
+    # Configurar config mock para compatibilidad
+    client.config = Mock()
+    client.config.base_url = "https://api-test.trackhs.com/api"
+    client.config.timeout = 30
+
     return client
 
 
@@ -299,7 +310,7 @@ def sample_reservation_data():
 
 @pytest.fixture
 def sample_reservation_data_v2():
-    """Datos de ejemplo de una reserva con formato real de API V2 (alternates como objetos)"""
+    """Datos de ejemplo de una reserva con formato real de API V2"""
     return {
         "id": 37165851,
         "alternates": [{"type": "airbnb", "id": "HMCNNSE3SJ"}],
@@ -573,7 +584,7 @@ def mock_trackhs_config():
     return TrackHSConfig(
         base_url="https://api-test.trackhs.com/api",
         username="test_user",
-        password="test_password",
+        password="test_password",  # nosec B106 - Test password for testing
         timeout=30,
     )
 
