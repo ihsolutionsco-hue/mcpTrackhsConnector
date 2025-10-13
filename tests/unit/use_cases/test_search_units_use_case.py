@@ -45,7 +45,13 @@ class TestSearchUnitsUseCase:
         # Assert
         assert result == expected_response
         mock_api_client.get.assert_called_once_with(
-            "/pms/units", params={"page": 0, "size": 25}
+            "/pms/units",
+            params={
+                "page": 0,
+                "size": 25,
+                "sortColumn": "name",
+                "sortDirection": "asc",
+            },
         )
 
     @pytest.mark.asyncio
@@ -74,6 +80,8 @@ class TestSearchUnitsUseCase:
             params={
                 "page": 0,
                 "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "nodeId": 1,
                 "bedrooms": 2,
                 "bathrooms": 2,
@@ -104,6 +112,8 @@ class TestSearchUnitsUseCase:
             params={
                 "page": 1,
                 "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "arrival": "2024-01-01",
                 "departure": "2024-01-07",
                 "contentUpdatedSince": "2024-01-01T00:00:00Z",
@@ -130,6 +140,8 @@ class TestSearchUnitsUseCase:
             params={
                 "page": 1,
                 "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "nodeId": [1, 2, 3],
                 "amenityId": [4, 5, 6],
                 "unitTypeId": 7,

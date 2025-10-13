@@ -88,11 +88,9 @@ class SearchUnitsUseCase:
         if params.size:
             request_params["size"] = params.size
 
-        # Parámetros de ordenamiento
-        if params.sort_column:
-            request_params["sortColumn"] = params.sort_column
-        if params.sort_direction:
-            request_params["sortDirection"] = params.sort_direction
+        # Parámetros de ordenamiento (siempre incluir valores por defecto según la API)
+        request_params["sortColumn"] = params.sort_column or "name"
+        request_params["sortDirection"] = params.sort_direction or "asc"
 
         # Parámetros de búsqueda
         if params.search:

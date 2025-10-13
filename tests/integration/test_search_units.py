@@ -73,7 +73,15 @@ class TestSearchUnitsIntegration:
         # Assert
         assert result == expected_response
         mock_api_client.get.assert_called_once_with(
-            "/pms/units", params={"page": 0, "size": 25}
+            "/pms/units",
+            params={
+                "page": 0,
+                "size": 25,
+                "sortColumn": "name",
+                "sortDirection": "asc",
+                "sortColumn": "name",
+                "sortDirection": "asc",
+            },
         )
 
     @pytest.mark.asyncio
@@ -154,6 +162,10 @@ class TestSearchUnitsIntegration:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
+                "page": 1,
+                "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "petsFriendly": 1,
                 "eventsAllowed": 0,
                 "smokingAllowed": 0,
@@ -189,6 +201,10 @@ class TestSearchUnitsIntegration:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
+                "page": 1,
+                "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "arrival": "2024-01-01",
                 "departure": "2024-01-07",
                 "contentUpdatedSince": "2024-01-01T00:00:00Z",
@@ -219,6 +235,10 @@ class TestSearchUnitsIntegration:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
+                "page": 1,
+                "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "bedrooms": 2,
                 "minBedrooms": 1,
                 "maxBedrooms": 3,
@@ -246,6 +266,10 @@ class TestSearchUnitsIntegration:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
+                "page": 1,
+                "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "search": "luxury villa",
                 "term": "ocean view",
                 "unitCode": "V001",
@@ -276,6 +300,10 @@ class TestSearchUnitsIntegration:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
+                "page": 1,
+                "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "nodeId": [1, 2, 3],
                 "amenityId": 4,
                 "unitTypeId": [5, 6],
@@ -299,7 +327,16 @@ class TestSearchUnitsIntegration:
         # Assert
         assert result == expected_response
         mock_api_client.get.assert_called_once_with(
-            "/pms/units", params={"isActive": 1, "isBookable": 1, "unitStatus": "clean"}
+            "/pms/units",
+            params={
+                "page": 1,
+                "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "asc",
+                "isActive": 1,
+                "isBookable": 1,
+                "unitStatus": "clean",
+            },
         )
 
     @pytest.mark.asyncio
@@ -329,7 +366,13 @@ class TestSearchUnitsIntegration:
         # Assert
         assert result == expected_response
         mock_api_client.get.assert_called_once_with(
-            "/pms/units", params={"page": 2, "size": 100}
+            "/pms/units",
+            params={
+                "page": 2,
+                "size": 100,
+                "sortColumn": "name",
+                "sortDirection": "asc",
+            },
         )
 
     @pytest.mark.asyncio
@@ -346,5 +389,11 @@ class TestSearchUnitsIntegration:
         # Assert
         assert result == expected_response
         mock_api_client.get.assert_called_once_with(
-            "/pms/units", params={"sortColumn": "name", "sortDirection": "desc"}
+            "/pms/units",
+            params={
+                "page": 1,
+                "size": 10,
+                "sortColumn": "name",
+                "sortDirection": "desc",
+            },
         )
