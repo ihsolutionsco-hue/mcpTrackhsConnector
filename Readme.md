@@ -17,15 +17,17 @@ El [Model Context Protocol](https://modelcontextprotocol.io) es un estándar abi
 
 ## 🚀 **Características Principales**
 
-### **Herramientas MCP (4)**
+### **Herramientas MCP (5)**
 - **`search_reservations_v1`**: Búsqueda de reservas usando API V1 (compatibilidad legacy)
 - **`search_reservations_v2`**: Búsqueda avanzada de reservas usando API V2 (recomendado)
 - **`get_reservation_v2`**: ✅ **100% funcional** - Obtención de reserva específica por ID
 - **`get_folio`**: ✅ **100% funcional** - Obtención de folio específico por ID
+- **`search_units`**: ✅ **100% funcional** - Búsqueda de unidades usando Channel API
 
-### **Recursos MCP (2)**
+### **Recursos MCP (3)**
 - **`trackhs://schema/reservations-v1`**: Esquema completo de datos para API V1
 - **`trackhs://schema/reservations-v2`**: Esquema completo de datos para API V2
+- **`trackhs://schema/units`**: Esquema completo de datos para Units API
 
 ### **Prompts MCP (3)**
 - **`search-reservations-by-dates`**: Búsqueda por rango de fechas
@@ -293,6 +295,40 @@ python -m src.trackhs_mcp
 - [ ] Validar servidor MCP: `python -c "from trackhs_mcp.server import mcp"`
 - [ ] Ejecutar preflight: `python scripts/fastmcp_preflight_simple.py`
 
+## 🔧 **Herramientas MCP Detalladas**
+
+### **`search_units` - Búsqueda de Unidades**
+Nueva herramienta MCP para obtener información completa de unidades desde la Channel API de Track HS.
+
+**Características:**
+- ✅ **29+ parámetros de filtrado** (paginación, búsqueda, filtros por características)
+- ✅ **Filtros avanzados** (habitaciones, baños, amenidades, políticas, disponibilidad)
+- ✅ **Búsqueda por texto** (nombre, descripción, código de unidad)
+- ✅ **Filtros de ubicación** (nodos, amenidades, tipos de unidad)
+- ✅ **Filtros de estado** (activo, reservable, estado de unidad)
+- ✅ **Filtros de fechas** (disponibilidad, actualización de contenido)
+- ✅ **Ordenamiento flexible** (por ID, nombre, nodo, tipo de unidad)
+- ✅ **Paginación robusta** (limitado a 10k resultados totales)
+- ✅ **Validación estricta** (formatos de fecha ISO 8601, valores booleanos 0/1)
+
+**Ejemplos de Uso:**
+```python
+# Búsqueda básica
+search_units(page=0, size=25)
+
+# Filtro por características
+search_units(bedrooms=2, bathrooms=2, pets_friendly=1, is_active=1)
+
+# Búsqueda por disponibilidad
+search_units(arrival="2024-01-01", departure="2024-01-07", is_bookable=1)
+
+# Filtro por amenidades
+search_units(amenity_id="1,2,3", pets_friendly=1, events_allowed=1)
+
+# Búsqueda por ubicación
+search_units(node_id="1,2,3", is_active=1)
+```
+
 ## 📚 **Documentación Adicional**
 
 - **[Guía de Arquitectura](docs/architecture.md)**: Implementación de Clean Architecture
@@ -324,7 +360,8 @@ python -m src.trackhs_mcp
 
 ### **Últimas Actualizaciones (v1.0.1 - 12 Oct 2025)**
 
-#### ✅ **Correcciones Críticas Implementadas**
+#### ✅ **Nuevas Funcionalidades Implementadas**
+- **`search_units`**: Nueva herramienta MCP para búsqueda de unidades usando Channel API
 - **`get_reservation_v2`**: 100% funcional con todos los canales OTA
 - **Validación de campos**: Soporte completo para `alternates` y `payment_plan`
 - **FastMCP Cloud**: Configuración optimizada para despliegue
