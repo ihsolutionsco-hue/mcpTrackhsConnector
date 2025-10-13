@@ -62,9 +62,12 @@ class SearchUnitsUseCase:
 
         # Validar límite total de resultados (10k máximo)
         # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
-        adjusted_page = (
-            max(0, params.page - 1) if params.page and params.page > 0 else 0
-        )
+        # Asegurar que page sea entero para evitar errores de comparación
+        if params.page:
+            page_int = int(params.page) if isinstance(params.page, str) else params.page
+            adjusted_page = max(0, page_int - 1) if page_int > 0 else 0
+        else:
+            adjusted_page = 0
         if params.page and params.size and adjusted_page * params.size > 10000:
             raise ValidationError("Total results (page * size) must be <= 10,000")
 

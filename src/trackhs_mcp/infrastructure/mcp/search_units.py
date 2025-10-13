@@ -20,7 +20,7 @@ from ..utils.user_friendly_messages import format_date_error
 def register_search_units(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_units"""
 
-    @mcp.tool
+    @mcp.tool(name="search_units")
     @error_handler("search_units")
     async def search_units(
         page: int = 1,
@@ -162,7 +162,9 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         """
         # Validar límite total de resultados (10k máximo) - validación de negocio
         # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
-        adjusted_page = max(0, page - 1) if page > 0 else 0
+        # Asegurar que page sea entero para evitar errores de comparación
+        page_int = int(page) if isinstance(page, str) else page
+        adjusted_page = max(0, page_int - 1) if page_int > 0 else 0
         if adjusted_page * size > 10000:
             raise ValidationError(
                 "Total results (page * size) must be <= 10,000", "page"
