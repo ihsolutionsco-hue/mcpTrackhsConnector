@@ -95,10 +95,8 @@ def test_units_endpoint_analysis():
 
     print()
     print("8. PROXIMOS PASOS:")
-    print("   1. Implementar workaround usando datos embebidos")
-    print("   2. Crear función search_units_from_reservations()")
-    print("   3. Probar funcionalidad con datos reales")
-    print("   4. Configurar Channel API para acceso directo (futuro)")
+    print("   1. Configurar Channel API para acceso directo")
+    print("   2. Probar funcionalidad con datos reales")
     print()
 
     print("=== FIN DEL ANALISIS ===")
