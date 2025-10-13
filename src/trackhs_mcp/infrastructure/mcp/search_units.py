@@ -17,7 +17,187 @@ from ..utils.error_handling import error_handler
 def register_search_units(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_units"""
 
-    @mcp.tool
+    @mcp.tool(
+        name="search_units",
+        description="Search units in Track HS Channel API with comprehensive filtering options",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "description": "Page number (1-based, max 10k total results)",
+                    "default": 1,
+                    "minimum": 1,
+                },
+                "size": {
+                    "type": "integer",
+                    "description": "Page size (max 1000, limited to 10k total results)",
+                    "default": 25,
+                    "minimum": 1,
+                    "maximum": 1000,
+                },
+                "sort_column": {
+                    "type": "string",
+                    "enum": ["id", "name", "nodeName", "unitTypeName"],
+                    "description": "Column to sort by",
+                    "default": "name",
+                },
+                "sort_direction": {
+                    "type": "string",
+                    "enum": ["asc", "desc"],
+                    "description": "Sort direction",
+                    "default": "asc",
+                },
+                "search": {
+                    "type": "string",
+                    "description": "Text search in names/descriptions",
+                },
+                "term": {
+                    "type": "string",
+                    "description": "Substring search matching on term",
+                },
+                "unit_code": {
+                    "type": "string",
+                    "description": "Search on unitCode, exact match or add % for wildcard",
+                },
+                "short_name": {
+                    "type": "string",
+                    "description": "Search on shortName, exact match or add % for wildcard",
+                },
+                "node_id": {
+                    "type": "string",
+                    "description": "Node ID(s) - single int, comma-separated, or array",
+                },
+                "amenity_id": {
+                    "type": "string",
+                    "description": "Amenity ID(s) - single int, comma-separated, or array",
+                },
+                "unit_type_id": {
+                    "type": "string",
+                    "description": "Unit type ID(s) - single int, comma-separated, or array",
+                },
+                "id": {"type": "string", "description": "Filter by Unit IDs"},
+                "calendar_id": {
+                    "type": "integer",
+                    "description": "Return units matching this unit's type with calendar group id",
+                },
+                "role_id": {
+                    "type": "integer",
+                    "description": "Return units by specific roleId",
+                },
+                "bedrooms": {
+                    "type": "string",
+                    "description": "Exact number of bedrooms (will be converted to integer)",
+                },
+                "min_bedrooms": {
+                    "type": "string",
+                    "description": "Minimum number of bedrooms (will be converted to integer)",
+                },
+                "max_bedrooms": {
+                    "type": "string",
+                    "description": "Maximum number of bedrooms (will be converted to integer)",
+                },
+                "bathrooms": {
+                    "type": "string",
+                    "description": "Exact number of bathrooms (will be converted to integer)",
+                },
+                "min_bathrooms": {
+                    "type": "string",
+                    "description": "Minimum number of bathrooms (will be converted to integer)",
+                },
+                "max_bathrooms": {
+                    "type": "string",
+                    "description": "Maximum number of bathrooms (will be converted to integer)",
+                },
+                "pets_friendly": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Pet friendly units (0/1)",
+                },
+                "allow_unit_rates": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Units that allow unit rates (0/1)",
+                },
+                "computed": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Additional computed values (0/1)",
+                },
+                "inherited": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Additional inherited attributes (0/1)",
+                },
+                "limited": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Very limited attributes (0/1)",
+                },
+                "is_bookable": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Bookable units (0/1)",
+                },
+                "include_descriptions": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Include descriptions (0/1)",
+                },
+                "is_active": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Active units (0/1)",
+                },
+                "events_allowed": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Events allowed (0/1)",
+                },
+                "smoking_allowed": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Smoking allowed (0/1)",
+                },
+                "children_allowed": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Children allowed (0/1)",
+                },
+                "is_accessible": {
+                    "type": "string",
+                    "enum": ["0", "1"],
+                    "description": "Accessible units (0/1)",
+                },
+                "arrival": {
+                    "type": "string",
+                    "description": "Arrival date (ISO 8601 format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?)?$",
+                },
+                "departure": {
+                    "type": "string",
+                    "description": "Departure date (ISO 8601 format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?)?$",
+                },
+                "content_updated_since": {
+                    "type": "string",
+                    "description": "Content changes since timestamp (ISO 8601 format)",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?)?$",
+                },
+                "updated_since": {
+                    "type": "string",
+                    "description": "Updated since timestamp (ISO 8601 format) - deprecated",
+                    "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3})?Z?)?$",
+                },
+                "unit_status": {
+                    "type": "string",
+                    "enum": ["clean", "dirty", "occupied", "inspection", "inprogress"],
+                    "description": "Unit status",
+                },
+            },
+            "required": [],
+        },
+    )
     @error_handler("search_units")
     async def search_units(
         page: int = 1,
