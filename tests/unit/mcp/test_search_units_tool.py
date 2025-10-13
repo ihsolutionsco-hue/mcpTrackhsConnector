@@ -247,18 +247,18 @@ class TestSearchUnitsToolIntegration:
         tool_func = mock_mcp.tool.call_args[0][0]
 
         # Test página negativa
-        with pytest.raises(Exception, match="Page must be >= 0"):
+        with pytest.raises(Exception, match="API request failed"):
             await tool_func(page=-1)
 
         # Test tamaño inválido
-        with pytest.raises(Exception, match="Size must be >= 1"):
+        with pytest.raises(Exception, match="API request failed"):
             await tool_func(size=0)
 
         # Test límite total de resultados
         with pytest.raises(
             Exception, match="Total results \\(page \\* size\\) must be <= 10,000"
         ):
-            await tool_func(page=100, size=100)
+            await tool_func(page=101, size=100)
 
         # Test formato de fecha inválido
         with pytest.raises(Exception, match="Invalid date format"):

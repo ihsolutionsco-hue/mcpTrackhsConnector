@@ -176,7 +176,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         if min_bedrooms is not None and max_bedrooms is not None:
             if min_bedrooms > max_bedrooms:
                 raise ValidationError(
-                    "min_bedrooms must be <= max_bathrooms", "min_bedrooms"
+                    "min_bedrooms must be <= max_bedrooms", "min_bedrooms"
                 )
 
         if min_bathrooms is not None and max_bathrooms is not None:
