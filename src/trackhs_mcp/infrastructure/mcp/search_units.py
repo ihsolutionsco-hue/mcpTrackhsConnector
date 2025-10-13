@@ -5,6 +5,8 @@ Basado en la especificación completa de la API Get Units Collection
 
 from typing import TYPE_CHECKING, List, Literal, Optional, Union
 
+from pydantic import BaseModel, Field
+
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
 
@@ -17,11 +19,141 @@ from ..utils.error_handling import error_handler
 def register_search_units(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_units"""
 
+    # Definir el modelo Pydantic para el inputSchema
+    class SearchUnitsInput(BaseModel):
+        """Modelo de entrada para search_units - Genera automáticamente el inputSchema"""
+
+        page: Union[int, str] = Field(
+            default=1, description="Page number (1-based, max 10k total results)"
+        )
+        size: Union[int, str] = Field(
+            default=25, description="Page size (max 1000, limited to 10k total results)"
+        )
+        sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = Field(
+            default="name", description="Column to sort by"
+        )
+        sort_direction: Literal["asc", "desc"] = Field(
+            default="asc", description="Sort direction"
+        )
+        search: Optional[str] = Field(
+            default=None, description="Text search in names/descriptions"
+        )
+        term: Optional[str] = Field(
+            default=None, description="Substring search matching on term"
+        )
+        unit_code: Optional[str] = Field(
+            default=None,
+            description="Search on unitCode, exact match or add % for wildcard",
+        )
+        short_name: Optional[str] = Field(
+            default=None,
+            description="Search on shortName, exact match or add % for wildcard",
+        )
+        node_id: Optional[str] = Field(
+            default=None,
+            description="Node ID(s) - single int, comma-separated, or array",
+        )
+        amenity_id: Optional[str] = Field(
+            default=None,
+            description="Amenity ID(s) - single int, comma-separated, or array",
+        )
+        unit_type_id: Optional[str] = Field(
+            default=None,
+            description="Unit type ID(s) - single int, comma-separated, or array",
+        )
+        id: Optional[str] = Field(default=None, description="Filter by Unit IDs")
+        calendar_id: Optional[Union[int, str]] = Field(
+            default=None,
+            description="Return units matching this unit's type with calendar group id",
+        )
+        role_id: Optional[Union[int, str]] = Field(
+            default=None, description="Return units by specific roleId"
+        )
+        bedrooms: Optional[Union[int, str]] = Field(
+            default=None,
+            description="Exact number of bedrooms (will be converted to integer)",
+        )
+        min_bedrooms: Optional[Union[int, str]] = Field(
+            default=None,
+            description="Minimum number of bedrooms (will be converted to integer)",
+        )
+        max_bedrooms: Optional[Union[int, str]] = Field(
+            default=None,
+            description="Maximum number of bedrooms (will be converted to integer)",
+        )
+        bathrooms: Optional[Union[int, str]] = Field(
+            default=None,
+            description="Exact number of bathrooms (will be converted to integer)",
+        )
+        min_bathrooms: Optional[Union[int, str]] = Field(
+            default=None,
+            description="Minimum number of bathrooms (will be converted to integer)",
+        )
+        max_bathrooms: Optional[Union[int, str]] = Field(
+            default=None,
+            description="Maximum number of bathrooms (will be converted to integer)",
+        )
+        pets_friendly: Optional[Union[int, str]] = Field(
+            default=None, description="Pet friendly units (0/1)"
+        )
+        allow_unit_rates: Optional[Union[int, str]] = Field(
+            default=None, description="Units that allow unit rates (0/1)"
+        )
+        computed: Optional[Union[int, str]] = Field(
+            default=None, description="Additional computed values (0/1)"
+        )
+        inherited: Optional[Union[int, str]] = Field(
+            default=None, description="Additional inherited attributes (0/1)"
+        )
+        limited: Optional[Union[int, str]] = Field(
+            default=None, description="Very limited attributes (0/1)"
+        )
+        is_bookable: Optional[Union[int, str]] = Field(
+            default=None, description="Bookable units (0/1)"
+        )
+        include_descriptions: Optional[Union[int, str]] = Field(
+            default=None, description="Include descriptions (0/1)"
+        )
+        is_active: Optional[Union[int, str]] = Field(
+            default=None, description="Active units (0/1)"
+        )
+        events_allowed: Optional[Union[int, str]] = Field(
+            default=None, description="Events allowed (0/1)"
+        )
+        smoking_allowed: Optional[Union[int, str]] = Field(
+            default=None, description="Smoking allowed (0/1)"
+        )
+        children_allowed: Optional[Union[int, str]] = Field(
+            default=None, description="Children allowed (0/1)"
+        )
+        is_accessible: Optional[Union[int, str]] = Field(
+            default=None, description="Accessible units (0/1)"
+        )
+        arrival: Optional[str] = Field(
+            default=None,
+            description="Arrival date (ISO 8601 format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+        )
+        departure: Optional[str] = Field(
+            default=None,
+            description="Departure date (ISO 8601 format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+        )
+        content_updated_since: Optional[str] = Field(
+            default=None,
+            description="Content changes since timestamp (ISO 8601 format)",
+        )
+        updated_since: Optional[str] = Field(
+            default=None,
+            description="Updated since timestamp (ISO 8601 format) - deprecated",
+        )
+        unit_status: Optional[
+            Literal["clean", "dirty", "occupied", "inspection", "inprogress"]
+        ] = Field(default=None, description="Unit status")
+
     @mcp.tool
     @error_handler("search_units")
     async def search_units(
-        page: str = "1",
-        size: str = "25",
+        page: Union[int, str] = 1,
+        size: Union[int, str] = 25,
         sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = "name",
         sort_direction: Literal["asc", "desc"] = "asc",
         search: Optional[str] = None,
@@ -32,26 +164,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         amenity_id: Optional[str] = None,
         unit_type_id: Optional[str] = None,
         id: Optional[str] = None,
-        calendar_id: Optional[str] = None,
-        role_id: Optional[str] = None,
-        bedrooms: Optional[str] = None,
-        min_bedrooms: Optional[str] = None,
-        max_bedrooms: Optional[str] = None,
-        bathrooms: Optional[str] = None,
-        min_bathrooms: Optional[str] = None,
-        max_bathrooms: Optional[str] = None,
-        pets_friendly: Optional[str] = None,
-        allow_unit_rates: Optional[str] = None,
-        computed: Optional[str] = None,
-        inherited: Optional[str] = None,
-        limited: Optional[str] = None,
-        is_bookable: Optional[str] = None,
-        include_descriptions: Optional[str] = None,
-        is_active: Optional[str] = None,
-        events_allowed: Optional[str] = None,
-        smoking_allowed: Optional[str] = None,
-        children_allowed: Optional[str] = None,
-        is_accessible: Optional[str] = None,
+        calendar_id: Optional[Union[int, str]] = None,
+        role_id: Optional[Union[int, str]] = None,
+        bedrooms: Optional[Union[int, str]] = None,
+        min_bedrooms: Optional[Union[int, str]] = None,
+        max_bedrooms: Optional[Union[int, str]] = None,
+        bathrooms: Optional[Union[int, str]] = None,
+        min_bathrooms: Optional[Union[int, str]] = None,
+        max_bathrooms: Optional[Union[int, str]] = None,
+        pets_friendly: Optional[Union[int, str]] = None,
+        allow_unit_rates: Optional[Union[int, str]] = None,
+        computed: Optional[Union[int, str]] = None,
+        inherited: Optional[Union[int, str]] = None,
+        limited: Optional[Union[int, str]] = None,
+        is_bookable: Optional[Union[int, str]] = None,
+        include_descriptions: Optional[Union[int, str]] = None,
+        is_active: Optional[Union[int, str]] = None,
+        events_allowed: Optional[Union[int, str]] = None,
+        smoking_allowed: Optional[Union[int, str]] = None,
+        children_allowed: Optional[Union[int, str]] = None,
+        is_accessible: Optional[Union[int, str]] = None,
         arrival: Optional[str] = None,
         departure: Optional[str] = None,
         content_updated_since: Optional[str] = None,
