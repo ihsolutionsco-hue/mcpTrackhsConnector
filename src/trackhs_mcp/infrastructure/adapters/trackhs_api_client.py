@@ -132,9 +132,32 @@ class TrackHSApiClient(ApiClientPort):
                         logger = logging.getLogger(__name__)
                         logger.error(f"400 Bad Request - URL: {endpoint}")
                         logger.error(
+                            f"400 Bad Request - Full URL: {self.client.base_url}{endpoint}"
+                        )
+                        logger.error(f"400 Bad Request - Method: {method}")
+                        logger.error(f"400 Bad Request - Headers: {headers}")
+                        logger.error(
                             f"400 Bad Request - Params: {request_kwargs.get('params')}"
                         )
-                        logger.error(f"400 Bad Request - Response: {error_body}")
+                        logger.error(
+                            f"400 Bad Request - Response Status: {response.status_code}"
+                        )
+                        logger.error(
+                            f"400 Bad Request - Response Headers: {dict(response.headers)}"
+                        )
+                        logger.error(f"400 Bad Request - Response Body: {error_body}")
+
+                        # Intentar parsear el error como JSON si es posible
+                        try:
+                            import json
+
+                            error_json = response.json()
+                            logger.error(
+                                f"400 Bad Request - Parsed Error: {error_json}"
+                            )
+                        except:
+                            logger.error(f"400 Bad Request - Raw Text: {error_body}")
+
                         raise ApiError(
                             f"Bad Request: {error_body}",
                             400,

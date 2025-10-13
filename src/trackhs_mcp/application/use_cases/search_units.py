@@ -40,8 +40,12 @@ class SearchUnitsUseCase:
         import logging
 
         logger = logging.getLogger(__name__)
-        logger.debug(f"Units API Request - Endpoint: /pms/units")
-        logger.debug(f"Units API Request - Params: {request_params}")
+        logger.info(f"Units API Request - Endpoint: /pms/units")
+        logger.info(f"Units API Request - Params: {request_params}")
+        logger.info(f"Units API Request - Params count: {len(request_params)}")
+        logger.info(
+            f"Units API Request - Params types: {[(k, type(v).__name__, v) for k, v in request_params.items()]}"
+        )
 
         response = await self.api_client.get("/pms/units", params=request_params)
 

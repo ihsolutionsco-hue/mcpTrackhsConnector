@@ -245,9 +245,17 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                         f"400 Bad Request - Params enviados: {search_params.model_dump()}"
                     )
                     logger.error(f"400 Bad Request - Error details: {str(e)}")
+                    logger.error(f"400 Bad Request - Error type: {type(e).__name__}")
+                    logger.error(f"400 Bad Request - Error attributes: {dir(e)}")
+
                     # Capturar error body si está disponible
                     error_body = getattr(e, "response_text", str(e))
                     logger.error(f"400 Bad Request - Response body: {error_body}")
+
+                    # Intentar obtener más información del error
+                    if hasattr(e, "args") and e.args:
+                        logger.error(f"400 Bad Request - Error args: {e.args}")
+
                     raise ValidationError(
                         "Bad Request: Invalid parameters sent to Units API. "
                         "Please check the parameter format and values. "
