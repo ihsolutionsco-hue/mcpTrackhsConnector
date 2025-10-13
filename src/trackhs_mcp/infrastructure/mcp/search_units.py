@@ -205,25 +205,55 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 )
 
         try:
+            # Log de parámetros recibidos para debugging
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.info(f"Search units called with parameters:")
+            logger.info(f"  - page: {page} (type: {type(page)})")
+            logger.info(f"  - size: {size} (type: {type(size)})")
+            logger.info(f"  - bedrooms: {bedrooms} (type: {type(bedrooms)})")
+            logger.info(f"  - bathrooms: {bathrooms} (type: {type(bathrooms)})")
+            logger.info(
+                f"  - pets_friendly: {pets_friendly} (type: {type(pets_friendly)})"
+            )
+            logger.info(f"  - arrival: {arrival} (type: {type(arrival)})")
+            logger.info(f"  - departure: {departure} (type: {type(departure)})")
+
             # Crear caso de uso
             use_case = SearchUnitsUseCase(api_client)
 
             # Convertir parámetros de string a tipos correctos si es necesario
             def _convert_param(param, target_type):
-                """Convierte parámetro a tipo correcto"""
+                """Convierte parámetro a tipo correcto con validación robusta"""
                 if param is None:
                     return None
                 if isinstance(param, target_type):
                     return param
                 try:
                     if target_type == int:
+                        # Validar que el parámetro sea convertible a int
+                        if isinstance(param, str):
+                            # Remover espacios en blanco
+                            param = param.strip()
+                            # Validar que no esté vacío
+                            if not param:
+                                return None
                         return int(param)
                     elif target_type == str:
                         return str(param)
                     else:
                         return param
-                except (ValueError, TypeError):
-                    return param
+                except (ValueError, TypeError) as e:
+                    # Log del error para debugging
+                    import logging
+
+                    logger = logging.getLogger(__name__)
+                    logger.warning(
+                        f"Error converting parameter {param} to {target_type.__name__}: {e}"
+                    )
+                    # Retornar None en lugar del parámetro original para evitar errores
+                    return None
 
             # Mapeo de parámetros para conversión correcta
             PARAM_MAPPING = {
@@ -250,6 +280,46 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 "sort_column": "sortColumn",
                 "sort_direction": "sortDirection",
             }
+
+            # Validar fechas ISO 8601 si están presentes
+            def _validate_iso8601_date(date_str, param_name):
+                """Valida formato ISO 8601 para fechas"""
+                if not date_str:
+                    return date_str
+
+                # Formato ISO 8601 estricto: YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ
+                import re
+                from datetime import datetime
+
+                # Patrón para fechas ISO 8601
+                iso_pattern = r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?)?$"
+
+                if not re.match(iso_pattern, date_str):
+                    import logging
+
+                    logger = logging.getLogger(__name__)
+                    logger.warning(
+                        f"Invalid ISO 8601 format for {param_name}: {date_str}"
+                    )
+                    # Retornar None para fechas inválidas
+                    return None
+
+                # Validación adicional con datetime para asegurar que la fecha sea válida
+                try:
+                    if "T" in date_str:
+                        # Fecha con tiempo
+                        datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                    else:
+                        # Solo fecha
+                        datetime.fromisoformat(date_str)
+                except ValueError:
+                    import logging
+
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Invalid date value for {param_name}: {date_str}")
+                    return None
+
+                return date_str
 
             # Crear parámetros de búsqueda con conversión de tipos y mapeo
             search_params = SearchUnitsParams(
@@ -285,10 +355,12 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 smoking_allowed=_convert_param(smoking_allowed, int),
                 children_allowed=_convert_param(children_allowed, int),
                 is_accessible=_convert_param(is_accessible, int),
-                arrival=arrival,
-                departure=departure,
-                content_updated_since=content_updated_since,
-                updated_since=updated_since,
+                arrival=_validate_iso8601_date(arrival, "arrival"),
+                departure=_validate_iso8601_date(departure, "departure"),
+                content_updated_since=_validate_iso8601_date(
+                    content_updated_since, "content_updated_since"
+                ),
+                updated_since=_validate_iso8601_date(updated_since, "updated_since"),
                 unit_status=unit_status,
             )
 
@@ -322,12 +394,13 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                         "Bad Request: Invalid parameters sent to Units API. "
                         "Common issues:\n"
                         "- Page must be >= 1 (1-based pagination)\n"
-                        "- Numeric parameters (bedrooms, bathrooms) must be integers\n"
+                        "- Numeric parameters (bedrooms, bathrooms) must be integers or convertible strings\n"
                         "- Boolean parameters (pets_friendly, is_active) must be 0 or 1\n"
-                        "- Date parameters must be in ISO 8601 format (YYYY-MM-DD)\n"
+                        "- Date parameters must be in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)\n"
                         "- Range parameters (min_bedrooms, max_bedrooms) must be integers\n"
                         "- ID parameters can be single integers or comma-separated lists\n"
                         "- Unit status must be one of: clean, dirty, occupied, inspection, inprogress\n"
+                        "- Empty string parameters are converted to None automatically\n"
                         f"Error details: {str(e)}",
                         "parameters",
                     )

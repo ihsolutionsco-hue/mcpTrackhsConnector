@@ -12,7 +12,7 @@ class PaginationParams(BaseModel):
 
     page: Optional[int] = Field(default=1, ge=0, description="Número de página")
     size: Optional[int] = Field(
-        default=10, ge=1, le=100, description="Tamaño de página"
+        default=10, ge=1, le=1000, description="Tamaño de página"
     )
     sort_column: Optional[str] = Field(default="id", description="Columna para ordenar")
     sort_direction: Optional[str] = Field(
