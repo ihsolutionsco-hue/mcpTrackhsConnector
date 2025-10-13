@@ -156,14 +156,16 @@ class TestSearchUnitsTypeValidation:
         bedrooms_param = sig.parameters.get("bedrooms")
         assert bedrooms_param is not None
         # Verificar que es Optional[int] (Union[int, None] o similar)
-        assert bedrooms_param.annotation in [int, type(None)] or str(
+        from typing import Optional
+
+        assert bedrooms_param.annotation == Optional[int] or str(
             bedrooms_param.annotation
         ).startswith("typing.Union")
 
         # Verificar que is_active es Optional[int]
         is_active_param = sig.parameters.get("is_active")
         assert is_active_param is not None
-        assert is_active_param.annotation in [int, type(None)] or str(
+        assert is_active_param.annotation == Optional[int] or str(
             is_active_param.annotation
         ).startswith("typing.Union")
 

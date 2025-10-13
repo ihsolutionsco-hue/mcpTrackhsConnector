@@ -263,7 +263,7 @@ class TestSearchUnitsToolIntegration:
             )  # adjusted_page = 101, 101 * 100 = 10,100
 
         # Test formato de fecha inválido
-        with pytest.raises(Exception, match="Invalid date format"):
+        with pytest.raises(Exception, match="Formato de fecha inválido"):
             await tool_func(arrival="01/01/2024")
 
         # Test rango de habitaciones inválido

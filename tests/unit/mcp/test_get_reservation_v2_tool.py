@@ -107,9 +107,7 @@ class TestGetReservationV2Tool:
             with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
-            assert "reservation_id debe ser un número entero positivo válido" in str(
-                exc_info.value
-            )
+            assert "Valor inválido para 'reservation_id'" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_tool_invalid_id_negative(self, mock_api_client):
@@ -140,9 +138,7 @@ class TestGetReservationV2Tool:
             with pytest.raises(TrackHSError) as exc_info:
                 await tool_func(reservation_id)
 
-            assert "reservation_id debe ser un número entero positivo válido" in str(
-                exc_info.value
-            )
+            assert "Valor inválido para 'reservation_id'" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_tool_api_error_401(self, mock_api_client):

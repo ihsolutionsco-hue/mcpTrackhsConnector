@@ -202,21 +202,17 @@ class TestGetFolioE2E:
 
         with pytest.raises(ValidationError) as exc_info:
             await tool_function(folio_id="")
-        assert "folio_id es requerido y no puede estar vacío" in str(exc_info.value)
+        assert "Parámetro 'folio_id' es requerido" in str(exc_info.value)
 
         # Test ID negativo
         with pytest.raises(ValidationError) as exc_info:
             await tool_function(folio_id="-1")
-        assert "folio_id debe ser un número entero positivo válido" in str(
-            exc_info.value
-        )
+        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
 
         # Test ID inválido
         with pytest.raises(ValidationError) as exc_info:
             await tool_function(folio_id="abc")
-        assert "folio_id debe ser un número entero positivo válido" in str(
-            exc_info.value
-        )
+        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_with_embedded_data(

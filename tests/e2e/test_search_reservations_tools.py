@@ -384,7 +384,7 @@ class TestSearchReservationsToolsE2E:
             await tool_func(scroll=2)
 
         # Test error de formato de fecha
-        with pytest.raises(TrackHSError, match="Invalid date format"):
+        with pytest.raises(TrackHSError, match="Formato de fecha inválido"):
             await tool_func(arrival_start="invalid-date")
 
         # Test error de status inválido
@@ -429,7 +429,7 @@ class TestSearchReservationsToolsE2E:
             await tool_func(scroll=2)
 
         # Test error de formato de fecha
-        with pytest.raises(TrackHSError, match="Invalid date format"):
+        with pytest.raises(TrackHSError, match="Formato de fecha inválido"):
             await tool_func(arrival_start="invalid-date")
 
         # Test error de status inválido

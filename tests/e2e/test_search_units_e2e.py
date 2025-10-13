@@ -532,7 +532,7 @@ class TestSearchUnitsE2E:
             await setup_tool(page=102, size=100)
 
         # Test formato de fecha inválido
-        with pytest.raises(Exception, match="Invalid date format for arrival"):
+        with pytest.raises(Exception, match="Formato de fecha inválido"):
             await setup_tool(arrival="01/01/2024")
 
         # Test rango de habitaciones inválido

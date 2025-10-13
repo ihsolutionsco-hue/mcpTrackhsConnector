@@ -60,7 +60,7 @@ class TestGetFolioTool:
         with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="")
 
-        assert "folio_id es requerido y no puede estar vacío" in str(exc_info.value)
+        assert "Parámetro 'folio_id' es requerido" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_validation_none_id(self, tool_function):
@@ -71,7 +71,7 @@ class TestGetFolioTool:
         with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id=None)
 
-        assert "folio_id es requerido y no puede estar vacío" in str(exc_info.value)
+        assert "Parámetro 'folio_id' es requerido" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_validation_negative_id(self, tool_function):
@@ -82,9 +82,7 @@ class TestGetFolioTool:
         with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="-1")
 
-        assert "folio_id debe ser un número entero positivo válido" in str(
-            exc_info.value
-        )
+        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_validation_zero_id(self, tool_function):
@@ -93,9 +91,7 @@ class TestGetFolioTool:
         with pytest.raises(ValidationError) as exc_info:
             await tool_function(folio_id="0")
 
-        assert "folio_id debe ser un número entero positivo válido" in str(
-            exc_info.value
-        )
+        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_validation_invalid_id(self, tool_function):
@@ -104,9 +100,7 @@ class TestGetFolioTool:
         with pytest.raises(ValidationError) as exc_info:
             await tool_function(folio_id="abc")
 
-        assert "folio_id debe ser un número entero positivo válido" in str(
-            exc_info.value
-        )
+        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_error_handling_401(

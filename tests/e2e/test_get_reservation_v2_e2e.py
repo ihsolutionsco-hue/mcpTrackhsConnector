@@ -90,9 +90,7 @@ class TestGetReservationV2E2E:
         with pytest.raises(Exception) as exc_info:
             await tool_func(invalid_reservation_id)
 
-        assert "reservation_id debe ser un número entero positivo válido" in str(
-            exc_info.value
-        )
+        assert "Valor inválido para 'reservation_id'" in str(exc_info.value)
 
     @pytest.mark.asyncio
     @pytest.mark.e2e

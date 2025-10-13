@@ -321,10 +321,10 @@ class TestToolsIntegrationE2E:
             await v2_tool(size=0)
 
         # Test error de formato de fecha
-        with pytest.raises(TrackHSError, match="Invalid date format"):
+        with pytest.raises(TrackHSError, match="Formato de fecha inválido"):
             await v1_tool(arrival_start="invalid-date")
 
-        with pytest.raises(TrackHSError, match="Invalid date format"):
+        with pytest.raises(TrackHSError, match="Formato de fecha inválido"):
             await v2_tool(arrival_start="invalid-date")
 
     @pytest.mark.e2e

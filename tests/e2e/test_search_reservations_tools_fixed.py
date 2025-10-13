@@ -383,7 +383,7 @@ class TestSearchReservationsToolsE2EFixed:
             await tool_func(scroll=2)
 
         # Test error de formato de fecha
-        with pytest.raises(TrackHSError, match="Invalid date format"):
+        with pytest.raises(TrackHSError, match="Formato de fecha inválido"):
             await tool_func(arrival_start="invalid-date")
 
         # Test error de status inválido
@@ -426,7 +426,7 @@ class TestSearchReservationsToolsE2EFixed:
             await tool_func(scroll=2)
 
         # Test error de formato de fecha
-        with pytest.raises(TrackHSError, match="Invalid date format"):
+        with pytest.raises(TrackHSError, match="Formato de fecha inválido"):
             await tool_func(arrival_start="invalid-date")
 
         # Test error de status inválido
@@ -1000,7 +1000,7 @@ class TestSearchReservationsToolsE2EFixed:
 
         # Verificar que el mensaje de error es amigable
         error_message = str(exc_info.value)
-        assert "reservation_id es requerido" in error_message
+        assert "Parámetro 'reservation_id' es requerido" in error_message
         assert "reservation_id=1" in error_message  # Debe incluir ejemplo
 
     @pytest.mark.asyncio
@@ -1026,5 +1026,5 @@ class TestSearchReservationsToolsE2EFixed:
 
         # Verificar que el mensaje de error es amigable
         error_message = str(exc_info.value)
-        assert "folio_id es requerido" in error_message
+        assert "Parámetro 'folio_id' es requerido" in error_message
         assert "folio_id=1" in error_message  # Debe incluir ejemplo
