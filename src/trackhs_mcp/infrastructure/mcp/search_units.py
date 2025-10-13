@@ -353,6 +353,14 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                         "The Channel API endpoint might not be available in your environment.",
                         "endpoint",
                     )
+                elif e.status_code == 409:
+                    raise ValidationError(
+                        "Conflict: Pagination limit exceeded. "
+                        "Maximum of 10,000 results (2,000 pages of size 5). "
+                        "Please use scroll parameter for large datasets or reduce page size. "
+                        "Current request exceeds the maximum allowed results.",
+                        "pagination_limit",
+                    )
                 elif e.status_code == 500:
                     raise ValidationError(
                         "Internal Server Error: API temporarily unavailable. "
