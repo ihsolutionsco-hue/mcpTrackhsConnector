@@ -229,29 +229,43 @@ class TestRegressionPostFix:
         print("✅ Test 2 PASS - Filtros Complejos V2")
 
     @pytest.mark.asyncio
-    async def test_phase_2_get_reservation_v2(self, mcp_server, mock_api_client):
+    async def test_phase_2_get_reservation_v2(
+        self, mcp_server, mock_api_client, sample_reservation_data_v2
+    ):
         """FASE 2.3: Test de Obtención de Reservación Individual"""
 
         tools = mcp_server._tool_manager._tools
         get_tool = tools["get_reservation_v2"]
 
+        # Configurar mock con datos completos
+        mock_api_client.get.return_value = sample_reservation_data_v2
+
         # Test 3: Obtención por ID
         result = await get_tool.fn(reservation_id="37152796")
 
         assert result is not None
+        assert "id" in result
+        assert result["id"] == 37165851
         print("✅ Test 3 PASS - Obtención Individual V2")
 
     @pytest.mark.asyncio
-    async def test_phase_2_get_folio(self, mcp_server, mock_api_client):
+    async def test_phase_2_get_folio(
+        self, mcp_server, mock_api_client, sample_folio_guest
+    ):
         """FASE 2.4: Test de Obtención de Folio"""
 
         tools = mcp_server._tool_manager._tools
         folio_tool = tools["get_folio"]
 
+        # Configurar mock con datos completos
+        mock_api_client.get.return_value = sample_folio_guest
+
         # Test 4: Obtención de folio
         result = await folio_tool.fn(folio_id="37152796")
 
         assert result is not None
+        assert "id" in result
+        assert result["id"] == 12345
         print("✅ Test 4 PASS - Obtención de Folio")
 
     @pytest.mark.asyncio
@@ -312,7 +326,14 @@ class TestRegressionPostFix:
         print("✅ Test PASS - Mensajes de error configurados correctamente")
 
     @pytest.mark.asyncio
-    async def test_performance_requirements(self, mcp_server, mock_api_client):
+    async def test_performance_requirements(
+        self,
+        mcp_server,
+        mock_api_client,
+        sample_reservation_data_v2,
+        sample_folio_guest,
+        sample_search_response,
+    ):
         """Test de requisitos de performance"""
 
         import time
@@ -324,12 +345,20 @@ class TestRegressionPostFix:
             start_time = time.time()
 
             if tool_name == "search_reservations_v2":
+                # Configurar mock para search_reservations_v2
+                mock_api_client.get.return_value = sample_search_response
                 await tool.fn(page=1, size=10)
             elif tool_name == "search_units":
+                # Configurar mock para search_units
+                mock_api_client.get.return_value = sample_search_response
                 await tool.fn(page=1, size=5, bedrooms=2)
             elif tool_name == "get_reservation_v2":
+                # Configurar mock para get_reservation_v2
+                mock_api_client.get.return_value = sample_reservation_data_v2
                 await tool.fn(reservation_id="37152796")
             elif tool_name == "get_folio":
+                # Configurar mock para get_folio
+                mock_api_client.get.return_value = sample_folio_guest
                 await tool.fn(folio_id="37152796")
 
             end_time = time.time()
