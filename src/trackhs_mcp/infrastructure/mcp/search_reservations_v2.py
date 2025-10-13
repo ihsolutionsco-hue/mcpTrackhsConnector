@@ -206,7 +206,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             search_params = SearchReservationsParams(
                 page=page,
                 size=size,
-                sort_column=sort_column,
+                sort_column=sort_column if sort_column != "altConf" else "altCon",
                 sort_direction=sort_direction,
                 search=search,
                 tags=tags,
@@ -369,7 +369,11 @@ def _parse_id_string(id_string: Union[str, int, List[int]]) -> Union[int, List[i
         raise ValidationError(f"Invalid ID format: {id_string}", "id")
 
 
-def _format_status_param(status_value: Union[str, List[str]]) -> Union[str, List[str]]:
+def _format_status_param(
+    status_value: Union[str, List[str]]
+) -> Union[
+    Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"], List[str]
+]:
     """
     Formatea parámetros de status para la API.
     Valida que los valores sean válidos según la especificación.

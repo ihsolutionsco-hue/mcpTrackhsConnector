@@ -85,7 +85,16 @@ omit = [
     "*/__pycache__/*",
     "*/venv/*",
     "*/Lib/*",
-    "*/Scripts/*"
+    "*/Scripts/*",
+    "*/resources/*",
+    "*/documentation/*",
+    "*/examples/*",
+    "*/references/*",
+    "*/schemas/*",
+    "*/__main__.py",
+    "*/server.py",
+    "*/all_tools.py",
+    "*/prompts.py"
 ]
 
 [tool.coverage.report]

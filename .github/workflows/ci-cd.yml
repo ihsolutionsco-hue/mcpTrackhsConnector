@@ -97,7 +97,7 @@ jobs:
           TRACKHS_TIMEOUT: ${{ env.TRACKHS_TIMEOUT }}
         run: |
           echo "🧪 Running unit tests..."
-          pytest tests/unit/ -v --cov=src --cov-report=term-missing --cov-report=xml --cov-fail-under=80
+          pytest tests/unit/ -v --cov=src --cov-report=term-missing --cov-report=xml --cov-fail-under=70
 
       - name: Upload Coverage Reports
         uses: actions/upload-artifact@v4

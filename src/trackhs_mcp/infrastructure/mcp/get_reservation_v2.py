@@ -105,7 +105,10 @@ def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
             reservation = await use_case.execute(params)
 
             # Convertir a diccionario para respuesta MCP
-            return reservation.model_dump(by_alias=True, exclude_none=True)
+            result: Dict[str, Any] = reservation.model_dump(
+                by_alias=True, exclude_none=True
+            )
+            return result
 
         except Exception as e:
             # Manejar errores específicos de la API

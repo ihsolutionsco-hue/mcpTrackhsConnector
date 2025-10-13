@@ -42,16 +42,8 @@ class GetReservationUseCase:
                 "reservation_id",
             )
 
-        # Convertir a entero si es string
-        try:
-            if isinstance(params.reservation_id, str):
-                reservation_id_int = int(params.reservation_id.strip())
-            else:
-                reservation_id_int = int(params.reservation_id)
-
-            if reservation_id_int <= 0:
-                raise ValueError("ID debe ser positivo")
-        except (ValueError, TypeError):
+        # Validar que el ID sea positivo
+        if params.reservation_id <= 0:
             raise ValidationError(
                 "reservation_id debe ser un número entero positivo válido",
                 "reservation_id",
@@ -59,7 +51,7 @@ class GetReservationUseCase:
 
         try:
             # Construir endpoint
-            endpoint = f"/v2/pms/reservations/{reservation_id_int}"
+            endpoint = f"/v2/pms/reservations/{params.reservation_id}"
 
             # Realizar petición GET a la API
             response_data = await self.api_client.get(endpoint)
@@ -67,7 +59,7 @@ class GetReservationUseCase:
             # Validar que la respuesta contiene datos
             if not response_data:
                 raise ValidationError(
-                    f"No se encontraron datos para la reserva ID {reservation_id_int}",
+                    f"No se encontraron datos para la reserva ID {params.reservation_id}",
                     "reservation_id",
                 )
 
