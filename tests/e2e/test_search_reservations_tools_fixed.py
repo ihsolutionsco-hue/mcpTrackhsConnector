@@ -908,3 +908,123 @@ class TestSearchReservationsToolsE2EFixed:
         assert params["status"] == "Confirmed,Checked In"
         assert params["groupId"] == 100
         assert params["checkinOfficeId"] == 200
+
+    @pytest.mark.asyncio
+    async def test_search_reservations_v2_error_messages_are_user_friendly(
+        self, mock_config, mock_api_client
+    ):
+        """Test que verifica mensajes de error amigables en search_reservations_v2"""
+        from fastmcp import FastMCP
+
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
+            register_search_reservations_v2,
+        )
+
+        # Crear servidor MCP
+        mcp = FastMCP("Test Server")
+        register_search_reservations_v2(mcp, mock_api_client)
+
+        # Obtener la función registrada
+        tools = mcp._tool_manager._tools
+        search_tool = tools["search_reservations_v2"]
+
+        # Test con fecha inválida para verificar mensaje de error
+        with pytest.raises(ValidationError) as exc_info:
+            await search_tool.fn(
+                page=1, size=10, arrival_start="invalid-date"  # Fecha inválida
+            )
+
+        # Verificar que el mensaje de error es amigable
+        error_message = str(exc_info.value)
+        assert "Formato de fecha inválido" in error_message
+        assert "2025-01-01" in error_message  # Debe incluir ejemplo
+        assert (
+            "arrival_start='2025-01-15'" in error_message
+        )  # Debe incluir ejemplo específico
+
+    @pytest.mark.asyncio
+    async def test_search_reservations_v1_error_messages_are_user_friendly(
+        self, mock_config, mock_api_client
+    ):
+        """Test que verifica mensajes de error amigables en search_reservations_v1"""
+        from fastmcp import FastMCP
+
+        from src.trackhs_mcp.infrastructure.mcp.search_reservations_v1 import (
+            register_search_reservations_v1,
+        )
+
+        # Crear servidor MCP
+        mcp = FastMCP("Test Server")
+        register_search_reservations_v1(mcp, mock_api_client)
+
+        # Obtener la función registrada
+        tools = mcp._tool_manager._tools
+        search_tool = tools["search_reservations_v1"]
+
+        # Test con fecha inválida para verificar mensaje de error
+        with pytest.raises(ValidationError) as exc_info:
+            await search_tool.fn(
+                page=1, size=10, arrival_start="invalid-date"  # Fecha inválida
+            )
+
+        # Verificar que el mensaje de error es amigable
+        error_message = str(exc_info.value)
+        assert "Formato de fecha inválido" in error_message
+        assert "2025-01-01" in error_message  # Debe incluir ejemplo
+        assert (
+            "arrival_start='2025-01-15'" in error_message
+        )  # Debe incluir ejemplo específico
+
+    @pytest.mark.asyncio
+    async def test_get_reservation_v2_error_messages_are_user_friendly(
+        self, mock_config, mock_api_client
+    ):
+        """Test que verifica mensajes de error amigables en get_reservation_v2"""
+        from fastmcp import FastMCP
+
+        from src.trackhs_mcp.infrastructure.mcp.get_reservation_v2 import (
+            register_get_reservation_v2,
+        )
+
+        # Crear servidor MCP
+        mcp = FastMCP("Test Server")
+        register_get_reservation_v2(mcp, mock_api_client)
+
+        # Obtener la función registrada
+        tools = mcp._tool_manager._tools
+        get_tool = tools["get_reservation_v2"]
+
+        # Test con ID inválido para verificar mensaje de error
+        with pytest.raises(ValidationError) as exc_info:
+            await get_tool.fn(reservation_id="")  # ID vacío
+
+        # Verificar que el mensaje de error es amigable
+        error_message = str(exc_info.value)
+        assert "reservation_id es requerido" in error_message
+        assert "reservation_id=1" in error_message  # Debe incluir ejemplo
+
+    @pytest.mark.asyncio
+    async def test_get_folio_error_messages_are_user_friendly(
+        self, mock_config, mock_api_client
+    ):
+        """Test que verifica mensajes de error amigables en get_folio"""
+        from fastmcp import FastMCP
+
+        from src.trackhs_mcp.infrastructure.mcp.get_folio import register_get_folio
+
+        # Crear servidor MCP
+        mcp = FastMCP("Test Server")
+        register_get_folio(mcp, mock_api_client)
+
+        # Obtener la función registrada
+        tools = mcp._tool_manager._tools
+        folio_tool = tools["get_folio"]
+
+        # Test con ID inválido para verificar mensaje de error
+        with pytest.raises(ValidationError) as exc_info:
+            await folio_tool.fn(folio_id="")  # ID vacío
+
+        # Verificar que el mensaje de error es amigable
+        error_message = str(exc_info.value)
+        assert "folio_id es requerido" in error_message
+        assert "folio_id=1" in error_message  # Debe incluir ejemplo

@@ -586,3 +586,139 @@ class TestSearchUnitsE2E:
 
         with pytest.raises(ValidationError, match="Internal Server Error"):
             await setup_tool()
+
+    @pytest.mark.asyncio
+    async def test_search_units_with_integer_params_fixed(
+        self, setup_tool, mock_api_client
+    ):
+        """Test con parámetros numéricos como integers (corrección del bloqueador crítico)"""
+        # Mock response
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 1,
+                        "name": "Unit 1",
+                        "bedrooms": 2,
+                        "bathrooms": 1,
+                        "isActive": True,
+                        "petsFriendly": True,
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 5,
+            "total_items": 1,
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act - Ejecutar con parámetros numéricos como integers (caso que antes fallaba)
+        result = await setup_tool(
+            page=1,  # int
+            size=5,  # int
+            bedrooms=2,  # int
+            bathrooms=1,  # int
+            is_active=1,  # int
+            pets_friendly=1,  # int
+        )
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_search_units_with_all_numeric_params(
+        self, setup_tool, mock_api_client
+    ):
+        """Test con todos los parámetros numéricos como integers"""
+        # Mock response
+        expected_response = {
+            "_embedded": {
+                "units": [{"id": 1, "name": "Unit 1", "bedrooms": 2, "bathrooms": 1}]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act - Ejecutar con todos los parámetros numéricos
+        result = await setup_tool(
+            page=1,
+            size=25,
+            calendar_id=123,
+            role_id=456,
+            bedrooms=2,
+            min_bedrooms=1,
+            max_bedrooms=4,
+            bathrooms=1,
+            min_bathrooms=1,
+            max_bathrooms=2,
+            pets_friendly=1,
+            allow_unit_rates=1,
+            computed=1,
+            inherited=1,
+            limited=1,
+            is_bookable=1,
+            include_descriptions=1,
+            is_active=1,
+            events_allowed=1,
+            smoking_allowed=0,
+            children_allowed=1,
+            is_accessible=1,
+        )
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_search_units_error_messages_are_user_friendly(
+        self, setup_tool, mock_api_client
+    ):
+        """Test que verifica mensajes de error amigables"""
+        # Test con fecha inválida para verificar mensaje de error
+        with pytest.raises(ValidationError) as exc_info:
+            await setup_tool(page=1, size=25, arrival="invalid-date")  # Fecha inválida
+
+        # Verificar que el mensaje de error es amigable
+        error_message = str(exc_info.value)
+        assert "Formato de fecha inválido" in error_message
+        assert "2025-01-01" in error_message  # Debe incluir ejemplo
+        assert (
+            "arrival='2025-01-15'" in error_message
+        )  # Debe incluir ejemplo específico
+
+    @pytest.mark.asyncio
+    async def test_search_units_performance_requirements(
+        self, setup_tool, mock_api_client
+    ):
+        """Test de requisitos de performance"""
+        import time
+
+        # Mock response
+        expected_response = {
+            "_embedded": {"units": [{"id": 1, "name": "Unit 1"}]},
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Medir tiempo de respuesta
+        start_time = time.time()
+        result = await setup_tool(page=1, size=25, bedrooms=2)
+        end_time = time.time()
+
+        response_time = end_time - start_time
+
+        # Verificar que el tiempo de respuesta es < 3 segundos
+        assert (
+            response_time < 3.0
+        ), f"Tiempo de respuesta {response_time:.2f}s debe ser < 3s"
+
+        # Verificar resultado
+        assert result == expected_response

@@ -12,6 +12,7 @@ from ...application.use_cases.get_reservation import GetReservationUseCase
 from ...domain.entities.reservations import GetReservationParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
+from ..utils.user_friendly_messages import format_required_error, format_type_error
 
 
 def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
@@ -75,11 +76,16 @@ def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
         - La respuesta incluye todos los datos embebidos disponibles
         - Los datos financieros están en formato de string para precisión
         - Las fechas están en formato ISO 8601
+
+        **Common Errors:**
+        - reservation_id: Required parameter (reservation_id="37152796")
+        - ID format: Must be positive integer as string ("12345")
+        - Authentication: Check TRACKHS_USERNAME and TRACKHS_PASSWORD
         """
         # Validar parámetros de entrada
         if not reservation_id or not reservation_id.strip():
             raise ValidationError(
-                "reservation_id es requerido y no puede estar vacío",
+                format_required_error("reservation_id"),
                 "reservation_id",
             )
 
@@ -90,7 +96,9 @@ def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
                 raise ValueError("ID debe ser positivo")
         except (ValueError, TypeError):
             raise ValidationError(
-                "reservation_id debe ser un número entero positivo válido",
+                format_type_error(
+                    "reservation_id", "número entero positivo", reservation_id
+                ),
                 "reservation_id",
             )
 

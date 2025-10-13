@@ -12,6 +12,7 @@ from ...application.use_cases.search_reservations import SearchReservationsUseCa
 from ...domain.entities.reservations import SearchReservationsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
+from ..utils.user_friendly_messages import format_date_error
 
 
 def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
@@ -151,6 +152,12 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         - Validates ISO 8601 date formats strictly
         - Enforces 10k total results limit
         - Disables sorting when using scroll
+
+        **Common Errors:**
+        - Date format: Use 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SSZ'
+        - Page/size: Must be positive integers (page=1, size=10)
+        - Status: Use valid status values like "Confirmed", "Cancelled"
+        - Scroll: Use 1 to start, string to continue
         """
         # Validar parámetros básicos según documentación API V2
         if page < 0:
@@ -194,7 +201,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         for param_name, param_value in date_params.items():
             if param_value and not _is_valid_date_format(param_value):
                 raise ValidationError(
-                    f"Invalid date format for {param_name}. Use ISO 8601 format.",
+                    format_date_error(param_name),
                     param_name,
                 )
 

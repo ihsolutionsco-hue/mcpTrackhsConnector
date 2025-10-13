@@ -12,6 +12,7 @@ from ...application.use_cases.get_folio import GetFolioUseCase
 from ...domain.entities.folios import GetFolioParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
+from ..utils.user_friendly_messages import format_required_error, format_type_error
 
 
 def register_get_folio(mcp, api_client: "ApiClientPort"):
@@ -77,11 +78,16 @@ def register_get_folio(mcp, api_client: "ApiClientPort"):
         - Los datos financieros están en formato numérico para cálculos
         - Las fechas están en formato ISO 8601
         - Los campos opcionales pueden estar ausentes según el tipo de folio
+
+        **Common Errors:**
+        - folio_id: Required parameter (folio_id="37152796")
+        - ID format: Must be positive integer as string ("12345")
+        - Authentication: Check TRACKHS_USERNAME and TRACKHS_PASSWORD
         """
         # Validar parámetros de entrada
         if not folio_id or not folio_id.strip():
             raise ValidationError(
-                "folio_id es requerido y no puede estar vacío",
+                format_required_error("folio_id"),
                 "folio_id",
             )
 
@@ -92,7 +98,7 @@ def register_get_folio(mcp, api_client: "ApiClientPort"):
                 raise ValueError("ID debe ser positivo")
         except (ValueError, TypeError):
             raise ValidationError(
-                "folio_id debe ser un número entero positivo válido",
+                format_type_error("folio_id", "número entero positivo", folio_id),
                 "folio_id",
             )
 

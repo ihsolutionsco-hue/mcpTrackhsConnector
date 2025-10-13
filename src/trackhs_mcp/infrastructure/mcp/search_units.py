@@ -14,146 +14,17 @@ from ...application.use_cases.search_units import SearchUnitsUseCase
 from ...domain.entities.units import SearchUnitsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
+from ..utils.user_friendly_messages import format_date_error
 
 
 def register_search_units(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_units"""
 
-    # Definir el modelo Pydantic para el inputSchema
-    class SearchUnitsInput(BaseModel):
-        """Modelo de entrada para search_units - Genera automáticamente el inputSchema"""
-
-        page: Union[int, str] = Field(
-            default=1, description="Page number (1-based, max 10k total results)"
-        )
-        size: Union[int, str] = Field(
-            default=25, description="Page size (max 1000, limited to 10k total results)"
-        )
-        sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = Field(
-            default="name", description="Column to sort by"
-        )
-        sort_direction: Literal["asc", "desc"] = Field(
-            default="asc", description="Sort direction"
-        )
-        search: Optional[str] = Field(
-            default=None, description="Text search in names/descriptions"
-        )
-        term: Optional[str] = Field(
-            default=None, description="Substring search matching on term"
-        )
-        unit_code: Optional[str] = Field(
-            default=None,
-            description="Search on unitCode, exact match or add % for wildcard",
-        )
-        short_name: Optional[str] = Field(
-            default=None,
-            description="Search on shortName, exact match or add % for wildcard",
-        )
-        node_id: Optional[str] = Field(
-            default=None,
-            description="Node ID(s) - single int, comma-separated, or array",
-        )
-        amenity_id: Optional[str] = Field(
-            default=None,
-            description="Amenity ID(s) - single int, comma-separated, or array",
-        )
-        unit_type_id: Optional[str] = Field(
-            default=None,
-            description="Unit type ID(s) - single int, comma-separated, or array",
-        )
-        id: Optional[str] = Field(default=None, description="Filter by Unit IDs")
-        calendar_id: Optional[Union[int, str]] = Field(
-            default=None,
-            description="Return units matching this unit's type with calendar group id",
-        )
-        role_id: Optional[Union[int, str]] = Field(
-            default=None, description="Return units by specific roleId"
-        )
-        bedrooms: Optional[Union[int, str]] = Field(
-            default=None,
-            description="Exact number of bedrooms (will be converted to integer)",
-        )
-        min_bedrooms: Optional[Union[int, str]] = Field(
-            default=None,
-            description="Minimum number of bedrooms (will be converted to integer)",
-        )
-        max_bedrooms: Optional[Union[int, str]] = Field(
-            default=None,
-            description="Maximum number of bedrooms (will be converted to integer)",
-        )
-        bathrooms: Optional[Union[int, str]] = Field(
-            default=None,
-            description="Exact number of bathrooms (will be converted to integer)",
-        )
-        min_bathrooms: Optional[Union[int, str]] = Field(
-            default=None,
-            description="Minimum number of bathrooms (will be converted to integer)",
-        )
-        max_bathrooms: Optional[Union[int, str]] = Field(
-            default=None,
-            description="Maximum number of bathrooms (will be converted to integer)",
-        )
-        pets_friendly: Optional[Union[int, str]] = Field(
-            default=None, description="Pet friendly units (0/1)"
-        )
-        allow_unit_rates: Optional[Union[int, str]] = Field(
-            default=None, description="Units that allow unit rates (0/1)"
-        )
-        computed: Optional[Union[int, str]] = Field(
-            default=None, description="Additional computed values (0/1)"
-        )
-        inherited: Optional[Union[int, str]] = Field(
-            default=None, description="Additional inherited attributes (0/1)"
-        )
-        limited: Optional[Union[int, str]] = Field(
-            default=None, description="Very limited attributes (0/1)"
-        )
-        is_bookable: Optional[Union[int, str]] = Field(
-            default=None, description="Bookable units (0/1)"
-        )
-        include_descriptions: Optional[Union[int, str]] = Field(
-            default=None, description="Include descriptions (0/1)"
-        )
-        is_active: Optional[Union[int, str]] = Field(
-            default=None, description="Active units (0/1)"
-        )
-        events_allowed: Optional[Union[int, str]] = Field(
-            default=None, description="Events allowed (0/1)"
-        )
-        smoking_allowed: Optional[Union[int, str]] = Field(
-            default=None, description="Smoking allowed (0/1)"
-        )
-        children_allowed: Optional[Union[int, str]] = Field(
-            default=None, description="Children allowed (0/1)"
-        )
-        is_accessible: Optional[Union[int, str]] = Field(
-            default=None, description="Accessible units (0/1)"
-        )
-        arrival: Optional[str] = Field(
-            default=None,
-            description="Arrival date (ISO 8601 format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        )
-        departure: Optional[str] = Field(
-            default=None,
-            description="Departure date (ISO 8601 format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        )
-        content_updated_since: Optional[str] = Field(
-            default=None,
-            description="Content changes since timestamp (ISO 8601 format)",
-        )
-        updated_since: Optional[str] = Field(
-            default=None,
-            description="Updated since timestamp (ISO 8601 format) - deprecated",
-        )
-        unit_status: Optional[
-            Literal["clean", "dirty", "occupied", "inspection", "inprogress"]
-        ] = Field(default=None, description="Unit status")
-
     @mcp.tool
     @error_handler("search_units")
     async def search_units(
-        page: Union[int, str] = 1,
-        size: Union[int, str] = 25,
+        page: int = 1,
+        size: int = 25,
         sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = "name",
         sort_direction: Literal["asc", "desc"] = "asc",
         search: Optional[str] = None,
@@ -164,26 +35,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         amenity_id: Optional[str] = None,
         unit_type_id: Optional[str] = None,
         id: Optional[str] = None,
-        calendar_id: Optional[Union[int, str]] = None,
-        role_id: Optional[Union[int, str]] = None,
-        bedrooms: Optional[Union[int, str]] = None,
-        min_bedrooms: Optional[Union[int, str]] = None,
-        max_bedrooms: Optional[Union[int, str]] = None,
-        bathrooms: Optional[Union[int, str]] = None,
-        min_bathrooms: Optional[Union[int, str]] = None,
-        max_bathrooms: Optional[Union[int, str]] = None,
-        pets_friendly: Optional[Union[int, str]] = None,
-        allow_unit_rates: Optional[Union[int, str]] = None,
-        computed: Optional[Union[int, str]] = None,
-        inherited: Optional[Union[int, str]] = None,
-        limited: Optional[Union[int, str]] = None,
-        is_bookable: Optional[Union[int, str]] = None,
-        include_descriptions: Optional[Union[int, str]] = None,
-        is_active: Optional[Union[int, str]] = None,
-        events_allowed: Optional[Union[int, str]] = None,
-        smoking_allowed: Optional[Union[int, str]] = None,
-        children_allowed: Optional[Union[int, str]] = None,
-        is_accessible: Optional[Union[int, str]] = None,
+        calendar_id: Optional[int] = None,
+        role_id: Optional[int] = None,
+        bedrooms: Optional[int] = None,
+        min_bedrooms: Optional[int] = None,
+        max_bedrooms: Optional[int] = None,
+        bathrooms: Optional[int] = None,
+        min_bathrooms: Optional[int] = None,
+        max_bathrooms: Optional[int] = None,
+        pets_friendly: Optional[int] = None,
+        allow_unit_rates: Optional[int] = None,
+        computed: Optional[int] = None,
+        inherited: Optional[int] = None,
+        limited: Optional[int] = None,
+        is_bookable: Optional[int] = None,
+        include_descriptions: Optional[int] = None,
+        is_active: Optional[int] = None,
+        events_allowed: Optional[int] = None,
+        smoking_allowed: Optional[int] = None,
+        children_allowed: Optional[int] = None,
+        is_accessible: Optional[int] = None,
         arrival: Optional[str] = None,
         departure: Optional[str] = None,
         content_updated_since: Optional[str] = None,
@@ -282,6 +153,12 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         - Validates ISO 8601 date formats strictly
         - Enforces 10k total results limit
         - Validates boolean parameters (0/1 only)
+
+        **Common Errors:**
+        - Date format: Use 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SSZ'
+        - Page/size: Must be positive integers (page=1, size=25)
+        - Boolean flags: Use 0 or 1 (pets_friendly=1, is_active=1)
+        - Bedrooms/bathrooms: Use integers (bedrooms=2, bathrooms=1)
         """
         # Validar límite total de resultados (10k máximo) - validación de negocio
         # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
@@ -319,7 +196,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         for param_name, param_value in date_params.items():
             if param_value and not _is_valid_date_format(param_value):
                 raise ValidationError(
-                    f"Invalid date format for {param_name}. Use ISO 8601 format.",
+                    format_date_error(param_name),
                     param_name,
                 )
 
@@ -354,38 +231,6 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
             # Crear caso de uso
             use_case = SearchUnitsUseCase(api_client)
-
-            # Convertir parámetros de string a tipos correctos si es necesario
-            def _convert_param(param, target_type):
-                """Convierte parámetro a tipo correcto con validación robusta"""
-                if param is None:
-                    return None
-                if isinstance(param, target_type):
-                    return param
-                try:
-                    if target_type == int:
-                        # Validar que el parámetro sea convertible a int
-                        if isinstance(param, str):
-                            # Remover espacios en blanco
-                            param = param.strip()
-                            # Validar que no esté vacío
-                            if not param:
-                                return None
-                        return int(param)
-                    elif target_type == str:
-                        return str(param)
-                    else:
-                        return param
-                except (ValueError, TypeError) as e:
-                    # Log del error para debugging
-                    import logging
-
-                    logger = logging.getLogger(__name__)
-                    logger.warning(
-                        f"Error converting parameter {param} to {target_type.__name__}: {e}"
-                    )
-                    # Retornar None en lugar del parámetro original para evitar errores
-                    return None
 
             # Mapeo de parámetros para conversión correcta
             PARAM_MAPPING = {
@@ -453,10 +298,10 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
                 return date_str
 
-            # Crear parámetros de búsqueda con conversión de tipos y mapeo
+            # Crear parámetros de búsqueda con mapeo
             search_params = SearchUnitsParams(
-                page=_convert_param(page, int),
-                size=_convert_param(size, int),
+                page=page,
+                size=size,
                 sort_column=sort_column,
                 sort_direction=sort_direction,
                 search=search,
@@ -467,26 +312,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 amenity_id=_parse_id_string(amenity_id) if amenity_id else None,
                 unit_type_id=_parse_id_string(unit_type_id) if unit_type_id else None,
                 id=_parse_id_list(id) if id else None,
-                calendar_id=_convert_param(calendar_id, int),
-                role_id=_convert_param(role_id, int),
-                bedrooms=_convert_param(bedrooms, int),
-                min_bedrooms=_convert_param(min_bedrooms, int),
-                max_bedrooms=_convert_param(max_bedrooms, int),
-                bathrooms=_convert_param(bathrooms, int),
-                min_bathrooms=_convert_param(min_bathrooms, int),
-                max_bathrooms=_convert_param(max_bathrooms, int),
-                pets_friendly=_convert_param(pets_friendly, int),
-                allow_unit_rates=_convert_param(allow_unit_rates, int),
-                computed=_convert_param(computed, int),
-                inherited=_convert_param(inherited, int),
-                limited=_convert_param(limited, int),
-                is_bookable=_convert_param(is_bookable, int),
-                include_descriptions=_convert_param(include_descriptions, int),
-                is_active=_convert_param(is_active, int),
-                events_allowed=_convert_param(events_allowed, int),
-                smoking_allowed=_convert_param(smoking_allowed, int),
-                children_allowed=_convert_param(children_allowed, int),
-                is_accessible=_convert_param(is_accessible, int),
+                calendar_id=calendar_id,
+                role_id=role_id,
+                bedrooms=bedrooms,
+                min_bedrooms=min_bedrooms,
+                max_bedrooms=max_bedrooms,
+                bathrooms=bathrooms,
+                min_bathrooms=min_bathrooms,
+                max_bathrooms=max_bathrooms,
+                pets_friendly=pets_friendly,
+                allow_unit_rates=allow_unit_rates,
+                computed=computed,
+                inherited=inherited,
+                limited=limited,
+                is_bookable=is_bookable,
+                include_descriptions=include_descriptions,
+                is_active=is_active,
+                events_allowed=events_allowed,
+                smoking_allowed=smoking_allowed,
+                children_allowed=children_allowed,
+                is_accessible=is_accessible,
                 arrival=_validate_iso8601_date(arrival, "arrival"),
                 departure=_validate_iso8601_date(departure, "departure"),
                 content_updated_since=_validate_iso8601_date(
