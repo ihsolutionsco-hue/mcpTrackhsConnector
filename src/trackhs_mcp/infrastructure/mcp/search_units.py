@@ -20,8 +20,8 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
     @mcp.tool
     @error_handler("search_units")
     async def search_units(
-        page: int = 1,
-        size: int = 25,
+        page: Union[int, str] = 1,
+        size: Union[int, str] = 25,
         sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = "name",
         sort_direction: Literal["asc", "desc"] = "asc",
         search: Optional[str] = None,
@@ -32,26 +32,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         amenity_id: Optional[str] = None,
         unit_type_id: Optional[str] = None,
         id: Optional[str] = None,
-        calendar_id: Optional[int] = None,
-        role_id: Optional[int] = None,
-        bedrooms: Optional[int] = None,
-        min_bedrooms: Optional[int] = None,
-        max_bedrooms: Optional[int] = None,
-        bathrooms: Optional[int] = None,
-        min_bathrooms: Optional[int] = None,
-        max_bathrooms: Optional[int] = None,
-        pets_friendly: Optional[Literal[0, 1]] = None,
-        allow_unit_rates: Optional[Literal[0, 1]] = None,
-        computed: Optional[Literal[0, 1]] = None,
-        inherited: Optional[Literal[0, 1]] = None,
-        limited: Optional[Literal[0, 1]] = None,
-        is_bookable: Optional[Literal[0, 1]] = None,
-        include_descriptions: Optional[Literal[0, 1]] = None,
-        is_active: Optional[Literal[0, 1]] = None,
-        events_allowed: Optional[Literal[0, 1]] = None,
-        smoking_allowed: Optional[Literal[0, 1]] = None,
-        children_allowed: Optional[Literal[0, 1]] = None,
-        is_accessible: Optional[Literal[0, 1]] = None,
+        calendar_id: Union[int, str, None] = None,
+        role_id: Union[int, str, None] = None,
+        bedrooms: Union[int, str, None] = None,
+        min_bedrooms: Union[int, str, None] = None,
+        max_bedrooms: Union[int, str, None] = None,
+        bathrooms: Union[int, str, None] = None,
+        min_bathrooms: Union[int, str, None] = None,
+        max_bathrooms: Union[int, str, None] = None,
+        pets_friendly: Union[Literal[0, 1], str, None] = None,
+        allow_unit_rates: Union[Literal[0, 1], str, None] = None,
+        computed: Union[Literal[0, 1], str, None] = None,
+        inherited: Union[Literal[0, 1], str, None] = None,
+        limited: Union[Literal[0, 1], str, None] = None,
+        is_bookable: Union[Literal[0, 1], str, None] = None,
+        include_descriptions: Union[Literal[0, 1], str, None] = None,
+        is_active: Union[Literal[0, 1], str, None] = None,
+        events_allowed: Union[Literal[0, 1], str, None] = None,
+        smoking_allowed: Union[Literal[0, 1], str, None] = None,
+        children_allowed: Union[Literal[0, 1], str, None] = None,
+        is_accessible: Union[Literal[0, 1], str, None] = None,
         arrival: Optional[str] = None,
         departure: Optional[str] = None,
         content_updated_since: Optional[str] = None,
@@ -193,11 +193,52 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
             # Convertir parámetros de string a tipos correctos si es necesario
             def _convert_param(param, target_type):
-                """Convierte parámetro a tipo correcto"""
+                """Convierte parámetro a tipo correcto con manejo robusto de strings"""
                 if param is None:
                     return None
                 if isinstance(param, target_type):
                     return param
+
+                # Si es string, intentar convertir
+                if isinstance(param, str):
+                    try:
+                        if target_type == int:
+                            return int(param)
+                        elif target_type == str:
+                            return str(param)
+                        # Para Literal[0, 1], convertir string a int primero
+                        elif hasattr(target_type, "__args__") and target_type.__args__:
+                            # Es un Union, buscar el tipo int
+                            for arg in target_type.__args__:
+                                if arg == int or (
+                                    hasattr(arg, "__origin__")
+                                    and arg.__origin__ is type(None)
+                                ):
+                                    continue
+                                elif hasattr(arg, "__args__") and arg.__args__ == (
+                                    0,
+                                    1,
+                                ):
+                                    # Es Literal[0, 1]
+                                    converted = int(param)
+                                    if converted in [0, 1]:
+                                        return converted
+                                    else:
+                                        raise ValueError(
+                                            f"Value {converted} not in Literal[0, 1]"
+                                        )
+                                elif arg == int:
+                                    return int(param)
+                            return param
+                        else:
+                            return param
+                    except (ValueError, TypeError) as e:
+                        raise ValidationError(
+                            f"Invalid parameter value: {param}. Expected {target_type.__name__}",
+                            "parameter",
+                        )
+
+                # Si no es string, intentar conversión directa
                 try:
                     if target_type == int:
                         return int(param)
