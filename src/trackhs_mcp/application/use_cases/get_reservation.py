@@ -3,7 +3,7 @@ Use Case para obtener una reserva específica por ID desde TrackHS API V2
 Implementa la lógica de negocio para el endpoint GET /v2/pms/reservations/{reservationId}
 """
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
