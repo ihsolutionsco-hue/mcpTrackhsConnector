@@ -280,62 +280,56 @@ class SearchUnitsParams(PaginationParams, SearchParams):
     short_name: Optional[str] = Field(
         default=None, description="Búsqueda por nombre corto"
     )
-    min_bedrooms: Optional[int] = Field(
+    min_bedrooms: Optional[str] = Field(
         default=None, description="Mínimo de habitaciones"
     )
-    max_bedrooms: Optional[int] = Field(
+    max_bedrooms: Optional[str] = Field(
         default=None, description="Máximo de habitaciones"
     )
-    bedrooms: Optional[int] = Field(
+    bedrooms: Optional[str] = Field(
         default=None, description="Número exacto de habitaciones"
     )
-    min_bathrooms: Optional[int] = Field(default=None, description="Mínimo de baños")
-    max_bathrooms: Optional[int] = Field(default=None, description="Máximo de baños")
-    bathrooms: Optional[int] = Field(default=None, description="Número exacto de baños")
-    calendar_id: Optional[int] = Field(default=None, description="ID del calendario")
-    pets_friendly: Optional[int] = Field(
-        default=None, description="Permite mascotas (0/1)", ge=0, le=1
+    min_bathrooms: Optional[str] = Field(default=None, description="Mínimo de baños")
+    max_bathrooms: Optional[str] = Field(default=None, description="Máximo de baños")
+    bathrooms: Optional[str] = Field(default=None, description="Número exacto de baños")
+    calendar_id: Optional[str] = Field(default=None, description="ID del calendario")
+    pets_friendly: Optional[str] = Field(
+        default=None, description="Permite mascotas (0/1)"
     )
-    allow_unit_rates: Optional[int] = Field(
-        default=None, description="Permite tarifas de unidad (0/1)", ge=0, le=1
+    allow_unit_rates: Optional[str] = Field(
+        default=None, description="Permite tarifas de unidad (0/1)"
     )
-    computed: Optional[int] = Field(
-        default=None, description="Valores computados (0/1)", ge=0, le=1
+    computed: Optional[str] = Field(
+        default=None, description="Valores computados (0/1)"
     )
-    inherited: Optional[int] = Field(
-        default=None, description="Atributos heredados (0/1)", ge=0, le=1
+    inherited: Optional[str] = Field(
+        default=None, description="Atributos heredados (0/1)"
     )
-    limited: Optional[int] = Field(
-        default=None, description="Atributos limitados (0/1)", ge=0, le=1
+    limited: Optional[str] = Field(
+        default=None, description="Atributos limitados (0/1)"
     )
-    is_bookable: Optional[int] = Field(
-        default=None, description="Es reservable (0/1)", ge=0, le=1
+    is_bookable: Optional[str] = Field(default=None, description="Es reservable (0/1)")
+    include_descriptions: Optional[str] = Field(
+        default=None, description="Incluir descripciones (0/1)"
     )
-    include_descriptions: Optional[int] = Field(
-        default=None, description="Incluir descripciones (0/1)", ge=0, le=1
+    is_active: Optional[str] = Field(default=None, description="Está activo (0/1)")
+    events_allowed: Optional[str] = Field(
+        default=None, description="Permite eventos (0/1)"
     )
-    is_active: Optional[int] = Field(
-        default=None, description="Está activo (0/1)", ge=0, le=1
+    smoking_allowed: Optional[str] = Field(
+        default=None, description="Permite fumar (0/1)"
     )
-    events_allowed: Optional[int] = Field(
-        default=None, description="Permite eventos (0/1)", ge=0, le=1
+    children_allowed: Optional[str] = Field(
+        default=None, description="Permite niños (0/1)"
     )
-    smoking_allowed: Optional[int] = Field(
-        default=None, description="Permite fumar (0/1)", ge=0, le=1
-    )
-    children_allowed: Optional[int] = Field(
-        default=None, description="Permite niños (0/1)", ge=0, le=1
-    )
-    is_accessible: Optional[int] = Field(
-        default=None, description="Es accesible (0/1)", ge=0, le=1
-    )
+    is_accessible: Optional[str] = Field(default=None, description="Es accesible (0/1)")
     arrival: Optional[str] = Field(
         default=None, description="Fecha de llegada (ISO 8601)"
     )
     departure: Optional[str] = Field(
         default=None, description="Fecha de salida (ISO 8601)"
     )
-    role_id: Optional[int] = Field(default=None, description="ID del rol")
+    role_id: Optional[str] = Field(default=None, description="ID del rol")
     id: Optional[List[int]] = Field(
         default=None, description="IDs específicos de unidades"
     )
