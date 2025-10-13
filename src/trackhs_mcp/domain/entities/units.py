@@ -250,11 +250,27 @@ class SearchUnitsParams(PaginationParams, SearchParams):
     """Parámetros para buscar unidades - Basado en la especificación completa"""
 
     @field_validator(
-        "min_bedrooms", "max_bedrooms", "bedrooms", "min_bathrooms", "max_bathrooms",
-        "bathrooms", "calendar_id", "pets_friendly", "allow_unit_rates", "computed",
-        "inherited", "limited", "is_bookable", "include_descriptions", "is_active",
-        "events_allowed", "smoking_allowed", "children_allowed", "is_accessible", "role_id",
-        mode="before"
+        "min_bedrooms",
+        "max_bedrooms",
+        "bedrooms",
+        "min_bathrooms",
+        "max_bathrooms",
+        "bathrooms",
+        "calendar_id",
+        "pets_friendly",
+        "allow_unit_rates",
+        "computed",
+        "inherited",
+        "limited",
+        "is_bookable",
+        "include_descriptions",
+        "is_active",
+        "events_allowed",
+        "smoking_allowed",
+        "children_allowed",
+        "is_accessible",
+        "role_id",
+        mode="before",
     )
     @classmethod
     def convert_int_to_str(cls, v):
@@ -296,56 +312,70 @@ class SearchUnitsParams(PaginationParams, SearchParams):
     short_name: Optional[str] = Field(
         default=None, description="Búsqueda por nombre corto"
     )
-    min_bedrooms: Optional[str] = Field(
+    min_bedrooms: Optional[Union[int, str]] = Field(
         default=None, description="Mínimo de habitaciones"
     )
-    max_bedrooms: Optional[str] = Field(
+    max_bedrooms: Optional[Union[int, str]] = Field(
         default=None, description="Máximo de habitaciones"
     )
-    bedrooms: Optional[str] = Field(
+    bedrooms: Optional[Union[int, str]] = Field(
         default=None, description="Número exacto de habitaciones"
     )
-    min_bathrooms: Optional[str] = Field(default=None, description="Mínimo de baños")
-    max_bathrooms: Optional[str] = Field(default=None, description="Máximo de baños")
-    bathrooms: Optional[str] = Field(default=None, description="Número exacto de baños")
-    calendar_id: Optional[str] = Field(default=None, description="ID del calendario")
-    pets_friendly: Optional[str] = Field(
+    min_bathrooms: Optional[Union[int, str]] = Field(
+        default=None, description="Mínimo de baños"
+    )
+    max_bathrooms: Optional[Union[int, str]] = Field(
+        default=None, description="Máximo de baños"
+    )
+    bathrooms: Optional[Union[int, str]] = Field(
+        default=None, description="Número exacto de baños"
+    )
+    calendar_id: Optional[Union[int, str]] = Field(
+        default=None, description="ID del calendario"
+    )
+    pets_friendly: Optional[Union[int, str]] = Field(
         default=None, description="Permite mascotas (0/1)"
     )
-    allow_unit_rates: Optional[str] = Field(
+    allow_unit_rates: Optional[Union[int, str]] = Field(
         default=None, description="Permite tarifas de unidad (0/1)"
     )
-    computed: Optional[str] = Field(
+    computed: Optional[Union[int, str]] = Field(
         default=None, description="Valores computados (0/1)"
     )
-    inherited: Optional[str] = Field(
+    inherited: Optional[Union[int, str]] = Field(
         default=None, description="Atributos heredados (0/1)"
     )
-    limited: Optional[str] = Field(
+    limited: Optional[Union[int, str]] = Field(
         default=None, description="Atributos limitados (0/1)"
     )
-    is_bookable: Optional[str] = Field(default=None, description="Es reservable (0/1)")
-    include_descriptions: Optional[str] = Field(
+    is_bookable: Optional[Union[int, str]] = Field(
+        default=None, description="Es reservable (0/1)"
+    )
+    include_descriptions: Optional[Union[int, str]] = Field(
         default=None, description="Incluir descripciones (0/1)"
     )
-    is_active: Optional[str] = Field(default=None, description="Está activo (0/1)")
-    events_allowed: Optional[str] = Field(
+    is_active: Optional[Union[int, str]] = Field(
+        default=None, description="Está activo (0/1)"
+    )
+    events_allowed: Optional[Union[int, str]] = Field(
         default=None, description="Permite eventos (0/1)"
     )
-    smoking_allowed: Optional[str] = Field(
+    smoking_allowed: Optional[Union[int, str]] = Field(
         default=None, description="Permite fumar (0/1)"
     )
-    children_allowed: Optional[str] = Field(
+    children_allowed: Optional[Union[int, str]] = Field(
         default=None, description="Permite niños (0/1)"
     )
-    is_accessible: Optional[str] = Field(default=None, description="Es accesible (0/1)")
+    is_accessible: Optional[Union[int, str]] = Field(
+        default=None, description="Es accesible (0/1)"
+    )
     arrival: Optional[str] = Field(
         default=None, description="Fecha de llegada (ISO 8601)"
     )
     departure: Optional[str] = Field(
         default=None, description="Fecha de salida (ISO 8601)"
     )
-    role_id: Optional[str] = Field(default=None, description="ID del rol")
+    role_id: Optional[Union[int, str]] = Field(default=None, description="ID del rol")
     id: Optional[List[int]] = Field(
         default=None, description="IDs específicos de unidades"
     )
