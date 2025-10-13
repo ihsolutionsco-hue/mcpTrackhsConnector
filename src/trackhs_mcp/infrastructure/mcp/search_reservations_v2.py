@@ -370,7 +370,7 @@ def _parse_id_string(id_string: Union[str, int, List[int]]) -> Union[int, List[i
 
 
 def _format_status_param(
-    status_value: Union[str, List[str]]
+    status_value: Union[str, List[str]],
 ) -> Union[
     Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"], List[str]
 ]:
