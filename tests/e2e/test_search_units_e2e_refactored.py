@@ -47,8 +47,24 @@ class TestSearchUnitsE2ERefactored:
     @pytest.fixture
     def setup_tool(self, mock_mcp, mock_api_client):
         """Configuración de la herramienta"""
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Registrar la función
         register_search_units(mock_mcp, mock_api_client)
-        return mock_mcp.tool.call_args[0][0]  # Obtener la función del tool
+
+        # Obtener la función registrada
+        return registered_function
 
     @pytest.mark.asyncio
     async def test_basic_search_returns_expected_structure(
@@ -237,10 +253,22 @@ class TestSearchUnitsE2ERefactored:
         mock_api_client = AsyncMock()
         mock_api_client.get.side_effect = Exception("API Error")
 
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
         mock_mcp = MagicMock()
-        mock_mcp.tool = MagicMock()
+        mock_mcp.tool = mock_tool_decorator
+
         register_search_units(mock_mcp, mock_api_client)
-        tool_func = mock_mcp.tool.call_args[0][0]
+        tool_func = registered_function
 
         # Act & Assert - Verificar que se maneja el error correctamente
         with pytest.raises(Exception):

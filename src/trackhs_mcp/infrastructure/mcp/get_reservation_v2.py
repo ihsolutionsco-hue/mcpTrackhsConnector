@@ -18,8 +18,8 @@ from ..utils.user_friendly_messages import format_required_error, format_type_er
 def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta get_reservation_v2"""
 
-    @mcp.tool
-    @error_handler("get_reservation_v2")
+    @mcp.tool(name="get_reservation")
+    @error_handler("get_reservation")
     async def get_reservation_v2(reservation_id: str) -> Dict[str, Any]:
         """
         Obtiene una reserva específica por ID desde TrackHS API V2.

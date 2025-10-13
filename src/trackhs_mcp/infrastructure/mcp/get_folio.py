@@ -18,7 +18,7 @@ from ..utils.user_friendly_messages import format_required_error, format_type_er
 def register_get_folio(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta get_folio"""
 
-    @mcp.tool
+    @mcp.tool(name="get_folio")
     @error_handler("get_folio")
     async def get_folio(folio_id: str) -> Dict[str, Any]:
         """

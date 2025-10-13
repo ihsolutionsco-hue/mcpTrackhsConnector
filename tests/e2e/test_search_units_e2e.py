@@ -28,8 +28,24 @@ class TestSearchUnitsE2E:
     @pytest.fixture
     def setup_tool(self, mock_mcp, mock_api_client):
         """Configuración de la herramienta"""
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Registrar la función
         register_search_units(mock_mcp, mock_api_client)
-        return mock_mcp.tool.call_args[0][0]
+
+        # Obtener la función registrada
+        return registered_function
 
     @pytest.mark.asyncio
     async def test_e2e_basic_search(self, setup_tool, mock_api_client):

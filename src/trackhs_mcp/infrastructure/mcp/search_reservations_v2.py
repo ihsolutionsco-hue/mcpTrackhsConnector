@@ -18,8 +18,8 @@ from ..utils.user_friendly_messages import format_date_error
 def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_reservations_v2"""
 
-    @mcp.tool
-    @error_handler("search_reservations_v2")
+    @mcp.tool(name="search_reservations")
+    @error_handler("search_reservations")
     async def search_reservations_v2(
         page: int = 1,
         size: int = 10,
@@ -63,7 +63,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         checkin_office_id: Optional[int] = None,
     ):
         """
-        Search reservations in Track HS API V2 with comprehensive filtering options.
+        Search reservations in Track HS API with comprehensive filtering options.
 
         This MCP tool provides advanced reservation search capabilities with full API V2
         compatibility, including pagination, filtering, sorting, and scroll support for

@@ -190,10 +190,24 @@ class TestSearchUnitsToolIntegration:
     async def test_search_units_basic_call(self, mock_mcp, mock_api_client):
         """Test de llamada básica a search_units"""
         # Arrange
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Registrar la función
         register_search_units(mock_mcp, mock_api_client)
 
         # Obtener la función registrada
-        tool_func = mock_mcp.tool.call_args[0][0]
+        tool_func = registered_function
 
         expected_response = {
             "_embedded": {"units": []},
@@ -217,8 +231,24 @@ class TestSearchUnitsToolIntegration:
         # Arrange
         register_search_units(mock_mcp, mock_api_client)
 
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Registrar la función
+        register_search_units(mock_mcp, mock_api_client)
+
         # Obtener la función registrada
-        tool_func = mock_mcp.tool.call_args[0][0]
+        tool_func = registered_function
 
         expected_response = {"_embedded": {"units": []}}
         mock_api_client.get.return_value = expected_response
@@ -243,8 +273,24 @@ class TestSearchUnitsToolIntegration:
         # Arrange
         register_search_units(mock_mcp, mock_api_client)
 
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Registrar la función
+        register_search_units(mock_mcp, mock_api_client)
+
         # Obtener la función registrada
-        tool_func = mock_mcp.tool.call_args[0][0]
+        tool_func = registered_function
 
         # Test página negativa (ahora se convierte automáticamente, pero Pydantic valida)
         with pytest.raises(Exception, match="API request failed"):
@@ -276,8 +322,24 @@ class TestSearchUnitsToolIntegration:
         # Arrange
         register_search_units(mock_mcp, mock_api_client)
 
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Registrar la función
+        register_search_units(mock_mcp, mock_api_client)
+
         # Obtener la función registrada
-        tool_func = mock_mcp.tool.call_args[0][0]
+        tool_func = registered_function
 
         # Test error 401
         error_401 = Exception("Unauthorized")
