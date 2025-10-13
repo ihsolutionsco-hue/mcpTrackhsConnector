@@ -48,6 +48,10 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         is_bookable: Optional[Literal[0, 1]] = None,
         include_descriptions: Optional[Literal[0, 1]] = None,
         is_active: Optional[Literal[0, 1]] = None,
+        events_allowed: Optional[Literal[0, 1]] = None,
+        smoking_allowed: Optional[Literal[0, 1]] = None,
+        children_allowed: Optional[Literal[0, 1]] = None,
+        is_accessible: Optional[Literal[0, 1]] = None,
         arrival: Optional[str] = None,
         departure: Optional[str] = None,
         content_updated_since: Optional[str] = None,
@@ -147,15 +151,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         - Enforces 10k total results limit
         - Validates boolean parameters (0/1 only)
         """
-        # Validar parámetros básicos según documentación Channel API
-        if page < 0:
-            raise ValidationError("Page must be >= 0", "page")
-        if size < 1:
-            raise ValidationError("Size must be >= 1", "size")
-        if size > 1000:
-            raise ValidationError("Size must be <= 1000", "size")
-
-        # Validar límite total de resultados (10k máximo)
+        # Validar límite total de resultados (10k máximo) - validación de negocio
         if page * size > 10000:
             raise ValidationError(
                 "Total results (page * size) must be <= 10,000", "page"
@@ -180,7 +176,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         if min_bedrooms is not None and max_bedrooms is not None:
             if min_bedrooms > max_bedrooms:
                 raise ValidationError(
-                    "min_bedrooms must be <= max_bedrooms", "min_bedrooms"
+                    "min_bedrooms must be <= max_bathrooms", "min_bedrooms"
                 )
 
         if min_bathrooms is not None and max_bathrooms is not None:
@@ -223,6 +219,10 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 is_bookable=is_bookable,
                 include_descriptions=include_descriptions,
                 is_active=is_active,
+                events_allowed=events_allowed,
+                smoking_allowed=smoking_allowed,
+                children_allowed=children_allowed,
+                is_accessible=is_accessible,
                 arrival=arrival,
                 departure=departure,
                 content_updated_since=content_updated_since,

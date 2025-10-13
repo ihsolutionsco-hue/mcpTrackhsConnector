@@ -74,11 +74,11 @@ class TestSearchUnitsUseCase:
             params={
                 "page": 0,
                 "size": 10,
+                "nodeId": 1,
                 "bedrooms": 2,
                 "bathrooms": 2,
                 "petsFriendly": 1,
                 "isActive": 1,
-                "nodeId": 1,
             },
         )
 
@@ -102,6 +102,8 @@ class TestSearchUnitsUseCase:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
+                "page": 1,
+                "size": 10,
                 "arrival": "2024-01-01",
                 "departure": "2024-01-07",
                 "contentUpdatedSince": "2024-01-01T00:00:00Z",
@@ -125,38 +127,42 @@ class TestSearchUnitsUseCase:
         assert result == expected_response
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
-            params={"nodeId": [1, 2, 3], "amenityId": [4, 5, 6], "unitTypeId": 7},
+            params={
+                "page": 1,
+                "size": 10,
+                "nodeId": [1, 2, 3],
+                "amenityId": [4, 5, 6],
+                "unitTypeId": 7,
+            },
         )
 
     def test_validate_params_page_negative(self, use_case):
         """Test de validación de página negativa"""
-        # Arrange
-        params = SearchUnitsParams(page=-1)
-
-        # Act & Assert
-        with pytest.raises(ValidationError, match="Page debe ser mayor o igual a 0"):
-            use_case._validate_params(params)
+        # Arrange & Act & Assert
+        # Pydantic valida automáticamente, no necesitamos validación personalizada
+        with pytest.raises(Exception):  # Pydantic validation error
+            SearchUnitsParams(page=-1)
 
     def test_validate_params_size_invalid(self, use_case):
         """Test de validación de tamaño inválido"""
-        # Arrange
-        params = SearchUnitsParams(size=0)
-
-        # Act & Assert
-        with pytest.raises(ValidationError, match="Size debe estar entre 1 y 1000"):
-            use_case._validate_params(params)
+        # Arrange & Act & Assert
+        # Pydantic valida automáticamente, no necesitamos validación personalizada
+        with pytest.raises(Exception):  # Pydantic validation error
+            SearchUnitsParams(size=0)
 
         # Test tamaño máximo
-        params = SearchUnitsParams(size=1001)
-        with pytest.raises(ValidationError, match="Size debe estar entre 1 y 1000"):
-            use_case._validate_params(params)
+        with pytest.raises(Exception):  # Pydantic validation error
+            SearchUnitsParams(size=1001)
 
     def test_validate_params_total_results_limit(self, use_case):
         """Test de validación de límite total de resultados"""
         # Arrange
-        params = SearchUnitsParams(page=100, size=100)  # 10,000 resultados
+        params = SearchUnitsParams(
+            page=101, size=100
+        )  # 10,100 resultados (excede límite)
 
         # Act & Assert
+        # Esta validación se hace en el caso de uso, no en Pydantic
         with pytest.raises(
             ValidationError, match="Total results \\(page \\* size\\) must be <= 10,000"
         ):

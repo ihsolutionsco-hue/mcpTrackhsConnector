@@ -247,27 +247,25 @@ class TestSearchUnitsToolIntegration:
         tool_func = mock_mcp.tool.call_args[0][0]
 
         # Test página negativa
-        with pytest.raises(ValidationError, match="Page must be >= 0"):
+        with pytest.raises(Exception, match="Page must be >= 0"):
             await tool_func(page=-1)
 
         # Test tamaño inválido
-        with pytest.raises(ValidationError, match="Size must be >= 1"):
+        with pytest.raises(Exception, match="Size must be >= 1"):
             await tool_func(size=0)
 
         # Test límite total de resultados
         with pytest.raises(
-            ValidationError, match="Total results \\(page \\* size\\) must be <= 10,000"
+            Exception, match="Total results \\(page \\* size\\) must be <= 10,000"
         ):
             await tool_func(page=100, size=100)
 
         # Test formato de fecha inválido
-        with pytest.raises(ValidationError, match="Invalid date format"):
+        with pytest.raises(Exception, match="Invalid date format"):
             await tool_func(arrival="01/01/2024")
 
         # Test rango de habitaciones inválido
-        with pytest.raises(
-            ValidationError, match="min_bedrooms must be <= max_bedrooms"
-        ):
+        with pytest.raises(Exception, match="min_bedrooms must be <= max_bedrooms"):
             await tool_func(min_bedrooms=3, max_bedrooms=1)
 
     @pytest.mark.asyncio

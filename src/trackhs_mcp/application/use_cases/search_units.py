@@ -149,6 +149,14 @@ class SearchUnitsUseCase:
             request_params["includeDescriptions"] = params.include_descriptions
         if params.is_active is not None:
             request_params["isActive"] = params.is_active
+        if params.events_allowed is not None:
+            request_params["eventsAllowed"] = params.events_allowed
+        if params.smoking_allowed is not None:
+            request_params["smokingAllowed"] = params.smoking_allowed
+        if params.children_allowed is not None:
+            request_params["childrenAllowed"] = params.children_allowed
+        if params.is_accessible is not None:
+            request_params["isAccessible"] = params.is_accessible
 
         # Parámetros de fechas
         if params.arrival:

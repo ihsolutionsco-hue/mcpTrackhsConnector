@@ -250,10 +250,10 @@ class SearchUnitsParams(PaginationParams, SearchParams):
     """Parámetros para buscar unidades - Basado en la especificación completa"""
 
     sort_column: Optional[Literal["id", "name", "nodeName", "unitTypeName"]] = Field(
-        default="name", description="Columna para ordenar"
+        default=None, description="Columna para ordenar"
     )
     sort_direction: Optional[Literal["asc", "desc"]] = Field(
-        default="asc", description="Dirección de ordenamiento"
+        default=None, description="Dirección de ordenamiento"
     )
     node_id: Optional[Union[int, List[int]]] = Field(
         default=None, description="ID(s) del nodo específico"
@@ -316,6 +316,18 @@ class SearchUnitsParams(PaginationParams, SearchParams):
     )
     is_active: Optional[Literal[0, 1]] = Field(
         default=None, description="Está activo (0/1)"
+    )
+    events_allowed: Optional[Literal[0, 1]] = Field(
+        default=None, description="Permite eventos (0/1)"
+    )
+    smoking_allowed: Optional[Literal[0, 1]] = Field(
+        default=None, description="Permite fumar (0/1)"
+    )
+    children_allowed: Optional[Literal[0, 1]] = Field(
+        default=None, description="Permite niños (0/1)"
+    )
+    is_accessible: Optional[Literal[0, 1]] = Field(
+        default=None, description="Es accesible (0/1)"
     )
     arrival: Optional[str] = Field(
         default=None, description="Fecha de llegada (ISO 8601)"
