@@ -109,8 +109,7 @@ class TestGetReservationUseCase:
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "No autorizado" in str(exc_info.value)
-        assert "Credenciales de autenticación inválidas" in str(exc_info.value)
+        assert "Error en la petición a la API: 401 Unauthorized" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_execute_api_error_403(self, use_case, mock_api_client):
@@ -128,7 +127,7 @@ class TestGetReservationUseCase:
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "Prohibido" in str(exc_info.value)
+        assert "Error en la petición a la API: 403 Forbidden" in str(exc_info.value)
         assert "Permisos insuficientes" in str(exc_info.value)
 
     @pytest.mark.asyncio
@@ -147,7 +146,7 @@ class TestGetReservationUseCase:
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "Reserva no encontrada" in str(exc_info.value)
+        assert "Error en la petición a la API: 404 Not Found" in str(exc_info.value)
         assert f"No existe una reserva con ID {reservation_id}" in str(exc_info.value)
 
     @pytest.mark.asyncio

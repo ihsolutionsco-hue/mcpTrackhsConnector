@@ -57,9 +57,7 @@ class TestGetFolioUseCase:
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(params)
 
-        assert "folio_id debe ser un número entero positivo válido" in str(
-            exc_info.value
-        )
+        assert "folio_id es requerido" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_negative_id(self, use_case):
