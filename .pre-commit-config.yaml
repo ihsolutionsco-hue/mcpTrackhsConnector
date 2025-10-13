@@ -40,26 +40,7 @@ repos:
   #       name: Validar sintaxis Python
   #       args: [--select=E9,F63,F7,F82]
 
-  # 5. Tests optimizados con pytest (NUEVO)
-  - repo: local
-    hooks:
-      - id: pytest-fast
-        name: Tests rápidos y optimizados
-        entry: pytest
-        language: system
-        pass_filenames: false
-        always_run: true
-        args: [
-          'tests/',
-          '--lf',           # Solo tests que fallaron antes
-          '--ff',           # Failed first
-          '-x',             # Detener al primer fallo
-          '-n', 'auto',     # Paralelo (requiere pytest-xdist)
-          '--tb=short',     # Traceback corto
-          '--quiet',        # Modo silencioso
-          '--no-cov',       # Sin cobertura (más rápido)
-        ]
-        stages: [pre-commit]
+  # 5. Tests se ejecutan en CI, no en pre-commit para mayor velocidad
 
 # Configuración
 default_stages: [pre-commit]
