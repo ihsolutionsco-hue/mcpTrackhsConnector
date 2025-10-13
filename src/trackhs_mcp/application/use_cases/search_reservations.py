@@ -59,7 +59,7 @@ class SearchReservationsUseCase:
 
     def _build_request_params(self, params: SearchReservationsParams) -> Dict[str, Any]:
         """Construir parámetros para la petición HTTP"""
-        request_params = {}
+        request_params: Dict[str, Any] = {}
 
         # Parámetros de paginación
         if params.page:

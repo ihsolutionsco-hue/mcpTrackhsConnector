@@ -68,7 +68,7 @@ class GetReservationUseCase:
                 import json
 
                 try:
-                    response_data = json.loads(response_data)
+                    response_data: Dict[str, Any] = json.loads(response_data)
                 except json.JSONDecodeError as e:
                     raise ValidationError(
                         f"Error al parsear respuesta JSON: {str(e)}",
