@@ -293,41 +293,41 @@ class SearchUnitsParams(PaginationParams, SearchParams):
     max_bathrooms: Optional[int] = Field(default=None, description="Máximo de baños")
     bathrooms: Optional[int] = Field(default=None, description="Número exacto de baños")
     calendar_id: Optional[int] = Field(default=None, description="ID del calendario")
-    pets_friendly: Optional[Literal[0, 1]] = Field(
-        default=None, description="Permite mascotas (0/1)"
+    pets_friendly: Optional[int] = Field(
+        default=None, description="Permite mascotas (0/1)", ge=0, le=1
     )
-    allow_unit_rates: Optional[Literal[0, 1]] = Field(
-        default=None, description="Permite tarifas de unidad (0/1)"
+    allow_unit_rates: Optional[int] = Field(
+        default=None, description="Permite tarifas de unidad (0/1)", ge=0, le=1
     )
-    computed: Optional[Literal[0, 1]] = Field(
-        default=None, description="Valores computados (0/1)"
+    computed: Optional[int] = Field(
+        default=None, description="Valores computados (0/1)", ge=0, le=1
     )
-    inherited: Optional[Literal[0, 1]] = Field(
-        default=None, description="Atributos heredados (0/1)"
+    inherited: Optional[int] = Field(
+        default=None, description="Atributos heredados (0/1)", ge=0, le=1
     )
-    limited: Optional[Literal[0, 1]] = Field(
-        default=None, description="Atributos limitados (0/1)"
+    limited: Optional[int] = Field(
+        default=None, description="Atributos limitados (0/1)", ge=0, le=1
     )
-    is_bookable: Optional[Literal[0, 1]] = Field(
-        default=None, description="Es reservable (0/1)"
+    is_bookable: Optional[int] = Field(
+        default=None, description="Es reservable (0/1)", ge=0, le=1
     )
-    include_descriptions: Optional[Literal[0, 1]] = Field(
-        default=None, description="Incluir descripciones (0/1)"
+    include_descriptions: Optional[int] = Field(
+        default=None, description="Incluir descripciones (0/1)", ge=0, le=1
     )
-    is_active: Optional[Literal[0, 1]] = Field(
-        default=None, description="Está activo (0/1)"
+    is_active: Optional[int] = Field(
+        default=None, description="Está activo (0/1)", ge=0, le=1
     )
-    events_allowed: Optional[Literal[0, 1]] = Field(
-        default=None, description="Permite eventos (0/1)"
+    events_allowed: Optional[int] = Field(
+        default=None, description="Permite eventos (0/1)", ge=0, le=1
     )
-    smoking_allowed: Optional[Literal[0, 1]] = Field(
-        default=None, description="Permite fumar (0/1)"
+    smoking_allowed: Optional[int] = Field(
+        default=None, description="Permite fumar (0/1)", ge=0, le=1
     )
-    children_allowed: Optional[Literal[0, 1]] = Field(
-        default=None, description="Permite niños (0/1)"
+    children_allowed: Optional[int] = Field(
+        default=None, description="Permite niños (0/1)", ge=0, le=1
     )
-    is_accessible: Optional[Literal[0, 1]] = Field(
-        default=None, description="Es accesible (0/1)"
+    is_accessible: Optional[int] = Field(
+        default=None, description="Es accesible (0/1)", ge=0, le=1
     )
     arrival: Optional[str] = Field(
         default=None, description="Fecha de llegada (ISO 8601)"
