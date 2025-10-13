@@ -1,0 +1,522 @@
+"""
+Tests end-to-end para search_units
+"""
+
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
+from src.trackhs_mcp.infrastructure.mcp.search_units import register_search_units
+
+
+class TestSearchUnitsE2E:
+    """Tests end-to-end para search_units"""
+
+    @pytest.fixture
+    def mock_mcp(self):
+        """Mock del servidor MCP"""
+        mcp = MagicMock()
+        mcp.tool = MagicMock()
+        return mcp
+
+    @pytest.fixture
+    def mock_api_client(self):
+        """Mock del cliente API"""
+        return AsyncMock()
+
+    @pytest.fixture
+    def setup_tool(self, mock_mcp, mock_api_client):
+        """Configuración de la herramienta"""
+        register_search_units(mock_mcp, mock_api_client)
+        return mock_mcp.tool.call_args[0][0]
+
+    @pytest.mark.asyncio
+    async def test_e2e_basic_search(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda básica"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 1,
+                        "name": "Villa Paradise",
+                        "shortName": "VP001",
+                        "unitCode": "VP001",
+                        "nodeId": 1,
+                        "bedrooms": 3,
+                        "fullBathrooms": 2,
+                        "maxOccupancy": 6,
+                        "petsFriendly": True,
+                        "eventsAllowed": False,
+                        "smokingAllowed": False,
+                        "childrenAllowed": True,
+                        "isAccessible": True,
+                        "updatedAt": "2024-01-15T10:30:00Z",
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+            "_links": {
+                "self": {"href": "https://api.example.com/api/pms/units/?page=0"},
+                "first": {"href": "https://api.example.com/api/pms/units/"},
+                "last": {"href": "https://api.example.com/api/pms/units/?page=0"},
+            },
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(page=0, size=25)
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units", params={"page": 0, "size": 25}
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_with_filters(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda con filtros"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 2,
+                        "name": "Beach House",
+                        "bedrooms": 2,
+                        "bathrooms": 2,
+                        "petsFriendly": True,
+                        "isActive": True,
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 10,
+            "total_items": 1,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(
+            page=0, size=10, bedrooms=2, bathrooms=2, pets_friendly=1, is_active=1
+        )
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units",
+            params={
+                "page": 0,
+                "size": 10,
+                "bedrooms": 2,
+                "bathrooms": 2,
+                "petsFriendly": 1,
+                "isActive": 1,
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_by_availability(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda por disponibilidad"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 3,
+                        "name": "Mountain Cabin",
+                        "isBookable": True,
+                        "arrival": "2024-01-01",
+                        "departure": "2024-01-07",
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(
+            arrival="2024-01-01", departure="2024-01-07", is_bookable=1
+        )
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units",
+            params={
+                "arrival": "2024-01-01",
+                "departure": "2024-01-07",
+                "isBookable": 1,
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_by_amenities(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda por amenidades"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 4,
+                        "name": "Luxury Penthouse",
+                        "amenities": [
+                            {
+                                "id": 1,
+                                "name": "Pool",
+                                "group": {"id": 1, "name": "Outdoor"},
+                            },
+                            {
+                                "id": 2,
+                                "name": "Gym",
+                                "group": {"id": 2, "name": "Fitness"},
+                            },
+                        ],
+                        "petsFriendly": True,
+                        "eventsAllowed": True,
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(amenity_id="1,2,3", pets_friendly=1, events_allowed=1)
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units",
+            params={"amenityId": [1, 2, 3], "petsFriendly": 1, "eventsAllowed": 1},
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_by_location(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda por ubicación"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 5,
+                        "name": "Downtown Apartment",
+                        "nodeId": 1,
+                        "locality": "Miami",
+                        "region": "FL",
+                        "country": "US",
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(node_id="1,2,3", is_active=1)
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units", params={"nodeId": [1, 2, 3], "isActive": 1}
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_with_sorting(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda con ordenamiento"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {"id": 3, "name": "Z Villa"},
+                    {"id": 2, "name": "B House"},
+                    {"id": 1, "name": "A Apartment"},
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 3,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(sort_column="name", sort_direction="desc", size=25)
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units",
+            params={"sortColumn": "name", "sortDirection": "desc", "size": 25},
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_with_text(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda por texto"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 6,
+                        "name": "Luxury Villa with Ocean View",
+                        "shortDescription": "Beautiful villa with stunning ocean views",
+                        "longDescription": "This luxury villa offers breathtaking ocean views and modern amenities",
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(search="luxury villa ocean view")
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units", params={"search": "luxury villa ocean view"}
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_with_room_filters(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda con filtros de habitaciones"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 7,
+                        "name": "Family House",
+                        "bedrooms": 3,
+                        "fullBathrooms": 2,
+                        "halfBathrooms": 1,
+                        "maxOccupancy": 8,
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(bedrooms=3, min_bathrooms=2, max_bathrooms=3)
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units", params={"bedrooms": 3, "minBathrooms": 2, "maxBathrooms": 3}
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_with_status_filters(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda con filtros de estado"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 8,
+                        "name": "Clean Unit",
+                        "isActive": True,
+                        "isBookable": True,
+                        "unitStatus": "clean",
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(is_active=1, is_bookable=1, unit_status="clean")
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units", params={"isActive": 1, "isBookable": 1, "unitStatus": "clean"}
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_with_boolean_filters(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda con filtros booleanos"""
+        # Arrange
+        expected_response = {
+            "_embedded": {
+                "units": [
+                    {
+                        "id": 9,
+                        "name": "Pet-Friendly Accessible Unit",
+                        "petsFriendly": True,
+                        "eventsAllowed": False,
+                        "smokingAllowed": False,
+                        "childrenAllowed": True,
+                        "isAccessible": True,
+                    }
+                ]
+            },
+            "page": 0,
+            "page_count": 1,
+            "page_size": 25,
+            "total_items": 1,
+            "_links": {},
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(
+            pets_friendly=1,
+            events_allowed=0,
+            smoking_allowed=0,
+            children_allowed=1,
+            is_accessible=1,
+        )
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units",
+            params={
+                "petsFriendly": 1,
+                "eventsAllowed": 0,
+                "smokingAllowed": 0,
+                "childrenAllowed": 1,
+                "isAccessible": 1,
+            },
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_with_pagination(self, setup_tool, mock_api_client):
+        """Test E2E de búsqueda con paginación"""
+        # Arrange
+        expected_response = {
+            "_embedded": {"units": []},
+            "page": 2,
+            "page_count": 10,
+            "page_size": 100,
+            "total_items": 1000,
+            "_links": {
+                "self": {"href": "https://api.example.com/api/pms/units/?page=2"},
+                "first": {"href": "https://api.example.com/api/pms/units/"},
+                "last": {"href": "https://api.example.com/api/pms/units/?page=9"},
+                "next": {"href": "https://api.example.com/api/pms/units/?page=3"},
+                "prev": {"href": "https://api.example.com/api/pms/units/?page=1"},
+            },
+        }
+        mock_api_client.get.return_value = expected_response
+
+        # Act
+        result = await setup_tool(page=2, size=100)
+
+        # Assert
+        assert result == expected_response
+        mock_api_client.get.assert_called_once_with(
+            "/pms/units", params={"page": 2, "size": 100}
+        )
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_validation_errors(self, setup_tool):
+        """Test E2E de errores de validación"""
+        # Test página negativa
+        with pytest.raises(ValidationError, match="Page must be >= 0"):
+            await setup_tool(page=-1)
+
+        # Test tamaño inválido
+        with pytest.raises(ValidationError, match="Size must be >= 1"):
+            await setup_tool(size=0)
+
+        # Test límite total de resultados
+        with pytest.raises(
+            ValidationError, match="Total results \\(page \\* size\\) must be <= 10,000"
+        ):
+            await setup_tool(page=100, size=100)
+
+        # Test formato de fecha inválido
+        with pytest.raises(ValidationError, match="Invalid date format"):
+            await setup_tool(arrival="01/01/2024")
+
+        # Test rango de habitaciones inválido
+        with pytest.raises(
+            ValidationError, match="min_bedrooms must be <= max_bedrooms"
+        ):
+            await setup_tool(min_bedrooms=3, max_bedrooms=1)
+
+    @pytest.mark.asyncio
+    async def test_e2e_search_api_errors(self, setup_tool, mock_api_client):
+        """Test E2E de errores de API"""
+        # Test error 401
+        error_401 = Exception("Unauthorized")
+        error_401.status_code = 401
+        mock_api_client.get.side_effect = error_401
+
+        with pytest.raises(
+            ValidationError, match="Unauthorized: Invalid authentication credentials"
+        ):
+            await setup_tool()
+
+        # Reset mock
+        mock_api_client.reset_mock()
+
+        # Test error 403
+        error_403 = Exception("Forbidden")
+        error_403.status_code = 403
+        mock_api_client.get.side_effect = error_403
+
+        with pytest.raises(
+            ValidationError, match="Forbidden: Insufficient permissions"
+        ):
+            await setup_tool()
+
+        # Reset mock
+        mock_api_client.reset_mock()
+
+        # Test error 404
+        error_404 = Exception("Not Found")
+        error_404.status_code = 404
+        mock_api_client.get.side_effect = error_404
+
+        with pytest.raises(ValidationError, match="Endpoint not found"):
+            await setup_tool()
+
+        # Reset mock
+        mock_api_client.reset_mock()
+
+        # Test error 500
+        error_500 = Exception("Internal Server Error")
+        error_500.status_code = 500
+        mock_api_client.get.side_effect = error_500
+
+        with pytest.raises(ValidationError, match="Internal Server Error"):
+            await setup_tool()
