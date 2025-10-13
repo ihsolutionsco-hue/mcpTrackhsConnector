@@ -4,11 +4,12 @@ Pre-tests para validar el despliegue en FastMCP Cloud
 Ejecuta validaciones antes del commit para asegurar que el despliegue funcione correctamente
 """
 
-import os
-import sys
-import subprocess
 import importlib.util
+import os
+import subprocess
+import sys
 from pathlib import Path
+
 
 def check_python_version():
     """Verificar que la versión de Python sea compatible"""
@@ -58,7 +59,9 @@ def check_imports():
 
         # Test basic imports
         from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
-        from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+        from trackhs_mcp.infrastructure.adapters.trackhs_api_client import (
+            TrackHSApiClient,
+        )
         from trackhs_mcp.infrastructure.mcp.server import register_all_components
         print("✅ Imports básicos funcionan")
 
