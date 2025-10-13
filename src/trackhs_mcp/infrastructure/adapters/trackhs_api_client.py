@@ -126,6 +126,20 @@ class TrackHSApiClient(ApiClientPort):
                                 response.status_code,
                                 endpoint,
                             )
+                    elif response.status_code == 400:
+                        # Agregar log detallado del body de error
+                        error_body = response.text
+                        logger = logging.getLogger(__name__)
+                        logger.error(f"400 Bad Request - URL: {endpoint}")
+                        logger.error(
+                            f"400 Bad Request - Params: {request_kwargs.get('params')}"
+                        )
+                        logger.error(f"400 Bad Request - Response: {error_body}")
+                        raise ApiError(
+                            f"Bad Request: {error_body}",
+                            400,
+                            endpoint,
+                        )
                     else:
                         raise ApiError(
                             f"API Error: {response.status_code} "

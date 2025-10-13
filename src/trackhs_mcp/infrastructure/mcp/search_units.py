@@ -236,7 +236,25 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         except Exception as e:
             # Manejar errores específicos de la API según documentación
             if hasattr(e, "status_code"):
-                if e.status_code == 401:
+                if e.status_code == 400:
+                    # Logging adicional para 400 Bad Request
+                    import logging
+
+                    logger = logging.getLogger(__name__)
+                    logger.error(
+                        f"400 Bad Request - Params enviados: {search_params.model_dump()}"
+                    )
+                    logger.error(f"400 Bad Request - Error details: {str(e)}")
+                    # Capturar error body si está disponible
+                    error_body = getattr(e, "response_text", str(e))
+                    logger.error(f"400 Bad Request - Response body: {error_body}")
+                    raise ValidationError(
+                        "Bad Request: Invalid parameters sent to Units API. "
+                        "Please check the parameter format and values. "
+                        f"Error details: {str(e)}",
+                        "parameters",
+                    )
+                elif e.status_code == 401:
                     raise ValidationError(
                         "Unauthorized: Invalid authentication credentials. "
                         "Please verify your TRACKHS_USERNAME and TRACKHS_PASSWORD "

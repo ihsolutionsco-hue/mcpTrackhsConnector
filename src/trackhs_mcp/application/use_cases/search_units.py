@@ -37,6 +37,12 @@ class SearchUnitsUseCase:
         request_params = self._build_request_params(params)
 
         # Realizar petición a la API
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.debug(f"Units API Request - Endpoint: /pms/units")
+        logger.debug(f"Units API Request - Params: {request_params}")
+
         response = await self.api_client.get("/pms/units", params=request_params)
 
         # Procesar respuesta
