@@ -237,8 +237,16 @@ class TestRegressionPostFix:
         tools = mcp_server._tool_manager._tools
         get_tool = tools["get_reservation_v2"]
 
-        # Configurar mock con datos completos
-        mock_api_client.get.return_value = sample_reservation_data_v2
+        # Configurar mock con datos completos - usar el fixture directamente
+        # El mock debe devolver el objeto individual, no una lista paginada
+        # Usar side_effect para devolver datos diferentes según el endpoint
+        def mock_get_side_effect(endpoint, **kwargs):
+            if "/v2/pms/reservations/" in endpoint:
+                return sample_reservation_data_v2
+            else:
+                return sample_reservation_data_v2
+
+        mock_api_client.get.side_effect = mock_get_side_effect
 
         # Test 3: Obtención por ID
         result = await get_tool.fn(reservation_id="37152796")
@@ -258,7 +266,14 @@ class TestRegressionPostFix:
         folio_tool = tools["get_folio"]
 
         # Configurar mock con datos completos
-        mock_api_client.get.return_value = sample_folio_guest
+        # Usar side_effect para devolver datos diferentes según el endpoint
+        def mock_get_side_effect(endpoint, **kwargs):
+            if "/pms/folios/" in endpoint:
+                return sample_folio_guest
+            else:
+                return sample_folio_guest
+
+        mock_api_client.get.side_effect = mock_get_side_effect
 
         # Test 4: Obtención de folio
         result = await folio_tool.fn(folio_id="37152796")
@@ -340,25 +355,32 @@ class TestRegressionPostFix:
 
         tools = mcp_server._tool_manager._tools
 
+        # Configurar mock con side_effect para devolver datos correctos según el endpoint
+        def mock_get_side_effect(endpoint, **kwargs):
+            if "/v2/pms/reservations?" in endpoint:
+                return sample_search_response
+            elif "/v2/pms/reservations/" in endpoint:
+                return sample_reservation_data_v2
+            elif "/pms/folios/" in endpoint:
+                return sample_folio_guest
+            elif "/units?" in endpoint:
+                return sample_search_response
+            else:
+                return sample_search_response
+
+        mock_api_client.get.side_effect = mock_get_side_effect
+
         # Test de tiempo de respuesta para cada herramienta
         for tool_name, tool in tools.items():
             start_time = time.time()
 
             if tool_name == "search_reservations_v2":
-                # Configurar mock para search_reservations_v2
-                mock_api_client.get.return_value = sample_search_response
                 await tool.fn(page=1, size=10)
             elif tool_name == "search_units":
-                # Configurar mock para search_units
-                mock_api_client.get.return_value = sample_search_response
                 await tool.fn(page=1, size=5, bedrooms=2)
             elif tool_name == "get_reservation_v2":
-                # Configurar mock para get_reservation_v2
-                mock_api_client.get.return_value = sample_reservation_data_v2
                 await tool.fn(reservation_id="37152796")
             elif tool_name == "get_folio":
-                # Configurar mock para get_folio
-                mock_api_client.get.return_value = sample_folio_guest
                 await tool.fn(folio_id="37152796")
 
             end_time = time.time()
