@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
 
-from ...application.use_cases.search_reservations_v1 import SearchReservationsV1UseCase
-from ...domain.entities.reservations import SearchReservationsV1Params
+from ...application.use_cases.search_reservations import SearchReservationsUseCase
+from ...domain.entities.reservations import SearchReservationsParams
 from ..utils.error_handling import error_handler
 
 
@@ -85,12 +85,12 @@ def register_search_units_from_reservations(mcp, api_client: "ApiClientPort"):
 
         try:
             # Crear caso de uso para reservaciones
-            reservations_use_case = SearchReservationsV1UseCase(api_client)
+            reservations_use_case = SearchReservationsUseCase(api_client)
 
             # Construir parámetros para buscar reservaciones
             # Usar un rango amplio de fechas para obtener más unidades
-            search_params = SearchReservationsV1Params(
-                page=0,  # Empezar desde la primera página
+            search_params = SearchReservationsParams(
+                page=1,  # Empezar desde la primera página (SearchReservationsParams usa 1-based)
                 size=1000,  # Obtener muchas reservaciones para tener más unidades
                 # Filtros opcionales
                 node_id=node_id,
