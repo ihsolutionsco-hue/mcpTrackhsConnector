@@ -188,8 +188,16 @@ class SearchUnitsUseCase:
             return ids if len(ids) > 1 else ids[0]
         return ids
 
-    def _process_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
+    def _process_response(self, response: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
         """Procesar respuesta de la API"""
-        # Retornar directamente la respuesta de la API sin validación estricta
-        # para evitar errores de validación con datos de prueba
+        # Si la respuesta es un string JSON, parsearlo
+        if isinstance(response, str):
+            import json
+
+            try:
+                return json.loads(response)
+            except json.JSONDecodeError as e:
+                raise ValidationError(f"Invalid JSON response from API: {e}")
+
+        # Si ya es un diccionario, retornarlo directamente
         return response
