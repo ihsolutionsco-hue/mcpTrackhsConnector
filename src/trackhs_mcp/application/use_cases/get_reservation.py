@@ -99,7 +99,7 @@ class GetReservationUseCase:
                     )
                 elif e.status_code == 404:
                     raise ValidationError(
-                        f"Reserva no encontrada: No existe una reserva con ID {reservation_id_int}. "
+                        f"Reserva no encontrada: No existe una reserva con ID {params.reservation_id}. "
                         "Por favor verifica que el ID sea correcto.",
                         "reservation_id",
                     )
