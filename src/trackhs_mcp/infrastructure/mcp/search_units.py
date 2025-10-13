@@ -200,8 +200,8 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
     )
     @error_handler("search_units")
     async def search_units(
-        page: int = 1,
-        size: int = 25,
+        page: str = "1",
+        size: str = "25",
         sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = "name",
         sort_direction: Literal["asc", "desc"] = "asc",
         search: Optional[str] = None,
@@ -212,8 +212,8 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         amenity_id: Optional[str] = None,
         unit_type_id: Optional[str] = None,
         id: Optional[str] = None,
-        calendar_id: Optional[int] = None,
-        role_id: Optional[int] = None,
+        calendar_id: Optional[str] = None,
+        role_id: Optional[str] = None,
         bedrooms: Optional[str] = None,
         min_bedrooms: Optional[str] = None,
         max_bedrooms: Optional[str] = None,
