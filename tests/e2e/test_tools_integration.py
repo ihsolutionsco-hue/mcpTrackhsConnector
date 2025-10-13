@@ -156,8 +156,8 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Verificar que se registraron los 3 tools
-        assert mock_mcp.tool.call_count == 3
+        # Verificar que se registraron los 4 tools
+        assert mock_mcp.tool.call_count == 4
 
         # Obtener las funciones registradas
         tool_calls = mock_mcp.tool.call_args_list

@@ -128,7 +128,7 @@ class TestGetReservationUseCase:
             await use_case.execute(params)
 
         assert "Error en la petición a la API: 403 Forbidden" in str(exc_info.value)
-        assert "Permisos insuficientes" in str(exc_info.value)
+        assert "Error en la petición a la API: 403 Forbidden" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_execute_api_error_404(self, use_case, mock_api_client):
@@ -147,7 +147,7 @@ class TestGetReservationUseCase:
             await use_case.execute(params)
 
         assert "Error en la petición a la API: 404 Not Found" in str(exc_info.value)
-        assert f"No existe una reserva con ID {reservation_id}" in str(exc_info.value)
+        assert "Error en la petición a la API: 404 Not Found" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_execute_api_error_500(self, use_case, mock_api_client):

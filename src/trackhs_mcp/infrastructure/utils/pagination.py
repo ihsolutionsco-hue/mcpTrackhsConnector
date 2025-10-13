@@ -128,7 +128,7 @@ class PaginationUtility:
 
     def process_scroll_response(self, response: Dict[str, Any]) -> PaginationResult:
         """Procesa respuesta de scroll de Elasticsearch"""
-        data = response.get("embedded", {}).get("reservations", [])
+        data = response.get("_embedded", {}).get("reservations", [])
         page_info = PageInfo(
             page=1,  # Scroll no usa páginas tradicionales
             size=len(data),
@@ -153,7 +153,7 @@ class PaginationUtility:
         self, response: Dict[str, Any], page: int, size: int
     ) -> PaginationResult:
         """Procesa respuesta de paginación estándar"""
-        data = response.get("embedded", {}).get("reservations", [])
+        data = response.get("_embedded", {}).get("reservations", [])
         total_items = response.get("total_items", 0)
 
         page_info = self.calculate_page_info(page, size, total_items)

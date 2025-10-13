@@ -545,8 +545,8 @@ class TrackHSCompletion:
             if context.parameter_name == "nodeId":
                 # Obtener nodos disponibles
                 response = await self.api_client.get("/nodes")
-                if "embedded" in response and "nodes" in response["embedded"]:
-                    for node in response["embedded"]["nodes"]:
+                if "_embedded" in response and "nodes" in response["_embedded"]:
+                    for node in response["_embedded"]["nodes"]:
                         suggestions.append(
                             CompletionSuggestion(
                                 str(node["id"]),
@@ -560,8 +560,8 @@ class TrackHSCompletion:
             elif context.parameter_name == "unitId":
                 # Obtener unidades disponibles
                 response = await self.api_client.get("/units")
-                if "embedded" in response and "units" in response["embedded"]:
-                    for unit in response["embedded"]["units"]:
+                if "_embedded" in response and "units" in response["_embedded"]:
+                    for unit in response["_embedded"]["units"]:
                         suggestions.append(
                             CompletionSuggestion(
                                 str(unit["id"]),
@@ -575,8 +575,8 @@ class TrackHSCompletion:
             elif context.parameter_name == "contactId":
                 # Obtener contactos disponibles
                 response = await self.api_client.get("/contacts")
-                if "embedded" in response and "contacts" in response["embedded"]:
-                    for contact in response["embedded"]["contacts"]:
+                if "_embedded" in response and "contacts" in response["_embedded"]:
+                    for contact in response["_embedded"]["contacts"]:
                         suggestions.append(
                             CompletionSuggestion(
                                 str(contact["id"]),

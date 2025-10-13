@@ -5,6 +5,7 @@ Tests unitarios para GetFolioUseCase
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+from pydantic import ValidationError as PydanticValidationError
 
 from src.trackhs_mcp.application.use_cases.get_folio import GetFolioUseCase
 from src.trackhs_mcp.domain.entities.folios import Folio, GetFolioParams
@@ -77,11 +78,11 @@ class TestGetFolioUseCase:
     async def test_get_folio_empty_id(self, use_case):
         """Test con ID vacío"""
         # Arrange - Crear parámetros con string vacío que falle en Pydantic
-        with pytest.raises(ValidationError) as exc_info:
-            params = GetFolioParams(folio_id="")
+        with pytest.raises(PydanticValidationError) as exc_info:
+            GetFolioParams(folio_id="")
 
         # Verificar que Pydantic valida correctamente
-        assert "Input should be a valid integer" in str(exc_info.value)
+        assert "unable to parse string as an integer" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_not_found(self, use_case, mock_api_client):

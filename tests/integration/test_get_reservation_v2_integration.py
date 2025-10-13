@@ -75,7 +75,7 @@ class TestGetReservationV2Integration:
         with pytest.raises(TrackHSError) as exc_info:
             await use_case.execute(GetReservationParams(reservation_id=reservation_id))
 
-        assert "Endpoint not found" in str(exc_info.value)
+        assert "Reserva no encontrada" in str(exc_info.value)
 
     @pytest.mark.asyncio
     @pytest.mark.integration
