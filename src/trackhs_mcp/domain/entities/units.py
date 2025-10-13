@@ -5,7 +5,7 @@ Basado en la especificación completa de la API Get Units Collection
 
 from typing import Any, Dict, List, Literal, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .base import PaginationParams, SearchParams
 
@@ -248,6 +248,22 @@ class Unit(BaseModel):
 
 class SearchUnitsParams(PaginationParams, SearchParams):
     """Parámetros para buscar unidades - Basado en la especificación completa"""
+
+    @field_validator(
+        "min_bedrooms", "max_bedrooms", "bedrooms", "min_bathrooms", "max_bathrooms",
+        "bathrooms", "calendar_id", "pets_friendly", "allow_unit_rates", "computed",
+        "inherited", "limited", "is_bookable", "include_descriptions", "is_active",
+        "events_allowed", "smoking_allowed", "children_allowed", "is_accessible", "role_id",
+        mode="before"
+    )
+    @classmethod
+    def convert_int_to_str(cls, v):
+        """Convierte integers a strings para compatibilidad con FastMCP"""
+        if v is None:
+            return None
+        if isinstance(v, int):
+            return str(v)
+        return v
 
     sort_column: Optional[Literal["id", "name", "nodeName", "unitTypeName"]] = Field(
         default=None, description="Columna para ordenar"
