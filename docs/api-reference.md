@@ -11,7 +11,7 @@ This server follows MCP best practices by providing a focused set of tools, prom
 **Description**: Advanced reservation search using TrackHS API V2 with comprehensive filtering options
 
 **Parameters**:
-- `page` (integer, optional): Page number (default: 1)
+- `page` (integer, optional): Page number (default: 1, 1-based pagination)
 - `size` (integer, optional): Page size (default: 10, max: 1000)
 - `sort_column` (string, optional): Sort field (name, status, checkin, etc.)
 - `sort_direction` (string, optional): Sort order (asc/desc)
@@ -28,6 +28,33 @@ This server follows MCP best practices by providing a focused set of tools, prom
 - `booked_end` (string, optional): Booking date end (ISO 8601)
 - `scroll` (integer|string, optional): Elasticsearch scroll (1 to start)
 - `in_house_today` (integer, optional): Filter by in-house today (0/1)
+
+### search_units
+
+**Description**: Search units in Track HS Channel API with comprehensive filtering options
+
+**Parameters**:
+- `page` (integer, optional): Page number (default: 1, 1-based pagination)
+- `size` (integer, optional): Page size (default: 25, max: 1000)
+- `sort_column` (string, optional): Sort field (id, name, nodeName, unitTypeName)
+- `sort_direction` (string, optional): Sort order (asc/desc)
+- `search` (string, optional): Text search in names/descriptions
+- `node_id` (string, optional): Node ID(s) - single int, comma-separated, or array
+- `amenity_id` (string, optional): Amenity ID(s) - single int, comma-separated, or array
+- `unit_type_id` (string, optional): Unit type ID(s) - single int, comma-separated, or array
+- `bedrooms` (integer, optional): Exact number of bedrooms
+- `bathrooms` (integer, optional): Exact number of bathrooms
+- `pets_friendly` (integer, optional): Pet friendly units (0/1)
+- `is_active` (integer, optional): Active units (0/1)
+- `is_bookable` (integer, optional): Bookable units (0/1)
+- `arrival` (string, optional): Arrival date (ISO 8601)
+- `departure` (string, optional): Departure date (ISO 8601)
+
+**Important Notes**:
+- **Pagination**: Uses 1-based pagination (page=1 is the first page, not page=0)
+- **Parameter Types**: All numeric and boolean parameters accept both integers and strings (automatic conversion)
+- **Multiple IDs**: Supports comma-separated IDs (e.g., "1,2,3") or arrays
+- **Date Format**: All dates must be in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)
 
 ### search_reservations_v1 (V1 - Legacy)
 

@@ -20,7 +20,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
     @mcp.tool
     @error_handler("search_units")
     async def search_units(
-        page: int = 0,
+        page: int = 1,
         size: int = 25,
         sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = "name",
         sort_direction: Literal["asc", "desc"] = "asc",
@@ -78,7 +78,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         **Examples:**
 
         # Basic search
-        search_units(page=0, size=25)
+        search_units(page=1, size=25)
 
         # Search by property features
         search_units(
@@ -109,7 +109,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         )
 
         **Parameters:**
-        - page: Page number (0-based, max 10k total results)
+        - page: Page number (1-based, max 10k total results)
         - size: Page size (max 1000, limited to 10k total results)
         - sort_column: Sort by field (id, name, nodeName, unitTypeName)
         - sort_direction: Sort direction (asc/desc)
@@ -152,7 +152,9 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         - Validates boolean parameters (0/1 only)
         """
         # Validar límite total de resultados (10k máximo) - validación de negocio
-        if page * size > 10000:
+        # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
+        adjusted_page = max(0, page - 1) if page > 0 else 0
+        if adjusted_page * size > 10000:
             raise ValidationError(
                 "Total results (page * size) must be <= 10,000", "page"
             )
@@ -189,10 +191,27 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             # Crear caso de uso
             use_case = SearchUnitsUseCase(api_client)
 
-            # Crear parámetros de búsqueda
+            # Convertir parámetros de string a tipos correctos si es necesario
+            def _convert_param(param, target_type):
+                """Convierte parámetro a tipo correcto"""
+                if param is None:
+                    return None
+                if isinstance(param, target_type):
+                    return param
+                try:
+                    if target_type == int:
+                        return int(param)
+                    elif target_type == str:
+                        return str(param)
+                    else:
+                        return param
+                except (ValueError, TypeError):
+                    return param
+
+            # Crear parámetros de búsqueda con conversión de tipos
             search_params = SearchUnitsParams(
-                page=page,
-                size=size,
+                page=_convert_param(page, int),
+                size=_convert_param(size, int),
                 sort_column=sort_column,
                 sort_direction=sort_direction,
                 search=search,
@@ -203,26 +222,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 amenity_id=_parse_id_string(amenity_id) if amenity_id else None,
                 unit_type_id=_parse_id_string(unit_type_id) if unit_type_id else None,
                 id=_parse_id_list(id) if id else None,
-                calendar_id=calendar_id,
-                role_id=role_id,
-                bedrooms=bedrooms,
-                min_bedrooms=min_bedrooms,
-                max_bedrooms=max_bedrooms,
-                bathrooms=bathrooms,
-                min_bathrooms=min_bathrooms,
-                max_bathrooms=max_bathrooms,
-                pets_friendly=pets_friendly,
-                allow_unit_rates=allow_unit_rates,
-                computed=computed,
-                inherited=inherited,
-                limited=limited,
-                is_bookable=is_bookable,
-                include_descriptions=include_descriptions,
-                is_active=is_active,
-                events_allowed=events_allowed,
-                smoking_allowed=smoking_allowed,
-                children_allowed=children_allowed,
-                is_accessible=is_accessible,
+                calendar_id=_convert_param(calendar_id, int),
+                role_id=_convert_param(role_id, int),
+                bedrooms=_convert_param(bedrooms, int),
+                min_bedrooms=_convert_param(min_bedrooms, int),
+                max_bedrooms=_convert_param(max_bedrooms, int),
+                bathrooms=_convert_param(bathrooms, int),
+                min_bathrooms=_convert_param(min_bathrooms, int),
+                max_bathrooms=_convert_param(max_bathrooms, int),
+                pets_friendly=_convert_param(pets_friendly, int),
+                allow_unit_rates=_convert_param(allow_unit_rates, int),
+                computed=_convert_param(computed, int),
+                inherited=_convert_param(inherited, int),
+                limited=_convert_param(limited, int),
+                is_bookable=_convert_param(is_bookable, int),
+                include_descriptions=_convert_param(include_descriptions, int),
+                is_active=_convert_param(is_active, int),
+                events_allowed=_convert_param(events_allowed, int),
+                smoking_allowed=_convert_param(smoking_allowed, int),
+                children_allowed=_convert_param(children_allowed, int),
+                is_accessible=_convert_param(is_accessible, int),
                 arrival=arrival,
                 departure=departure,
                 content_updated_since=content_updated_since,
@@ -258,7 +277,11 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
                     raise ValidationError(
                         "Bad Request: Invalid parameters sent to Units API. "
-                        "Please check the parameter format and values. "
+                        "Common issues:\n"
+                        "- Page must be >= 1 (1-based pagination)\n"
+                        "- Numeric parameters (bedrooms, bathrooms) must be integers\n"
+                        "- Boolean parameters (pets_friendly, is_active) must be 0 or 1\n"
+                        "- Date parameters must be in ISO 8601 format (YYYY-MM-DD)\n"
                         f"Error details: {str(e)}",
                         "parameters",
                     )
@@ -273,19 +296,22 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                     raise ValidationError(
                         "Forbidden: Insufficient permissions for this operation. "
                         "Please verify your account has access to "
-                        "Channel API/Units endpoints.",
+                        "Channel API/Units endpoints. "
+                        "Contact your administrator to enable Channel API access.",
                         "permissions",
                     )
                 elif e.status_code == 404:
                     raise ValidationError(
                         "Endpoint not found: /pms/units. "
-                        "Please verify the API URL and endpoint path are correct.",
+                        "Please verify the API URL and endpoint path are correct. "
+                        "The Channel API endpoint might not be available in your environment.",
                         "endpoint",
                     )
                 elif e.status_code == 500:
                     raise ValidationError(
                         "Internal Server Error: API temporarily unavailable. "
-                        "Please try again later or contact support.",
+                        "Please try again later or contact TrackHS support. "
+                        "If the problem persists, check the TrackHS service status.",
                         "api",
                     )
             raise ValidationError(f"API request failed: {str(e)}", "api")

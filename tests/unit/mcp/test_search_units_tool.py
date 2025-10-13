@@ -246,19 +246,21 @@ class TestSearchUnitsToolIntegration:
         # Obtener la función registrada
         tool_func = mock_mcp.tool.call_args[0][0]
 
-        # Test página negativa
+        # Test página negativa (ahora se convierte automáticamente, pero Pydantic valida)
         with pytest.raises(Exception, match="API request failed"):
             await tool_func(page=-1)
 
-        # Test tamaño inválido
+        # Test tamaño inválido (ahora se convierte automáticamente, pero Pydantic valida)
         with pytest.raises(Exception, match="API request failed"):
             await tool_func(size=0)
 
-        # Test límite total de resultados
+        # Test límite total de resultados (usar valores que realmente excedan el límite)
         with pytest.raises(
             Exception, match="Total results \\(page \\* size\\) must be <= 10,000"
         ):
-            await tool_func(page=101, size=100)
+            await tool_func(
+                page=102, size=100
+            )  # adjusted_page = 101, 101 * 100 = 10,100
 
         # Test formato de fecha inválido
         with pytest.raises(Exception, match="Invalid date format"):

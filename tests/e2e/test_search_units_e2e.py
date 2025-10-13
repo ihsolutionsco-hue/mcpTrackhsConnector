@@ -69,17 +69,15 @@ class TestSearchUnitsE2E:
         mock_api_client.get.return_value = expected_response
 
         # Act
-        result = await setup_tool(page=0, size=25)
+        result = await setup_tool(page=1, size=25)
 
         # Assert
         assert result == expected_response
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
-                "sortColumn": "name",
-                "sortDirection": "asc",
                 "sortColumn": "name",
                 "sortDirection": "asc",
             },
@@ -112,7 +110,7 @@ class TestSearchUnitsE2E:
 
         # Act
         result = await setup_tool(
-            page=0, size=10, bedrooms=2, bathrooms=2, pets_friendly=1, is_active=1
+            page=1, size=10, bedrooms=2, bathrooms=2, pets_friendly=1, is_active=1
         )
 
         # Assert
@@ -120,7 +118,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 10,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -165,7 +163,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -218,7 +216,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -261,7 +259,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -298,7 +296,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "desc",
@@ -336,11 +334,11 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "search": "luxury villa ocean view",
+                "page": 1,
+                "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
-                "page": 0,
-                "size": 25,
+                "search": "luxury villa ocean view",
             },
         )
 
@@ -377,13 +375,13 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
+                "page": 1,
+                "size": 25,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "bedrooms": 3,
                 "minBathrooms": 2,
                 "maxBathrooms": 3,
-                "sortColumn": "name",
-                "sortDirection": "asc",
-                "page": 0,
-                "size": 25,
             },
         )
 
@@ -419,13 +417,13 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
+                "page": 1,
+                "size": 25,
+                "sortColumn": "name",
+                "sortDirection": "asc",
                 "isActive": 1,
                 "isBookable": 1,
                 "unitStatus": "clean",
-                "sortColumn": "name",
-                "sortDirection": "asc",
-                "page": 0,
-                "size": 25,
             },
         )
 
@@ -469,7 +467,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -513,8 +511,6 @@ class TestSearchUnitsE2E:
                 "size": 100,
                 "sortColumn": "name",
                 "sortDirection": "asc",
-                "sortColumn": "name",
-                "sortDirection": "asc",
             },
         )
 
@@ -529,11 +525,11 @@ class TestSearchUnitsE2E:
         with pytest.raises(Exception, match="API request failed"):
             await setup_tool(size=0)
 
-        # Test límite total de resultados
+        # Test límite total de resultados (ahora con page=102 para exceder 10k)
         with pytest.raises(
             Exception, match="Total results \\(page \\* size\\) must be <= 10,000"
         ):
-            await setup_tool(page=101, size=100)
+            await setup_tool(page=102, size=100)
 
         # Test formato de fecha inválido
         with pytest.raises(Exception, match="Invalid date format for arrival"):

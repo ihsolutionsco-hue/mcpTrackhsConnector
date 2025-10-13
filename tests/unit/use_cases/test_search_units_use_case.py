@@ -170,8 +170,8 @@ class TestSearchUnitsUseCase:
         """Test de validación de límite total de resultados"""
         # Arrange
         params = SearchUnitsParams(
-            page=101, size=100
-        )  # 10,100 resultados (excede límite)
+            page=102, size=100
+        )  # adjusted_page = 101, 101 * 100 = 10,100 resultados (excede límite)
 
         # Act & Assert
         # Esta validación se hace en el caso de uso, no en Pydantic

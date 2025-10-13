@@ -54,14 +54,18 @@ class SearchUnitsUseCase:
 
     def _validate_params(self, params: SearchUnitsParams) -> None:
         """Validar parámetros de entrada"""
-        if params.page and params.page < 0:
-            raise ValidationError("Page debe ser mayor o igual a 0")
+        if params.page and params.page < 1:
+            raise ValidationError("Page debe ser mayor o igual a 1")
 
         if params.size and (params.size < 1 or params.size > 1000):
             raise ValidationError("Size debe estar entre 1 y 1000")
 
         # Validar límite total de resultados (10k máximo)
-        if params.page and params.size and params.page * params.size > 10000:
+        # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
+        adjusted_page = (
+            max(0, params.page - 1) if params.page and params.page > 0 else 0
+        )
+        if params.page and params.size and adjusted_page * params.size > 10000:
             raise ValidationError("Total results (page * size) must be <= 10,000")
 
         # Validar fechas si están presentes
