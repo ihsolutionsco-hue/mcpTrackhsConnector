@@ -12,6 +12,7 @@ from ...application.use_cases.search_reservations import SearchReservationsUseCa
 from ...domain.entities.reservations import SearchReservationsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
+from ..utils.type_normalization import normalize_binary_int, normalize_int
 from ..utils.user_friendly_messages import format_date_error
 
 
@@ -21,8 +22,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
     @mcp.tool(name="search_reservations")
     @error_handler("search_reservations")
     async def search_reservations_v2(
-        page: int = 1,
-        size: int = 10,
+        page: Union[int, float, str] = 1,
+        size: Union[int, float, str] = 10,
         sort_column: Literal[
             "name",
             "status",
@@ -57,10 +58,10 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         departure_end: Optional[str] = None,
         updated_since: Optional[str] = None,
         scroll: Optional[Union[int, str]] = None,
-        in_house_today: Optional[Literal[0, 1]] = None,
+        in_house_today: Optional[Union[int, float, str]] = None,
         status: Optional[Union[str, List[str]]] = None,
-        group_id: Optional[int] = None,
-        checkin_office_id: Optional[int] = None,
+        group_id: Optional[Union[int, float, str]] = None,
+        checkin_office_id: Optional[Union[int, float, str]] = None,
     ):
         """
         Search reservations in Track HS API with comprehensive filtering options.
@@ -159,6 +160,13 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         - Status: Use valid status values like "Confirmed", "Cancelled"
         - Scroll: Use 1 to start, string to continue
         """
+        # Normalizar parámetros numéricos primero (para compatibilidad JSON-RPC)
+        page = normalize_int(page, "page")
+        size = normalize_int(size, "size")
+        in_house_today = normalize_binary_int(in_house_today, "in_house_today")
+        group_id = normalize_int(group_id, "group_id")
+        checkin_office_id = normalize_int(checkin_office_id, "checkin_office_id")
+
         # Validar parámetros básicos según documentación API V2
         if page < 0:
             raise ValidationError("Page must be >= 0", "page")

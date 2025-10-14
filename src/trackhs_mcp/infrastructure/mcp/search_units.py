@@ -14,6 +14,7 @@ from ...application.use_cases.search_units import SearchUnitsUseCase
 from ...domain.entities.units import SearchUnitsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
+from ..utils.type_normalization import normalize_binary_int, normalize_int
 from ..utils.user_friendly_messages import format_date_error
 
 
@@ -23,8 +24,8 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
     @mcp.tool(name="search_units")
     @error_handler("search_units")
     async def search_units(
-        page: int = 1,
-        size: int = 25,
+        page: Union[int, float, str] = 1,
+        size: Union[int, float, str] = 25,
         sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = "name",
         sort_direction: Literal["asc", "desc"] = "asc",
         search: Optional[str] = None,
@@ -35,26 +36,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         amenity_id: Optional[str] = None,
         unit_type_id: Optional[str] = None,
         id: Optional[str] = None,
-        calendar_id: Optional[int] = None,
-        role_id: Optional[int] = None,
-        bedrooms: Optional[int] = None,
-        min_bedrooms: Optional[int] = None,
-        max_bedrooms: Optional[int] = None,
-        bathrooms: Optional[int] = None,
-        min_bathrooms: Optional[int] = None,
-        max_bathrooms: Optional[int] = None,
-        pets_friendly: Optional[int] = None,
-        allow_unit_rates: Optional[int] = None,
-        computed: Optional[int] = None,
-        inherited: Optional[int] = None,
-        limited: Optional[int] = None,
-        is_bookable: Optional[int] = None,
-        include_descriptions: Optional[int] = None,
-        is_active: Optional[int] = None,
-        events_allowed: Optional[int] = None,
-        smoking_allowed: Optional[int] = None,
-        children_allowed: Optional[int] = None,
-        is_accessible: Optional[int] = None,
+        calendar_id: Optional[Union[int, float, str]] = None,
+        role_id: Optional[Union[int, float, str]] = None,
+        bedrooms: Optional[Union[int, float, str]] = None,
+        min_bedrooms: Optional[Union[int, float, str]] = None,
+        max_bedrooms: Optional[Union[int, float, str]] = None,
+        bathrooms: Optional[Union[int, float, str]] = None,
+        min_bathrooms: Optional[Union[int, float, str]] = None,
+        max_bathrooms: Optional[Union[int, float, str]] = None,
+        pets_friendly: Optional[Union[int, float, str]] = None,
+        allow_unit_rates: Optional[Union[int, float, str]] = None,
+        computed: Optional[Union[int, float, str]] = None,
+        inherited: Optional[Union[int, float, str]] = None,
+        limited: Optional[Union[int, float, str]] = None,
+        is_bookable: Optional[Union[int, float, str]] = None,
+        include_descriptions: Optional[Union[int, float, str]] = None,
+        is_active: Optional[Union[int, float, str]] = None,
+        events_allowed: Optional[Union[int, float, str]] = None,
+        smoking_allowed: Optional[Union[int, float, str]] = None,
+        children_allowed: Optional[Union[int, float, str]] = None,
+        is_accessible: Optional[Union[int, float, str]] = None,
         arrival: Optional[str] = None,
         departure: Optional[str] = None,
         content_updated_since: Optional[str] = None,
@@ -160,33 +161,44 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         - Boolean flags: Use 0 or 1 (pets_friendly=1, is_active=1)
         - Bedrooms/bathrooms: Use integers (bedrooms=2, bathrooms=1)
         """
+        # Normalizar parámetros numéricos primero (para compatibilidad JSON-RPC)
+        page = normalize_int(page, "page")
+        size = normalize_int(size, "size")
+        calendar_id = normalize_int(calendar_id, "calendar_id")
+        role_id = normalize_int(role_id, "role_id")
+        bedrooms = normalize_int(bedrooms, "bedrooms")
+        min_bedrooms = normalize_int(min_bedrooms, "min_bedrooms")
+        max_bedrooms = normalize_int(max_bedrooms, "max_bedrooms")
+        bathrooms = normalize_int(bathrooms, "bathrooms")
+        min_bathrooms = normalize_int(min_bathrooms, "min_bathrooms")
+        max_bathrooms = normalize_int(max_bathrooms, "max_bathrooms")
+
+        # Normalizar flags booleanos (0/1)
+        pets_friendly = normalize_binary_int(pets_friendly, "pets_friendly")
+        allow_unit_rates = normalize_binary_int(allow_unit_rates, "allow_unit_rates")
+        computed = normalize_binary_int(computed, "computed")
+        inherited = normalize_binary_int(inherited, "inherited")
+        limited = normalize_binary_int(limited, "limited")
+        is_bookable = normalize_binary_int(is_bookable, "is_bookable")
+        include_descriptions = normalize_binary_int(
+            include_descriptions, "include_descriptions"
+        )
+        is_active = normalize_binary_int(is_active, "is_active")
+        events_allowed = normalize_binary_int(events_allowed, "events_allowed")
+        smoking_allowed = normalize_binary_int(smoking_allowed, "smoking_allowed")
+        children_allowed = normalize_binary_int(children_allowed, "children_allowed")
+        is_accessible = normalize_binary_int(is_accessible, "is_accessible")
+
         # Validar límite total de resultados (10k máximo) - validación de negocio
         # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
-        # Asegurar que page y size sean enteros para evitar errores de comparación
-        page_int = int(page) if isinstance(page, str) else page
-        size_int = int(size) if isinstance(size, str) else size
-        adjusted_page = max(0, page_int - 1) if page_int > 0 else 0
-        if adjusted_page * size_int > 10000:
+        adjusted_page = max(0, page - 1) if page > 0 else 0
+        if adjusted_page * size > 10000:
             raise ValidationError(
                 "Total results (page * size) must be <= 10,000", "page"
             )
 
-        # Validar parámetros booleanos - verificar lógica invertida
-        boolean_params = {
-            "is_bookable": is_bookable,
-            "events_allowed": events_allowed,
-            "smoking_allowed": smoking_allowed,
-            "is_accessible": is_accessible,
-            "pets_friendly": pets_friendly,
-            "is_active": is_active,
-        }
-
-        for param_name, param_value in boolean_params.items():
-            if param_value is not None and param_value not in [0, 1]:
-                raise ValidationError(
-                    f"Parameter {param_name} must be 0 or 1, got {param_value}",
-                    param_name,
-                )
+        # Nota: La validación de parámetros booleanos (0/1) ya se realiza
+        # en normalize_binary_int(), por lo que no necesitamos validarlos aquí
 
         # Validar fechas si se proporcionan
         date_params = {
@@ -205,25 +217,13 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
         # Validar rangos de habitaciones y baños
         if min_bedrooms is not None and max_bedrooms is not None:
-            min_bed_int = (
-                int(min_bedrooms) if isinstance(min_bedrooms, str) else min_bedrooms
-            )
-            max_bed_int = (
-                int(max_bedrooms) if isinstance(max_bedrooms, str) else max_bedrooms
-            )
-            if min_bed_int > max_bed_int:
+            if min_bedrooms > max_bedrooms:
                 raise ValidationError(
                     "min_bedrooms must be <= max_bedrooms", "min_bedrooms"
                 )
 
         if min_bathrooms is not None and max_bathrooms is not None:
-            min_bath_int = (
-                int(min_bathrooms) if isinstance(min_bathrooms, str) else min_bathrooms
-            )
-            max_bath_int = (
-                int(max_bathrooms) if isinstance(max_bathrooms, str) else max_bathrooms
-            )
-            if min_bath_int > max_bath_int:
+            if min_bathrooms > max_bathrooms:
                 raise ValidationError(
                     "min_bathrooms must be <= max_bathrooms", "min_bathrooms"
                 )
@@ -313,16 +313,11 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
                 return date_str
 
-            # Helper para convertir parámetros int opcionales
-            def _to_int(val):
-                if val is None:
-                    return None
-                return int(val) if isinstance(val, str) else val
-
             # Crear parámetros de búsqueda con mapeo
+            # Nota: Todos los parámetros numéricos ya están normalizados arriba
             search_params = SearchUnitsParams(
-                page=page_int,
-                size=size_int,
+                page=page,
+                size=size,
                 sort_column=sort_column,
                 sort_direction=sort_direction,
                 search=search,
@@ -333,26 +328,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 amenity_id=_parse_id_string(amenity_id) if amenity_id else None,
                 unit_type_id=_parse_id_string(unit_type_id) if unit_type_id else None,
                 id=_parse_id_list(id) if id else None,
-                calendar_id=_to_int(calendar_id),
-                role_id=_to_int(role_id),
-                bedrooms=_to_int(bedrooms),
-                min_bedrooms=_to_int(min_bedrooms),
-                max_bedrooms=_to_int(max_bedrooms),
-                bathrooms=_to_int(bathrooms),
-                min_bathrooms=_to_int(min_bathrooms),
-                max_bathrooms=_to_int(max_bathrooms),
-                pets_friendly=_to_int(pets_friendly),
-                allow_unit_rates=_to_int(allow_unit_rates),
-                computed=_to_int(computed),
-                inherited=_to_int(inherited),
-                limited=_to_int(limited),
-                is_bookable=_to_int(is_bookable),
-                include_descriptions=_to_int(include_descriptions),
-                is_active=_to_int(is_active),
-                events_allowed=_to_int(events_allowed),
-                smoking_allowed=_to_int(smoking_allowed),
-                children_allowed=_to_int(children_allowed),
-                is_accessible=_to_int(is_accessible),
+                calendar_id=calendar_id,
+                role_id=role_id,
+                bedrooms=bedrooms,
+                min_bedrooms=min_bedrooms,
+                max_bedrooms=max_bedrooms,
+                bathrooms=bathrooms,
+                min_bathrooms=min_bathrooms,
+                max_bathrooms=max_bathrooms,
+                pets_friendly=pets_friendly,
+                allow_unit_rates=allow_unit_rates,
+                computed=computed,
+                inherited=inherited,
+                limited=limited,
+                is_bookable=is_bookable,
+                include_descriptions=include_descriptions,
+                is_active=is_active,
+                events_allowed=events_allowed,
+                smoking_allowed=smoking_allowed,
+                children_allowed=children_allowed,
+                is_accessible=is_accessible,
                 arrival=_validate_iso8601_date(arrival, "arrival"),
                 departure=_validate_iso8601_date(departure, "departure"),
                 content_updated_since=_validate_iso8601_date(
