@@ -193,6 +193,16 @@ docs/MCP/07-repositorios-originales/modelcontextprotocol/
 docs/MCP/07-repositorios-originales/python-sdk/
 docs/MCP/07-repositorios-originales/servers/
 
+# Embedded repositories in reference
+reference/mcp/04-ejemplos/quickstart/
+reference/mcp/04-ejemplos/servidor-remoto-completo/
+reference/mcp/06-herramientas/inspector/
+reference/mcp/07-repositorios-originales/example-remote-server/
+reference/mcp/07-repositorios-originales/inspector/
+reference/mcp/07-repositorios-originales/modelcontextprotocol/
+reference/mcp/07-repositorios-originales/python-sdk/
+reference/mcp/07-repositorios-originales/servers/
+
 # IDE
 .cursor/
 
