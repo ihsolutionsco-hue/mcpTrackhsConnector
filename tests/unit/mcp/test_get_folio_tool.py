@@ -30,8 +30,21 @@ class TestGetFolioTool:
     @pytest.fixture
     def tool_function(self, mock_mcp, mock_api_client):
         """Función de la herramienta registrada"""
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
         register_get_folio(mock_mcp, mock_api_client)
-        return mock_mcp.tool.call_args[0][0]  # Obtener la función decorada
+        return registered_function
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_success(

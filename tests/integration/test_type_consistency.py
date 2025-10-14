@@ -10,9 +10,6 @@ from src.trackhs_mcp.infrastructure.mcp.get_folio import register_get_folio
 from src.trackhs_mcp.infrastructure.mcp.get_reservation_v2 import (
     register_get_reservation_v2,
 )
-from src.trackhs_mcp.infrastructure.mcp.search_reservations_v1 import (
-    register_search_reservations_v1,
-)
 from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
     register_search_reservations_v2,
 )
@@ -39,7 +36,6 @@ class TestTypeConsistency:
 
         # Registrar todas las herramientas
         register_search_units(mcp, mock_api_client)
-        register_search_reservations_v1(mcp, mock_api_client)
         register_search_reservations_v2(mcp, mock_api_client)
         register_get_reservation_v2(mcp, mock_api_client)
         register_get_folio(mcp, mock_api_client)

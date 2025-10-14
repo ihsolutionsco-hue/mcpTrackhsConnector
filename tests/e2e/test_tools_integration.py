@@ -40,7 +40,7 @@ class TestToolsIntegrationE2E:
         return mcp
 
     @pytest.fixture
-    def sample_reservations_response_v1(self):
+    def sample_reservations_response_v2(self):
         """Respuesta de ejemplo para API V1"""
         return {
             "_embedded": {
@@ -67,8 +67,8 @@ class TestToolsIntegrationE2E:
             "page_size": 10,
             "total_items": 1,
             "_links": {
-                "self": {"href": "/pms/reservations?page=1&size=10"},
-                "next": {"href": "/pms/reservations?page=2&size=10"},
+                "self": {"href": "/v2/pms/reservations?page=1&size=10"},
+                "next": {"href": "/v2/pms/reservations?page=2&size=10"},
             },
         }
 
@@ -124,8 +124,8 @@ class TestToolsIntegrationE2E:
             "page_size": 10,
             "total_items": 1,
             "_links": {
-                "self": {"href": "/v2/pms/reservations?page=1&size=10"},
-                "next": {"href": "/v2/pms/reservations?page=2&size=10"},
+                "self": {"href": "/v2/v2/pms/reservations?page=1&size=10"},
+                "next": {"href": "/v2/v2/pms/reservations?page=2&size=10"},
             },
         }
 
@@ -135,16 +135,16 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para registro de ambos tools juntos"""
 
         # Configurar mocks para diferentes endpoints
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -156,17 +156,28 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Verificar que se registraron los 6 tools (incluyendo search_units_from_reservations)
-        assert mock_mcp.tool.call_count == 5
+        # Verificar que se registraron los 4 tools
+        assert mock_mcp.tool.call_count == 4
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
 
-        # Test V1 tool
-        result_v1 = await v1_tool(page=1, size=10)
-        assert result_v1 == sample_reservations_response_v1
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Test V2 tool
         result_v2 = await v2_tool(page=1, size=10)
@@ -181,16 +192,16 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para ambos tools con los mismos parámetros"""
 
         # Configurar mocks
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -202,10 +213,25 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Parámetros comunes
         common_params = {
@@ -220,25 +246,25 @@ class TestToolsIntegrationE2E:
         }
 
         # Ejecutar ambos tools con los mismos parámetros
-        result_v1 = await v1_tool(**common_params)
+        result_v1 = await v2_tool(**common_params)
         result_v2 = await v2_tool(**common_params)
 
         # Verificar resultados
-        assert result_v1 == sample_reservations_response_v1
+        assert result_v1 == sample_reservations_response_v2
         assert result_v2 == sample_reservations_response_v2
 
         # Verificar que se llamaron ambos endpoints
         assert mock_api_client.get.call_count == 2
 
         # Verificar parámetros enviados a cada endpoint
-        v1_call = mock_api_client.get.call_args_list[0]
-        v2_call = mock_api_client.get.call_args_list[1]
+        v2_call_1 = mock_api_client.get.call_args_list[0]
+        v2_call_2 = mock_api_client.get.call_args_list[1]
 
-        assert v1_call[0][0] == "/pms/reservations"
         assert v2_call[0][0] == "/v2/pms/reservations"
+        assert v2_call[0][0] == "/v2/v2/pms/reservations"
 
         # Verificar que los parámetros son consistentes
-        v1_params = v1_call[1]["params"]
+        v1_params = v2_call[1]["params"]
         v2_params = v2_call[1]["params"]
 
         # Parámetros que deben ser iguales
@@ -274,16 +300,31 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Test error en V1
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
 
         with pytest.raises(TrackHSError, match=".*Unauthorized.*"):
-            await v1_tool()
+            await v2_tool()
 
         # Test error en V2
         with pytest.raises(TrackHSError, match=".*Unauthorized.*"):
@@ -298,31 +339,46 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Test errores de validación en ambos tools
         from src.trackhs_mcp.infrastructure.utils.error_handling import TrackHSError
 
         # Test error de página negativa
         with pytest.raises(TrackHSError, match="Page must be >= 0"):
-            await v1_tool(page=-1)
+            await v2_tool(page=-1)
 
         with pytest.raises(TrackHSError, match="Page must be >= 0"):
             await v2_tool(page=-1)
 
         # Test error de tamaño inválido
         with pytest.raises(TrackHSError, match="Size must be >= 1"):
-            await v1_tool(size=0)
+            await v2_tool(size=0)
 
         with pytest.raises(TrackHSError, match="Size must be >= 1"):
             await v2_tool(size=0)
 
         # Test error de formato de fecha
         with pytest.raises(TrackHSError, match="Formato de fecha inválido"):
-            await v1_tool(arrival_start="invalid-date")
+            await v2_tool(arrival_start="invalid-date")
 
         with pytest.raises(TrackHSError, match="Formato de fecha inválido"):
             await v2_tool(arrival_start="invalid-date")
@@ -333,16 +389,16 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para consistencia de formato de fechas en ambos tools"""
 
         # Configurar mocks
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -354,10 +410,25 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Test diferentes formatos de fecha en ambos tools
         test_dates = [
@@ -374,9 +445,9 @@ class TestToolsIntegrationE2E:
             mock_api_client.get.side_effect = mock_get_side_effect
 
             # Test V1
-            await v1_tool(arrival_start=test_date)
-            v1_call = mock_api_client.get.call_args
-            v1_params = v1_call[1]["params"]
+            await v2_tool(arrival_start=test_date)
+            v2_call = mock_api_client.get.call_args
+            v1_params = v2_call[1]["params"]
             v1_formatted_date = v1_params["arrivalStart"]
 
             # Test V2
@@ -410,16 +481,16 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para consistencia de parsing de IDs en ambos tools"""
 
         # Configurar mocks
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -431,10 +502,25 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Test diferentes formatos de ID en ambos tools
         test_ids = [
@@ -450,9 +536,9 @@ class TestToolsIntegrationE2E:
             mock_api_client.get.side_effect = mock_get_side_effect
 
             # Test V1
-            await v1_tool(node_id=input_id)
-            v1_call = mock_api_client.get.call_args
-            v1_params = v1_call[1]["params"]
+            await v2_tool(node_id=input_id)
+            v2_call = mock_api_client.get.call_args
+            v1_params = v2_call[1]["params"]
             v1_parsed_id = v1_params["nodeId"]
 
             # Test V2
@@ -481,16 +567,16 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para consistencia de parsing de status en ambos tools"""
 
         # Configurar mocks
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -502,10 +588,25 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Test diferentes formatos de status en ambos tools
         test_statuses = [
@@ -521,9 +622,9 @@ class TestToolsIntegrationE2E:
             mock_api_client.get.side_effect = mock_get_side_effect
 
             # Test V1
-            await v1_tool(status=input_status)
-            v1_call = mock_api_client.get.call_args
-            v1_params = v1_call[1]["params"]
+            await v2_tool(status=input_status)
+            v2_call = mock_api_client.get.call_args
+            v1_params = v2_call[1]["params"]
             v1_parsed_status = v1_params["status"]
 
             # Test V2
@@ -552,16 +653,16 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para consistencia de scroll en ambos tools"""
 
         # Configurar mocks
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -573,10 +674,25 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Test scroll en ambos tools
         # Reset mock calls
@@ -584,9 +700,9 @@ class TestToolsIntegrationE2E:
         mock_api_client.get.side_effect = mock_get_side_effect
 
         # Test V1 con scroll
-        await v1_tool(scroll=1, size=1000)
-        v1_call = mock_api_client.get.call_args
-        v1_params = v1_call[1]["params"]
+        await v2_tool(scroll=1, size=1000)
+        v2_call = mock_api_client.get.call_args
+        v1_params = v2_call[1]["params"]
         v1_scroll = v1_params["scroll"]
         v1_size = v1_params["size"]
         v1_sort_column = v1_params["sortColumn"]
@@ -614,16 +730,16 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para flujo completo de ambos tools"""
 
         # Configurar mocks
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -635,10 +751,25 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Parámetros completos para ambos tools
         comprehensive_params = {
@@ -671,25 +802,25 @@ class TestToolsIntegrationE2E:
         }
 
         # Ejecutar ambos tools con parámetros completos
-        result_v1 = await v1_tool(**comprehensive_params)
+        result_v1 = await v2_tool(**comprehensive_params)
         result_v2 = await v2_tool(**comprehensive_params)
 
         # Verificar resultados
-        assert result_v1 == sample_reservations_response_v1
+        assert result_v1 == sample_reservations_response_v2
         assert result_v2 == sample_reservations_response_v2
 
         # Verificar que se llamaron ambos endpoints
         assert mock_api_client.get.call_count == 2
 
         # Verificar parámetros enviados a cada endpoint
-        v1_call = mock_api_client.get.call_args_list[0]
-        v2_call = mock_api_client.get.call_args_list[1]
+        v2_call_1 = mock_api_client.get.call_args_list[0]
+        v2_call_2 = mock_api_client.get.call_args_list[1]
 
-        assert v1_call[0][0] == "/pms/reservations"
         assert v2_call[0][0] == "/v2/pms/reservations"
+        assert v2_call[0][0] == "/v2/v2/pms/reservations"
 
         # Verificar que los parámetros son consistentes entre ambos tools
-        v1_params = v1_call[1]["params"]
+        v1_params = v2_call[1]["params"]
         v2_params = v2_call[1]["params"]
 
         # Parámetros que deben ser iguales
@@ -761,7 +892,7 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para comparación de rendimiento entre ambos tools"""
@@ -769,9 +900,9 @@ class TestToolsIntegrationE2E:
 
         # Configurar mocks
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -783,10 +914,25 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Parámetros de prueba
         test_params = {
@@ -799,7 +945,7 @@ class TestToolsIntegrationE2E:
 
         # Medir tiempo de ejecución para V1
         start_time_v1 = time.time()
-        result_v1 = await v1_tool(**test_params)
+        result_v1 = await v2_tool(**test_params)
         end_time_v1 = time.time()
         execution_time_v1 = end_time_v1 - start_time_v1
 
@@ -810,7 +956,7 @@ class TestToolsIntegrationE2E:
         execution_time_v2 = end_time_v2 - start_time_v2
 
         # Verificar que ambos tools completaron exitosamente
-        assert result_v1 == sample_reservations_response_v1
+        assert result_v1 == sample_reservations_response_v2
         assert result_v2 == sample_reservations_response_v2
 
         # Verificar que ambos tools tienen tiempos de ejecución razonables
@@ -827,16 +973,16 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v1,
+        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para ejecución concurrente de ambos tools"""
 
         # Configurar mocks
         def mock_get_side_effect(endpoint, **kwargs):
-            if endpoint == "/pms/reservations":
-                return sample_reservations_response_v1
-            elif endpoint == "/v2/pms/reservations":
+            if endpoint == "/v2/pms/reservations":
+                return sample_reservations_response_v2
+            elif endpoint == "/v2/v2/pms/reservations":
                 return sample_reservations_response_v2
             else:
                 raise ValueError(f"Unexpected endpoint: {endpoint}")
@@ -848,10 +994,25 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Obtener las funciones registradas
-        tool_calls = mock_mcp.tool.call_args_list
-        v1_tool = tool_calls[0][0][0]
-        v2_tool = tool_calls[1][0][0]
+        # Obtener las funciones registradas usando mock decorator
+        registered_functions = []
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                registered_functions.append(func)
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
+        # Re-registrar las herramientas
+        from src.trackhs_mcp.infrastructure.mcp.all_tools import register_all_tools
+
+        register_all_tools(mock_mcp, mock_api_client)
+
+        v2_tool = registered_functions[0]
+        search_units_tool = registered_functions[1]
 
         # Parámetros de prueba
         test_params = {
@@ -863,10 +1024,10 @@ class TestToolsIntegrationE2E:
         }
 
         # Ejecutar ambos tools concurrentemente
-        results = await asyncio.gather(v1_tool(**test_params), v2_tool(**test_params))
+        results = await asyncio.gather(v2_tool(**test_params), v2_tool(**test_params))
 
         # Verificar resultados
-        assert results[0] == sample_reservations_response_v1
+        assert results[0] == sample_reservations_response_v2
         assert results[1] == sample_reservations_response_v2
 
         # Verificar que se llamaron ambos endpoints

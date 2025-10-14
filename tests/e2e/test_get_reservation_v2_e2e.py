@@ -59,8 +59,21 @@ class TestGetReservationV2E2E:
             # Verificar que se registró el tool
             mock_mcp.tool.assert_called_once()
 
+            # Crear un mock que capture la función registrada
+            registered_function = None
+
+            def mock_tool_decorator(name=None):
+                def decorator(func):
+                    nonlocal registered_function
+                    registered_function = func
+                    return func
+
+                return decorator
+
+            mock_mcp.tool = mock_tool_decorator
+
             # Obtener la función tool registrada
-            tool_func = mock_mcp.tool.call_args[0][0]
+            tool_func = registered_function
 
             # Ejecutar el tool
             result = await tool_func(reservation_id)
@@ -81,10 +94,23 @@ class TestGetReservationV2E2E:
         invalid_reservation_id = "0"
 
         # Act
+        # Crear un mock que capture la función registrada
+        registered_function = None
+
+        def mock_tool_decorator(name=None):
+            def decorator(func):
+                nonlocal registered_function
+                registered_function = func
+                return func
+
+            return decorator
+
+        mock_mcp.tool = mock_tool_decorator
+
         register_get_reservation_v2(mock_mcp, api_client)
 
         # Obtener la función tool registrada
-        tool_func = mock_mcp.tool.call_args[0][0]
+        tool_func = registered_function
 
         # Act & Assert
         with pytest.raises(Exception) as exc_info:
@@ -110,8 +136,21 @@ class TestGetReservationV2E2E:
             # Act
             register_get_reservation_v2(mock_mcp, api_client)
 
+            # Crear un mock que capture la función registrada
+            registered_function = None
+
+            def mock_tool_decorator(name=None):
+                def decorator(func):
+                    nonlocal registered_function
+                    registered_function = func
+                    return func
+
+                return decorator
+
+            mock_mcp.tool = mock_tool_decorator
+
             # Obtener la función tool registrada
-            tool_func = mock_mcp.tool.call_args[0][0]
+            tool_func = registered_function
 
             # Act & Assert
             with pytest.raises(Exception):
@@ -131,8 +170,21 @@ class TestGetReservationV2E2E:
             # Act
             register_get_reservation_v2(mock_mcp, api_client)
 
+            # Crear un mock que capture la función registrada
+            registered_function = None
+
+            def mock_tool_decorator(name=None):
+                def decorator(func):
+                    nonlocal registered_function
+                    registered_function = func
+                    return func
+
+                return decorator
+
+            mock_mcp.tool = mock_tool_decorator
+
             # Obtener la función tool registrada
-            tool_func = mock_mcp.tool.call_args[0][0]
+            tool_func = registered_function
 
             # Act & Assert
             with pytest.raises(Exception):
@@ -152,8 +204,21 @@ class TestGetReservationV2E2E:
             # Act
             register_get_reservation_v2(mock_mcp, api_client)
 
+            # Crear un mock que capture la función registrada
+            registered_function = None
+
+            def mock_tool_decorator(name=None):
+                def decorator(func):
+                    nonlocal registered_function
+                    registered_function = func
+                    return func
+
+                return decorator
+
+            mock_mcp.tool = mock_tool_decorator
+
             # Obtener la función tool registrada
-            tool_func = mock_mcp.tool.call_args[0][0]
+            tool_func = registered_function
 
             # Act & Assert
             with pytest.raises(Exception):
@@ -178,8 +243,21 @@ class TestGetReservationV2E2E:
             # Verificar que se registró el tool
             mock_mcp.tool.assert_called_once()
 
+            # Crear un mock que capture la función registrada
+            registered_function = None
+
+            def mock_tool_decorator(name=None):
+                def decorator(func):
+                    nonlocal registered_function
+                    registered_function = func
+                    return func
+
+                return decorator
+
+            mock_mcp.tool = mock_tool_decorator
+
             # Obtener la función tool registrada
-            tool_func = mock_mcp.tool.call_args[0][0]
+            tool_func = registered_function
 
             # Ejecutar el tool
             result = await tool_func(reservation_id)
@@ -231,10 +309,23 @@ class TestGetReservationV2E2E:
         for error, expected_message in error_scenarios:
             with patch.object(api_client, "get", side_effect=error):
                 # Act
+                # Crear un mock que capture la función registrada
+                registered_function = None
+
+                def mock_tool_decorator(name=None):
+                    def decorator(func):
+                        nonlocal registered_function
+                        registered_function = func
+                        return func
+
+                    return decorator
+
+                mock_mcp.tool = mock_tool_decorator
+
                 register_get_reservation_v2(mock_mcp, api_client)
 
                 # Obtener la función tool registrada
-                tool_func = mock_mcp.tool.call_args[0][0]
+                tool_func = registered_function
 
                 # Act & Assert
                 with pytest.raises(Exception) as exc_info:
@@ -262,8 +353,21 @@ class TestGetReservationV2E2E:
             # Act
             register_get_reservation_v2(mock_mcp, api_client)
 
+            # Crear un mock que capture la función registrada
+            registered_function = None
+
+            def mock_tool_decorator(name=None):
+                def decorator(func):
+                    nonlocal registered_function
+                    registered_function = func
+                    return func
+
+                return decorator
+
+            mock_mcp.tool = mock_tool_decorator
+
             # Obtener la función tool registrada
-            tool_func = mock_mcp.tool.call_args[0][0]
+            tool_func = registered_function
 
             # Medir tiempo de ejecución
             start_time = asyncio.get_event_loop().time()
