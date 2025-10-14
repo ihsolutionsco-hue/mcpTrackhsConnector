@@ -407,6 +407,11 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 ## Validación unificada ahora se realiza desde utils.date_validation
 
 
+# Compatibilidad retroactiva con tests que importan _is_valid_date_format
+def _is_valid_date_format(date_string: str) -> bool:  # pragma: no cover - shim
+    return is_valid_iso8601_date(date_string)
+
+
 def _parse_id_string(id_string: Union[str, int, List[int]]) -> Union[int, List[int]]:
     """
     Parsea un string de ID que puede ser:

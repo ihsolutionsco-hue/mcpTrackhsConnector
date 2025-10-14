@@ -18,6 +18,7 @@ _DATE_TIME_NO_TZ_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\
 _DATE_TIME_OFFSET_PATTERN = re.compile(
     r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?[+-]\d{2}:\d{2}$"
 )
+_DATE_TIME_SPACE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$")
 
 
 def is_valid_iso8601_date(date_string: Optional[str]) -> bool:
@@ -48,6 +49,14 @@ def is_valid_iso8601_date(date_string: Optional[str]) -> bool:
     if _DATE_TIME_NO_TZ_PATTERN.match(date_string) or _DATE_TIME_OFFSET_PATTERN.match(
         date_string
     ):
+        try:
+            datetime.fromisoformat(date_string)
+            return True
+        except ValueError:
+            return False
+
+    # Compatibilidad: aceptar 'YYYY-MM-DD HH:MM:SS' (con espacio)
+    if _DATE_TIME_SPACE_PATTERN.match(date_string):
         try:
             datetime.fromisoformat(date_string)
             return True
