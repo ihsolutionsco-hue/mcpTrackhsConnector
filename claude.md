@@ -8,20 +8,18 @@
 
 ## 🚀 **FUNCIONALIDADES PRINCIPALES**
 
-### **Herramientas MCP (4)**
-- **`search_reservations_v1`**: Búsqueda de reservas usando API V1 (compatibilidad legacy)
-- **`search_reservations_v2`**: Búsqueda avanzada de reservas usando API V2 (recomendado)
-- **`get_reservation_v2`**: ✅ **100% funcional** - Obtención de reserva específica por ID
+### **Herramientas MCP (5)**
+- **`search_reservations`**: Búsqueda avanzada de reservas usando API V2 (recomendado)
+- **`get_reservation`**: ✅ **100% funcional** - Obtención de reserva específica por ID
 - **`get_folio`**: ✅ **100% funcional** - Obtención de folio específico por ID
+- **`search_units`**: ✅ **100% funcional** - Búsqueda de unidades usando Channel API
+- **`search_amenities`**: ✅ **100% funcional** - Búsqueda de amenidades usando Channel API
 
-### **Recursos MCP (2)**
-- **`trackhs://schema/reservations-v1`**: Esquema completo de datos para API V1
-- **`trackhs://schema/reservations-v2`**: Esquema completo de datos para API V2
+### **Recursos MCP (0)**
+*Actualmente no implementados - el proyecto se enfoca en herramientas MCP*
 
-### **Prompts MCP (3)**
-- **`search-reservations-by-dates`**: Búsqueda por rango de fechas
-- **`search-reservations-by-guest`**: Búsqueda por información del huésped
-- **`search-reservations-advanced`**: Búsqueda avanzada con múltiples filtros
+### **Prompts MCP (0)**
+*Actualmente no implementados - el proyecto se enfoca en herramientas MCP*
 
 ## 🏗️ **ARQUITECTURA CRÍTICA**
 
@@ -70,11 +68,11 @@ npx -y @modelcontextprotocol/inspector
 ## 🧪 **TESTING Y CALIDAD**
 
 ### **Suite de Tests**
-- **299+ tests** con 95%+ cobertura de código
+- **512 tests** con 49% cobertura de código
 - **Unit Tests**: 104 tests - Componentes individuales
 - **Integration Tests**: 10 tests - Integración entre capas
 - **E2E Tests**: 185 tests - Flujos completos
-- **Estado**: 27/27 tests pasando (100%)
+- **Estado**: 512/512 tests recopilados (100% funcional)
 
 ### **Pre-commit Hooks Optimizados**
 ```yaml
@@ -194,7 +192,7 @@ isort src/
 
 ### **Estado Final**
 - ✅ **Pre-commit Hooks**: 8 hooks optimizados funcionando
-- ✅ **Tests**: 299+ tests, 27/27 pasando (100%)
+- ✅ **Tests**: 512 tests recopilados (100% funcional)
 - ✅ **Tiempo**: 20-40s primera vez, 5-15s siguientes
 - ✅ **GitHub Actions**: Listo para ejecutar automáticamente
 - ✅ **FastMCP Deploy**: Deploy automático en push a main
@@ -208,7 +206,7 @@ isort src/
 - Inyección de dependencias para testing
 
 ### **2. Testing Exhaustivo**
-- 299+ tests con cobertura 95%+
+- 512 tests con cobertura 49%
 - Tests optimizados en pre-commit
 - Validación completa antes de push
 
@@ -283,7 +281,7 @@ pip install -r requirements-dev.txt
 - [ ] Ejecutar tests completos: `pytest tests/ -v --cov=src`
 - [ ] Ejecutar linting: `flake8 src/`
 - [ ] Ejecutar formateo: `black src/ && isort src/`
-- [ ] Validar servidor MCP: `python -c "from trackhs_mcp.server import mcp"`
+- [ ] Validar servidor MCP: `python -c "from src.trackhs_mcp.server import mcp"`
 - [ ] Ejecutar preflight: `python scripts/fastmcp_preflight_simple.py`
 
 ## 🚀 **DESPLIEGUE**
@@ -307,6 +305,64 @@ pip install -r requirements.txt
 # Ejecutar servidor
 python -m src.trackhs_mcp
 ```
+
+## 🔧 **HERRAMIENTAS MCP DETALLADAS**
+
+### **`search_units` - Búsqueda de Unidades**
+Nueva herramienta MCP para obtener información completa de unidades desde la Channel API de Track HS.
+
+**Características:**
+- ✅ **29+ parámetros de filtrado** (paginación, búsqueda, filtros por características)
+- ✅ **Filtros avanzados** (habitaciones, baños, amenidades, políticas, disponibilidad)
+- ✅ **Búsqueda por texto** (nombre, descripción, código de unidad)
+- ✅ **Filtros de ubicación** (nodos, amenidades, tipos de unidad)
+- ✅ **Filtros de estado** (activo, reservable, estado de unidad)
+- ✅ **Filtros de fechas** (disponibilidad, actualización de contenido)
+- ✅ **Ordenamiento flexible** (por ID, nombre, nodo, tipo de unidad)
+- ✅ **Paginación robusta** (limitado a 10k resultados totales)
+- ✅ **Validación estricta** (formatos de fecha ISO 8601, valores booleanos 0/1)
+
+### **`search_amenities` - Búsqueda de Amenidades**
+Herramienta MCP para buscar amenidades en Track HS Channel API.
+
+**Características:**
+- ✅ **Filtros completos** (grupos, estado público, búsqueda)
+- ✅ **Paginación avanzada** (limitado a 10k resultados totales)
+- ✅ **Ordenamiento flexible** (por ID, orden, estado público, etc.)
+- ✅ **Búsqueda por texto** (ID y nombre de amenidades)
+- ✅ **Filtros booleanos** (público, buscable, filtrable)
+- ✅ **Validación estricta** (parámetros booleanos 0/1)
+
+### **`search_reservations` - Búsqueda de Reservas (API V2)**
+Herramienta MCP para búsqueda avanzada de reservas usando API V2.
+
+**Características:**
+- ✅ **25+ parámetros de filtrado** (fechas, IDs, estado, etc.)
+- ✅ **Paginación avanzada** (estándar + Elasticsearch scroll)
+- ✅ **Filtros de fechas** (llegada, salida, reserva, actualización)
+- ✅ **Filtros de estado** (confirmado, cancelado, en casa hoy)
+- ✅ **Filtros de IDs** (nodo, unidad, contacto, agente de viajes)
+- ✅ **Scroll para grandes datasets** (Elasticsearch scroll)
+- ✅ **Ordenamiento flexible** (por nombre, estado, fechas, etc.)
+
+### **`get_reservation` - Obtener Reserva Específica**
+Herramienta MCP para obtener una reserva específica por ID.
+
+**Características:**
+- ✅ **Datos completos** (información financiera, políticas, ocupantes)
+- ✅ **Datos embebidos** (unidad, contacto, políticas, usuario)
+- ✅ **Manejo de errores robusto** (401, 403, 404, 500)
+- ✅ **Validación de ID** (formato y existencia)
+
+### **`get_folio` - Obtener Folio Específico**
+Herramienta MCP para obtener un folio específico por ID.
+
+**Características:**
+- ✅ **Datos financieros completos** (balances, comisiones, ingresos)
+- ✅ **Datos embebidos** (contacto, compañía, agente de viajes)
+- ✅ **Reglas de folio maestro** (si aplica)
+- ✅ **Manejo de errores robusto** (401, 403, 404, 500)
+- ✅ **Validación de ID** (formato y existencia)
 
 ---
 
