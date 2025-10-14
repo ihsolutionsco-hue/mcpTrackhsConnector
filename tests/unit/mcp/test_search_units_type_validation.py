@@ -132,8 +132,9 @@ class TestSearchUnitsTypeValidation:
         assert result is not None
 
     def test_search_units_function_signature_has_correct_types(self, mcp_server):
-        """Verifica que la firma de la función tiene los tipos correctos"""
+        """Verifica que la firma de la función tiene los tipos flexibles correctos para JSON-RPC"""
         import inspect
+        from typing import Union
 
         # Obtener la función registrada
         tools = mcp_server._tool_manager._tools
@@ -142,36 +143,45 @@ class TestSearchUnitsTypeValidation:
         # Obtener la firma de la función
         sig = inspect.signature(search_units_tool.fn)
 
-        # Verificar que page es int
+        # Verificar que page es Union[int, float, str] (flexible para JSON-RPC)
         page_param = sig.parameters.get("page")
         assert page_param is not None
-        assert page_param.annotation == int
+        # Debe ser Union[int, float, str] para compatibilidad JSON-RPC
+        assert page_param.annotation == Union[int, float, str], (
+            f"page debe ser Union[int, float, str] para compatibilidad JSON-RPC, "
+            f"pero es {page_param.annotation}"
+        )
 
-        # Verificar que size es int
+        # Verificar que size es Union[int, float, str] (flexible para JSON-RPC)
         size_param = sig.parameters.get("size")
         assert size_param is not None
-        assert size_param.annotation == int
+        assert size_param.annotation == Union[int, float, str], (
+            f"size debe ser Union[int, float, str] para compatibilidad JSON-RPC, "
+            f"pero es {size_param.annotation}"
+        )
 
-        # Verificar que bedrooms es Optional[int]
+        # Verificar que bedrooms es Optional[Union[int, float, str]]
         bedrooms_param = sig.parameters.get("bedrooms")
         assert bedrooms_param is not None
-        # Verificar que es Optional[int] (Union[int, None] o similar)
-        from typing import Optional
+        # Verificar que contiene Union (flexible para JSON-RPC)
+        annotation_str = str(bedrooms_param.annotation)
+        assert "Union" in annotation_str, (
+            f"bedrooms debe ser Optional[Union[int, float, str]], "
+            f"pero es {bedrooms_param.annotation}"
+        )
 
-        assert bedrooms_param.annotation == Optional[int] or str(
-            bedrooms_param.annotation
-        ).startswith("typing.Union")
-
-        # Verificar que is_active es Optional[int]
+        # Verificar que is_active es Optional[Union[int, float, str]]
         is_active_param = sig.parameters.get("is_active")
         assert is_active_param is not None
-        assert is_active_param.annotation == Optional[int] or str(
-            is_active_param.annotation
-        ).startswith("typing.Union")
+        annotation_str = str(is_active_param.annotation)
+        assert "Union" in annotation_str, (
+            f"is_active debe ser Optional[Union[int, float, str]], "
+            f"pero es {is_active_param.annotation}"
+        )
 
     @pytest.mark.asyncio
-    async def test_search_units_no_union_types_in_signature(self, mcp_server):
-        """Verifica que no hay Union[int, str] en la firma de la función"""
+    async def test_search_units_has_flexible_union_types(self, mcp_server):
+        """Verifica que los parámetros numéricos tienen Union[int, float, str] para JSON-RPC"""
         import inspect
 
         # Obtener la función registrada
@@ -181,15 +191,42 @@ class TestSearchUnitsTypeValidation:
         # Obtener la firma de la función
         sig = inspect.signature(search_units_tool.fn)
 
-        # Verificar que no hay Union[int, str] en ningún parámetro
-        for param_name, param in sig.parameters.items():
-            annotation_str = str(param.annotation)
-            assert (
-                "Union[int, str]" not in annotation_str
-            ), f"Parámetro {param_name} tiene Union[int, str]"
-            assert (
-                "Union[str, int]" not in annotation_str
-            ), f"Parámetro {param_name} tiene Union[str, int]"
+        # Parámetros numéricos que DEBEN tener Union[int, float, str]
+        numeric_params = [
+            "page",
+            "size",
+            "calendar_id",
+            "role_id",
+            "bedrooms",
+            "min_bedrooms",
+            "max_bedrooms",
+            "bathrooms",
+            "min_bathrooms",
+            "max_bathrooms",
+            "pets_friendly",
+            "allow_unit_rates",
+            "computed",
+            "inherited",
+            "limited",
+            "is_bookable",
+            "include_descriptions",
+            "is_active",
+            "events_allowed",
+            "smoking_allowed",
+            "children_allowed",
+            "is_accessible",
+        ]
+
+        # Verificar que todos los parámetros numéricos tienen Union types
+        for param_name in numeric_params:
+            param = sig.parameters.get(param_name)
+            if param is not None:
+                annotation_str = str(param.annotation)
+                # Debe contener Union para compatibilidad JSON-RPC
+                assert "Union" in annotation_str or "union" in annotation_str, (
+                    f"Parámetro {param_name} debe tener Union[int, float, str] "
+                    f"para compatibilidad JSON-RPC, pero tiene {param.annotation}"
+                )
 
     @pytest.mark.asyncio
     async def test_search_units_error_handling_with_invalid_types(self, mcp_server):
