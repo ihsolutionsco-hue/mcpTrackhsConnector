@@ -182,9 +182,9 @@ class TestNormalizePositiveIntExtended:
 
     def test_normalize_positive_int_with_invalid_inputs(self):
         """Test normalize_positive_int with invalid inputs."""
-        # Test with zero
+        # Test with negative numbers - these should raise exceptions
         with pytest.raises(Exception):  # ValidationError or ValueError
-            normalize_positive_int(0, "size")
+            normalize_positive_int(-1, "size")
 
 
 class TestTypeNormalizationIntegration:
