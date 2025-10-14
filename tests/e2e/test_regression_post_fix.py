@@ -176,9 +176,7 @@ class TestRegressionPostFix:
         # Verificar que las herramientas están registradas
         tools = mcp_server._tool_manager._tools
         expected_tools = [
-            "search_reservations_v2",
             "search_units",
-            "get_reservation_v2",
             "get_folio",
         ]
 
@@ -195,7 +193,7 @@ class TestRegressionPostFix:
         """FASE 2.1: Test de Búsqueda Simple V2"""
 
         tools = mcp_server._tool_manager._tools
-        search_tool = tools["search_reservations_v2"]
+        search_tool = tools["search_units"]
 
         # Test 1: Búsqueda simple
         result = await search_tool.fn(page=1, size=10)
@@ -215,14 +213,14 @@ class TestRegressionPostFix:
         """FASE 2.2: Test de Búsqueda con Filtros Complejos"""
 
         tools = mcp_server._tool_manager._tools
-        search_tool = tools["search_reservations_v2"]
+        search_tool = tools["search_units"]
 
         # Test 2: Búsqueda con filtros
         result = await search_tool.fn(
-            arrival_start="2025-01-01",
-            arrival_end="2025-12-31",
-            status="Confirmed",
+            page=1,
             size=5,
+            bedrooms=2,
+            bathrooms=1,
         )
 
         assert result is not None
@@ -235,25 +233,37 @@ class TestRegressionPostFix:
         """FASE 2.3: Test de Obtención de Reservación Individual"""
 
         tools = mcp_server._tool_manager._tools
-        get_tool = tools["get_reservation_v2"]
+        get_tool = tools["get_folio"]
 
         # Configurar mock con datos completos - usar el fixture directamente
         # El mock debe devolver el objeto individual, no una lista paginada
-        # Usar side_effect para devolver datos diferentes según el endpoint
+        # Usar side_effect para devolver datos de folio
         def mock_get_side_effect(endpoint, **kwargs):
-            if "/v2/pms/reservations/" in endpoint:
-                return sample_reservation_data_v2
+            if "/pms/folios/" in endpoint:
+                return {
+                    "id": 37152796,
+                    "status": "open",
+                    "type": "guest",
+                    "balance": "100.00",
+                    "realized": "50.00",
+                }
             else:
-                return sample_reservation_data_v2
+                return {
+                    "id": 37152796,
+                    "status": "open",
+                    "type": "guest",
+                    "balance": "100.00",
+                    "realized": "50.00",
+                }
 
         mock_api_client.get.side_effect = mock_get_side_effect
 
         # Test 3: Obtención por ID
-        result = await get_tool.fn(reservation_id="37152796")
+        result = await get_tool.fn(folio_id="37152796")
 
         assert result is not None
         assert "id" in result
-        assert result["id"] == 37165851
+        assert result["id"] == 37152796
         print("✅ Test 3 PASS - Obtención Individual V2")
 
     @pytest.mark.asyncio

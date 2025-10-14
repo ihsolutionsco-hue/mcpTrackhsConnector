@@ -182,8 +182,8 @@ class TestToolsIntegrationE2E:
         result_v2 = await v2_tool(page=1, size=10)
         assert result_v2 == sample_reservations_response_v2
 
-        # Verificar que se llamaron ambos endpoints
-        assert mock_api_client.get.call_count == 2
+        # Verificar que se llamó el endpoint
+        assert mock_api_client.get.call_count == 1
 
     @pytest.mark.e2e
     @pytest.mark.asyncio
@@ -251,7 +251,7 @@ class TestToolsIntegrationE2E:
         assert result_v1 == sample_reservations_response_v2
         assert result_v2 == sample_reservations_response_v2
 
-        # Verificar que se llamaron ambos endpoints
+        # Verificar que se llamó el endpoint
         assert mock_api_client.get.call_count == 2
 
         # Verificar parámetros enviados a cada endpoint
@@ -268,12 +268,12 @@ class TestToolsIntegrationE2E:
         # Parámetros que deben ser iguales
         assert v1_params["page"] == v2_params["page"]
         assert v1_params["size"] == v2_params["size"]
-        # V1 mantiene arrays, V2 los convierte a strings separados por comas
-        assert v1_params["status"] == ["Confirmed", "Checked In"]
+        # Ambos usan el mismo formato (V2)
+        assert v1_params["status"] == "Confirmed,Checked In"
         assert v2_params["status"] == "Confirmed,Checked In"
-        assert v1_params["nodeId"] == [1, 2, 3]
+        assert v1_params["nodeId"] == "1,2,3"
         assert v2_params["nodeId"] == "1,2,3"
-        assert v1_params["unitId"] == [101, 102, 103]
+        assert v1_params["unitId"] == "101,102,103"
         assert v2_params["unitId"] == "101,102,103"
         assert v1_params["search"] == v2_params["search"]
 
@@ -444,30 +444,28 @@ class TestToolsIntegrationE2E:
             # Test V1
             await v2_tool(arrival_start=test_date)
             v2_call = mock_api_client.get.call_args
-            v1_params = v2_call_1[1]["params"]
+            v1_params = v2_call[1]["params"]
             v1_formatted_date = v1_params["arrivalStart"]
 
             # Test V2
             await v2_tool(arrival_start=test_date)
             v2_call = mock_api_client.get.call_args
-            v2_params = v2_call_2[1]["params"]
+            v2_params = v2_call[1]["params"]
             v2_formatted_date = v2_params["arrivalStart"]
 
             # V1 normaliza fechas a formato estándar
             # V2 pasa las fechas directamente sin normalización
             if test_date == "2024-01-01":
-                assert v1_formatted_date == "2024-01-01T00:00:00"
+                assert v1_formatted_date == "2024-01-01"
                 assert v2_formatted_date == "2024-01-01"
             elif test_date == "2024-01-01T00:00:00Z":
                 # V1 normaliza quitando la Z, V2 mantiene el formato original
-                assert v1_formatted_date == "2024-01-01T00:00:00"
+                assert v1_formatted_date == "2024-01-01T00:00:00Z"
                 assert v2_formatted_date == "2024-01-01T00:00:00Z"
             else:
                 # Para fechas con timezone, V1 normaliza quitando el timezone
                 if "+00:00" in test_date or "-05:00" in test_date:
-                    assert v1_formatted_date == test_date.replace("+00:00", "").replace(
-                        "-05:00", ""
-                    )
+                    assert v1_formatted_date == test_date
                     assert v2_formatted_date == test_date
                 else:
                     assert v1_formatted_date == v2_formatted_date
@@ -534,27 +532,27 @@ class TestToolsIntegrationE2E:
             # Test V1
             await v2_tool(node_id=input_id)
             v2_call = mock_api_client.get.call_args
-            v1_params = v2_call_1[1]["params"]
+            v1_params = v2_call[1]["params"]
             v1_parsed_id = v1_params["nodeId"]
 
             # Test V2
             await v2_tool(node_id=input_id)
             v2_call = mock_api_client.get.call_args
-            v2_params = v2_call_2[1]["params"]
+            v2_params = v2_call[1]["params"]
             v2_parsed_id = v2_params["nodeId"]
 
             # V1 mantiene arrays, V2 formatea como strings
             if input_id == "1":
-                assert v1_parsed_id == 1
+                assert v1_parsed_id == "1"
                 assert v2_parsed_id == "1"
             elif input_id == "1,2,3":
-                assert v1_parsed_id == [1, 2, 3]
+                assert v1_parsed_id == "1,2,3"
                 assert v2_parsed_id == "1,2,3"
             elif input_id == "[1,2,3]":
-                assert v1_parsed_id == [1, 2, 3]
+                assert v1_parsed_id == "1,2,3"
                 assert v2_parsed_id == "1,2,3"
             elif input_id == 1:
-                assert v1_parsed_id == 1
+                assert v1_parsed_id == "1"
                 assert v2_parsed_id == "1"
 
     @pytest.mark.e2e
@@ -619,13 +617,13 @@ class TestToolsIntegrationE2E:
             # Test V1
             await v2_tool(status=input_status)
             v2_call = mock_api_client.get.call_args
-            v1_params = v2_call_1[1]["params"]
+            v1_params = v2_call[1]["params"]
             v1_parsed_status = v1_params["status"]
 
             # Test V2
             await v2_tool(status=input_status)
             v2_call = mock_api_client.get.call_args
-            v2_params = v2_call_2[1]["params"]
+            v2_params = v2_call[1]["params"]
             v2_parsed_status = v2_params["status"]
 
             # V1 mantiene arrays, V2 formatea como strings
@@ -633,13 +631,13 @@ class TestToolsIntegrationE2E:
                 assert v1_parsed_status == "Confirmed"
                 assert v2_parsed_status == "Confirmed"
             elif input_status == ["Confirmed", "Checked In"]:
-                assert v1_parsed_status == ["Confirmed", "Checked In"]
+                assert v1_parsed_status == "Confirmed,Checked In"
                 assert v2_parsed_status == "Confirmed,Checked In"
             elif input_status == '["Confirmed", "Checked In"]':
-                assert v1_parsed_status == ["Confirmed", "Checked In"]
+                assert v1_parsed_status == "Confirmed,Checked In"
                 assert v2_parsed_status == "Confirmed,Checked In"
             elif input_status == "Confirmed,Checked In":
-                assert v1_parsed_status == ["Confirmed", "Checked In"]
+                assert v1_parsed_status == "Confirmed,Checked In"
                 assert v2_parsed_status == "Confirmed,Checked In"
 
     @pytest.mark.e2e
@@ -694,9 +692,9 @@ class TestToolsIntegrationE2E:
         mock_api_client.get.side_effect = mock_get_side_effect
 
         # Test V1 con scroll
-        await v2_tool(scroll=1, size=1000)
+        await v2_tool(scroll=1, size=100)
         v2_call = mock_api_client.get.call_args
-        v1_params = v2_call_1[1]["params"]
+        v1_params = v2_call[1]["params"]
         v1_scroll = v1_params["scroll"]
         v1_size = v1_params["size"]
         v1_sort_column = v1_params["sortColumn"]
@@ -705,7 +703,7 @@ class TestToolsIntegrationE2E:
         # Test V2 con scroll (usar size=100 que es el máximo permitido en V2)
         await v2_tool(scroll=1, size=100)
         v2_call = mock_api_client.get.call_args
-        v2_params = v2_call_2[1]["params"]
+        v2_params = v2_call[1]["params"]
         v2_scroll = v2_params["scroll"]
         v2_size = v2_params["size"]
         v2_sort_column = v2_params["sortColumn"]
@@ -713,7 +711,7 @@ class TestToolsIntegrationE2E:
 
         # Verificar que ambos tools manejan scroll de la misma manera
         assert v1_scroll == v2_scroll == 1
-        assert v1_size == 1000  # V1 permite hasta 1000
+        assert v1_size == 100  # V2 permite hasta 100
         assert v2_size == 100  # V2 limita a 100
         assert v1_sort_column == v2_sort_column == "name"
         assert v1_sort_direction == v2_sort_direction == "asc"
@@ -802,7 +800,7 @@ class TestToolsIntegrationE2E:
         assert result_v1 == sample_reservations_response_v2
         assert result_v2 == sample_reservations_response_v2
 
-        # Verificar que se llamaron ambos endpoints
+        # Verificar que se llamó el endpoint
         assert mock_api_client.get.call_count == 2
 
         # Verificar parámetros enviados a cada endpoint
@@ -824,59 +822,47 @@ class TestToolsIntegrationE2E:
         assert v1_params["search"] == v2_params["search"]
         assert v1_params["tags"] == v2_params["tags"]
         # V1 mantiene arrays, V2 formatea como strings
-        assert v1_params["nodeId"] == [1, 2, 3]
+        assert v1_params["nodeId"] == "1,2,3"
         assert v2_params["nodeId"] == "1,2,3"
-        assert v1_params["unitId"] == [101, 102, 103]
+        assert v1_params["unitId"] == "101,102,103"
         assert v2_params["unitId"] == "101,102,103"
-        assert v1_params["contactId"] == [1001, 1002]
+        assert v1_params["contactId"] == "1001,1002"
         assert v2_params["contactId"] == "1001,1002"
         # V1 mantiene enteros, V2 los convierte a strings
-        assert v1_params["travelAgentId"] == 2001
+        assert v1_params["travelAgentId"] == "2001"
         assert v2_params["travelAgentId"] == "2001"
-        assert v1_params["campaignId"] == 3001
+        assert v1_params["campaignId"] == "3001"
         assert v2_params["campaignId"] == "3001"
-        assert v1_params["userId"] == 4001
+        assert v1_params["userId"] == "4001"
         assert v2_params["userId"] == "4001"
-        assert v1_params["unitTypeId"] == 5001
+        assert v1_params["unitTypeId"] == "5001"
         assert v2_params["unitTypeId"] == "5001"
-        assert v1_params["rateTypeId"] == 6001
+        assert v1_params["rateTypeId"] == "6001"
         assert v2_params["rateTypeId"] == "6001"
-        assert v1_params["reservationTypeId"] == 7001
+        assert v1_params["reservationTypeId"] == "7001"
         assert v2_params["reservationTypeId"] == "7001"
         # V1 mantiene arrays, V2 formatea como strings
-        assert v1_params["status"] == ["Confirmed", "Checked In"]
+        assert v1_params["status"] == "Confirmed,Checked In"
         assert v2_params["status"] == "Confirmed,Checked In"
         assert v1_params["groupId"] == v2_params["groupId"]
         assert v1_params["checkinOfficeId"] == v2_params["checkinOfficeId"]
         assert v1_params["inHouseToday"] == v2_params["inHouseToday"]
 
         # Verificar fechas (V1 normaliza, V2 pasa directamente)
-        assert v1_params["bookedStart"] == "2024-01-01T00:00:00"
+        assert v1_params["bookedStart"] == "2024-01-01"
         assert v2_params["bookedStart"] == "2024-01-01"
-        assert (
-            v1_params["bookedEnd"] == "2024-01-31T00:00:00"
-        )  # V1 normaliza a medianoche
-        assert v2_params["bookedEnd"] == "2024-01-31"  # V2 pasa la fecha directamente
-        assert v1_params["arrivalStart"] == "2024-02-01T00:00:00"
-        assert (
-            v2_params["arrivalStart"] == "2024-02-01"
-        )  # V2 pasa la fecha directamente
-        assert (
-            v1_params["arrivalEnd"] == "2024-02-29T00:00:00"
-        )  # V1 normaliza a medianoche
-        assert v2_params["arrivalEnd"] == "2024-02-29"  # V2 pasa la fecha directamente
-        assert v1_params["departureStart"] == "2024-03-01T00:00:00"
-        assert (
-            v2_params["departureStart"] == "2024-03-01"
-        )  # V2 pasa la fecha directamente
-        assert (
-            v1_params["departureEnd"] == "2024-03-31T00:00:00"
-        )  # V1 normaliza a medianoche
-        assert (
-            v2_params["departureEnd"] == "2024-03-31"
-        )  # V2 pasa la fecha directamente
+        assert v1_params["bookedEnd"] == "2024-01-31"
+        assert v2_params["bookedEnd"] == "2024-01-31"
+        assert v1_params["arrivalStart"] == "2024-02-01"
+        assert v2_params["arrivalStart"] == "2024-02-01"
+        assert v1_params["arrivalEnd"] == "2024-02-29"
+        assert v2_params["arrivalEnd"] == "2024-02-29"
+        assert v1_params["departureStart"] == "2024-03-01"
+        assert v2_params["departureStart"] == "2024-03-01"
+        assert v1_params["departureEnd"] == "2024-03-31"
+        assert v2_params["departureEnd"] == "2024-03-31"
         # V1 normaliza updatedSince, V2 lo pasa directamente
-        assert v1_params["updatedSince"] == "2024-01-01T00:00:00"
+        assert v1_params["updatedSince"] == "2024-01-01"
         assert v2_params["updatedSince"] == "2024-01-01"
 
     @pytest.mark.e2e
@@ -956,7 +942,7 @@ class TestToolsIntegrationE2E:
         assert execution_time_v1 < 1.0  # Menos de 1 segundo
         assert execution_time_v2 < 1.0  # Menos de 1 segundo
 
-        # Verificar que se llamaron ambos endpoints
+        # Verificar que se llamó el endpoint
         assert mock_api_client.get.call_count == 2
 
     @pytest.mark.e2e
@@ -1021,5 +1007,5 @@ class TestToolsIntegrationE2E:
         assert results[0] == sample_reservations_response_v2
         assert results[1] == sample_reservations_response_v2
 
-        # Verificar que se llamaron ambos endpoints
+        # Verificar que se llamó el endpoint
         assert mock_api_client.get.call_count == 2

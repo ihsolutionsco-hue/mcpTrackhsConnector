@@ -53,12 +53,6 @@ class TestGetReservationV2E2E:
 
         # Mock del cliente API
         with patch.object(api_client, "get", return_value=mock_response):
-            # Act
-            register_get_reservation_v2(mock_mcp, api_client)
-
-            # Verificar que se registró el tool
-            mock_mcp.tool.assert_called_once()
-
             # Crear un mock que capture la función registrada
             registered_function = None
 
@@ -71,6 +65,9 @@ class TestGetReservationV2E2E:
                 return decorator
 
             mock_mcp.tool = mock_tool_decorator
+
+            # Act - Registrar la herramienta
+            register_get_reservation_v2(mock_mcp, api_client)
 
             # Obtener la función tool registrada
             tool_func = registered_function
@@ -237,12 +234,6 @@ class TestGetReservationV2E2E:
 
         # Mock del cliente API
         with patch.object(api_client, "get", return_value=mock_response):
-            # Act
-            register_get_reservation_v2(mock_mcp, api_client)
-
-            # Verificar que se registró el tool
-            mock_mcp.tool.assert_called_once()
-
             # Crear un mock que capture la función registrada
             registered_function = None
 
@@ -255,6 +246,9 @@ class TestGetReservationV2E2E:
                 return decorator
 
             mock_mcp.tool = mock_tool_decorator
+
+            # Act - Registrar la herramienta
+            register_get_reservation_v2(mock_mcp, api_client)
 
             # Obtener la función tool registrada
             tool_func = registered_function
@@ -365,6 +359,9 @@ class TestGetReservationV2E2E:
                 return decorator
 
             mock_mcp.tool = mock_tool_decorator
+
+            # Act - Registrar la herramienta
+            register_get_reservation_v2(mock_mcp, api_client)
 
             # Obtener la función tool registrada
             tool_func = registered_function

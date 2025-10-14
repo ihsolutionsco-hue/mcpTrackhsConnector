@@ -209,13 +209,13 @@ class TestSearchReservationsV2E2E:
             )
 
         # Act & Assert - Página negativa
-        with pytest.raises(ValidationError, match="debe ser mayor o igual a 0"):
+        with pytest.raises(ValidationError, match="Page must be >= 0"):
             await tool_func(
                 page=-1,
             )
 
         # Act & Assert - Tamaño inválido
-        with pytest.raises(ValidationError, match="debe estar entre 1 y 10000"):
+        with pytest.raises(ValidationError, match="Size must be >= 1"):
             await tool_func(
                 page=1,
                 size=0,
