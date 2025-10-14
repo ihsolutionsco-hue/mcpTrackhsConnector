@@ -62,10 +62,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 
@@ -94,10 +97,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 
@@ -125,10 +131,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 
@@ -164,10 +173,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 
@@ -204,10 +216,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 
@@ -244,10 +259,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 
@@ -286,10 +304,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 
@@ -324,10 +345,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 
@@ -366,10 +390,13 @@ class TestGetReservationV2Tool:
             mock_mcp = Mock()
             tool_func = None
 
-            def capture_tool(func):
-                nonlocal tool_func
-                tool_func = func
-                return func
+            def capture_tool(name=None):
+                def decorator(func):
+                    nonlocal tool_func
+                    tool_func = func
+                    return func
+
+                return decorator
 
             mock_mcp.tool = capture_tool
 

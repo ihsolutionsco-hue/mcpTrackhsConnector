@@ -136,7 +136,6 @@ class TestToolsIntegrationE2E:
         mock_mcp,
         mock_api_client,
         sample_reservations_response_v2,
-        sample_reservations_response_v2,
     ):
         """Test E2E para registro de ambos tools juntos"""
 
@@ -260,12 +259,12 @@ class TestToolsIntegrationE2E:
         v2_call_1 = mock_api_client.get.call_args_list[0]
         v2_call_2 = mock_api_client.get.call_args_list[1]
 
-        assert v2_call[0][0] == "/v2/pms/reservations"
-        assert v2_call[0][0] == "/v2/v2/pms/reservations"
+        assert v2_call_1[0][0] == "/v2/pms/reservations"
+        assert v2_call_2[0][0] == "/v2/pms/reservations"
 
         # Verificar que los parámetros son consistentes
-        v1_params = v2_call[1]["params"]
-        v2_params = v2_call[1]["params"]
+        v1_params = v2_call_1[1]["params"]
+        v2_params = v2_call_2[1]["params"]
 
         # Parámetros que deben ser iguales
         assert v1_params["page"] == v2_params["page"]
@@ -447,13 +446,13 @@ class TestToolsIntegrationE2E:
             # Test V1
             await v2_tool(arrival_start=test_date)
             v2_call = mock_api_client.get.call_args
-            v1_params = v2_call[1]["params"]
+            v1_params = v2_call_1[1]["params"]
             v1_formatted_date = v1_params["arrivalStart"]
 
             # Test V2
             await v2_tool(arrival_start=test_date)
             v2_call = mock_api_client.get.call_args
-            v2_params = v2_call[1]["params"]
+            v2_params = v2_call_2[1]["params"]
             v2_formatted_date = v2_params["arrivalStart"]
 
             # V1 normaliza fechas a formato estándar
@@ -538,13 +537,13 @@ class TestToolsIntegrationE2E:
             # Test V1
             await v2_tool(node_id=input_id)
             v2_call = mock_api_client.get.call_args
-            v1_params = v2_call[1]["params"]
+            v1_params = v2_call_1[1]["params"]
             v1_parsed_id = v1_params["nodeId"]
 
             # Test V2
             await v2_tool(node_id=input_id)
             v2_call = mock_api_client.get.call_args
-            v2_params = v2_call[1]["params"]
+            v2_params = v2_call_2[1]["params"]
             v2_parsed_id = v2_params["nodeId"]
 
             # V1 mantiene arrays, V2 formatea como strings
@@ -624,13 +623,13 @@ class TestToolsIntegrationE2E:
             # Test V1
             await v2_tool(status=input_status)
             v2_call = mock_api_client.get.call_args
-            v1_params = v2_call[1]["params"]
+            v1_params = v2_call_1[1]["params"]
             v1_parsed_status = v1_params["status"]
 
             # Test V2
             await v2_tool(status=input_status)
             v2_call = mock_api_client.get.call_args
-            v2_params = v2_call[1]["params"]
+            v2_params = v2_call_2[1]["params"]
             v2_parsed_status = v2_params["status"]
 
             # V1 mantiene arrays, V2 formatea como strings
@@ -702,7 +701,7 @@ class TestToolsIntegrationE2E:
         # Test V1 con scroll
         await v2_tool(scroll=1, size=1000)
         v2_call = mock_api_client.get.call_args
-        v1_params = v2_call[1]["params"]
+        v1_params = v2_call_1[1]["params"]
         v1_scroll = v1_params["scroll"]
         v1_size = v1_params["size"]
         v1_sort_column = v1_params["sortColumn"]
@@ -711,7 +710,7 @@ class TestToolsIntegrationE2E:
         # Test V2 con scroll (usar size=100 que es el máximo permitido en V2)
         await v2_tool(scroll=1, size=100)
         v2_call = mock_api_client.get.call_args
-        v2_params = v2_call[1]["params"]
+        v2_params = v2_call_2[1]["params"]
         v2_scroll = v2_params["scroll"]
         v2_size = v2_params["size"]
         v2_sort_column = v2_params["sortColumn"]
@@ -816,12 +815,12 @@ class TestToolsIntegrationE2E:
         v2_call_1 = mock_api_client.get.call_args_list[0]
         v2_call_2 = mock_api_client.get.call_args_list[1]
 
-        assert v2_call[0][0] == "/v2/pms/reservations"
-        assert v2_call[0][0] == "/v2/v2/pms/reservations"
+        assert v2_call_1[0][0] == "/v2/pms/reservations"
+        assert v2_call_2[0][0] == "/v2/pms/reservations"
 
         # Verificar que los parámetros son consistentes entre ambos tools
-        v1_params = v2_call[1]["params"]
-        v2_params = v2_call[1]["params"]
+        v1_params = v2_call_1[1]["params"]
+        v2_params = v2_call_2[1]["params"]
 
         # Parámetros que deben ser iguales
         assert v1_params["page"] == v2_params["page"]
@@ -973,7 +972,6 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para ejecución concurrente de ambos tools"""
