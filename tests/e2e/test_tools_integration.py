@@ -192,7 +192,6 @@ class TestToolsIntegrationE2E:
         mock_mcp,
         mock_api_client,
         sample_reservations_response_v2,
-        sample_reservations_response_v2,
     ):
         """Test E2E para ambos tools con los mismos parámetros"""
 
@@ -389,7 +388,6 @@ class TestToolsIntegrationE2E:
         mock_mcp,
         mock_api_client,
         sample_reservations_response_v2,
-        sample_reservations_response_v2,
     ):
         """Test E2E para consistencia de formato de fechas en ambos tools"""
 
@@ -481,7 +479,6 @@ class TestToolsIntegrationE2E:
         mock_mcp,
         mock_api_client,
         sample_reservations_response_v2,
-        sample_reservations_response_v2,
     ):
         """Test E2E para consistencia de parsing de IDs en ambos tools"""
 
@@ -566,7 +563,6 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para consistencia de parsing de status en ambos tools"""
@@ -653,7 +649,6 @@ class TestToolsIntegrationE2E:
         mock_mcp,
         mock_api_client,
         sample_reservations_response_v2,
-        sample_reservations_response_v2,
     ):
         """Test E2E para consistencia de scroll en ambos tools"""
 
@@ -729,7 +724,6 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para flujo completo de ambos tools"""
@@ -891,7 +885,6 @@ class TestToolsIntegrationE2E:
         self,
         mock_mcp,
         mock_api_client,
-        sample_reservations_response_v2,
         sample_reservations_response_v2,
     ):
         """Test E2E para comparación de rendimiento entre ambos tools"""
