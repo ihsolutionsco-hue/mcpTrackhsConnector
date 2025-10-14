@@ -192,3 +192,9 @@ docs/MCP/07-repositorios-originales/inspector/
 docs/MCP/07-repositorios-originales/modelcontextprotocol/
 docs/MCP/07-repositorios-originales/python-sdk/
 docs/MCP/07-repositorios-originales/servers/
+
+# IDE
+.cursor/
+
+# Temporary test files
+test_*.tmp
