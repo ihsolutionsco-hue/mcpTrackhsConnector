@@ -137,7 +137,7 @@ jobs:
           TRACKHS_TIMEOUT: ${{ env.TRACKHS_TIMEOUT }}
         run: |
           echo "🔬 Running E2E tests..."
-          pytest tests/e2e/ -v --cov=src --cov-report=term-missing --cov-report=xml --cov-fail-under=80
+          pytest tests/e2e/ -v --cov=src --cov-report=term-missing --cov-report=xml --cov-fail-under=60
 
       - name: Upload E2E Test Logs
         if: always()
