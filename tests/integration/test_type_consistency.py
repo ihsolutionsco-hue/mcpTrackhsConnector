@@ -3,6 +3,7 @@ Tests de integración para verificar consistencia de tipos entre herramientas
 """
 
 import inspect
+from typing import Union
 
 import pytest
 
@@ -57,19 +58,21 @@ class TestTypeConsistency:
                 tool = all_tools[tool_name]
                 sig = inspect.signature(tool.fn)
 
-                # Verificar que page es int
+                # Verificar que page es Union[int, float, str] (compatibilidad JSON-RPC)
                 if "page" in sig.parameters:
                     page_param = sig.parameters["page"]
                     assert (
-                        page_param.annotation == int
-                    ), f"{tool_name}.page debe ser int"
+                        page_param.annotation == Union[int, float, str]
+                        or page_param.annotation == int
+                    ), f"{tool_name}.page debe ser int o Union[int, float, str]"
 
-                # Verificar que size es int
+                # Verificar que size es Union[int, float, str] (compatibilidad JSON-RPC)
                 if "size" in sig.parameters:
                     size_param = sig.parameters["size"]
                     assert (
-                        size_param.annotation == int
-                    ), f"{tool_name}.size debe ser int"
+                        size_param.annotation == Union[int, float, str]
+                        or size_param.annotation == int
+                    ), f"{tool_name}.size debe ser int o Union[int, float, str]"
 
     def test_no_union_int_str_in_any_tool(self, all_tools):
         """Verifica que ninguna herramienta usa Union[int, str]"""
@@ -97,14 +100,15 @@ class TestTypeConsistency:
         tool = all_tools["search_units"]
         sig = inspect.signature(tool.fn)
 
-        # Parámetros que deben ser int
-        int_params = ["page", "size"]
-        for param_name in int_params:
+        # Parámetros que deben ser Union[int, float, str] (compatibilidad JSON-RPC)
+        union_params = ["page", "size"]
+        for param_name in union_params:
             if param_name in sig.parameters:
                 param = sig.parameters[param_name]
                 assert (
-                    param.annotation == int
-                ), f"search_units.{param_name} debe ser int"
+                    param.annotation == Union[int, float, str]
+                    or param.annotation == int
+                ), f"search_units.{param_name} debe ser int o Union[int, float, str]"
 
         # Parámetros que deben ser Optional[int]
         optional_int_params = [

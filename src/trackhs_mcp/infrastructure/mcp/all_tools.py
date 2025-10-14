@@ -12,6 +12,7 @@ from .get_folio import register_get_folio
 from .get_reservation_v2 import register_get_reservation_v2
 
 # Importar herramientas
+from .search_amenities import register_search_amenities
 from .search_reservations_v2 import register_search_reservations_v2
 from .search_units import register_search_units
 
@@ -25,6 +26,7 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     - get_reservation (API V2 - endpoint /v2/pms/reservations/{id})
     - get_folio (API - endpoint /pms/folios/{id})
     - search_units (Channel API - endpoint /pms/units)
+    - search_amenities (Channel API - endpoint /pms/units/amenities)
 
     Args:
         mcp: Instancia del servidor FastMCP
@@ -37,3 +39,4 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     register_get_reservation_v2(mcp, api_client)  # Expone como "get_reservation"
     register_get_folio(mcp, api_client)  # Expone como "get_folio"
     register_search_units(mcp, api_client)  # Expone como "search_units"
+    register_search_amenities(mcp, api_client)  # Expone como "search_amenities"

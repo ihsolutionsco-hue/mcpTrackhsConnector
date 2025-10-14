@@ -48,6 +48,21 @@ This server follows MCP best practices by providing a focused set of tools, prom
 - `is_active` (integer, optional): Active units (0/1)
 - `is_bookable` (integer, optional): Bookable units (0/1)
 - `arrival` (string, optional): Arrival date (ISO 8601)
+
+### search_amenities
+
+**Description**: Search amenities in Track HS Channel API with comprehensive filtering options
+
+**Parameters**:
+- `page` (integer, optional): Page number (default: 1, 1-based pagination)
+- `size` (integer, optional): Page size (default: 25, max: 1000)
+- `sort_column` (string, optional): Sort field (id, order, isPublic, publicSearchable, isFilterable, createdAt)
+- `sort_direction` (string, optional): Sort order (asc/desc)
+- `search` (string, optional): Text search in id and/or name
+- `group_id` (integer, optional): Filter by group ID
+- `is_public` (integer, optional): Public amenities (0/1)
+- `public_searchable` (integer, optional): Publicly searchable amenities (0/1)
+- `is_filterable` (integer, optional): Filterable amenities (0/1)
 - `departure` (string, optional): Departure date (ISO 8601)
 
 **Important Notes**:
