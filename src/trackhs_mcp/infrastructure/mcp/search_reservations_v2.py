@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 from ...application.use_cases.search_reservations import SearchReservationsUseCase
 from ...domain.entities.reservations import SearchReservationsParams
 from ...domain.exceptions.api_exceptions import ValidationError
+from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
 from ..utils.type_normalization import normalize_binary_int, normalize_int
 from ..utils.user_friendly_messages import format_date_error
@@ -207,7 +208,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         }
 
         for param_name, param_value in date_params.items():
-            if param_value and not _is_valid_date_format(param_value):
+            if param_value and not is_valid_iso8601_date(param_value):
                 raise ValidationError(
                     format_date_error(param_name),
                     param_name,
@@ -289,47 +290,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             raise ValidationError(f"API request failed: {str(e)}", "api")
 
 
-def _is_valid_date_format(date_string: str) -> bool:
-    """Valida formato de fecha con múltiples formatos soportados"""
-    try:
-        import re
-        from datetime import datetime
-
-        # Patrones de fecha soportados
-        patterns = [
-            # ISO 8601 completo con timezone
-            r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$",
-            # ISO 8601 sin timezone
-            r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?$",
-            # Solo fecha ISO
-            r"^\d{4}-\d{2}-\d{2}$",
-            # Formato con espacio (alternativo)
-            r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$",
-        ]
-
-        # Verificar si coincide con algún patrón
-        for pattern in patterns:
-            if re.match(pattern, date_string):
-                # Intentar parsear la fecha
-                try:
-                    if "T" in date_string:
-                        # Formato ISO con tiempo
-                        if date_string.endswith("Z"):
-                            datetime.fromisoformat(date_string.replace("Z", "+00:00"))
-                        elif "+" in date_string or "-" in date_string[-6:]:
-                            datetime.fromisoformat(date_string)
-                        else:
-                            datetime.fromisoformat(date_string)
-                    else:
-                        # Solo fecha
-                        datetime.fromisoformat(date_string)
-                    return True
-                except ValueError:
-                    continue
-
-        return False
-    except (ValueError, AttributeError):
-        return False
+## Validación unificada ahora se realiza desde utils.date_validation
 
 
 def _parse_id_string(id_string: Union[str, int, List[int]]) -> Union[int, List[int]]:
