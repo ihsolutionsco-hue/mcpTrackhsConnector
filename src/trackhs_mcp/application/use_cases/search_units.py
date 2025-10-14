@@ -54,22 +54,29 @@ class SearchUnitsUseCase:
 
     def _validate_params(self, params: SearchUnitsParams) -> None:
         """Validar parámetros de entrada"""
-        if params.page and params.page < 1:
-            raise ValidationError("Page debe ser mayor o igual a 1")
+        # Convertir page y size a enteros para validación
+        if params.page:
+            page_val = int(params.page) if isinstance(params.page, str) else params.page
+            if page_val < 1:
+                raise ValidationError("Page debe ser mayor o igual a 1")
 
-        if params.size and (params.size < 1 or params.size > 1000):
-            raise ValidationError("Size debe estar entre 1 y 1000")
+        if params.size:
+            size_val = int(params.size) if isinstance(params.size, str) else params.size
+            if size_val < 1 or size_val > 1000:
+                raise ValidationError("Size debe estar entre 1 y 1000")
 
         # Validar límite total de resultados (10k máximo)
         # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
-        # Asegurar que page sea entero para evitar errores de comparación
+        # Asegurar que page y size sean enteros para evitar errores de comparación
         if params.page:
             page_int = int(params.page) if isinstance(params.page, str) else params.page
             adjusted_page = max(0, page_int - 1) if page_int > 0 else 0
         else:
             adjusted_page = 0
-        if params.page and params.size and adjusted_page * params.size > 10000:
-            raise ValidationError("Total results (page * size) must be <= 10,000")
+        if params.page and params.size:
+            size_int = int(params.size) if isinstance(params.size, str) else params.size
+            if adjusted_page * size_int > 10000:
+                raise ValidationError("Total results (page * size) must be <= 10,000")
 
         # Validar fechas si están presentes
         if params.arrival and params.departure:
@@ -78,13 +85,33 @@ class SearchUnitsUseCase:
 
         # Validar rangos de habitaciones y baños
         if params.min_bedrooms and params.max_bedrooms:
-            if params.min_bedrooms > params.max_bedrooms:
+            min_bed_int = (
+                int(params.min_bedrooms)
+                if isinstance(params.min_bedrooms, str)
+                else params.min_bedrooms
+            )
+            max_bed_int = (
+                int(params.max_bedrooms)
+                if isinstance(params.max_bedrooms, str)
+                else params.max_bedrooms
+            )
+            if min_bed_int > max_bed_int:
                 raise ValidationError(
                     "min_bedrooms debe ser menor o igual a max_bedrooms"
                 )
 
         if params.min_bathrooms and params.max_bathrooms:
-            if params.min_bathrooms > params.max_bathrooms:
+            min_bath_int = (
+                int(params.min_bathrooms)
+                if isinstance(params.min_bathrooms, str)
+                else params.min_bathrooms
+            )
+            max_bath_int = (
+                int(params.max_bathrooms)
+                if isinstance(params.max_bathrooms, str)
+                else params.max_bathrooms
+            )
+            if min_bath_int > max_bath_int:
                 raise ValidationError(
                     "min_bathrooms debe ser menor o igual a max_bathrooms"
                 )
