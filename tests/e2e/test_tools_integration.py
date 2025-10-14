@@ -40,7 +40,7 @@ class TestToolsIntegrationE2E:
         return mcp
 
     @pytest.fixture
-    def sample_reservations_response_v2(self):
+    def sample_reservations_response_v1(self):
         """Respuesta de ejemplo para API V1"""
         return {
             "_embedded": {

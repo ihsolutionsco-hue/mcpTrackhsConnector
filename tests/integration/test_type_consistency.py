@@ -98,7 +98,7 @@ class TestTypeConsistency:
         sig = inspect.signature(tool.fn)
 
         # Parámetros que deben ser int
-        int_params = ["page", "size", "calendar_id", "role_id"]
+        int_params = ["page", "size"]
         for param_name in int_params:
             if param_name in sig.parameters:
                 param = sig.parameters[param_name]
@@ -126,6 +126,8 @@ class TestTypeConsistency:
             "smoking_allowed",
             "children_allowed",
             "is_accessible",
+            "calendar_id",
+            "role_id",
         ]
 
         for param_name in optional_int_params:
