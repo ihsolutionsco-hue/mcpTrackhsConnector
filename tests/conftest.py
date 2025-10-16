@@ -35,16 +35,16 @@ def event_loop():
 
 @pytest.fixture
 def mock_api_client():
-    """Mock del API client para tests unitarios - CORREGIDO con soporte async"""
+    """Mock del API client para tests unitarios - SÍNCRONO para work orders"""
     client = Mock()
-    client.get = AsyncMock()
-    client.post = AsyncMock()
-    client.request = AsyncMock()
-    client.close = AsyncMock()
+    client.get = Mock()
+    client.post = Mock()
+    client.request = Mock()
+    client.close = Mock()
 
-    # Context manager async support
-    client.__aenter__ = AsyncMock(return_value=client)
-    client.__aexit__ = AsyncMock(return_value=None)
+    # Context manager support
+    client.__enter__ = Mock(return_value=client)
+    client.__exit__ = Mock(return_value=None)
 
     # Configurar config mock para compatibilidad
     client.config = Mock()
@@ -736,6 +736,173 @@ def sample_folio_minimal():
     return {
         "id": 11111,
         "status": "open",
+    }
+
+
+@pytest.fixture
+def sample_work_order_response():
+    """Work order response de ejemplo con datos completos"""
+    return {
+        "id": 12345,
+        "dateReceived": "2024-01-15",
+        "priority": 5,
+        "status": "open",
+        "summary": "Reparar aire acondicionado en unidad 101",
+        "estimatedCost": 150.00,
+        "estimatedTime": 120,
+        "dateScheduled": "2024-01-16T09:00:00Z",
+        "userId": 1,
+        "vendorId": 456,
+        "unitId": 123,
+        "reservationId": 37165851,
+        "referenceNumber": "WO-2024-001",
+        "description": "El aire acondicionado de la unidad 101 no está funcionando correctamente",
+        "workPerformed": "Diagnóstico inicial realizado",
+        "source": "Guest Request",
+        "sourceName": "Juan Pérez",
+        "sourcePhone": "+1234567890",
+        "actualTime": 90,
+        "blockCheckin": True,
+        "createdAt": "2024-01-15T10:30:00Z",
+        "updatedAt": "2024-01-15T10:30:00Z",
+        "createdBy": "system",
+        "updatedBy": "system",
+        "_embedded": {
+            "unit": {
+                "id": 123,
+                "name": "Unit 101",
+                "unitCode": "U101",
+                "nodeId": 1,
+                "unitType": {"id": 1, "name": "Apartment"},
+            },
+            "vendor": {
+                "id": 456,
+                "name": "HVAC Solutions Inc",
+                "type": "vendor",
+                "isActive": True,
+                "email": "contact@hvac-solutions.com",
+                "phone": "+1987654321",
+            },
+            "user": {
+                "id": 1,
+                "firstName": "Admin",
+                "lastName": "User",
+                "email": "admin@example.com",
+                "isActive": True,
+            },
+        },
+        "_links": {
+            "self": {"href": "/api/pms/maintenance/work-orders/12345"},
+            "unit": {"href": "/api/pms/units/123"},
+            "vendor": {"href": "/api/pms/vendors/456"},
+        },
+    }
+
+
+@pytest.fixture
+def sample_work_order_minimal():
+    """Work order con campos mínimos requeridos"""
+    return {
+        "id": 67890,
+        "dateReceived": "2024-01-15",
+        "priority": 3,
+        "status": "not-started",
+        "summary": "Mantenimiento preventivo",
+        "estimatedCost": 75.50,
+        "estimatedTime": 60,
+        "createdAt": "2024-01-15T10:30:00Z",
+        "updatedAt": "2024-01-15T10:30:00Z",
+        "createdBy": "system",
+        "updatedBy": "system",
+        "_embedded": {},
+        "_links": {
+            "self": {"href": "/api/pms/maintenance/work-orders/67890"},
+        },
+    }
+
+
+@pytest.fixture
+def sample_work_order_high_priority():
+    """Work order de alta prioridad"""
+    return {
+        "id": 11111,
+        "dateReceived": "2024-01-15T14:30:00Z",
+        "priority": 5,
+        "status": "in-progress",
+        "summary": "Emergencia: Fuga de agua en unidad 205",
+        "estimatedCost": 300.00,
+        "estimatedTime": 180,
+        "dateScheduled": "2024-01-15T15:00:00Z",
+        "unitId": 205,
+        "description": "Fuga de agua en el baño principal, requiere atención inmediata",
+        "source": "Guest Call",
+        "sourceName": "María García",
+        "sourcePhone": "+1987654321",
+        "blockCheckin": True,
+        "createdAt": "2024-01-15T14:30:00Z",
+        "updatedAt": "2024-01-15T14:30:00Z",
+        "createdBy": "emergency_system",
+        "updatedBy": "emergency_system",
+        "_embedded": {
+            "unit": {
+                "id": 205,
+                "name": "Unit 205",
+                "unitCode": "U205",
+                "nodeId": 1,
+            },
+        },
+        "_links": {
+            "self": {"href": "/api/pms/maintenance/work-orders/11111"},
+            "unit": {"href": "/api/pms/units/205"},
+        },
+    }
+
+
+@pytest.fixture
+def sample_work_order_vendor_assigned():
+    """Work order asignada a proveedor"""
+    return {
+        "id": 22222,
+        "dateReceived": "2024-01-14",
+        "priority": 3,
+        "status": "vendor-assigned",
+        "summary": "Instalación de nuevo sistema de seguridad",
+        "estimatedCost": 500.00,
+        "estimatedTime": 240,
+        "dateScheduled": "2024-01-17T08:00:00Z",
+        "vendorId": 789,
+        "unitId": 150,
+        "referenceNumber": "SEC-2024-001",
+        "description": "Instalación de sistema de cámaras de seguridad",
+        "source": "Management Request",
+        "sourceName": "Carlos López",
+        "sourcePhone": "+1555123456",
+        "blockCheckin": False,
+        "createdAt": "2024-01-14T09:00:00Z",
+        "updatedAt": "2024-01-14T16:30:00Z",
+        "createdBy": "admin",
+        "updatedBy": "admin",
+        "_embedded": {
+            "unit": {
+                "id": 150,
+                "name": "Unit 150",
+                "unitCode": "U150",
+                "nodeId": 1,
+            },
+            "vendor": {
+                "id": 789,
+                "name": "Security Pro Inc",
+                "type": "vendor",
+                "isActive": True,
+                "email": "info@securitypro.com",
+                "phone": "+1555987654",
+            },
+        },
+        "_links": {
+            "self": {"href": "/api/pms/maintenance/work-orders/22222"},
+            "unit": {"href": "/api/pms/units/150"},
+            "vendor": {"href": "/api/pms/vendors/789"},
+        },
     }
 
 

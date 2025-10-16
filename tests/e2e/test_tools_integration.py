@@ -155,13 +155,13 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Verificar que se registraron los 5 tools (incluyendo search_amenities)
-        assert mock_mcp.tool.call_count == 5
+        # Verificar que se registraron los 6 tools (incluyendo search_amenities y create_maintenance_work_order)
+        assert mock_mcp.tool.call_count == 6
 
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -214,7 +214,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -301,7 +301,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -340,7 +340,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -410,7 +410,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -499,7 +499,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -584,7 +584,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -669,7 +669,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -745,7 +745,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -895,7 +895,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func
@@ -974,7 +974,7 @@ class TestToolsIntegrationE2E:
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []
 
-        def mock_tool_decorator(name=None):
+        def mock_tool_decorator(name=None, description=None):
             def decorator(func):
                 registered_functions.append(func)
                 return func

@@ -92,3 +92,17 @@ class TimeoutError(TrackHSError):
             context["timeout_seconds"] = timeout_seconds
 
         super().__init__(message, ErrorSeverity.MEDIUM, context)
+
+
+class AuthorizationError(TrackHSError):
+    """Error de autorización"""
+
+    def __init__(self, message: str = "Authorization failed", **kwargs):
+        super().__init__(message, ErrorSeverity.CRITICAL, kwargs.get("context", {}))
+
+
+class ServerError(TrackHSError):
+    """Error del servidor"""
+
+    def __init__(self, message: str = "Server error", **kwargs):
+        super().__init__(message, ErrorSeverity.CRITICAL, kwargs.get("context", {}))

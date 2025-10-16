@@ -323,3 +323,81 @@ def normalize_positive_int(
         )
 
     return int_value
+
+
+def normalize_string_to_int(value: Union[int, str]) -> int:
+    """
+    Normaliza un valor string a int.
+
+    Args:
+        value: Valor a normalizar (int o str)
+
+    Returns:
+        int normalizado
+
+    Raises:
+        ValidationError: Si el valor no puede convertirse a int
+    """
+    if isinstance(value, int):
+        return value
+
+    if isinstance(value, str):
+        try:
+            return int(value)
+        except ValueError:
+            raise ValidationError(f"Invalid integer value: {value}")
+
+    raise ValidationError(f"Expected int or str, got: {type(value).__name__}")
+
+
+def normalize_string_to_float(value: Union[float, str]) -> float:
+    """
+    Normaliza un valor string a float.
+
+    Args:
+        value: Valor a normalizar (float o str)
+
+    Returns:
+        float normalizado
+
+    Raises:
+        ValidationError: Si el valor no puede convertirse a float
+    """
+    if isinstance(value, float):
+        return value
+
+    if isinstance(value, str):
+        try:
+            return float(value)
+        except ValueError:
+            raise ValidationError(f"Invalid float value: {value}")
+
+    raise ValidationError(f"Expected float or str, got: {type(value).__name__}")
+
+
+def normalize_string_to_bool(value: Union[bool, str]) -> bool:
+    """
+    Normaliza un valor string a bool.
+
+    Args:
+        value: Valor a normalizar (bool o str)
+
+    Returns:
+        bool normalizado
+
+    Raises:
+        ValidationError: Si el valor no puede convertirse a bool
+    """
+    if isinstance(value, bool):
+        return value
+
+    if isinstance(value, str):
+        value_lower = value.strip().lower()
+        if value_lower in ("true", "1", "yes", "y", "t"):
+            return True
+        elif value_lower in ("false", "0", "no", "n", "f"):
+            return False
+        else:
+            raise ValidationError(f"Invalid boolean value: {value}")
+
+    raise ValidationError(f"Expected bool or str, got: {type(value).__name__}")
