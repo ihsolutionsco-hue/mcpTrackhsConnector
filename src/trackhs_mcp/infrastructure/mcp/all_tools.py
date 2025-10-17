@@ -11,8 +11,6 @@ if TYPE_CHECKING:
 from .create_maintenance_work_order import register_create_maintenance_work_order
 from .get_folio import register_get_folio
 from .get_reservation_v2 import register_get_reservation_v2
-
-# Importar herramientas
 from .search_amenities import register_search_amenities
 from .search_reservations_v2 import register_search_reservations_v2
 from .search_units import register_search_units
