@@ -10,14 +10,13 @@ if TYPE_CHECKING:
 
 
 def register_all_prompts(mcp, api_client: "ApiClientPort"):
-    """Registra todos los prompts MCP para TrackHS V1 y V2"""
+    """Registra todos los prompts MCP para TrackHS"""
 
     # Prompt para búsqueda por rango de fechas
     @mcp.prompt
     def create_date_range_search_prompt(
         start_date: str,
         end_date: str,
-        api_version: str = "v2",
         include_financials: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -28,12 +27,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
         - Análisis de ocupación por período
         - Auditoría de reservas en fechas específicas
         """
-        tool_name = (
-            f"search_reservations_{api_version}"
-            if api_version == "v1"
-            else "search_reservations_v2"
-        )
-
         return {
             "messages": [
                 {
@@ -45,11 +38,10 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
 **Parámetros:**
 - Fecha de inicio: {start_date}
 - Fecha de fin: {end_date}
-- API Version: {api_version.upper()}
 - Incluir información financiera: {'Sí' if include_financials else 'No'}
 
 **Instrucciones:**
-1. Usa {tool_name} con arrival_start="{start_date}" y arrival_end="{end_date}"
+1. Usa search_reservations_v2 con arrival_start="{start_date}" y arrival_end="{end_date}"
 2. Ordena por fecha de llegada (sort_column="checkin")
 3. Incluye todos los campos relevantes
 4. {'Incluye desglose financiero completo' if include_financials else 'Enfócate en datos básicos'}
@@ -75,7 +67,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
     @mcp.prompt
     def create_status_search_prompt(
         status: str,
-        api_version: str = "v2",
         include_financials: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -86,12 +77,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
         - Reservas canceladas para análisis
         - Huéspedes actualmente en casa
         """
-        tool_name = (
-            f"search_reservations_{api_version}"
-            if api_version == "v1"
-            else "search_reservations_v2"
-        )
-
         return {
             "messages": [
                 {
@@ -102,11 +87,10 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
 
 **Parámetros:**
 - Estado: {status}
-- API Version: {api_version.upper()}
 - Incluir información financiera: {'Sí' if include_financials else 'No'}
 
 **Instrucciones:**
-1. Usa {tool_name} con status="{status}"
+1. Usa search_reservations_v2 con status="{status}"
 2. Ordena por fecha de llegada más reciente
 3. Incluye reservas históricas y futuras
 4. {'Incluye desglose financiero completo' if include_financials else 'Enfócate en datos básicos'}
@@ -133,7 +117,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
     def create_unit_search_prompt(
         unit_id: str = None,
         node_id: str = None,
-        api_version: str = "v2",
         include_financials: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -144,12 +127,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
         - Reservas de una propiedad (nodo)
         - Análisis de rendimiento por unidad
         """
-        tool_name = (
-            f"search_reservations_{api_version}"
-            if api_version == "v1"
-            else "search_reservations_v2"
-        )
-
         filters = []
         if unit_id:
             filters.append(f'unit_id="{unit_id}"')
@@ -168,11 +145,10 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
 
 **Parámetros:**
 - Filtros: {filter_text}
-- API Version: {api_version.upper()}
 - Incluir información financiera: {'Sí' if include_financials else 'No'}
 
 **Instrucciones:**
-1. Usa {tool_name} con {filter_text}
+1. Usa search_reservations_v2 con {filter_text}
 2. Ordena por fecha de llegada más reciente
 3. Incluye reservas históricas y futuras
 4. {'Incluye desglose financiero completo' if include_financials else 'Enfócate en datos básicos'}
@@ -197,7 +173,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
     # Prompt para búsqueda con scroll (grandes datasets)
     @mcp.prompt
     def create_scroll_search_prompt(
-        api_version: str = "v2",
         size: int = 1000,
         include_financials: bool = False,
     ) -> Dict[str, Any]:
@@ -209,12 +184,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
         - Análisis de grandes volúmenes
         - Sincronización de datos
         """
-        tool_name = (
-            f"search_reservations_{api_version}"
-            if api_version == "v1"
-            else "search_reservations_v2"
-        )
-
         return {
             "messages": [
                 {
@@ -224,12 +193,11 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
                         "text": f"""Búsqueda con scroll para grandes datasets:
 
 **Parámetros:**
-- API Version: {api_version.upper()}
 - Tamaño de página: {size}
 - Incluir información financiera: {'Sí' if include_financials else 'No'}
 
 **Instrucciones:**
-1. Usa {tool_name} con scroll=1 y size={size}
+1. Usa search_reservations_v2 con scroll=1 y size={size}
 2. NO uses sort_column ni sort_direction (deshabilitados con scroll)
 3. Para continuar, usa el valor de _links.next como scroll
 4. {'Incluye desglose financiero completo' if include_financials else 'Enfócate en datos básicos'}
@@ -255,7 +223,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
     @mcp.prompt
     def create_combined_search_prompt(
         filters: Dict[str, Any],
-        api_version: str = "v2",
         include_financials: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -266,12 +233,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
         - Reportes específicos por período y estado
         - Búsquedas personalizadas
         """
-        tool_name = (
-            f"search_reservations_{api_version}"
-            if api_version == "v1"
-            else "search_reservations_v2"
-        )
-
         # Construir texto de filtros
         filters_text = ""
         for key, value in filters.items():
@@ -288,11 +249,10 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
 
 **Filtros Aplicados:**
 {filters_text}
-- API Version: {api_version.upper()}
 - Incluir información financiera: {'Sí' if include_financials else 'No'}
 
 **Instrucciones:**
-1. Usa {tool_name} con todos los filtros proporcionados
+1. Usa search_reservations_v2 con todos los filtros proporcionados
 2. Ordena por fecha de llegada (sort_column="checkin")
 3. Incluye todos los campos relevantes
 4. {'Incluye desglose financiero completo' if include_financials else 'Enfócate en datos básicos'}
@@ -318,7 +278,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
     @mcp.prompt
     def create_updated_since_prompt(
         updated_since: str,
-        api_version: str = "v2",
         include_financials: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -329,12 +288,6 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
         - Auditoría de cambios
         - Monitoreo de actualizaciones
         """
-        tool_name = (
-            f"search_reservations_{api_version}"
-            if api_version == "v1"
-            else "search_reservations_v2"
-        )
-
         return {
             "messages": [
                 {
@@ -345,11 +298,10 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
 
 **Parámetros:**
 - Actualizadas desde: {updated_since}
-- API Version: {api_version.upper()}
 - Incluir información financiera: {'Sí' if include_financials else 'No'}
 
 **Instrucciones:**
-1. Usa {tool_name} con updated_since="{updated_since}"
+1. Usa search_reservations_v2 con updated_since="{updated_since}"
 2. Ordena por fecha de actualización más reciente
 3. Incluye solo reservas modificadas desde la fecha especificada
 4. {'Incluye desglose financiero completo' if include_financials else 'Enfócate en datos básicos'}

@@ -26,15 +26,6 @@ def register_search_examples(mcp, api_client: "ApiClientPort"):
 
 ### 1. Reservas por Rango de Fechas
 ```python
-# V1
-search_reservations_v1(
-    arrival_start="2024-01-01",
-    arrival_end="2024-01-31",
-    sort_column="checkin",
-    sort_direction="asc"
-)
-
-# V2
 search_reservations_v2(
     arrival_start="2024-01-01",
     arrival_end="2024-01-31",
@@ -45,14 +36,14 @@ search_reservations_v2(
 
 ### 2. Reservas por Estado
 ```python
-# V1
-search_reservations_v1(
+# Estado único
+search_reservations_v2(
     status="Confirmed",
     sort_column="checkin",
     sort_direction="desc"
 )
 
-# V2 - Múltiples estados
+# Múltiples estados
 search_reservations_v2(
     status=["Confirmed", "Checked In"],
     sort_column="checkin",
@@ -62,13 +53,13 @@ search_reservations_v2(
 
 ### 3. Reservas por Unidad/Nodo
 ```python
-# V1
-search_reservations_v1(
+# ID único
+search_reservations_v2(
     unit_id="123",
     node_id="456"
 )
 
-# V2 - Múltiples IDs
+# Múltiples IDs
 search_reservations_v2(
     unit_id="123,124,125",
     node_id="456,457"
@@ -77,7 +68,7 @@ search_reservations_v2(
 
 ### 4. Scroll para Grandes Datasets
 ```python
-# V1 y V2 - Mismo comportamiento
+# Iniciar scroll
 search_reservations_v2(
     scroll=1,
     size=1000
@@ -92,7 +83,7 @@ search_reservations_v2(
 
 ### 5. Búsqueda Combinada
 ```python
-# V2 - Filtros múltiples
+# Filtros múltiples
 search_reservations_v2(
     arrival_start="2024-01-01",
     arrival_end="2024-12-31",
@@ -106,7 +97,7 @@ search_reservations_v2(
 
 ### 6. Reservas Actualizadas
 ```python
-# V2 - Nuevo en V2
+# Buscar reservas modificadas recientemente
 search_reservations_v2(
     updated_since="2024-01-01T00:00:00Z",
     sort_column="updated_at",

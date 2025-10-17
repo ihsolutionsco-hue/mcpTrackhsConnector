@@ -63,31 +63,22 @@ This server follows MCP best practices by providing a focused set of tools, prom
 - `is_public` (integer, optional): Public amenities (0/1)
 - `public_searchable` (integer, optional): Publicly searchable amenities (0/1)
 - `is_filterable` (integer, optional): Filterable amenities (0/1)
-- `departure` (string, optional): Departure date (ISO 8601)
 
 **Important Notes**:
 - **Pagination**: Uses 1-based pagination (page=1 is the first page, not page=0)
 - **Parameter Types**: All numeric and boolean parameters accept both integers and strings (automatic conversion)
-- **Multiple IDs**: Supports comma-separated IDs (e.g., "1,2,3") or arrays
+- **Boolean Values**: Use 0 or 1 (not true/false)
 - **Date Format**: All dates must be in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)
-
-### search_reservations_v1 (V1 - Legacy)
-
-**Description**: Legacy reservation search using TrackHS API V1 for compatibility
-
-**Parameters**: Same as search_reservations but uses V1 endpoint
 
 **Example Usage**:
 ```json
 {
-  "name": "search_reservations",
+  "name": "search_amenities",
   "arguments": {
-    "date_from": "2024-01-01",
-    "date_to": "2024-12-31",
-    "node_ids": "123,456,789",
-    "status": "confirmed",
-    "sort_by": "arrival_date",
-    "sort_order": "asc"
+    "is_public": 1,
+    "public_searchable": 1,
+    "sort_column": "order",
+    "sort_direction": "asc"
   }
 }
 ```
@@ -95,24 +86,101 @@ This server follows MCP best practices by providing a focused set of tools, prom
 **Response**:
 ```json
 {
-  "reservations": [
-    {
-      "id": "12345",
-      "arrival_date": "2024-01-15",
-      "departure_date": "2024-01-20",
-      "guest_name": "John Doe",
-      "status": "confirmed",
-      "total_amount": 500.00
-    }
-  ],
-  "pagination": {
-    "current_page": 1,
-    "total_pages": 10,
-    "total_items": 500,
-    "per_page": 50
+  "_embedded": {
+    "amenities": [
+      {
+        "id": 1,
+        "name": "Swimming Pool",
+        "order": 1,
+        "isPublic": true,
+        "publicSearchable": true,
+        "isFilterable": true,
+        "groupId": 5
+      }
+    ]
+  },
+  "page": 1,
+  "page_count": 2,
+  "page_size": 25,
+  "total_items": 45
+}
+```
+
+### create_maintenance_work_order
+
+**Description**: Create a new maintenance work order in TrackHS
+
+**Required Parameters**:
+- `date_received` (string, required): Date received in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)
+- `priority` (integer, required): Priority (1=Low, 3=Medium, 5=High)
+- `status` (string, required): Work order status (open, not-started, in-progress, completed, etc.)
+- `summary` (string, required): Brief summary of the work order
+- `estimated_cost` (number, required): Estimated cost (>= 0)
+- `estimated_time` (integer, required): Estimated time in minutes (> 0)
+
+**Optional Parameters**:
+- `date_scheduled` (string, optional): Scheduled date in ISO 8601 format
+- `user_id` (integer, optional): Responsible user ID
+- `vendor_id` (integer, optional): Assigned vendor ID
+- `unit_id` (integer, optional): Related unit ID
+- `reservation_id` (integer, optional): Related reservation ID
+- `reference_number` (string, optional): External reference number
+- `description` (string, optional): Detailed description
+- `work_performed` (string, optional): Work performed description
+- `source` (string, optional): Source of the order
+- `source_name` (string, optional): Source contact name
+- `source_phone` (string, optional): Source contact phone
+- `actual_time` (integer, optional): Actual time spent in minutes
+- `block_checkin` (boolean, optional): Whether to block check-in
+
+**Valid Statuses**:
+- `open`: Open
+- `not-started`: Not Started
+- `in-progress`: In Progress
+- `completed`: Completed
+- `processed`: Processed
+- `vendor-assigned`: Assigned to Vendor
+- `vendor-accepted`: Accepted by Vendor
+- `vendor-rejected`: Rejected by Vendor
+- `vendor-completed`: Completed by Vendor
+- `cancelled`: Cancelled
+
+**Example Usage**:
+```json
+{
+  "name": "create_maintenance_work_order",
+  "arguments": {
+    "date_received": "2024-01-15T10:30:00Z",
+    "priority": 5,
+    "status": "open",
+    "summary": "Repair air conditioning",
+    "estimated_cost": 150.00,
+    "estimated_time": 120,
+    "unit_id": 101,
+    "description": "AC not cooling properly"
   }
 }
 ```
+
+**Response**:
+```json
+{
+  "success": true,
+  "work_order": {
+    "id": 12345,
+    "dateReceived": "2024-01-15T10:30:00Z",
+    "priority": 5,
+    "status": "open",
+    "summary": "Repair air conditioning",
+    "estimatedCost": 150.00,
+    "estimatedTime": 120,
+    "unitId": 101,
+    "createdAt": "2024-01-15T10:30:00Z"
+  },
+  "message": "Orden de trabajo creada exitosamente"
+}
+```
+
 
 ## Tools (Additional)
 
@@ -180,21 +248,66 @@ This server follows MCP best practices by providing a focused set of tools, prom
 
 ## Resources
 
-### trackhs://schema/reservations
+MCP Resources proporcionan información estructurada sobre schemas, documentación y ejemplos para todas las herramientas disponibles.
 
-**Description**: Complete schema for TrackHS reservations V2
+### Schemas
 
-**Content**: JSON schema defining reservation structure, fields, and validation rules
+#### trackhs://schema/reservations-v2
+Complete schema for Search Reservations API V2 with all parameters and validation rules.
 
-**Usage**: Access via MCP resource system for understanding data structure
+#### trackhs://schema/reservation-detail-v2
+Complete schema for Get Reservation V2 API with embedded data structures.
 
-### trackhs://api/documentation
+#### trackhs://schema/folio
+Complete schema for Folios API with financial breakdown information.
 
-**Description**: Complete API V2 documentation and examples
+#### trackhs://schema/units
+Complete schema for Units API with 50+ fields and filtering options.
 
-**Content**: Comprehensive API documentation with examples and usage patterns
+#### trackhs://schema/amenities
+Complete schema for Amenities API with group and visibility options.
 
-**Usage**: Full reference for API usage and integration
+#### trackhs://schema/work-orders
+Complete schema for Work Orders API with required/optional fields and valid statuses.
+
+### Documentation
+
+#### trackhs://docs/api-v2
+Essential documentation for Reservations API V2 including parameters, examples, and best practices.
+
+#### trackhs://docs/folio-api
+Essential documentation for Folios API including financial data structures.
+
+#### trackhs://docs/amenities-api
+Essential documentation for Amenities API including filtering and sorting options.
+
+#### trackhs://docs/work-orders-api
+Essential documentation for Work Orders API including status workflow and validation rules.
+
+### Examples
+
+#### trackhs://examples/search-queries
+Common search query examples for reservations including date ranges, filters, and scroll mode.
+
+#### trackhs://examples/folio-operations
+Common folio operation examples including balance checks and financial analysis.
+
+#### trackhs://examples/amenities
+Common amenity query examples including public/filterable amenities and group searches.
+
+#### trackhs://examples/work-orders
+Common work order creation examples including different priorities, statuses, and use cases.
+
+### References
+
+#### trackhs://reference/status-values
+Valid values for reservation status parameters.
+
+#### trackhs://reference/date-formats
+Supported date formats for API parameters (ISO 8601).
+
+#### trackhs://reference/error-codes
+Common error codes and their meanings.
 
 ## Prompts
 

@@ -17,17 +17,38 @@ El [Model Context Protocol](https://modelcontextprotocol.io) es un estándar abi
 
 ## 🚀 **Características Principales**
 
-### **Herramientas MCP (5)**
-- **`search_reservations_v1`**: Búsqueda de reservas usando API V1 (compatibilidad legacy)
-- **`search_reservations_v2`**: Búsqueda avanzada de reservas usando API V2 (recomendado)
+### **Herramientas MCP (6)**
+- **`search_reservations_v2`**: ✅ **100% funcional** - Búsqueda avanzada de reservas usando API V2
 - **`get_reservation_v2`**: ✅ **100% funcional** - Obtención de reserva específica por ID
 - **`get_folio`**: ✅ **100% funcional** - Obtención de folio específico por ID
 - **`search_units`**: ✅ **100% funcional** - Búsqueda de unidades usando Channel API
+- **`search_amenities`**: ✅ **100% funcional** - Búsqueda de amenidades usando Channel API
+- **`create_maintenance_work_order`**: ✅ **100% funcional** - Creación de órdenes de trabajo de mantenimiento
 
-### **Recursos MCP (3)**
-- **`trackhs://schema/reservations-v1`**: Esquema completo de datos para API V1
-- **`trackhs://schema/reservations-v2`**: Esquema completo de datos para API V2
+### **Recursos MCP (16)**
+**Schemas (6):**
+- **`trackhs://schema/reservations-v2`**: Esquema completo de datos para Reservations API V2
+- **`trackhs://schema/reservation-detail-v2`**: Esquema para Get Reservation V2
+- **`trackhs://schema/folio`**: Esquema completo de datos para Folios API
 - **`trackhs://schema/units`**: Esquema completo de datos para Units API
+- **`trackhs://schema/amenities`**: Esquema completo de datos para Amenities API
+- **`trackhs://schema/work-orders`**: Esquema completo de datos para Work Orders API
+
+**Documentation (4):**
+- **`trackhs://docs/api-v2`**: Documentación esencial de Reservations API V2
+- **`trackhs://docs/folio-api`**: Documentación esencial de Folios API
+- **`trackhs://docs/amenities-api`**: Documentación esencial de Amenities API
+- **`trackhs://docs/work-orders-api`**: Documentación esencial de Work Orders API
+
+**Examples (4):**
+- **`trackhs://examples/search-queries`**: Ejemplos de búsquedas de reservas
+- **`trackhs://examples/folio-operations`**: Ejemplos de operaciones con folios
+- **`trackhs://examples/amenities`**: Ejemplos de búsquedas de amenidades
+- **`trackhs://examples/work-orders`**: Ejemplos de creación de órdenes de trabajo
+
+**References (2):**
+- **`trackhs://reference/status-values`**: Valores válidos para parámetros de estado
+- **`trackhs://reference/date-formats`**: Formatos de fecha soportados por la API
 
 ### **Prompts MCP (3)**
 - **`search-reservations-by-dates`**: Búsqueda por rango de fechas
@@ -358,13 +379,15 @@ search_units(node_id="1,2,3", is_active=1)
 
 ## 📈 **Estado del Proyecto**
 
-### **Últimas Actualizaciones (v1.0.1 - 12 Oct 2025)**
+### **Últimas Actualizaciones (v1.0.2 - 17 Oct 2025)**
 
 #### ✅ **Nuevas Funcionalidades Implementadas**
-- **`search_units`**: Nueva herramienta MCP para búsqueda de unidades usando Channel API
-- **`get_reservation_v2`**: 100% funcional con todos los canales OTA
-- **Validación de campos**: Soporte completo para `alternates` y `payment_plan`
-- **FastMCP Cloud**: Configuración optimizada para despliegue
+- **`search_amenities`**: Nueva herramienta MCP para búsqueda de amenidades usando Channel API
+- **`create_maintenance_work_order`**: Nueva herramienta MCP para crear órdenes de trabajo de mantenimiento
+- **Resources actualizados**: Eliminada documentación obsoleta de API V1
+- **16 Resources MCP**: Schemas, documentation y examples completos para todas las herramientas
+- **6 Herramientas**: 100% funcionales con documentación completa
+- **Prompts simplificados**: Eliminadas referencias a API V1
 - **Tests**: 27/27 tests pasando (100% funcional)
 
 #### 🎯 **Métricas de Calidad**
