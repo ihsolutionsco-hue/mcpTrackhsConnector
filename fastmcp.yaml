@@ -1,0 +1,56 @@
+# Configuración para FastMCP Cloud
+# Este archivo optimiza el despliegue en FastMCP Cloud
+
+# Configuración del servidor
+server:
+  name: "TrackHS MCP Server"
+  description: "Conector MCP para TrackHS API"
+  version: "1.0.0"
+
+# Configuración de Python
+python:
+  version: "3.12"
+  requirements_file: "requirements.txt"
+
+# Configuración de entrada
+entrypoint:
+  module: "src.trackhs_mcp.__main__"
+  function: "main"
+
+# Variables de entorno requeridas
+environment:
+  required:
+    - TRACKHS_API_URL
+    - TRACKHS_USERNAME
+    - TRACKHS_PASSWORD
+  optional:
+    - TRACKHS_TIMEOUT
+
+# Configuración de salud
+health_check:
+  enabled: true
+  endpoint: "/health"
+  timeout: 30
+
+# Configuración de logging
+logging:
+  level: "INFO"
+  format: "json"
+
+# Configuración de red
+network:
+  port: 8080
+  host: "0.0.0.0"
+
+# Configuración de recursos
+resources:
+  memory: "512Mi"
+  cpu: "0.5"
+  timeout: 300
+
+# Configuración de CI/CD
+ci_cd:
+  auto_deploy: true
+  branch: "main"
+  tests_required: true
+  security_scan: true
