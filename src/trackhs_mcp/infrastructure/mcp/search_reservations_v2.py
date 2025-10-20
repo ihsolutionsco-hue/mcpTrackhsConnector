@@ -290,7 +290,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             raise ValidationError(f"API request failed: {str(e)}", "api")
 
 
-## Validación unificada ahora se realiza desde utils.date_validation
+# Validación unificada ahora se realiza desde utils.date_validation
 
 
 # Compatibilidad retroactiva con tests que importan _is_valid_date_format

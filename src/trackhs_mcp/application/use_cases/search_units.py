@@ -40,7 +40,7 @@ class SearchUnitsUseCase:
         import logging
 
         logger = logging.getLogger(__name__)
-        logger.info(f"Units API Request - Endpoint: /pms/units")
+        logger.info("Units API Request - Endpoint: /pms/units")
         logger.info(f"Units API Request - Params: {request_params}")
         logger.info(f"Units API Request - Params count: {len(request_params)}")
         logger.info(

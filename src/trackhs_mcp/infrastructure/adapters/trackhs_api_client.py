@@ -155,7 +155,7 @@ class TrackHSApiClient(ApiClientPort):
                             logger.error(
                                 f"400 Bad Request - Parsed Error: {error_json}"
                             )
-                        except:
+                        except Exception:
                             logger.error(f"400 Bad Request - Raw Text: {error_body}")
 
                         raise ApiError(
@@ -181,7 +181,6 @@ class TrackHSApiClient(ApiClientPort):
                         return json_data
                     except Exception as json_error:
                         # Si falla el parsing JSON, intentar parsear manualmente
-                        import json
 
                         try:
                             response_text = response.text

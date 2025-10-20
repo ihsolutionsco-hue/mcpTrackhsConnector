@@ -40,7 +40,7 @@ class SearchAmenitiesUseCase:
         import logging
 
         logger = logging.getLogger(__name__)
-        logger.info(f"Amenities API Request - Endpoint: /pms/units/amenities")
+        logger.info("Amenities API Request - Endpoint: /pms/units/amenities")
         logger.info(f"Amenities API Request - Params: {request_params}")
         logger.info(f"Amenities API Request - Params count: {len(request_params)}")
         logger.info(

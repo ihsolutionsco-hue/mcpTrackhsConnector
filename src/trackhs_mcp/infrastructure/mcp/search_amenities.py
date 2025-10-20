@@ -126,7 +126,7 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
             import logging
 
             logger = logging.getLogger(__name__)
-            logger.info(f"Search amenities called with parameters:")
+            logger.info("Search amenities called with parameters:")
             logger.info(f"  - page: {page} (type: {type(page)})")
             logger.info(f"  - size: {size} (type: {type(size)})")
             logger.info(f"  - group_id: {group_id} (type: {type(group_id)})")

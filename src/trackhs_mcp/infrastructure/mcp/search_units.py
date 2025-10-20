@@ -234,7 +234,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             import logging
 
             logger = logging.getLogger(__name__)
-            logger.info(f"Search units called with parameters:")
+            logger.info("Search units called with parameters:")
             logger.info(f"  - page: {page} (type: {type(page)})")
             logger.info(f"  - size: {size} (type: {type(size)})")
             logger.info(f"  - bedrooms: {bedrooms} (type: {type(bedrooms)})")
@@ -404,7 +404,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             raise ValidationError(f"API request failed: {str(e)}", "api")
 
 
-## Validación unificada ahora se realiza desde utils.date_validation
+# Validación unificada ahora se realiza desde utils.date_validation
 
 
 # Compatibilidad retroactiva con tests que importan _is_valid_date_format
