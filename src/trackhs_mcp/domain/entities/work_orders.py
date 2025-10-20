@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class WorkOrderStatus(str, Enum):
@@ -100,18 +100,18 @@ class CreateWorkOrderParams(BaseModel):
         None, alias="blockCheckin", description="Bloquear check-in"
     )
 
-    class Config:
-        allow_population_by_field_name = True
-        use_enum_values = True
+    model_config = ConfigDict(populate_by_name=True, use_enum_values=True)
 
-    @validator("priority")
+    @field_validator("priority")
+    @classmethod
     def validate_priority(cls, v):
         """Validar que la prioridad sea válida."""
         if v not in [1, 3, 5]:
             raise ValueError("La prioridad debe ser 1 (Baja), 3 (Media) o 5 (Alta)")
         return v
 
-    @validator("date_received", "date_scheduled")
+    @field_validator("date_received", "date_scheduled")
+    @classmethod
     def validate_date_format(cls, v):
         """Validar formato de fecha ISO 8601."""
         if v is not None:
@@ -123,14 +123,16 @@ class CreateWorkOrderParams(BaseModel):
                 )
         return v
 
-    @validator("estimated_cost")
+    @field_validator("estimated_cost")
+    @classmethod
     def validate_estimated_cost(cls, v):
         """Validar que el costo estimado sea no negativo."""
         if v < 0:
             raise ValueError("El costo estimado no puede ser negativo")
         return v
 
-    @validator("estimated_time")
+    @field_validator("estimated_time")
+    @classmethod
     def validate_estimated_time(cls, v):
         """Validar que el tiempo estimado sea positivo."""
         if v <= 0:
@@ -175,9 +177,7 @@ class WorkOrder(BaseModel):
     _embedded: Optional[Dict[str, Any]] = None
     _links: Optional[Dict[str, Any]] = None
 
-    class Config:
-        allow_population_by_field_name = True
-        use_enum_values = True
+    model_config = ConfigDict(populate_by_name=True, use_enum_values=True)
 
     @classmethod
     def from_api_response(cls, data: Dict[str, Any]) -> "WorkOrder":
@@ -214,8 +214,7 @@ class WorkOrderResponse(BaseModel):
     success: bool = True
     message: Optional[str] = None
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
     @classmethod
     def from_api_data(cls, data: Dict[str, Any]) -> "WorkOrderResponse":
