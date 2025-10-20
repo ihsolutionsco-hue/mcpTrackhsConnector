@@ -155,8 +155,8 @@ class TestToolsIntegrationE2E:
 
         register_all_tools(mock_mcp, mock_api_client)
 
-        # Verificar que se registraron los 6 tools (incluyendo search_amenities y create_maintenance_work_order)
-        assert mock_mcp.tool.call_count == 6
+        # Verificar que se registraron los 7 tools (incluyendo search_amenities, create_maintenance_work_order y create_housekeeping_work_order)
+        assert mock_mcp.tool.call_count == 7
 
         # Obtener las funciones registradas usando mock decorator
         registered_functions = []

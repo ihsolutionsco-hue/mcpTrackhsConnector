@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
 
+from .create_housekeeping_work_order import register_create_housekeeping_work_order
 from .create_maintenance_work_order import register_create_maintenance_work_order
 from .get_folio import register_get_folio
 from .get_reservation_v2 import register_get_reservation_v2
@@ -27,6 +28,7 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     - search_units (Channel API - endpoint /pms/units)
     - search_amenities (Channel API - endpoint /pms/units/amenities)
     - create_maintenance_work_order (API - endpoint /pms/maintenance/work-orders)
+    - create_housekeeping_work_order (API - endpoint /pms/housekeeping/work-orders)
 
     Args:
         mcp: Instancia del servidor FastMCP
@@ -43,3 +45,6 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     register_create_maintenance_work_order(
         mcp, api_client
     )  # Expone como "create_maintenance_work_order"
+    register_create_housekeeping_work_order(
+        mcp, api_client
+    )  # Expone como "create_housekeeping_work_order"

@@ -321,3 +321,22 @@ class TrackHSApiClient(ApiClientPort):
             options.method = "DELETE"
 
         return await self.request(endpoint, options)
+
+    async def create_housekeeping_work_order(
+        self, data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Crea una nueva orden de trabajo de housekeeping.
+
+        Args:
+            data: Datos de la orden de trabajo
+
+        Returns:
+            Respuesta de la API con la orden creada
+
+        Raises:
+            ApiError: Si ocurre un error en la API
+            AuthenticationError: Si las credenciales son inválidas
+            NetworkError: Si hay problemas de red
+        """
+        return await self.post("/pms/housekeeping/work-orders", data)
