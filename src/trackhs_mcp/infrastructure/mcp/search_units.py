@@ -339,6 +339,13 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         if size_normalized is None:
             size_normalized = 25
 
+        # Asegurar que los valores sean enteros para comparaciones
+        try:
+            page_normalized = int(page_normalized)
+            size_normalized = int(size_normalized)
+        except (ValueError, TypeError):
+            raise ValidationError("Page and size must be valid integers", "parameters")
+
         # Validar parámetros básicos según documentación Channel API
         if page_normalized < 1:
             raise ValidationError("Page must be >= 1", "page")
