@@ -211,21 +211,23 @@ class TestGetFolioE2E:
     async def test_get_folio_e2e_validation_errors(self, tool_function):
         """Test errores de validación en E2E"""
         # Test ID vacío
-        from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
+        from src.trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
 
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="")
         assert "Parámetro 'folio_id' es requerido" in str(exc_info.value)
 
         # Test ID negativo
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="-1")
-        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
+        assert "El ID del folio debe ser un número entero positivo" in str(
+            exc_info.value
+        )
 
         # Test ID inválido
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="abc")
-        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
+        assert "Valor inválido para 'folio_id': abc" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_e2e_with_embedded_data(

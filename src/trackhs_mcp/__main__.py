@@ -60,7 +60,6 @@ def main():
         logger.info("Creando servidor MCP...")
         mcp = FastMCP(
             name="TrackHS MCP Server",
-            strict_input_validation=True,  # Validación estricta de parámetros
             mask_error_details=False,  # Mostrar detalles de error en desarrollo
             include_fastmcp_meta=True,  # Incluir metadatos FastMCP
         )

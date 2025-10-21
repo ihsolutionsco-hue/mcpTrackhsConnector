@@ -95,25 +95,33 @@ class TestGetFolioTool:
         with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="-1")
 
-        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
+        assert "El ID del folio debe ser un número entero positivo" in str(
+            exc_info.value
+        )
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_validation_zero_id(self, tool_function):
         """Test validación de parámetros - ID cero"""
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        from src.trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
+
+        with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="0")
 
-        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
+        assert "El ID del folio debe ser un número entero positivo" in str(
+            exc_info.value
+        )
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_validation_invalid_id(self, tool_function):
         """Test validación de parámetros - ID inválido"""
         # Act & Assert
-        with pytest.raises(ValidationError) as exc_info:
+        from src.trackhs_mcp.domain.exceptions.api_exceptions import TrackHSError
+
+        with pytest.raises(TrackHSError) as exc_info:
             await tool_function(folio_id="abc")
 
-        assert "Valor inválido para 'folio_id'" in str(exc_info.value)
+        assert "Valor inválido para 'folio_id': abc" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_get_folio_tool_error_handling_401(
