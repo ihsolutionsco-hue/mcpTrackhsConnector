@@ -15,7 +15,11 @@ from ...domain.entities.reservations import SearchReservationsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
-from ..utils.type_normalization import normalize_binary_int, normalize_int
+from ..utils.type_normalization import (
+    normalize_binary_int,
+    normalize_int,
+    normalize_optional_binary_int,
+)
 from ..utils.user_friendly_messages import format_date_error
 
 
@@ -173,7 +177,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
                 "Cancelled, Checked In, Checked Out, No Show, Pending"
             ),
         ),
-        in_house_today: Optional[int] = Field(
+        in_house_today: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by in-house today (0=not in house, 1=in house)",
             ge=0,
@@ -265,7 +269,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         # (en caso de que vengan como string de otros sistemas)
         page_normalized = normalize_int(page, "page")
         size_normalized = normalize_int(size, "size")
-        in_house_today_normalized = normalize_binary_int(
+        in_house_today_normalized = normalize_optional_binary_int(
             in_house_today, "in_house_today"
         )
         group_id_normalized = normalize_int(group_id, "group_id")

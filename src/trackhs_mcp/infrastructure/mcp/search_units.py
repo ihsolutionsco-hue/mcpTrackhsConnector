@@ -15,7 +15,12 @@ from ...domain.entities.units import SearchUnitsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
-from ..utils.type_normalization import normalize_binary_int, normalize_int
+from ..utils.type_normalization import (
+    normalize_binary_int,
+    normalize_int,
+    normalize_optional_binary_int,
+    normalize_optional_int,
+)
 from ..utils.user_friendly_messages import format_date_error
 
 
@@ -69,13 +74,13 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
     @error_handler("search_units")
     async def search_units(
         # Parámetros de paginación
-        page: int = Field(
+        page: Union[int, float, str] = Field(
             default=1,
             description="Page number (1-based indexing). Max total results: 10,000.",
             ge=1,
             le=10000,
         ),
-        size: int = Field(
+        size: Union[int, float, str] = Field(
             default=25, description="Number of results per page (1-1000)", ge=1, le=1000
         ),
         # Parámetros de ordenamiento
@@ -118,97 +123,99 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             default=None, description="Filter by unit IDs (comma-separated: '1,2,3')"
         ),
         # Filtros numéricos
-        calendar_id: Optional[int] = Field(
+        calendar_id: Optional[Union[int, float, str]] = Field(
             default=None, description="Filter by calendar ID"
         ),
-        role_id: Optional[int] = Field(default=None, description="Filter by role ID"),
+        role_id: Optional[Union[int, float, str]] = Field(
+            default=None, description="Filter by role ID"
+        ),
         # Filtros de habitaciones y baños
-        bedrooms: Optional[int] = Field(
+        bedrooms: Optional[Union[int, float, str]] = Field(
             default=None, description="Filter by exact number of bedrooms", ge=0
         ),
-        min_bedrooms: Optional[int] = Field(
+        min_bedrooms: Optional[Union[int, float, str]] = Field(
             default=None, description="Filter by minimum number of bedrooms", ge=0
         ),
-        max_bedrooms: Optional[int] = Field(
+        max_bedrooms: Optional[Union[int, float, str]] = Field(
             default=None, description="Filter by maximum number of bedrooms", ge=0
         ),
-        bathrooms: Optional[int] = Field(
+        bathrooms: Optional[Union[int, float, str]] = Field(
             default=None, description="Filter by exact number of bathrooms", ge=0
         ),
-        min_bathrooms: Optional[int] = Field(
+        min_bathrooms: Optional[Union[int, float, str]] = Field(
             default=None, description="Filter by minimum number of bathrooms", ge=0
         ),
-        max_bathrooms: Optional[int] = Field(
+        max_bathrooms: Optional[Union[int, float, str]] = Field(
             default=None, description="Filter by maximum number of bathrooms", ge=0
         ),
         # Filtros booleanos (0/1)
-        pets_friendly: Optional[int] = Field(
+        pets_friendly: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by pet-friendly units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        allow_unit_rates: Optional[int] = Field(
+        allow_unit_rates: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by units that allow unit-specific rates (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        computed: Optional[int] = Field(
+        computed: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by computed units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        inherited: Optional[int] = Field(
+        inherited: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by inherited units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        limited: Optional[int] = Field(
+        limited: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by limited availability units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        is_bookable: Optional[int] = Field(
+        is_bookable: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by bookable units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        include_descriptions: Optional[int] = Field(
+        include_descriptions: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Include unit descriptions in response (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        is_active: Optional[int] = Field(
+        is_active: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by active units (0=inactive, 1=active)",
             ge=0,
             le=1,
         ),
-        events_allowed: Optional[int] = Field(
+        events_allowed: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by units allowing events (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        smoking_allowed: Optional[int] = Field(
+        smoking_allowed: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by units allowing smoking (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        children_allowed: Optional[int] = Field(
+        children_allowed: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by units allowing children (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        is_accessible: Optional[int] = Field(
+        is_accessible: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes)",
             ge=0,
@@ -314,36 +321,46 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         # Aplicar valores por defecto cuando se detectan FieldInfo objects
         page_normalized = page_normalized or 1  # Default: 1
         size_normalized = size_normalized or 25  # Default: 25
-        calendar_id_normalized = normalize_int(calendar_id, "calendar_id")
-        role_id_normalized = normalize_int(role_id, "role_id")
-        bedrooms_normalized = normalize_int(bedrooms, "bedrooms")
-        min_bedrooms_normalized = normalize_int(min_bedrooms, "min_bedrooms")
-        max_bedrooms_normalized = normalize_int(max_bedrooms, "max_bedrooms")
-        bathrooms_normalized = normalize_int(bathrooms, "bathrooms")
-        min_bathrooms_normalized = normalize_int(min_bathrooms, "min_bathrooms")
-        max_bathrooms_normalized = normalize_int(max_bathrooms, "max_bathrooms")
-        pets_friendly_normalized = normalize_binary_int(pets_friendly, "pets_friendly")
-        allow_unit_rates_normalized = normalize_binary_int(
+        calendar_id_normalized = normalize_optional_int(calendar_id, "calendar_id")
+        role_id_normalized = normalize_optional_int(role_id, "role_id")
+        bedrooms_normalized = normalize_optional_int(bedrooms, "bedrooms")
+        min_bedrooms_normalized = normalize_optional_int(min_bedrooms, "min_bedrooms")
+        max_bedrooms_normalized = normalize_optional_int(max_bedrooms, "max_bedrooms")
+        bathrooms_normalized = normalize_optional_int(bathrooms, "bathrooms")
+        min_bathrooms_normalized = normalize_optional_int(
+            min_bathrooms, "min_bathrooms"
+        )
+        max_bathrooms_normalized = normalize_optional_int(
+            max_bathrooms, "max_bathrooms"
+        )
+        pets_friendly_normalized = normalize_optional_binary_int(
+            pets_friendly, "pets_friendly"
+        )
+        allow_unit_rates_normalized = normalize_optional_binary_int(
             allow_unit_rates, "allow_unit_rates"
         )
-        computed_normalized = normalize_binary_int(computed, "computed")
-        inherited_normalized = normalize_binary_int(inherited, "inherited")
-        limited_normalized = normalize_binary_int(limited, "limited")
-        is_bookable_normalized = normalize_binary_int(is_bookable, "is_bookable")
-        include_descriptions_normalized = normalize_binary_int(
+        computed_normalized = normalize_optional_binary_int(computed, "computed")
+        inherited_normalized = normalize_optional_binary_int(inherited, "inherited")
+        limited_normalized = normalize_optional_binary_int(limited, "limited")
+        is_bookable_normalized = normalize_optional_binary_int(
+            is_bookable, "is_bookable"
+        )
+        include_descriptions_normalized = normalize_optional_binary_int(
             include_descriptions, "include_descriptions"
         )
-        is_active_normalized = normalize_binary_int(is_active, "is_active")
-        events_allowed_normalized = normalize_binary_int(
+        is_active_normalized = normalize_optional_binary_int(is_active, "is_active")
+        events_allowed_normalized = normalize_optional_binary_int(
             events_allowed, "events_allowed"
         )
-        smoking_allowed_normalized = normalize_binary_int(
+        smoking_allowed_normalized = normalize_optional_binary_int(
             smoking_allowed, "smoking_allowed"
         )
-        children_allowed_normalized = normalize_binary_int(
+        children_allowed_normalized = normalize_optional_binary_int(
             children_allowed, "children_allowed"
         )
-        is_accessible_normalized = normalize_binary_int(is_accessible, "is_accessible")
+        is_accessible_normalized = normalize_optional_binary_int(
+            is_accessible, "is_accessible"
+        )
 
         # Asegurar que los valores sean enteros para comparaciones
         try:

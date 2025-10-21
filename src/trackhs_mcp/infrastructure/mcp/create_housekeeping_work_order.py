@@ -5,7 +5,7 @@ Esta herramienta permite crear work orders de housekeeping en TrackHS siguiendo
 el patrón de herramientas MCP existentes.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from pydantic import Field
 
@@ -26,6 +26,9 @@ from trackhs_mcp.domain.exceptions import (
 )
 from trackhs_mcp.infrastructure.utils.date_validation import is_valid_iso8601_date
 from trackhs_mcp.infrastructure.utils.type_normalization import (
+    normalize_optional_binary_int,
+    normalize_optional_float,
+    normalize_optional_int,
     normalize_string_to_bool,
     normalize_string_to_float,
     normalize_string_to_int,
@@ -57,23 +60,23 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             min_length=1,
             max_length=50,
         ),
-        unit_id: Optional[int] = Field(
+        unit_id: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Unit ID (positive integer). Required if unit_block_id not provided. Example: 123",
             ge=1,
         ),
-        unit_block_id: Optional[int] = Field(
+        unit_block_id: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Unit block ID (positive integer). Required if unit_id not provided. Example: 456",
             ge=1,
         ),
-        is_inspection: Optional[int] = Field(
+        is_inspection: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Is inspection flag (0=no, 1=yes). Required if clean_type_id not provided",
             ge=0,
             le=1,
         ),
-        clean_type_id: Optional[int] = Field(
+        clean_type_id: Optional[Union[int, float, str]] = Field(
             default=None,
             description="Clean type ID (positive integer). Required if is_inspection not provided. Example: 5",
             ge=1,
@@ -141,14 +144,8 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
                 )
 
             # Validar campos de unidad (exactamente uno requerido)
-            unit_id_norm = (
-                normalize_string_to_int(unit_id) if unit_id is not None else None
-            )
-            unit_block_id_norm = (
-                normalize_string_to_int(unit_block_id)
-                if unit_block_id is not None
-                else None
-            )
+            unit_id_norm = normalize_optional_int(unit_id, "unit_id")
+            unit_block_id_norm = normalize_optional_int(unit_block_id, "unit_block_id")
 
             if not unit_id_norm and not unit_block_id_norm:
                 raise ValidationError(
@@ -160,16 +157,10 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
                 )
 
             # Validar campos de tipo de tarea (exactamente uno requerido)
-            is_inspection_norm = (
-                normalize_string_to_bool(is_inspection)
-                if is_inspection is not None
-                else None
+            is_inspection_norm = normalize_optional_binary_int(
+                is_inspection, "is_inspection"
             )
-            clean_type_id_norm = (
-                normalize_string_to_int(clean_type_id)
-                if clean_type_id is not None
-                else None
-            )
+            clean_type_id_norm = normalize_optional_int(clean_type_id, "clean_type_id")
 
             if not is_inspection_norm and not clean_type_id_norm:
                 raise ValidationError(
@@ -181,39 +172,21 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
                 )
 
             # Normalizar campos opcionales
-            time_estimate_norm = (
-                normalize_string_to_float(time_estimate)
-                if time_estimate is not None
-                else None
+            time_estimate_norm = normalize_optional_float(
+                time_estimate, "time_estimate"
             )
-            actual_time_norm = (
-                normalize_string_to_float(actual_time)
-                if actual_time is not None
-                else None
+            actual_time_norm = normalize_optional_float(actual_time, "actual_time")
+            user_id_norm = normalize_optional_int(user_id, "user_id")
+            vendor_id_norm = normalize_optional_int(vendor_id, "vendor_id")
+            reservation_id_norm = normalize_optional_int(
+                reservation_id, "reservation_id"
             )
-            user_id_norm = (
-                normalize_string_to_int(user_id) if user_id is not None else None
+            is_turn_norm = normalize_optional_binary_int(is_turn, "is_turn")
+            is_manual_norm = normalize_optional_binary_int(is_manual, "is_manual")
+            charge_owner_norm = normalize_optional_binary_int(
+                charge_owner, "charge_owner"
             )
-            vendor_id_norm = (
-                normalize_string_to_int(vendor_id) if vendor_id is not None else None
-            )
-            reservation_id_norm = (
-                normalize_string_to_int(reservation_id)
-                if reservation_id is not None
-                else None
-            )
-            is_turn_norm = (
-                normalize_string_to_bool(is_turn) if is_turn is not None else None
-            )
-            is_manual_norm = (
-                normalize_string_to_bool(is_manual) if is_manual is not None else None
-            )
-            charge_owner_norm = (
-                normalize_string_to_bool(charge_owner)
-                if charge_owner is not None
-                else None
-            )
-            cost_norm = normalize_string_to_float(cost) if cost is not None else None
+            cost_norm = normalize_optional_float(cost, "cost")
 
             # Validar valores numéricos
             if time_estimate_norm is not None and time_estimate_norm < 0:

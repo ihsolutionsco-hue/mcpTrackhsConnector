@@ -6,7 +6,7 @@ el patrón de herramientas MCP existentes.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import Field
 
@@ -27,6 +27,10 @@ from trackhs_mcp.infrastructure.utils.date_validation import is_valid_iso8601_da
 
 # from trackhs_mcp.infrastructure.utils.error_handling import error_handler
 from trackhs_mcp.infrastructure.utils.type_normalization import (
+    normalize_float,
+    normalize_int,
+    normalize_optional_float,
+    normalize_optional_int,
     normalize_string_to_bool,
     normalize_string_to_float,
     normalize_string_to_int,
@@ -80,22 +84,22 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
             min_length=10,
             max_length=20,
         ),
-        user_id: Optional[int] = Field(
+        user_id: Optional[Union[int, float, str]] = Field(
             default=None,
             description="ID of responsible user (positive integer). Example: 123",
             ge=1,
         ),
-        vendor_id: Optional[int] = Field(
+        vendor_id: Optional[Union[int, float, str]] = Field(
             default=None,
             description="ID of assigned vendor (positive integer). Example: 456",
             ge=1,
         ),
-        unit_id: Optional[int] = Field(
+        unit_id: Optional[Union[int, float, str]] = Field(
             default=None,
             description="ID of related unit (positive integer). Example: 789",
             ge=1,
         ),
-        reservation_id: Optional[int] = Field(
+        reservation_id: Optional[Union[int, float, str]] = Field(
             default=None,
             description="ID of related reservation (positive integer). Example: 101112",
             ge=1,
@@ -170,21 +174,16 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
                 block_checkin = None
 
             # Normalizar tipos de entrada
-            priority = normalize_string_to_int(priority)
-            estimated_cost = normalize_string_to_float(estimated_cost)
-            estimated_time = normalize_string_to_int(estimated_time)
+            priority = normalize_int(priority, "priority")
+            estimated_cost = normalize_float(estimated_cost, "estimated_cost")
+            estimated_time = normalize_int(estimated_time, "estimated_time")
 
             # Normalizar campos opcionales
-            if user_id is not None:
-                user_id = normalize_string_to_int(user_id)
-            if vendor_id is not None:
-                vendor_id = normalize_string_to_int(vendor_id)
-            if unit_id is not None:
-                unit_id = normalize_string_to_int(unit_id)
-            if reservation_id is not None:
-                reservation_id = normalize_string_to_int(reservation_id)
-            if actual_time is not None:
-                actual_time = normalize_string_to_int(actual_time)
+            user_id = normalize_optional_int(user_id, "user_id")
+            vendor_id = normalize_optional_int(vendor_id, "vendor_id")
+            unit_id = normalize_optional_int(unit_id, "unit_id")
+            reservation_id = normalize_optional_int(reservation_id, "reservation_id")
+            actual_time = normalize_optional_int(actual_time, "actual_time")
             if block_checkin is not None:
                 block_checkin = normalize_string_to_bool(block_checkin)
 
