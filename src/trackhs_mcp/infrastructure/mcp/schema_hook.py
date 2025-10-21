@@ -46,11 +46,12 @@ class SchemaFixerHook:
         logger.info("Applying schema fixer hook to FastMCP server")
 
         # Guardar métodos originales
-        self.original_list_tools = self.mcp_server.list_tools
+        self.original_list_tools = getattr(self.mcp_server, "get_tools", None)
         self.original_get_tool = getattr(self.mcp_server, "get_tool", None)
 
         # Aplicar monkey patch
-        self.mcp_server.list_tools = self._patched_list_tools
+        if self.original_list_tools:
+            self.mcp_server.get_tools = self._patched_list_tools
         if self.original_get_tool:
             self.mcp_server.get_tool = self._patched_get_tool
 
@@ -69,7 +70,7 @@ class SchemaFixerHook:
 
         # Restaurar métodos originales
         if self.original_list_tools:
-            self.mcp_server.list_tools = self.original_list_tools
+            self.mcp_server.get_tools = self.original_list_tools
         if self.original_get_tool:
             self.mcp_server.get_tool = self.original_get_tool
 
