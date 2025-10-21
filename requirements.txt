@@ -5,3 +5,4 @@ fastmcp>=2.0.0
 httpx>=0.24.0
 pydantic>=2.0.0
 python-dotenv>=1.0.0
+# uvicorn no es necesario - FastMCP Cloud maneja el servidor HTTP automáticamente

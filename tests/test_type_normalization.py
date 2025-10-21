@@ -343,5 +343,4 @@ class TestRealWorldScenarios:
 # Marks para pytest
 pytestmark = [
     pytest.mark.unit,
-    pytest.mark.asyncio,
 ]

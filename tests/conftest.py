@@ -24,6 +24,12 @@ os.environ.setdefault("TRACKHS_USERNAME", "test_user")
 os.environ.setdefault("TRACKHS_PASSWORD", "test_password")
 os.environ.setdefault("TRACKHS_TIMEOUT", "30")
 
+# Variables de entorno para HTTP transport (manejadas por FastMCP Cloud)
+# Estas variables son opcionales para desarrollo local
+os.environ.setdefault("HOST", "0.0.0.0")
+os.environ.setdefault("PORT", "8080")
+os.environ.setdefault("CORS_ORIGINS", "https://elevenlabs.io,https://app.elevenlabs.io")
+
 
 @pytest.fixture(scope="session")
 def event_loop():

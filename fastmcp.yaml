@@ -25,6 +25,9 @@ environment:
     - TRACKHS_PASSWORD
   optional:
     - TRACKHS_TIMEOUT
+    - HOST
+    - PORT
+    - CORS_ORIGINS
 
 # Configuración de salud
 health_check:
@@ -41,6 +44,19 @@ logging:
 network:
   port: 8080
   host: "0.0.0.0"
+  # FastMCP Cloud maneja automáticamente el transporte HTTP
+  # No necesitamos especificar transport aquí
+
+# Configuración CORS para ElevenLabs
+cors:
+  origins:
+    - "https://elevenlabs.io"
+    - "https://api.elevenlabs.io"
+    - "https://app.elevenlabs.io"
+    - "https://claude.ai"
+    - "https://app.claude.ai"
+  credentials: true
+  methods: ["GET", "POST", "DELETE", "OPTIONS"]
 
 # Configuración de recursos
 resources:

@@ -80,12 +80,12 @@ pip install -r requirements.txt
 cp .env.example .env
 # Editar .env con tus credenciales de Track HS
 
-# 4. Iniciar servidor
+# 4. Iniciar servidor (FastMCP Cloud maneja HTTP automáticamente)
 python -m src.trackhs_mcp
 
 # 5. Probar con MCP Inspector
 npx -y @modelcontextprotocol/inspector
-# Conectar usando stdio transport
+# Conectar usando HTTP transport: http://localhost:8080/mcp
 ```
 
 ### **Variables de Entorno Requeridas**
@@ -96,6 +96,10 @@ TRACKHS_API_URL=https://api.trackhs.com/api
 TRACKHS_USERNAME=tu_usuario
 TRACKHS_PASSWORD=tu_contraseña
 TRACKHS_TIMEOUT=30
+
+# Configuración HTTP (manejada automáticamente por FastMCP Cloud)
+# HOST, PORT y CORS se configuran en fastmcp.yaml
+
 DEBUG=false
 ```
 
@@ -270,8 +274,12 @@ git commit --no-verify -m "WIP"
 # Instalar dependencias
 pip install -r requirements.txt
 
-# Ejecutar servidor
+# Ejecutar servidor (FastMCP Cloud maneja HTTP automáticamente)
 python -m src.trackhs_mcp
+
+# En FastMCP Cloud, el servidor estará disponible en:
+# - HTTP: https://tu-servidor.fastmcp.cloud/mcp
+# - Health: https://tu-servidor.fastmcp.cloud/health
 ```
 
 ## 📊 **Métricas de Éxito**

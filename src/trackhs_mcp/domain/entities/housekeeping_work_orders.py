@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class HousekeepingWorkOrderStatus(str, Enum):
@@ -79,7 +79,8 @@ class CreateHousekeepingWorkOrderParams(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True, use_enum_values=True)
 
-    @validator("scheduled_at")
+    @field_validator("scheduled_at")
+    @classmethod
     def validate_scheduled_at(cls, v):
         """Valida el formato de fecha ISO 8601."""
         try:

@@ -75,6 +75,10 @@ mcp = main()
 if __name__ == "__main__":
     try:
         logger.info("Iniciando servidor MCP...")
+
+        # FastMCP Cloud maneja automáticamente el transporte HTTP
+        # No necesitamos configurar transporte, host, puerto o CORS aquí
+        # La configuración está en fastmcp.yaml
         mcp.run()
     except KeyboardInterrupt:
         logger.info("Servidor detenido por el usuario")
