@@ -10,7 +10,6 @@ __author__ = "Track HS Team"
 __email__ = "team@trackhs.com"
 
 # Imports para compatibilidad
-from .infrastructure.adapters.config import TrackHSConfig
-from .infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+from .domain.value_objects.config import TrackHSConfig
 
-__all__ = ["TrackHSConfig", "TrackHSApiClient"]
+__all__ = ["TrackHSConfig"]
