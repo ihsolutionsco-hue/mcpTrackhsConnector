@@ -8,6 +8,7 @@ el patrón de herramientas MCP existentes.
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
+from fastmcp.exceptions import ToolError
 from pydantic import Field
 
 from trackhs_mcp.application.ports.api_client_port import ApiClientPort
@@ -21,20 +22,11 @@ from trackhs_mcp.domain.exceptions import (
     ApiError,
     AuthenticationError,
     AuthorizationError,
-    ValidationError,
 )
 from trackhs_mcp.infrastructure.utils.date_validation import is_valid_iso8601_date
 
 # from trackhs_mcp.infrastructure.utils.error_handling import error_handler
-from trackhs_mcp.infrastructure.utils.type_normalization import (
-    normalize_float,
-    normalize_int,
-    normalize_optional_float,
-    normalize_optional_int,
-    normalize_string_to_bool,
-    normalize_string_to_float,
-    normalize_string_to_int,
-)
+# Removed type normalization imports - using Pydantic automatic conversion
 
 
 def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
@@ -84,22 +76,22 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
             min_length=10,
             max_length=20,
         ),
-        user_id: Optional[Union[int, float, str]] = Field(
+        user_id: Optional[int] = Field(
             default=None,
             description="ID of responsible user (positive integer). Example: 123",
             ge=1,
         ),
-        vendor_id: Optional[Union[int, float, str]] = Field(
+        vendor_id: Optional[int] = Field(
             default=None,
             description="ID of assigned vendor (positive integer). Example: 456",
             ge=1,
         ),
-        unit_id: Optional[Union[int, float, str]] = Field(
+        unit_id: Optional[int] = Field(
             default=None,
             description="ID of related unit (positive integer). Example: 789",
             ge=1,
         ),
-        reservation_id: Optional[Union[int, float, str]] = Field(
+        reservation_id: Optional[int] = Field(
             default=None,
             description="ID of related reservation (positive integer). Example: 101112",
             ge=1,
@@ -174,71 +166,62 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
                 block_checkin = None
 
             # Normalizar tipos de entrada
-            priority = normalize_int(priority, "priority")
-            estimated_cost = normalize_float(estimated_cost, "estimated_cost")
-            estimated_time = normalize_int(estimated_time, "estimated_time")
-
-            # Normalizar campos opcionales
-            user_id = normalize_optional_int(user_id, "user_id")
-            vendor_id = normalize_optional_int(vendor_id, "vendor_id")
-            unit_id = normalize_optional_int(unit_id, "unit_id")
-            reservation_id = normalize_optional_int(reservation_id, "reservation_id")
-            actual_time = normalize_optional_int(actual_time, "actual_time")
-            if block_checkin is not None:
-                block_checkin = normalize_string_to_bool(block_checkin)
+            # Validar parámetros (Pydantic ya maneja la conversión automática)
+            if priority < 1 or priority > 5:
+                raise ToolError("priority debe estar entre 1 y 5")
+            if estimated_cost < 0:
+                raise ToolError("estimated_cost debe ser >= 0")
+            if estimated_time < 0:
+                raise ToolError("estimated_time debe ser >= 0")
 
             # Validar campos requeridos
             if not date_received or not date_received.strip():
-                raise ValidationError("La fecha de recepción es requerida")
+                raise ToolError("La fecha de recepción es requerida")
 
             if not is_valid_iso8601_date(date_received):
-                raise ValidationError(
+                raise ToolError(
                     "La fecha de recepción debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ)"
                 )
 
             if priority not in [1, 3, 5]:
-                raise ValidationError(
-                    "La prioridad debe ser 1 (Baja), 3 (Media) o 5 (Alta)"
-                )
+                raise ToolError("La prioridad debe ser 1 (Baja), 3 (Media) o 5 (Alta)")
 
             if not status or not status.strip():
-                raise ValidationError("El estado es requerido")
+                raise ToolError("El estado es requerido")
 
             # Validar estado
             try:
                 WorkOrderStatus(status)
             except ValueError:
                 valid_statuses = [s.value for s in WorkOrderStatus]
-                raise ValidationError(
+                raise ToolError(
                     f"Estado inválido. Estados válidos: {', '.join(valid_statuses)}"
                 )
 
             if not summary or not summary.strip():
-                raise ValidationError("El resumen es requerido")
+                raise ToolError("El resumen es requerido")
 
             if estimated_cost < 0:
-                raise ValidationError("El costo estimado no puede ser negativo")
+                raise ToolError("El costo estimado no puede ser negativo")
 
             if estimated_time <= 0:
-                raise ValidationError("El tiempo estimado debe ser mayor a 0")
+                raise ToolError("El tiempo estimado debe ser mayor a 0")
 
             # Validar fecha programada si se proporciona
             if date_scheduled and not is_valid_iso8601_date(date_scheduled):
-                raise ValidationError(
-                    "La fecha programada debe estar en formato ISO 8601"
-                )
+                raise ToolError("La fecha programada debe estar en formato ISO 8601")
 
             # Validar IDs opcionales
             if user_id is not None and user_id <= 0:
-                raise ValidationError("El ID de usuario debe ser un entero positivo")
+                raise ToolError("El ID de usuario debe ser un entero positivo")
             if vendor_id is not None and vendor_id <= 0:
-                raise ValidationError("El ID de proveedor debe ser un entero positivo")
+                raise ToolError("El ID de proveedor debe ser un entero positivo")
             if unit_id is not None and unit_id <= 0:
-                raise ValidationError("El ID de unidad debe ser un entero positivo")
+                raise ToolError("El ID de unidad debe ser un entero positivo")
             if reservation_id is not None and reservation_id <= 0:
-                raise ValidationError("El ID de reserva debe ser un entero positivo")
+                raise ToolError("El ID de reserva debe ser un entero positivo")
             if actual_time is not None and actual_time <= 0:
-                raise ValidationError("El tiempo real debe ser mayor a 0")
+                raise ToolError("El tiempo real debe ser mayor a 0")
 
             # Crear parámetros
             params = CreateWorkOrderParams(
@@ -274,7 +257,7 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
                 "message": "Orden de trabajo creada exitosamente",
             }
 
-        except ValidationError as e:
+        except ToolError as e:
             return {
                 "success": False,
                 "error": "Datos inválidos",

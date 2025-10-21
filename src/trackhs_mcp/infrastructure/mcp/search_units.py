@@ -3,6 +3,7 @@ Herramienta MCP para buscar unidades en Track HS Channel API
 Versión mejorada con tipos específicos siguiendo mejores prácticas MCP
 """
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from pydantic import Field
@@ -10,9 +11,10 @@ from pydantic import Field
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
 
+from fastmcp.exceptions import ToolError
+
 from ...application.use_cases.search_units import SearchUnitsUseCase
 from ...domain.entities.units import SearchUnitsParams
-from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
 from ..utils.type_normalization import (
@@ -22,6 +24,19 @@ from ..utils.type_normalization import (
     normalize_optional_int,
 )
 from ..utils.user_friendly_messages import format_date_error
+
+
+@dataclass
+class SearchUnitsResult:
+    """Resultado estructurado de búsqueda de unidades"""
+
+    units: List[dict]
+    total: int
+    page: int
+    size: int
+    total_pages: int
+    has_next: bool
+    has_previous: bool
 
 
 def _parse_id_string(
@@ -74,13 +89,13 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
     @error_handler("search_units")
     async def search_units(
         # Parámetros de paginación
-        page: Union[int, float, str] = Field(
+        page: int = Field(
             default=1,
             description="Page number (1-based indexing). Max total results: 10,000.",
             ge=1,
             le=10000,
         ),
-        size: Union[int, float, str] = Field(
+        size: int = Field(
             default=25, description="Number of results per page (1-1000)", ge=1, le=1000
         ),
         # Parámetros de ordenamiento
@@ -123,99 +138,97 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             default=None, description="Filter by unit IDs (comma-separated: '1,2,3')"
         ),
         # Filtros numéricos
-        calendar_id: Optional[Union[int, float, str]] = Field(
+        calendar_id: Optional[int] = Field(
             default=None, description="Filter by calendar ID"
         ),
-        role_id: Optional[Union[int, float, str]] = Field(
-            default=None, description="Filter by role ID"
-        ),
+        role_id: Optional[int] = Field(default=None, description="Filter by role ID"),
         # Filtros de habitaciones y baños
-        bedrooms: Optional[Union[int, float, str]] = Field(
+        bedrooms: Optional[int] = Field(
             default=None, description="Filter by exact number of bedrooms", ge=0
         ),
-        min_bedrooms: Optional[Union[int, float, str]] = Field(
+        min_bedrooms: Optional[int] = Field(
             default=None, description="Filter by minimum number of bedrooms", ge=0
         ),
-        max_bedrooms: Optional[Union[int, float, str]] = Field(
+        max_bedrooms: Optional[int] = Field(
             default=None, description="Filter by maximum number of bedrooms", ge=0
         ),
-        bathrooms: Optional[Union[int, float, str]] = Field(
+        bathrooms: Optional[int] = Field(
             default=None, description="Filter by exact number of bathrooms", ge=0
         ),
-        min_bathrooms: Optional[Union[int, float, str]] = Field(
+        min_bathrooms: Optional[int] = Field(
             default=None, description="Filter by minimum number of bathrooms", ge=0
         ),
-        max_bathrooms: Optional[Union[int, float, str]] = Field(
+        max_bathrooms: Optional[int] = Field(
             default=None, description="Filter by maximum number of bathrooms", ge=0
         ),
         # Filtros booleanos (0/1)
-        pets_friendly: Optional[Union[int, float, str]] = Field(
+        pets_friendly: Optional[int] = Field(
             default=None,
             description="Filter by pet-friendly units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        allow_unit_rates: Optional[Union[int, float, str]] = Field(
+        allow_unit_rates: Optional[int] = Field(
             default=None,
             description="Filter by units that allow unit-specific rates (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        computed: Optional[Union[int, float, str]] = Field(
+        computed: Optional[int] = Field(
             default=None,
             description="Filter by computed units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        inherited: Optional[Union[int, float, str]] = Field(
+        inherited: Optional[int] = Field(
             default=None,
             description="Filter by inherited units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        limited: Optional[Union[int, float, str]] = Field(
+        limited: Optional[int] = Field(
             default=None,
             description="Filter by limited availability units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        is_bookable: Optional[Union[int, float, str]] = Field(
+        is_bookable: Optional[int] = Field(
             default=None,
             description="Filter by bookable units (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        include_descriptions: Optional[Union[int, float, str]] = Field(
+        include_descriptions: Optional[int] = Field(
             default=None,
             description="Include unit descriptions in response (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        is_active: Optional[Union[int, float, str]] = Field(
+        is_active: Optional[int] = Field(
             default=None,
             description="Filter by active units (0=inactive, 1=active)",
             ge=0,
             le=1,
         ),
-        events_allowed: Optional[Union[int, float, str]] = Field(
+        events_allowed: Optional[int] = Field(
             default=None,
             description="Filter by units allowing events (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        smoking_allowed: Optional[Union[int, float, str]] = Field(
+        smoking_allowed: Optional[int] = Field(
             default=None,
             description="Filter by units allowing smoking (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        children_allowed: Optional[Union[int, float, str]] = Field(
+        children_allowed: Optional[int] = Field(
             default=None,
             description="Filter by units allowing children (0=no, 1=yes)",
             ge=0,
             le=1,
         ),
-        is_accessible: Optional[Union[int, float, str]] = Field(
+        is_accessible: Optional[int] = Field(
             default=None,
             description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes)",
             ge=0,
@@ -250,7 +263,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 "clean, dirty, occupied, inspection, inprogress"
             ),
         ),
-    ) -> str:
+    ) -> SearchUnitsResult:
         """
         Search units in Track HS Channel API with advanced filtering and pagination.
 
@@ -271,7 +284,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             images, rates, availability calendar, and pagination metadata.
 
         Raises:
-            ValidationError: If parameters are invalid (e.g., invalid date format)
+            ToolError: If parameters are invalid (e.g., invalid date format)
             APIError: If the API request fails (e.g., 401 Unauthorized, 500 Server Error)
         """
         # Detectar y convertir FieldInfo objects (cuando se llama directamente sin FastMCP)
@@ -312,11 +325,11 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
         # Validar parámetros antes de aplicar defaults
         if page_normalized is not None and page_normalized < 1:
-            raise ValidationError("Page must be >= 1", "page")
+            raise ToolError("Page must be >= 1")
         if size_normalized is not None and size_normalized < 1:
-            raise ValidationError("Size must be >= 1", "size")
+            raise ToolError("Size must be >= 1")
         if size_normalized is not None and size_normalized > 1000:
-            raise ValidationError("Size must be <= 1000", "size")
+            raise ToolError("Size must be <= 1000")
 
         # Aplicar valores por defecto cuando se detectan FieldInfo objects
         page_normalized = page_normalized or 1  # Default: 1
@@ -367,13 +380,11 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             page_normalized = int(page_normalized)
             size_normalized = int(size_normalized)
         except (ValueError, TypeError):
-            raise ValidationError("Page and size must be valid integers", "parameters")
+            raise ToolError("Page and size must be valid integers")
 
         # Validar límite total de resultados (10k máximo)
         if page_normalized * size_normalized > 10000:
-            raise ValidationError(
-                "Total results (page * size) must be <= 10,000", "page"
-            )
+            raise ToolError("Total results (page * size) must be <= 10,000")
 
         # Validar rango de habitaciones
         if (
@@ -381,9 +392,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             and max_bedrooms_normalized is not None
             and min_bedrooms_normalized > max_bedrooms_normalized
         ):
-            raise ValidationError(
-                "min_bedrooms cannot be greater than max_bedrooms", "min_bedrooms"
-            )
+            raise ToolError("min_bedrooms cannot be greater than max_bedrooms")
 
         # Validar rango de baños
         if (
@@ -391,9 +400,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             and max_bathrooms_normalized is not None
             and min_bathrooms_normalized > max_bathrooms_normalized
         ):
-            raise ValidationError(
-                "min_bathrooms cannot be greater than max_bathrooms", "min_bathrooms"
-            )
+            raise ToolError("min_bathrooms cannot be greater than max_bathrooms")
 
         # Validar fechas si se proporcionan
         date_params = {
@@ -405,17 +412,15 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
         for param_name, param_value in date_params.items():
             if param_value and not is_valid_iso8601_date(param_value):
-                raise ValidationError(
+                raise ToolError(
                     format_date_error(param_name),
-                    param_name,
                 )
 
         # Validar unit_status
         valid_statuses = ["clean", "dirty", "occupied", "inspection", "inprogress"]
         if unit_status and unit_status not in valid_statuses:
-            raise ValidationError(
-                f"Invalid unit_status. Must be one of: {', '.join(valid_statuses)}",
-                "unit_status",
+            raise ToolError(
+                f"Invalid unit_status. Must be one of: {', '.join(valid_statuses)}"
             )
 
         try:
@@ -470,50 +475,54 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             # Ejecutar caso de uso
             result = await use_case.execute(search_params)
 
-            return result
+            # Convertir resultado a dataclass estructurado
+            return SearchUnitsResult(
+                units=result.get("units", []),
+                total=result.get("total", 0),
+                page=result.get("page", 1),
+                size=result.get("size", 25),
+                total_pages=result.get("total_pages", 1),
+                has_next=result.get("has_next", False),
+                has_previous=result.get("has_previous", False),
+            )
 
         except Exception as e:
             # Manejar errores específicos de la API según documentación
             if hasattr(e, "status_code"):
                 if e.status_code == 400:
-                    raise ValidationError(
+                    raise ToolError(
                         "Bad Request: Invalid parameters sent to Units API. "
                         "Common issues:\n"
                         "- Page must be >= 1 (1-based pagination)\n"
                         "- Numeric parameters must be integers or convertible strings\n"
                         "- Boolean parameters must be 0 or 1\n"
                         "- Date parameters must be in ISO 8601 format\n"
-                        f"Error details: {str(e)}",
-                        "parameters",
+                        f"Error details: {str(e)}"
                     )
                 elif e.status_code == 401:
-                    raise ValidationError(
+                    raise ToolError(
                         "Unauthorized: Invalid authentication credentials. "
                         "Please verify your TRACKHS_USERNAME and TRACKHS_PASSWORD "
-                        "are correct and not expired.",
-                        "auth",
+                        "are correct and not expired."
                     )
                 elif e.status_code == 403:
-                    raise ValidationError(
+                    raise ToolError(
                         "Forbidden: Insufficient permissions for this operation. "
                         "Please verify your account has access to "
                         "Channel API/Units endpoints. "
-                        "Contact your administrator to enable Channel API access.",
-                        "permissions",
+                        "Contact your administrator to enable Channel API access."
                     )
                 elif e.status_code == 404:
-                    raise ValidationError(
+                    raise ToolError(
                         "Endpoint not found: /pms/units. "
                         "Please verify the API URL and endpoint path are correct. "
-                        "The Channel API endpoint might not be available in your environment.",
-                        "endpoint",
+                        "The Channel API endpoint might not be available in your environment."
                     )
                 elif e.status_code == 500:
-                    raise ValidationError(
+                    raise ToolError(
                         "Internal Server Error: API temporarily unavailable. "
                         "Please try again later or contact TrackHS support. "
-                        "If the problem persists, check the TrackHS service status.",
-                        "api",
+                        "If the problem persists, check the TrackHS service status."
                     )
             # El error_handler wrapper se encargará de formatear el error
             raise

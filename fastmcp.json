@@ -1,0 +1,33 @@
+{
+  "$schema": "https://gofastmcp.com/public/schemas/fastmcp.json/v1.json",
+  "source": {
+    "path": "src/trackhs_mcp/__main__.py",
+    "entrypoint": "mcp"
+  },
+  "transport": "http",
+  "host": "0.0.0.0",
+  "port": 8080,
+  "environment": {
+    "type": "standard"
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json"
+  },
+  "cors": {
+    "origins": [
+      "https://elevenlabs.io",
+      "https://api.elevenlabs.io",
+      "https://app.elevenlabs.io",
+      "https://claude.ai",
+      "https://app.claude.ai"
+    ],
+    "credentials": true,
+    "methods": ["GET", "POST", "DELETE", "OPTIONS"]
+  },
+  "health_check": {
+    "enabled": true,
+    "endpoint": "/health",
+    "timeout": 30
+  }
+}

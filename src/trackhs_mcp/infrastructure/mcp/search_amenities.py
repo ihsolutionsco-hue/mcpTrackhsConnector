@@ -3,18 +3,33 @@ Herramienta MCP para buscar amenidades en Track HS Channel API
 Basado en la especificación completa de la API Get Unit Amenities Collection
 """
 
-from typing import TYPE_CHECKING, Literal, Optional
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, List, Literal, Optional
 
 from pydantic import Field
 
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
 
+from fastmcp.exceptions import ToolError
+
 from ...application.use_cases.search_amenities import SearchAmenitiesUseCase
 from ...domain.entities.amenities import SearchAmenitiesParams
-from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.error_handling import error_handler
 from ..utils.type_normalization import normalize_binary_int, normalize_int
+
+
+@dataclass
+class SearchAmenitiesResult:
+    """Resultado estructurado de búsqueda de amenidades"""
+
+    amenities: List[dict]
+    total: int
+    page: int
+    size: int
+    total_pages: int
+    has_next: bool
+    has_previous: bool
 
 
 def register_search_amenities(mcp, api_client: "ApiClientPort"):
@@ -70,7 +85,7 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
             ge=0,
             le=1,
         ),
-    ):
+    ) -> SearchAmenitiesResult:
         """
         Search amenities in Track HS Channel API with filtering and pagination.
 
@@ -106,9 +121,7 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
         # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
         adjusted_page = max(0, page - 1) if page > 0 else 0
         if adjusted_page * size > 10000:
-            raise ValidationError(
-                "Total results (page * size) must be <= 10,000", "page"
-            )
+            raise ToolError("Total results (page * size) must be <= 10,000")
 
         try:
             # Log de parámetros recibidos para debugging
@@ -145,7 +158,17 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
 
             # Ejecutar caso de uso
             result = await use_case.execute(search_params)
-            return result
+
+            # Convertir resultado a dataclass estructurado
+            return SearchAmenitiesResult(
+                amenities=result.get("amenities", []),
+                total=result.get("total", 0),
+                page=result.get("page", 1),
+                size=result.get("size", 25),
+                total_pages=result.get("total_pages", 1),
+                has_next=result.get("has_next", False),
+                has_previous=result.get("has_previous", False),
+            )
         except Exception as e:
             # Manejar errores específicos de la API según documentación
             if hasattr(e, "status_code"):
@@ -169,7 +192,7 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
                     if hasattr(e, "args") and e.args:
                         logger.error(f"400 Bad Request - Error args: {e.args}")
 
-                    raise ValidationError(
+                    raise ToolError(
                         "Bad Request: Invalid parameters sent to Amenities API. "
                         "Common issues:\n"
                         "- Page must be >= 1 (1-based pagination)\n"
@@ -179,36 +202,31 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
                         "- Sort direction must be 'asc' or 'desc'\n"
                         "- Group ID must be a positive integer\n"
                         "- Empty string parameters are converted to None automatically\n"
-                        f"Error details: {str(e)}",
-                        "parameters",
+                        f"Error details: {str(e)}"
                     )
                 elif e.status_code == 401:
-                    raise ValidationError(
+                    raise ToolError(
                         "Unauthorized: Invalid authentication credentials. "
                         "Please verify your TRACKHS_USERNAME and TRACKHS_PASSWORD "
-                        "are correct and not expired.",
-                        "auth",
+                        "are correct and not expired."
                     )
                 elif e.status_code == 403:
-                    raise ValidationError(
+                    raise ToolError(
                         "Forbidden: Insufficient permissions for this operation. "
                         "Please verify your account has access to "
                         "Channel API/Amenities endpoints. "
-                        "Contact your administrator to enable Channel API access.",
-                        "permissions",
+                        "Contact your administrator to enable Channel API access."
                     )
                 elif e.status_code == 404:
-                    raise ValidationError(
+                    raise ToolError(
                         "Endpoint not found: /pms/units/amenities. "
                         "Please verify the API URL and endpoint path are correct. "
-                        "The Channel API endpoint might not be available in your environment.",
-                        "endpoint",
+                        "The Channel API endpoint might not be available in your environment."
                     )
                 elif e.status_code == 500:
-                    raise ValidationError(
+                    raise ToolError(
                         "Internal Server Error: API temporarily unavailable. "
                         "Please try again later or contact TrackHS support. "
-                        "If the problem persists, check the TrackHS service status.",
-                        "api",
+                        "If the problem persists, check the TrackHS service status."
                     )
-            raise ValidationError(f"API request failed: {str(e)}", "api")
+            raise ToolError(f"API request failed: {str(e)}")

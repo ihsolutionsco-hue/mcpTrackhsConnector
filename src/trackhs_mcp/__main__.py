@@ -10,6 +10,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+from fastmcp.exceptions import ResourceError, ToolError
+from fastmcp.server.middleware.error_handling import ErrorHandlingMiddleware
 
 # Agregar el directorio src al PYTHONPATH para que FastMCP pueda encontrar el módulo
 current_dir = Path(__file__).parent
@@ -52,9 +54,17 @@ def main():
         logger.info("Inicializando cliente API...")
         api_client = TrackHSApiClient(config)
 
-        # Create MCP server instance
+        # Create MCP server instance with error masking for production
         logger.info("Creando servidor MCP...")
-        mcp = FastMCP("TrackHS MCP Server")
+        mcp = FastMCP("TrackHS MCP Server", mask_error_details=True)
+
+        # Add middleware for error handling
+        logger.info("Agregando middleware...")
+        mcp.add_middleware(
+            ErrorHandlingMiddleware(
+                include_traceback=False, transform_errors=True  # En producción
+            )
+        )
 
         # Register all components
         logger.info("Registrando componentes...")
