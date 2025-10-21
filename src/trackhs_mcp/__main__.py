@@ -20,6 +20,10 @@ if str(src_dir) not in sys.path:
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
 from trackhs_mcp.infrastructure.mcp.server import register_all_components
+from trackhs_mcp.infrastructure.middleware import (
+    TrackHSErrorHandlingMiddleware,
+    TrackHSLoggingMiddleware,
+)
 
 # Configurar logging
 logging.basicConfig(
@@ -52,15 +56,41 @@ def main():
         logger.info("Inicializando cliente API...")
         api_client = TrackHSApiClient(config)
 
-        # Create MCP server instance
+        # Create MCP server instance with strict validation
         logger.info("Creando servidor MCP...")
-        mcp = FastMCP("TrackHS MCP Server")
+        mcp = FastMCP(
+            name="TrackHS MCP Server",
+            strict_input_validation=True,  # Validación estricta de parámetros
+            mask_error_details=False,  # Mostrar detalles de error en desarrollo
+            include_fastmcp_meta=True,  # Incluir metadatos FastMCP
+        )
 
         # Register all components
         logger.info("Registrando componentes...")
         register_all_components(mcp, api_client)
 
-        logger.info("Servidor MCP configurado correctamente")
+        # Configure logging level from environment
+        log_level = os.getenv("FASTMCP_LOG_LEVEL", "INFO").upper()
+        logging.getLogger().setLevel(getattr(logging, log_level, logging.INFO))
+
+        # Add middleware (order matters: logging first, then error handling)
+        logger.info("Configurando middleware...")
+
+        # Logging middleware
+        logging_middleware = TrackHSLoggingMiddleware(
+            log_requests=True, log_responses=True, log_timing=True, log_level=log_level
+        )
+        mcp.add_middleware(logging_middleware)
+
+        # Error handling middleware
+        error_middleware = TrackHSErrorHandlingMiddleware(
+            include_traceback=os.getenv("FASTMCP_INCLUDE_TRACEBACK", "false").lower()
+            == "true",
+            transform_errors=True,
+        )
+        mcp.add_middleware(error_middleware)
+
+        logger.info(f"Servidor MCP configurado correctamente (log_level={log_level})")
         return mcp
 
     except Exception as e:

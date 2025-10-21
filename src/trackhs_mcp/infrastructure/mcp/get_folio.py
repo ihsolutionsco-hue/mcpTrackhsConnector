@@ -10,6 +10,8 @@ from pydantic import Field
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
 
+from fastmcp.exceptions import ToolError
+
 from ...application.use_cases.get_folio import GetFolioUseCase
 from ...domain.entities.folios import GetFolioParams
 from ...domain.exceptions.api_exceptions import ValidationError
@@ -49,20 +51,16 @@ def register_get_folio(mcp, api_client: "ApiClientPort"):
         """
         # Validar parámetros de entrada
         if not folio_id or not folio_id.strip():
-            raise ValidationError(
-                format_required_error("folio_id"),
-                "folio_id",
-            )
+            raise ToolError(format_required_error("folio_id"))
 
         # Validar que sea un número entero positivo válido
         try:
             folio_id_int = int(folio_id.strip())
             if folio_id_int <= 0:
-                raise ValueError("ID debe ser positivo")
+                raise ToolError("El ID del folio debe ser un número entero positivo")
         except (ValueError, TypeError):
-            raise ValidationError(
-                format_type_error("folio_id", "número entero positivo", folio_id),
-                "folio_id",
+            raise ToolError(
+                format_type_error("folio_id", "número entero positivo", folio_id)
             )
 
         try:

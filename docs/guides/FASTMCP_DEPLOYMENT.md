@@ -1,6 +1,6 @@
 # Guía de Despliegue en FastMCP Cloud
 
-Esta guía te ayudará a desplegar correctamente el TrackHS MCP Connector en FastMCP Cloud.
+Esta guía te ayudará a desplegar correctamente el TrackHS MCP Connector en FastMCP Cloud, incluyendo las nuevas características de FastMCP 2.12+.
 
 ## ✅ Correcciones Implementadas
 
@@ -21,8 +21,16 @@ Esta guía te ayudará a desplegar correctamente el TrackHS MCP Connector en Fas
 
 ### 4. Optimización de Build
 - ✅ Archivo `.dockerignore` para optimizar el build
-- ✅ Archivo `fastmcp.yaml` para configuración del servidor
+- ✅ Archivo `fastmcp.yaml` para configuración del servidor (mantenido para compatibilidad)
+- ✅ **NUEVO**: Archivo `fastmcp.json` para configuración declarativa
 - ✅ Dependencias optimizadas en `requirements.txt`
+
+### 5. Nuevas Características FastMCP 2.12+
+- ✅ **NUEVO**: Configuración declarativa con `fastmcp.json`
+- ✅ **NUEVO**: Sistema de middleware robusto (logging + error handling)
+- ✅ **NUEVO**: Validación estricta de parámetros
+- ✅ **NUEVO**: Testing in-memory determinístico
+- ✅ **NUEVO**: Manejo de errores mejorado con `ToolError`
 
 ## 🚀 Pasos para Desplegar
 
@@ -31,10 +39,17 @@ Esta guía te ayudará a desplegar correctamente el TrackHS MCP Connector en Fas
 En el panel de FastMCP Cloud, configura estas variables de entorno:
 
 ```bash
+# Variables requeridas (TrackHS API)
 TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
 TRACKHS_USERNAME=tu_usuario_aqui
 TRACKHS_PASSWORD=tu_password_aqui
 TRACKHS_TIMEOUT=30
+
+# Variables opcionales (FastMCP 2.12+)
+FASTMCP_LOG_LEVEL=INFO
+FASTMCP_INCLUDE_TRACEBACK=false
+FASTMCP_MASK_ERROR_DETAILS=false
+FASTMCP_STRICT_INPUT_VALIDATION=true
 ```
 
 ### 2. Ejecutar Pre-tests Antes del Commit

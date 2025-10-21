@@ -1,0 +1,57 @@
+{
+  "$schema": "https://gofastmcp.com/public/schemas/fastmcp.json/v1.json",
+  "source": {
+    "path": "src/trackhs_mcp/__main__.py",
+    "entrypoint": "mcp"
+  },
+  "environment": {
+    "type": "uv",
+    "python": ">=3.10",
+    "requirements": "requirements.txt"
+  },
+  "transport": {
+    "type": "http",
+    "port": 8080,
+    "host": "0.0.0.0"
+  },
+  "server": {
+    "name": "TrackHS MCP Server",
+    "description": "Conector MCP para TrackHS API - IHVM Vacations",
+    "version": "1.0.0",
+    "website_url": "https://github.com/your-org/MCPtrackhsConnector"
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json"
+  },
+  "cors": {
+    "origins": [
+      "https://elevenlabs.io",
+      "https://api.elevenlabs.io",
+      "https://app.elevenlabs.io",
+      "https://claude.ai",
+      "https://app.claude.ai"
+    ],
+    "credentials": true,
+    "methods": ["GET", "POST", "DELETE", "OPTIONS"]
+  },
+  "health_check": {
+    "enabled": true,
+    "endpoint": "/health",
+    "timeout": 30
+  },
+  "environment_variables": {
+    "required": [
+      "TRACKHS_USERNAME",
+      "TRACKHS_PASSWORD"
+    ],
+    "optional": [
+      "TRACKHS_API_URL",
+      "TRACKHS_TIMEOUT",
+      "FASTMCP_LOG_LEVEL",
+      "FASTMCP_MASK_ERROR_DETAILS",
+      "FASTMCP_STRICT_INPUT_VALIDATION"
+    ]
+  }
+}
+
