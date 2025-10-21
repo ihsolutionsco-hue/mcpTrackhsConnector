@@ -5,7 +5,9 @@ Esta herramienta permite crear work orders de housekeeping en TrackHS siguiendo
 el patrón de herramientas MCP existentes.
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
+
+from pydantic import Field
 
 from trackhs_mcp.application.ports.api_client_port import ApiClientPort
 from trackhs_mcp.application.use_cases.create_housekeeping_work_order import (
@@ -44,113 +46,85 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
         description="Crear una nueva orden de trabajo de housekeeping en TrackHS",
     )
     async def create_housekeeping_work_order(
-        scheduled_at: str,
-        status: str,
-        unit_id: Optional[Union[int, str]] = None,
-        unit_block_id: Optional[Union[int, str]] = None,
-        is_inspection: Optional[Union[bool, str]] = None,
-        clean_type_id: Optional[Union[int, str]] = None,
-        time_estimate: Optional[Union[float, str]] = None,
-        actual_time: Optional[Union[float, str]] = None,
-        user_id: Optional[Union[int, str]] = None,
-        vendor_id: Optional[Union[int, str]] = None,
-        reservation_id: Optional[Union[int, str]] = None,
-        is_turn: Optional[Union[bool, str]] = None,
-        is_manual: Optional[Union[bool, str]] = None,
-        charge_owner: Optional[Union[bool, str]] = None,
-        comments: Optional[str] = None,
-        cost: Optional[Union[float, str]] = None,
+        scheduled_at: str = Field(
+            description="Scheduled date in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15T10:00:00Z'",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            min_length=10,
+            max_length=20,
+        ),
+        status: str = Field(
+            description="Work order status. Valid: pending, not-started, in-progress, completed, processed, cancelled, exception",
+            min_length=1,
+            max_length=50,
+        ),
+        unit_id: Optional[int] = Field(
+            default=None,
+            description="Unit ID (positive integer). Required if unit_block_id not provided. Example: 123",
+            ge=1,
+        ),
+        unit_block_id: Optional[int] = Field(
+            default=None,
+            description="Unit block ID (positive integer). Required if unit_id not provided. Example: 456",
+            ge=1,
+        ),
+        is_inspection: Optional[int] = Field(
+            default=None,
+            description="Is inspection flag (0=no, 1=yes). Required if clean_type_id not provided",
+            ge=0,
+            le=1,
+        ),
+        clean_type_id: Optional[int] = Field(
+            default=None,
+            description="Clean type ID (positive integer). Required if is_inspection not provided. Example: 5",
+            ge=1,
+        ),
+        time_estimate: Optional[float] = Field(
+            default=None,
+            description="Estimated time in minutes (must be >= 0). Example: 60.0",
+            ge=0.0,
+        ),
+        actual_time: Optional[float] = Field(
+            default=None,
+            description="Actual time spent in minutes (must be >= 0). Example: 75.5",
+            ge=0.0,
+        ),
+        user_id: Optional[int] = Field(
+            default=None,
+            description="Assigned user ID (positive integer). Example: 789",
+            ge=1,
+        ),
+        vendor_id: Optional[int] = Field(
+            default=None, description="Vendor ID (positive integer). Example: 321", ge=1
+        ),
+        reservation_id: Optional[int] = Field(
+            default=None,
+            description="Related reservation ID (positive integer). Example: 987654",
+            ge=1,
+        ),
+        is_turn: Optional[int] = Field(
+            default=None, description="Is turn flag (0=no, 1=yes)", ge=0, le=1
+        ),
+        is_manual: Optional[int] = Field(
+            default=None, description="Is manual flag (0=no, 1=yes)", ge=0, le=1
+        ),
+        charge_owner: Optional[int] = Field(
+            default=None, description="Charge owner flag (0=no, 1=yes)", ge=0, le=1
+        ),
+        comments: Optional[str] = Field(
+            default=None, description="Additional comments or notes", max_length=2000
+        ),
+        cost: Optional[float] = Field(
+            default=None,
+            description="Cost of the work order (must be >= 0). Example: 125.50",
+            ge=0.0,
+        ),
     ) -> Dict[str, Any]:
         """
-        Crear una nueva orden de trabajo de housekeeping.
+        Create a new housekeeping work order in TrackHS.
 
-        Esta herramienta permite crear órdenes de trabajo de housekeeping en TrackHS
-        con todos los campos requeridos y opcionales disponibles en la API.
-
-        **Campos Requeridos:**
-        - scheduled_at: Fecha programada en formato ISO 8601 (ej: "2024-01-15" o "2024-01-15T10:30:00Z")
-        - status: Estado de la orden (pending, not-started, in-progress, completed, processed, cancelled, exception)
-        - unit_id o unit_block_id: ID de la unidad o bloque de unidad (exactamente uno requerido)
-        - is_inspection o clean_type_id: Tipo de tarea (exactamente uno requerido)
-
-        **Campos Opcionales:**
-        - time_estimate: Tiempo estimado en minutos (debe ser >= 0)
-        - actual_time: Tiempo real en minutos (debe ser >= 0)
-        - user_id: ID del usuario asignado
-        - vendor_id: ID del proveedor
-        - reservation_id: ID de la reserva relacionada
-        - is_turn: Si es un turno (true/false)
-        - is_manual: Si es manual (true/false)
-        - charge_owner: Si se cobra al propietario (true/false)
-        - comments: Comentarios adicionales
-        - cost: Costo de la orden (debe ser >= 0)
-
-        **Ejemplos de Uso:**
-
-        # Crear inspección
-        create_housekeeping_work_order(
-            scheduled_at="2024-01-15",
-            status="pending",
-            unit_id=123,
-            is_inspection=True
-        )
-
-        # Crear limpieza con tipo específico
-        create_housekeeping_work_order(
-            scheduled_at="2024-01-15T10:00:00Z",
-            status="not-started",
-            unit_id=123,
-            clean_type_id=5,
-            time_estimate=60,
-            is_turn=True
-        )
-
-        # Crear orden completa
-        create_housekeeping_work_order(
-            scheduled_at="2024-01-15T14:30:00Z",
-            status="pending",
-            unit_id=456,
-            is_inspection=False,
-            clean_type_id=3,
-            time_estimate=90,
-            user_id=789,
-            is_turn=True,
-            comments="Limpieza profunda requerida"
-        )
-
-        **Estados Válidos:**
-        - pending: Pendiente
-        - not-started: No iniciada
-        - in-progress: En progreso
-        - completed: Completada
-        - processed: Procesada
-        - cancelled: Cancelada
-        - exception: Excepción
-
-        **Validaciones:**
-        - scheduled_at debe estar en formato ISO 8601
-        - status debe ser uno de los estados válidos
-        - Exactamente uno de unit_id o unit_block_id debe estar presente
-        - Exactamente uno de is_inspection o clean_type_id debe estar presente
-        - time_estimate y actual_time deben ser >= 0
-        - cost debe ser >= 0
-        - Todos los IDs deben ser enteros positivos
-
-        **Manejo de Errores:**
-        - 400: Datos de entrada inválidos
-        - 401: Credenciales inválidas o expiradas
-        - 403: Permisos insuficientes
-        - 404: Recurso no encontrado
-        - 500: Error interno del servidor
-
-        Returns:
-            Dict con la respuesta de la API incluyendo la orden creada
-
-        Raises:
-            ValidationError: Si los datos de entrada son inválidos
-            ApiError: Si ocurre un error en la API
-            AuthenticationError: Si las credenciales son inválidas
-            AuthorizationError: Si no hay permisos suficientes
+        Creates housekeeping work orders with scheduling, assignments, and task types.
+        Requires either unit_id or unit_block_id (exactly one), and either is_inspection
+        or clean_type_id (exactly one). Validates all inputs and returns complete order data.
         """
         try:
             # Validar fecha programada

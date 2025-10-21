@@ -1,11 +1,11 @@
 """
 Herramienta MCP para buscar unidades en Track HS Channel API
-Basado en la especificación completa de la API Get Units Collection
+Versión mejorada con tipos específicos siguiendo mejores prácticas MCP
 """
 
-from typing import TYPE_CHECKING, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
@@ -19,187 +19,359 @@ from ..utils.type_normalization import normalize_binary_int, normalize_int
 from ..utils.user_friendly_messages import format_date_error
 
 
+def _parse_id_string(
+    id_value: Optional[Union[str, int]]
+) -> Optional[Union[int, List[int]]]:
+    """
+    Parse ID string to int or list of ints.
+
+    Args:
+        id_value: String que puede ser "123" o "1,2,3", o int directo
+
+    Returns:
+        int si es un solo ID, List[int] si son múltiples, None si está vacío
+    """
+    if id_value is None:
+        return None
+
+    # Si ya es un int, retornarlo directamente
+    if isinstance(id_value, int):
+        return id_value
+
+    # Si es string, procesar
+    if isinstance(id_value, str):
+        id_value = id_value.strip()
+        if not id_value:
+            return None
+
+        # Si contiene comas, parsear como lista
+        if "," in id_value:
+            try:
+                return [int(id.strip()) for id in id_value.split(",") if id.strip()]
+            except ValueError:
+                # Si no se puede convertir a int, retornar None
+                return None
+
+        # Si es un solo ID, retornar como int
+        try:
+            return int(id_value)
+        except ValueError:
+            return None
+
+    # Si no es ni string ni int, retornar None
+    return None
+
+
 def register_search_units(mcp, api_client: "ApiClientPort"):
-    """Registra la herramienta search_units"""
+    """Registra la herramienta search_units mejorada"""
 
     @mcp.tool(name="search_units")
     @error_handler("search_units")
     async def search_units(
-        page: Union[int, float, str] = 1,
-        size: Union[int, float, str] = 25,
-        sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = "name",
-        sort_direction: Literal["asc", "desc"] = "asc",
-        search: Optional[str] = None,
-        term: Optional[str] = None,
-        unit_code: Optional[str] = None,
-        short_name: Optional[str] = None,
-        node_id: Optional[str] = None,
-        amenity_id: Optional[str] = None,
-        unit_type_id: Optional[str] = None,
-        id: Optional[str] = None,
-        calendar_id: Optional[Union[int, float, str]] = None,
-        role_id: Optional[Union[int, float, str]] = None,
-        bedrooms: Optional[Union[int, float, str]] = None,
-        min_bedrooms: Optional[Union[int, float, str]] = None,
-        max_bedrooms: Optional[Union[int, float, str]] = None,
-        bathrooms: Optional[Union[int, float, str]] = None,
-        min_bathrooms: Optional[Union[int, float, str]] = None,
-        max_bathrooms: Optional[Union[int, float, str]] = None,
-        pets_friendly: Optional[Union[int, float, str]] = None,
-        allow_unit_rates: Optional[Union[int, float, str]] = None,
-        computed: Optional[Union[int, float, str]] = None,
-        inherited: Optional[Union[int, float, str]] = None,
-        limited: Optional[Union[int, float, str]] = None,
-        is_bookable: Optional[Union[int, float, str]] = None,
-        include_descriptions: Optional[Union[int, float, str]] = None,
-        is_active: Optional[Union[int, float, str]] = None,
-        events_allowed: Optional[Union[int, float, str]] = None,
-        smoking_allowed: Optional[Union[int, float, str]] = None,
-        children_allowed: Optional[Union[int, float, str]] = None,
-        is_accessible: Optional[Union[int, float, str]] = None,
-        arrival: Optional[str] = None,
-        departure: Optional[str] = None,
-        content_updated_since: Optional[str] = None,
-        updated_since: Optional[str] = None,
-        unit_status: Optional[
-            Literal["clean", "dirty", "occupied", "inspection", "inprogress"]
-        ] = None,
-    ):
+        # Parámetros de paginación
+        page: int = Field(
+            default=1,
+            description="Page number (1-based indexing). Max total results: 10,000.",
+            ge=1,
+            le=10000,
+        ),
+        size: int = Field(
+            default=25, description="Number of results per page (1-1000)", ge=1, le=1000
+        ),
+        # Parámetros de ordenamiento
+        sort_column: str = Field(
+            default="name",
+            description="Column to sort by. Valid values: id, name, nodeName, unitTypeName",
+        ),
+        sort_direction: str = Field(
+            default="asc", description="Sort direction: 'asc' or 'desc'"
+        ),
+        # Parámetros de búsqueda de texto
+        search: Optional[str] = Field(
+            default=None,
+            description="Full-text search in unit names, codes, and descriptions",
+            max_length=200,
+        ),
+        term: Optional[str] = Field(
+            default=None,
+            description="Search term for unit names and descriptions",
+            max_length=200,
+        ),
+        unit_code: Optional[str] = Field(
+            default=None, description="Exact unit code to search for", max_length=50
+        ),
+        short_name: Optional[str] = Field(
+            default=None, description="Search by unit short name", max_length=100
+        ),
+        # Filtros por IDs (strings que pueden contener valores separados por comas)
+        node_id: Optional[str] = Field(
+            default=None, description="Filter by node IDs (comma-separated: '1,2,3')"
+        ),
+        amenity_id: Optional[str] = Field(
+            default=None, description="Filter by amenity IDs (comma-separated: '1,2,3')"
+        ),
+        unit_type_id: Optional[str] = Field(
+            default=None,
+            description="Filter by unit type IDs (comma-separated: '1,2,3')",
+        ),
+        id: Optional[str] = Field(
+            default=None, description="Filter by unit IDs (comma-separated: '1,2,3')"
+        ),
+        # Filtros numéricos
+        calendar_id: Optional[int] = Field(
+            default=None, description="Filter by calendar ID"
+        ),
+        role_id: Optional[int] = Field(default=None, description="Filter by role ID"),
+        # Filtros de habitaciones y baños
+        bedrooms: Optional[int] = Field(
+            default=None, description="Filter by exact number of bedrooms", ge=0
+        ),
+        min_bedrooms: Optional[int] = Field(
+            default=None, description="Filter by minimum number of bedrooms", ge=0
+        ),
+        max_bedrooms: Optional[int] = Field(
+            default=None, description="Filter by maximum number of bedrooms", ge=0
+        ),
+        bathrooms: Optional[int] = Field(
+            default=None, description="Filter by exact number of bathrooms", ge=0
+        ),
+        min_bathrooms: Optional[int] = Field(
+            default=None, description="Filter by minimum number of bathrooms", ge=0
+        ),
+        max_bathrooms: Optional[int] = Field(
+            default=None, description="Filter by maximum number of bathrooms", ge=0
+        ),
+        # Filtros booleanos (0/1)
+        pets_friendly: Optional[int] = Field(
+            default=None,
+            description="Filter by pet-friendly units (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        allow_unit_rates: Optional[int] = Field(
+            default=None,
+            description="Filter by units that allow unit-specific rates (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        computed: Optional[int] = Field(
+            default=None,
+            description="Filter by computed units (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        inherited: Optional[int] = Field(
+            default=None,
+            description="Filter by inherited units (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        limited: Optional[int] = Field(
+            default=None,
+            description="Filter by limited availability units (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        is_bookable: Optional[int] = Field(
+            default=None,
+            description="Filter by bookable units (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        include_descriptions: Optional[int] = Field(
+            default=None,
+            description="Include unit descriptions in response (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        is_active: Optional[int] = Field(
+            default=None,
+            description="Filter by active units (0=inactive, 1=active)",
+            ge=0,
+            le=1,
+        ),
+        events_allowed: Optional[int] = Field(
+            default=None,
+            description="Filter by units allowing events (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        smoking_allowed: Optional[int] = Field(
+            default=None,
+            description="Filter by units allowing smoking (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        children_allowed: Optional[int] = Field(
+            default=None,
+            description="Filter by units allowing children (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        is_accessible: Optional[int] = Field(
+            default=None,
+            description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes)",
+            ge=0,
+            le=1,
+        ),
+        # Filtros de fechas (ISO 8601)
+        arrival: Optional[str] = Field(
+            default=None,
+            description="Filter by arrival date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        departure: Optional[str] = Field(
+            default=None,
+            description="Filter by departure date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        content_updated_since: Optional[str] = Field(
+            default=None,
+            description="Filter by content update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        updated_since: Optional[str] = Field(
+            default=None,
+            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        # Estado de limpieza
+        unit_status: Optional[str] = Field(
+            default=None,
+            description=(
+                "Filter by housekeeping status. Valid values: "
+                "clean, dirty, occupied, inspection, inprogress"
+            ),
+        ),
+    ) -> str:
         """
-        Search units in Track HS Channel API with comprehensive filtering options.
+        Search units in Track HS Channel API with advanced filtering and pagination.
 
-        This MCP tool provides advanced unit search capabilities with full Channel API
-        compatibility, including pagination, filtering, sorting, and comprehensive
-        unit information retrieval.
+        This tool provides comprehensive unit search capabilities with support for
+        property features filtering (bedrooms, bathrooms, amenities), availability
+        checks, location filtering, and more. Optimized for AI model integration.
 
-        **Key Features:**
-        - ✅ Full Channel API compatibility with all 29+ parameters
-        - ✅ Advanced pagination (limited to 10k total results)
-        - ✅ Comprehensive filtering (dates, IDs, amenities, etc.)
-        - ✅ Flexible sorting options
-        - ✅ Robust error handling
-        - ✅ MCP-optimized for AI model integration
+        Key features:
+        - Full Channel API compatibility with 35+ filter parameters
+        - Property features filtering (bedrooms, bathrooms, pets, accessibility)
+        - Availability checks with date ranges
+        - Location and amenity filtering
+        - Housekeeping status filtering
+        - Comprehensive unit details including descriptions, images, and rates
 
-        **Examples:**
+        Returns:
+            JSON string with unit data including property features, amenities,
+            images, rates, availability calendar, and pagination metadata.
 
-        # Basic search
-        search_units(page=1, size=25)
-
-        # Search by property features
-        search_units(
-            bedrooms=2,
-            bathrooms=2,
-            pets_friendly=1,
-            is_active=1
-        )
-
-        # Search by availability
-        search_units(
-            arrival="2024-01-01",
-            departure="2024-01-07",
-            is_bookable=1
-        )
-
-        # Search by amenities
-        search_units(
-            amenity_id="1,2,3",
-            pets_friendly=1,
-            events_allowed=1
-        )
-
-        # Search by location
-        search_units(
-            node_id="1,2,3",
-            locality="Miami"
-        )
-
-        **Parameters:**
-        - page: Page number (1-based, max 10k total results)
-        - size: Page size (max 1000, limited to 10k total results)
-        - sort_column: Sort by field (id, name, nodeName, unitTypeName)
-        - sort_direction: Sort direction (asc/desc)
-        - search: Text search in names/descriptions
-        - term: Substring search matching on term
-        - unit_code: Search on unitCode, exact match or add % for wildcard
-        - short_name: Search on shortName, exact match or add % for wildcard
-        - node_id: Node ID(s) - single int, comma-separated, or array
-        - amenity_id: Amenity ID(s) - single int, comma-separated, or array
-        - unit_type_id: Unit type ID(s) - single int, comma-separated, or array
-        - id: Filter by Unit IDs
-        - calendar_id: Return units matching this unit's type with calendar group id
-        - role_id: Return units by specific roleId
-        - bedrooms: Exact number of bedrooms
-        - min_bedrooms/max_bedrooms: Range of bedrooms
-        - bathrooms: Exact number of bathrooms
-        - min_bathrooms/max_bathrooms: Range of bathrooms
-        - pets_friendly: Pet friendly units (0/1)
-        - allow_unit_rates: Units that allow unit rates (0/1)
-        - computed: Additional computed values (0/1)
-        - inherited: Additional inherited attributes (0/1)
-        - limited: Very limited attributes (0/1)
-        - is_bookable: Bookable units (0/1)
-        - include_descriptions: Include descriptions (0/1)
-        - is_active: Active units (0/1)
-        - arrival/departure: Availability date range (ISO 8601)
-        - content_updated_since: Content changes since timestamp (ISO 8601)
-        - updated_since: Updated since timestamp (ISO 8601) - deprecated
-        - unit_status: Unit status (clean, dirty, occupied, inspection, inprogress)
-
-        **Returns:**
-        Complete unit data with embedded objects (amenities, rooms, bed types, etc.)
-        and pagination information.
-
-        **Error Handling:**
-        - Validates all parameters according to Channel API specification
-        - Handles API errors (401, 403, 500) with descriptive messages
-        - Validates ISO 8601 date formats strictly
-        - Enforces 10k total results limit
-        - Validates boolean parameters (0/1 only)
-
-        **Common Errors:**
-        - Date format: Use 'YYYY-MM-DD' or 'YYYY-MM-DDTHH:MM:SSZ'
-        - Page/size: Must be positive integers (page=1, size=25)
-        - Boolean flags: Use 0 or 1 (pets_friendly=1, is_active=1)
-        - Bedrooms/bathrooms: Use integers (bedrooms=2, bathrooms=1)
+        Raises:
+            ValidationError: If parameters are invalid (e.g., invalid date format)
+            APIError: If the API request fails (e.g., 401 Unauthorized, 500 Server Error)
         """
-        # Normalizar parámetros numéricos primero (para compatibilidad JSON-RPC)
-        page = normalize_int(page, "page")
-        size = normalize_int(size, "size")
-        calendar_id = normalize_int(calendar_id, "calendar_id")
-        role_id = normalize_int(role_id, "role_id")
-        bedrooms = normalize_int(bedrooms, "bedrooms")
-        min_bedrooms = normalize_int(min_bedrooms, "min_bedrooms")
-        max_bedrooms = normalize_int(max_bedrooms, "max_bedrooms")
-        bathrooms = normalize_int(bathrooms, "bathrooms")
-        min_bathrooms = normalize_int(min_bathrooms, "min_bathrooms")
-        max_bathrooms = normalize_int(max_bathrooms, "max_bathrooms")
+        # Detectar y convertir FieldInfo objects (cuando se llama directamente sin FastMCP)
+        if type(sort_column).__name__ == "FieldInfo":
+            sort_column = "name"
+        if type(sort_direction).__name__ == "FieldInfo":
+            sort_direction = "asc"
+        if type(search).__name__ == "FieldInfo":
+            search = None
+        if type(term).__name__ == "FieldInfo":
+            term = None
+        if type(unit_code).__name__ == "FieldInfo":
+            unit_code = None
+        if type(short_name).__name__ == "FieldInfo":
+            short_name = None
+        if type(node_id).__name__ == "FieldInfo":
+            node_id = None
+        if type(amenity_id).__name__ == "FieldInfo":
+            amenity_id = None
+        if type(unit_type_id).__name__ == "FieldInfo":
+            unit_type_id = None
+        if type(id).__name__ == "FieldInfo":
+            id = None
+        if type(arrival).__name__ == "FieldInfo":
+            arrival = None
+        if type(departure).__name__ == "FieldInfo":
+            departure = None
+        if type(content_updated_since).__name__ == "FieldInfo":
+            content_updated_since = None
+        if type(updated_since).__name__ == "FieldInfo":
+            updated_since = None
+        if type(unit_status).__name__ == "FieldInfo":
+            unit_status = None
 
-        # Normalizar flags booleanos (0/1)
-        pets_friendly = normalize_binary_int(pets_friendly, "pets_friendly")
-        allow_unit_rates = normalize_binary_int(allow_unit_rates, "allow_unit_rates")
-        computed = normalize_binary_int(computed, "computed")
-        inherited = normalize_binary_int(inherited, "inherited")
-        limited = normalize_binary_int(limited, "limited")
-        is_bookable = normalize_binary_int(is_bookable, "is_bookable")
-        include_descriptions = normalize_binary_int(
+        # Normalizar parámetros numéricos para backward compatibility
+        page_normalized = normalize_int(page, "page")
+        size_normalized = normalize_int(size, "size")
+        calendar_id_normalized = normalize_int(calendar_id, "calendar_id")
+        role_id_normalized = normalize_int(role_id, "role_id")
+        bedrooms_normalized = normalize_int(bedrooms, "bedrooms")
+        min_bedrooms_normalized = normalize_int(min_bedrooms, "min_bedrooms")
+        max_bedrooms_normalized = normalize_int(max_bedrooms, "max_bedrooms")
+        bathrooms_normalized = normalize_int(bathrooms, "bathrooms")
+        min_bathrooms_normalized = normalize_int(min_bathrooms, "min_bathrooms")
+        max_bathrooms_normalized = normalize_int(max_bathrooms, "max_bathrooms")
+        pets_friendly_normalized = normalize_binary_int(pets_friendly, "pets_friendly")
+        allow_unit_rates_normalized = normalize_binary_int(
+            allow_unit_rates, "allow_unit_rates"
+        )
+        computed_normalized = normalize_binary_int(computed, "computed")
+        inherited_normalized = normalize_binary_int(inherited, "inherited")
+        limited_normalized = normalize_binary_int(limited, "limited")
+        is_bookable_normalized = normalize_binary_int(is_bookable, "is_bookable")
+        include_descriptions_normalized = normalize_binary_int(
             include_descriptions, "include_descriptions"
         )
-        is_active = normalize_binary_int(is_active, "is_active")
-        events_allowed = normalize_binary_int(events_allowed, "events_allowed")
-        smoking_allowed = normalize_binary_int(smoking_allowed, "smoking_allowed")
-        children_allowed = normalize_binary_int(children_allowed, "children_allowed")
-        is_accessible = normalize_binary_int(is_accessible, "is_accessible")
+        is_active_normalized = normalize_binary_int(is_active, "is_active")
+        events_allowed_normalized = normalize_binary_int(
+            events_allowed, "events_allowed"
+        )
+        smoking_allowed_normalized = normalize_binary_int(
+            smoking_allowed, "smoking_allowed"
+        )
+        children_allowed_normalized = normalize_binary_int(
+            children_allowed, "children_allowed"
+        )
+        is_accessible_normalized = normalize_binary_int(is_accessible, "is_accessible")
 
-        # Validar límite total de resultados (10k máximo) - validación de negocio
-        # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
-        adjusted_page = max(0, page - 1) if page > 0 else 0
-        if adjusted_page * size > 10000:
+        # Asegurar defaults para page y size si normalize_int retorna None (FieldInfo objects)
+        if page_normalized is None:
+            page_normalized = 1
+        if size_normalized is None:
+            size_normalized = 25
+
+        # Validar parámetros básicos según documentación Channel API
+        if page_normalized < 1:
+            raise ValidationError("Page must be >= 1", "page")
+        if size_normalized < 1:
+            raise ValidationError("Size must be >= 1", "size")
+        if size_normalized > 1000:
+            raise ValidationError("Size must be <= 1000", "size")
+
+        # Validar límite total de resultados (10k máximo)
+        if page_normalized * size_normalized > 10000:
             raise ValidationError(
                 "Total results (page * size) must be <= 10,000", "page"
             )
 
-        # Nota: La validación de parámetros booleanos (0/1) ya se realiza
-        # en normalize_binary_int(), por lo que no necesitamos validarlos aquí
+        # Validar rango de habitaciones
+        if (
+            min_bedrooms_normalized is not None
+            and max_bedrooms_normalized is not None
+            and min_bedrooms_normalized > max_bedrooms_normalized
+        ):
+            raise ValidationError(
+                "min_bedrooms cannot be greater than max_bedrooms", "min_bedrooms"
+            )
+
+        # Validar rango de baños
+        if (
+            min_bathrooms_normalized is not None
+            and max_bathrooms_normalized is not None
+            and min_bathrooms_normalized > max_bathrooms_normalized
+        ):
+            raise ValidationError(
+                "min_bathrooms cannot be greater than max_bathrooms", "min_bathrooms"
+            )
 
         # Validar fechas si se proporcionan
         date_params = {
@@ -216,151 +388,79 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                     param_name,
                 )
 
-        # Validar rangos de habitaciones y baños
-        if min_bedrooms is not None and max_bedrooms is not None:
-            if min_bedrooms > max_bedrooms:
-                raise ValidationError(
-                    "min_bedrooms must be <= max_bedrooms", "min_bedrooms"
-                )
-
-        if min_bathrooms is not None and max_bathrooms is not None:
-            if min_bathrooms > max_bathrooms:
-                raise ValidationError(
-                    "min_bathrooms must be <= max_bathrooms", "min_bathrooms"
-                )
+        # Validar unit_status
+        valid_statuses = ["clean", "dirty", "occupied", "inspection", "inprogress"]
+        if unit_status and unit_status not in valid_statuses:
+            raise ValidationError(
+                f"Invalid unit_status. Must be one of: {', '.join(valid_statuses)}",
+                "unit_status",
+            )
 
         try:
-            # Log de parámetros recibidos para debugging
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.info("Search units called with parameters:")
-            logger.info(f"  - page: {page} (type: {type(page)})")
-            logger.info(f"  - size: {size} (type: {type(size)})")
-            logger.info(f"  - bedrooms: {bedrooms} (type: {type(bedrooms)})")
-            logger.info(f"  - bathrooms: {bathrooms} (type: {type(bathrooms)})")
-            logger.info(
-                f"  - pets_friendly: {pets_friendly} (type: {type(pets_friendly)})"
-            )
-            logger.info(f"  - arrival: {arrival} (type: {type(arrival)})")
-            logger.info(f"  - departure: {departure} (type: {type(departure)})")
-
             # Crear caso de uso
             use_case = SearchUnitsUseCase(api_client)
 
-            # Mapeo de parámetros para conversión correcta
-            PARAM_MAPPING = {
-                "pets_friendly": "petsFriendly",
-                "is_active": "isActive",
-                "is_bookable": "isBookable",
-                "events_allowed": "eventsAllowed",
-                "smoking_allowed": "smokingAllowed",
-                "children_allowed": "childrenAllowed",
-                "is_accessible": "isAccessible",
-                "unit_status": "unitStatus",
-                "content_updated_since": "contentUpdatedSince",
-                "allow_unit_rates": "allowUnitRates",
-                "include_descriptions": "includeDescriptions",
-                "min_bedrooms": "minBedrooms",
-                "max_bedrooms": "maxBedrooms",
-                "min_bathrooms": "minBathrooms",
-                "max_bathrooms": "maxBathrooms",
-                "unit_code": "unitCode",
-                "short_name": "shortName",
-                "node_id": "nodeId",
-                "amenity_id": "amenityId",
-                "unit_type_id": "unitTypeId",
-                "sort_column": "sortColumn",
-                "sort_direction": "sortDirection",
-            }
+            # Convertir page de 1-based (user) a 0-based (API/use case)
+            # El usuario envía page=1 para la primera página, pero la API espera page=0
+            page_for_api = page_normalized - 1 if page_normalized > 0 else 0
 
-            # Función de ayuda para normalizar fechas inválidas a None según validador unificado
-            def _validate_iso8601_date(date_str, param_name):
-                if not date_str:
-                    return date_str
-                return date_str if is_valid_iso8601_date(date_str) else None
-
-            # Crear parámetros de búsqueda con mapeo
-            # Nota: Todos los parámetros numéricos ya están normalizados arriba
+            # Crear parámetros de búsqueda
             search_params = SearchUnitsParams(
-                page=page,
-                size=size,
+                page=page_for_api,
+                size=size_normalized,
                 sort_column=sort_column,
                 sort_direction=sort_direction,
                 search=search,
                 term=term,
                 unit_code=unit_code,
                 short_name=short_name,
-                node_id=_parse_id_string(node_id) if node_id else None,
-                amenity_id=_parse_id_string(amenity_id) if amenity_id else None,
-                unit_type_id=_parse_id_string(unit_type_id) if unit_type_id else None,
-                id=_parse_id_list(id) if id else None,
-                calendar_id=calendar_id,
-                role_id=role_id,
-                bedrooms=bedrooms,
-                min_bedrooms=min_bedrooms,
-                max_bedrooms=max_bedrooms,
-                bathrooms=bathrooms,
-                min_bathrooms=min_bathrooms,
-                max_bathrooms=max_bathrooms,
-                pets_friendly=pets_friendly,
-                allow_unit_rates=allow_unit_rates,
-                computed=computed,
-                inherited=inherited,
-                limited=limited,
-                is_bookable=is_bookable,
-                include_descriptions=include_descriptions,
-                is_active=is_active,
-                events_allowed=events_allowed,
-                smoking_allowed=smoking_allowed,
-                children_allowed=children_allowed,
-                is_accessible=is_accessible,
-                arrival=_validate_iso8601_date(arrival, "arrival"),
-                departure=_validate_iso8601_date(departure, "departure"),
-                content_updated_since=_validate_iso8601_date(
-                    content_updated_since, "content_updated_since"
-                ),
-                updated_since=_validate_iso8601_date(updated_since, "updated_since"),
+                node_id=_parse_id_string(node_id),
+                amenity_id=_parse_id_string(amenity_id),
+                unit_type_id=_parse_id_string(unit_type_id),
+                id=_parse_id_string(id),
+                calendar_id=calendar_id_normalized,
+                role_id=role_id_normalized,
+                bedrooms=bedrooms_normalized,
+                min_bedrooms=min_bedrooms_normalized,
+                max_bedrooms=max_bedrooms_normalized,
+                bathrooms=bathrooms_normalized,
+                min_bathrooms=min_bathrooms_normalized,
+                max_bathrooms=max_bathrooms_normalized,
+                pets_friendly=pets_friendly_normalized,
+                allow_unit_rates=allow_unit_rates_normalized,
+                computed=computed_normalized,
+                inherited=inherited_normalized,
+                limited=limited_normalized,
+                is_bookable=is_bookable_normalized,
+                include_descriptions=include_descriptions_normalized,
+                is_active=is_active_normalized,
+                events_allowed=events_allowed_normalized,
+                smoking_allowed=smoking_allowed_normalized,
+                children_allowed=children_allowed_normalized,
+                is_accessible=is_accessible_normalized,
+                arrival=arrival,
+                departure=departure,
+                content_updated_since=content_updated_since,
+                updated_since=updated_since,
                 unit_status=unit_status,
             )
 
             # Ejecutar caso de uso
             result = await use_case.execute(search_params)
+
             return result
+
         except Exception as e:
             # Manejar errores específicos de la API según documentación
             if hasattr(e, "status_code"):
                 if e.status_code == 400:
-                    # Logging adicional para 400 Bad Request
-                    import logging
-
-                    logger = logging.getLogger(__name__)
-                    logger.error(
-                        f"400 Bad Request - Params enviados: {search_params.model_dump()}"
-                    )
-                    logger.error(f"400 Bad Request - Error details: {str(e)}")
-                    logger.error(f"400 Bad Request - Error type: {type(e).__name__}")
-                    logger.error(f"400 Bad Request - Error attributes: {dir(e)}")
-
-                    # Capturar error body si está disponible
-                    error_body = getattr(e, "response_text", str(e))
-                    logger.error(f"400 Bad Request - Response body: {error_body}")
-
-                    # Intentar obtener más información del error
-                    if hasattr(e, "args") and e.args:
-                        logger.error(f"400 Bad Request - Error args: {e.args}")
-
                     raise ValidationError(
                         "Bad Request: Invalid parameters sent to Units API. "
                         "Common issues:\n"
                         "- Page must be >= 1 (1-based pagination)\n"
-                        "- Numeric parameters (bedrooms, bathrooms) must be integers or convertible strings\n"
-                        "- Boolean parameters (pets_friendly, is_active) must be 0 or 1\n"
-                        "- Date parameters must be in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)\n"
-                        "- Range parameters (min_bedrooms, max_bedrooms) must be integers\n"
-                        "- ID parameters can be single integers or comma-separated lists\n"
-                        "- Unit status must be one of: clean, dirty, occupied, inspection, inprogress\n"
-                        "- Empty string parameters are converted to None automatically\n"
+                        "- Numeric parameters must be integers or convertible strings\n"
+                        "- Boolean parameters must be 0 or 1\n"
+                        "- Date parameters must be in ISO 8601 format\n"
                         f"Error details: {str(e)}",
                         "parameters",
                     )
@@ -386,14 +486,6 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                         "The Channel API endpoint might not be available in your environment.",
                         "endpoint",
                     )
-                elif e.status_code == 409:
-                    raise ValidationError(
-                        "Conflict: Pagination limit exceeded. "
-                        "Maximum of 10,000 results (2,000 pages of size 5). "
-                        "Please use scroll parameter for large datasets or reduce page size. "
-                        "Current request exceeds the maximum allowed results.",
-                        "pagination_limit",
-                    )
                 elif e.status_code == 500:
                     raise ValidationError(
                         "Internal Server Error: API temporarily unavailable. "
@@ -401,105 +493,5 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                         "If the problem persists, check the TrackHS service status.",
                         "api",
                     )
-            raise ValidationError(f"API request failed: {str(e)}", "api")
-
-
-# Validación unificada ahora se realiza desde utils.date_validation
-
-
-# Compatibilidad retroactiva con tests que importan _is_valid_date_format
-def _is_valid_date_format(date_string: str) -> bool:  # pragma: no cover - shim
-    return is_valid_iso8601_date(date_string)
-
-
-def _parse_id_string(id_string: Union[str, int, List[int]]) -> Union[int, List[int]]:
-    """
-    Parsea un string de ID que puede ser:
-    - Un entero simple: "48" o 48
-    - Múltiples IDs separados por comas: "48,49,50"
-    - Array en formato string: "[48,49,50]"
-    - Lista de Python: [1, 2, 3]
-    """
-    # Si ya es un entero, devolverlo directamente
-    if isinstance(id_string, int):
-        return id_string
-
-    # Si ya es una lista, devolverla directamente
-    if isinstance(id_string, list):
-        return id_string
-
-    if not id_string or not str(id_string).strip():
-        raise ValidationError("ID string cannot be empty", "id")
-
-    # Limpiar espacios
-    id_string = id_string.strip()
-
-    # Si es un array en formato string, parsearlo
-    if id_string.startswith("[") and id_string.endswith("]"):
-        try:
-            # Remover corchetes y dividir por comas
-            content = id_string[1:-1].strip()
-            if not content:
-                raise ValidationError("Empty array not allowed", "id")
-            # Dividir por comas y convertir a enteros
-            ids = [int(x.strip()) for x in content.split(",")]
-            return ids if len(ids) > 1 else ids[0]
-        except ValueError:
-            raise ValidationError(f"Invalid array format: {id_string}", "id")
-
-    # Si contiene comas, es una lista de IDs
-    if "," in id_string:
-        try:
-            ids = [int(x.strip()) for x in id_string.split(",") if x.strip()]
-            if not ids:
-                raise ValidationError("No valid IDs found", "id")
-            return ids if len(ids) > 1 else ids[0]
-        except ValueError:
-            raise ValidationError(f"Invalid ID format: {id_string}", "id")
-
-    # Es un ID único
-    try:
-        return int(id_string)
-    except ValueError:
-        raise ValidationError(f"Invalid ID format: {id_string}", "id")
-
-
-def _parse_id_list(id_string: str) -> List[int]:
-    """
-    Parsea un string de IDs que puede ser:
-    - Múltiples IDs separados por comas: "48,49,50"
-    - Array en formato string: "[48,49,50]"
-    """
-    if not id_string or not str(id_string).strip():
-        raise ValidationError("ID string cannot be empty", "id")
-
-    # Limpiar espacios
-    id_string = id_string.strip()
-
-    # Si es un array en formato string, parsearlo
-    if id_string.startswith("[") and id_string.endswith("]"):
-        try:
-            # Remover corchetes y dividir por comas
-            content = id_string[1:-1].strip()
-            if not content:
-                raise ValidationError("Empty array not allowed", "id")
-            # Dividir por comas y convertir a enteros
-            return [int(x.strip()) for x in content.split(",")]
-        except ValueError:
-            raise ValidationError(f"Invalid array format: {id_string}", "id")
-
-    # Si contiene comas, es una lista de IDs
-    if "," in id_string:
-        try:
-            ids = [int(x.strip()) for x in id_string.split(",") if x.strip()]
-            if not ids:
-                raise ValidationError("No valid IDs found", "id")
-            return ids
-        except ValueError:
-            raise ValidationError(f"Invalid ID format: {id_string}", "id")
-
-    # Es un ID único, devolver como lista
-    try:
-        return [int(id_string)]
-    except ValueError:
-        raise ValidationError(f"Invalid ID format: {id_string}", "id")
+            # El error_handler wrapper se encargará de formatear el error
+            raise

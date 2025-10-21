@@ -6,7 +6,9 @@ el patrón de herramientas MCP existentes.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
+
+from pydantic import Field
 
 from trackhs_mcp.application.ports.api_client_port import ApiClientPort
 from trackhs_mcp.application.use_cases.create_work_order import CreateWorkOrderUseCase
@@ -45,106 +47,128 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
         description="Crear una nueva orden de trabajo de mantenimiento en TrackHS",
     )
     def create_maintenance_work_order(
-        date_received: str,
-        priority: Union[int, str],
-        status: str,
-        summary: str,
-        estimated_cost: Union[float, str],
-        estimated_time: Union[int, str],
-        date_scheduled: Optional[str] = None,
-        user_id: Optional[Union[int, str]] = None,
-        vendor_id: Optional[Union[int, str]] = None,
-        unit_id: Optional[Union[int, str]] = None,
-        reservation_id: Optional[Union[int, str]] = None,
-        reference_number: Optional[str] = None,
-        description: Optional[str] = None,
-        work_performed: Optional[str] = None,
-        source: Optional[str] = None,
-        source_name: Optional[str] = None,
-        source_phone: Optional[str] = None,
-        actual_time: Optional[Union[int, str]] = None,
-        block_checkin: Optional[Union[bool, str]] = None,
+        date_received: str = Field(
+            description="Date received in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15'",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            min_length=10,
+            max_length=20,
+        ),
+        priority: int = Field(
+            description="Priority level: 1=Low, 3=Medium, 5=High", ge=1, le=5
+        ),
+        status: str = Field(
+            description="Work order status. Valid: open, not-started, in-progress, completed, processed, vendor-assigned, vendor-accepted, vendor-rejected, vendor-completed, cancelled",
+            min_length=1,
+            max_length=50,
+        ),
+        summary: str = Field(
+            description="Brief summary of the work order (required, non-empty)",
+            min_length=1,
+            max_length=500,
+        ),
+        estimated_cost: float = Field(
+            description="Estimated cost in currency units (must be >= 0). Example: 150.00",
+            ge=0.0,
+        ),
+        estimated_time: int = Field(
+            description="Estimated time in minutes (must be > 0). Example: 120", ge=1
+        ),
+        date_scheduled: Optional[str] = Field(
+            default=None,
+            description="Scheduled date in ISO 8601 format. Example: '2024-01-16T09:00:00Z'",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            min_length=10,
+            max_length=20,
+        ),
+        user_id: Optional[int] = Field(
+            default=None,
+            description="ID of responsible user (positive integer). Example: 123",
+            ge=1,
+        ),
+        vendor_id: Optional[int] = Field(
+            default=None,
+            description="ID of assigned vendor (positive integer). Example: 456",
+            ge=1,
+        ),
+        unit_id: Optional[int] = Field(
+            default=None,
+            description="ID of related unit (positive integer). Example: 789",
+            ge=1,
+        ),
+        reservation_id: Optional[int] = Field(
+            default=None,
+            description="ID of related reservation (positive integer). Example: 101112",
+            ge=1,
+        ),
+        reference_number: Optional[str] = Field(
+            default=None, description="Reference number or external ID", max_length=100
+        ),
+        description: Optional[str] = Field(
+            default=None,
+            description="Detailed description of the work order",
+            max_length=2000,
+        ),
+        work_performed: Optional[str] = Field(
+            default=None, description="Description of work performed", max_length=2000
+        ),
+        source: Optional[str] = Field(
+            default=None,
+            description="Source of the work order (e.g., 'Guest Request', 'Inspection')",
+            max_length=100,
+        ),
+        source_name: Optional[str] = Field(
+            default=None, description="Name of the source person", max_length=200
+        ),
+        source_phone: Optional[str] = Field(
+            default=None,
+            description="Phone number of source person. Example: '+1234567890'",
+            max_length=50,
+        ),
+        actual_time: Optional[int] = Field(
+            default=None,
+            description="Actual time spent in minutes (must be > 0). Example: 90",
+            ge=1,
+        ),
+        block_checkin: Optional[int] = Field(
+            default=None, description="Block check-in flag: 0=no, 1=yes", ge=0, le=1
+        ),
     ) -> Dict[str, Any]:
         """
-        Crear una nueva orden de trabajo de mantenimiento.
+        Create a new maintenance work order in TrackHS.
 
-        Esta herramienta permite crear órdenes de trabajo de mantenimiento en TrackHS
-        con todos los campos requeridos y opcionales disponibles en la API.
-
-        **Campos Requeridos:**
-        - date_received: Fecha de recepción en formato ISO 8601 (ej: "2024-01-15" o "2024-01-15T10:30:00Z")
-        - priority: Prioridad de la orden (1=Baja, 3=Media, 5=Alta)
-        - status: Estado de la orden (open, not-started, in-progress, completed, processed, vendor-*, cancelled)
-        - summary: Resumen de la orden de trabajo
-        - estimated_cost: Costo estimado (debe ser >= 0)
-        - estimated_time: Tiempo estimado en minutos (debe ser > 0)
-
-        **Campos Opcionales:**
-        - date_scheduled: Fecha programada en formato ISO 8601
-        - user_id: ID del usuario responsable
-        - vendor_id: ID del proveedor asignado
-        - unit_id: ID de la unidad relacionada
-        - reservation_id: ID de la reserva relacionada
-        - reference_number: Número de referencia
-        - description: Descripción detallada
-        - work_performed: Trabajo realizado
-        - source: Fuente de la orden
-        - source_name: Nombre de la fuente
-        - source_phone: Teléfono de la fuente
-        - actual_time: Tiempo real en minutos
-        - block_checkin: Si debe bloquear el check-in (true/false)
-
-        **Ejemplos de Uso:**
-
-        # Creación básica
-        create_maintenance_work_order(
-            date_received="2024-01-15",
-            priority=5,
-            status="open",
-            summary="Reparar aire acondicionado",
-            estimated_cost=150.00,
-            estimated_time=120
-        )
-
-        # Creación completa
-        create_maintenance_work_order(
-            date_received="2024-01-15T10:30:00Z",
-            priority=3,
-            status="in-progress",
-            summary="Mantenimiento preventivo",
-            estimated_cost=200.50,
-            estimated_time=180,
-            date_scheduled="2024-01-16T09:00:00Z",
-            unit_id=123,
-            vendor_id=456,
-            description="Mantenimiento programado del sistema HVAC",
-            source="Guest Request",
-            source_name="Juan Pérez",
-            source_phone="+1234567890",
-            block_checkin=True
-        )
-
-        **Estados Válidos:**
-        - open: Abierta
-        - not-started: No iniciada
-        - in-progress: En progreso
-        - completed: Completada
-        - processed: Procesada
-        - vendor-assigned: Asignada a proveedor
-        - vendor-accepted: Aceptada por proveedor
-        - vendor-rejected: Rechazada por proveedor
-        - vendor-completed: Completada por proveedor
-        - cancelled: Cancelada
-
-        **Prioridades:**
-        - 1: Baja prioridad
-        - 3: Media prioridad
-        - 5: Alta prioridad
-
-        Returns:
-            Dict con la orden de trabajo creada incluyendo ID, fechas, y metadatos
+        Creates work orders with required fields (date, priority, status, summary, costs) and
+        optional fields (scheduling, assignments, descriptions). Validates all inputs according
+        to API requirements. Returns complete work order data with ID and metadata.
         """
         try:
+            # Detectar y convertir FieldInfo objects a None (cuando se llama directamente sin FastMCP)
+            if type(date_scheduled).__name__ == "FieldInfo":
+                date_scheduled = None
+            if type(user_id).__name__ == "FieldInfo":
+                user_id = None
+            if type(vendor_id).__name__ == "FieldInfo":
+                vendor_id = None
+            if type(unit_id).__name__ == "FieldInfo":
+                unit_id = None
+            if type(reservation_id).__name__ == "FieldInfo":
+                reservation_id = None
+            if type(reference_number).__name__ == "FieldInfo":
+                reference_number = None
+            if type(description).__name__ == "FieldInfo":
+                description = None
+            if type(work_performed).__name__ == "FieldInfo":
+                work_performed = None
+            if type(source).__name__ == "FieldInfo":
+                source = None
+            if type(source_name).__name__ == "FieldInfo":
+                source_name = None
+            if type(source_phone).__name__ == "FieldInfo":
+                source_phone = None
+            if type(actual_time).__name__ == "FieldInfo":
+                actual_time = None
+            if type(block_checkin).__name__ == "FieldInfo":
+                block_checkin = None
+
             # Normalizar tipos de entrada
             priority = normalize_string_to_int(priority)
             estimated_cost = normalize_string_to_float(estimated_cost)

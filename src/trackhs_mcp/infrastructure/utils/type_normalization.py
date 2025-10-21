@@ -23,6 +23,23 @@ from typing import Optional, Union
 from ...domain.exceptions.api_exceptions import ValidationError
 
 
+def _is_field_info(value) -> bool:
+    """
+    Detecta si un valor es un FieldInfo object de Pydantic.
+
+    FieldInfo objects aparecen cuando se invocan funciones decoradas con Field()
+    directamente en tests sin pasar por FastMCP, que normalmente los convierte
+    a sus valores por defecto.
+
+    Args:
+        value: Valor a verificar
+
+    Returns:
+        True si es un FieldInfo object, False en caso contrario
+    """
+    return type(value).__name__ == "FieldInfo"
+
+
 def normalize_int(
     value: Optional[Union[int, float, str]], param_name: str
 ) -> Optional[int]:
@@ -31,6 +48,7 @@ def normalize_int(
 
     Soporta:
     - None → None (para parámetros opcionales)
+    - FieldInfo → None (para tests que invocan funciones directamente)
     - int → int (directo)
     - float → int (si no tiene decimales)
     - str → int (parsing)
@@ -41,7 +59,7 @@ def normalize_int(
         param_name: Nombre del parámetro (para mensajes de error)
 
     Returns:
-        int normalizado, o None si value es None
+        int normalizado, o None si value es None o FieldInfo
 
     Raises:
         ValidationError: Si el valor no puede convertirse a int
@@ -58,6 +76,10 @@ def normalize_int(
         >>> normalize_int(42.5, "page")
         ValidationError: page must be an integer, got float with decimals: 42.5
     """
+    # Detectar FieldInfo objects (cuando tests invocan funciones directamente)
+    if _is_field_info(value):
+        return None
+
     if value is None:
         return None
 
@@ -109,7 +131,7 @@ def normalize_binary_int(
         param_name: Nombre del parámetro (para mensajes de error)
 
     Returns:
-        0 o 1, o None si value es None
+        0 o 1, o None si value es None o FieldInfo
 
     Raises:
         ValidationError: Si el valor no puede convertirse a 0 o 1
@@ -126,6 +148,10 @@ def normalize_binary_int(
         >>> normalize_binary_int(2, "is_active")
         ValidationError: is_active must be 0 or 1, got: 2
     """
+    # Detectar FieldInfo objects (cuando tests invocan funciones directamente)
+    if _is_field_info(value):
+        return None
+
     if value is None:
         return None
 

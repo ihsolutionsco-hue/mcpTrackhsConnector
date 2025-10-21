@@ -3,9 +3,9 @@ Herramienta MCP para buscar amenidades en Track HS Channel API
 Basado en la especificación completa de la API Get Unit Amenities Collection
 """
 
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
@@ -23,90 +23,79 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
     @mcp.tool(name="search_amenities")
     @error_handler("search_amenities")
     async def search_amenities(
-        page: Union[int, float, str] = 1,
-        size: Union[int, float, str] = 25,
+        page: int = Field(
+            default=1,
+            description="Page number (1-based indexing). Max 10,000 total results.",
+            ge=1,
+            le=10000,
+        ),
+        size: int = Field(
+            default=25, description="Items per page. Max 1,000 per page.", ge=1, le=1000
+        ),
         sort_column: Literal[
             "id", "order", "isPublic", "publicSearchable", "isFilterable", "createdAt"
-        ] = "order",
-        sort_direction: Literal["asc", "desc"] = "asc",
-        search: Optional[str] = None,
-        group_id: Optional[Union[int, float, str]] = None,
-        is_public: Optional[Union[int, float, str]] = None,
-        public_searchable: Optional[Union[int, float, str]] = None,
-        is_filterable: Optional[Union[int, float, str]] = None,
+        ] = Field(
+            default="order",
+            description="Field to sort by. Options: id, order, isPublic, publicSearchable, isFilterable, createdAt",
+        ),
+        sort_direction: Literal["asc", "desc"] = Field(
+            default="asc",
+            description="Sort direction: 'asc' (ascending) or 'desc' (descending)",
+        ),
+        search: Optional[str] = Field(
+            default=None,
+            description="Full-text search in amenity ID and name fields",
+            max_length=200,
+        ),
+        group_id: Optional[int] = Field(
+            default=None,
+            description="Filter by amenity group ID (positive integer)",
+            ge=1,
+        ),
+        is_public: Optional[int] = Field(
+            default=None,
+            description="Filter by public status: 0=private, 1=public",
+            ge=0,
+            le=1,
+        ),
+        public_searchable: Optional[int] = Field(
+            default=None,
+            description="Filter by searchable status: 0=not searchable, 1=searchable",
+            ge=0,
+            le=1,
+        ),
+        is_filterable: Optional[int] = Field(
+            default=None,
+            description="Filter by filterable status: 0=not filterable, 1=filterable",
+            ge=0,
+            le=1,
+        ),
     ):
         """
-        Search amenities in Track HS Channel API with comprehensive filtering options.
+        Search amenities in Track HS Channel API with filtering and pagination.
 
-        This MCP tool provides advanced amenity search capabilities with full Channel API
-        compatibility, including pagination, filtering, sorting, and comprehensive
-        amenity information retrieval.
-
-        **Key Features:**
-        - ✅ Full Channel API compatibility with all parameters
-        - ✅ Advanced pagination (limited to 10k total results)
-        - ✅ Comprehensive filtering (groups, public status, etc.)
-        - ✅ Flexible sorting options
-        - ✅ Robust error handling
-        - ✅ MCP-optimized for AI model integration
-
-        **Examples:**
-
-        # Basic search
-        search_amenities(page=1, size=25)
-
-        # Search by group
-        search_amenities(
-            group_id=1,
-            is_public=1,
-            public_searchable=1
-        )
-
-        # Search with sorting
-        search_amenities(
-            sort_column="name",
-            sort_direction="asc",
-            search="pool"
-        )
-
-        # Search with filters
-        search_amenities(
-            is_public=1,
-            is_filterable=1,
-            public_searchable=1
-        )
-
-        **Parameters:**
-        - page: Page number (1-based, max 10k total results)
-        - size: Page size (max 1000, limited to 10k total results)
-        - sort_column: Sort by field (id, order, isPublic, publicSearchable, isFilterable, createdAt)
-        - sort_direction: Sort direction (asc/desc)
-        - search: Text search in id and/or name
-        - group_id: Filter by group ID
-        - is_public: Public amenities (0/1)
-        - public_searchable: Publicly searchable amenities (0/1)
-        - is_filterable: Filterable amenities (0/1)
-
-        **Returns:**
-        Complete amenity data with embedded objects and pagination information.
-
-        **Error Handling:**
-        - Validates all parameters according to Channel API specification
-        - Handles API errors (401, 403, 500) with descriptive messages
-        - Validates parameter formats strictly
-        - Enforces 10k total results limit
-        - Validates boolean parameters (0/1 only)
-
-        **Common Errors:**
-        - Page/size: Must be positive integers (page=1, size=25)
-        - Boolean flags: Use 0 or 1 (is_public=1, public_searchable=1)
-        - Sort column: Must be one of: id, order, isPublic, publicSearchable, isFilterable, createdAt
-        - Group ID: Must be positive integer (group_id=1)
+        Provides comprehensive amenity search with filtering by group, public status,
+        searchability, and filterability. Supports pagination (max 10k results) and
+        flexible sorting options. Returns complete amenity data with embedded objects.
         """
+        # Detectar y aplicar defaults para FieldInfo objects (cuando se llama directamente sin FastMCP)
+        if type(sort_column).__name__ == "FieldInfo":
+            sort_column = "order"
+        if type(sort_direction).__name__ == "FieldInfo":
+            sort_direction = "asc"
+        if type(search).__name__ == "FieldInfo":
+            search = None
+
         # Normalizar parámetros numéricos primero (para compatibilidad JSON-RPC)
         page = normalize_int(page, "page")
         size = normalize_int(size, "size")
         group_id = normalize_int(group_id, "group_id")
+
+        # Asegurar defaults para page y size si normalize_int retorna None (FieldInfo objects)
+        if page is None:
+            page = 1
+        if size is None:
+            size = 25
 
         # Normalizar flags booleanos (0/1)
         is_public = normalize_binary_int(is_public, "is_public")

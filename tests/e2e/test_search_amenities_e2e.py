@@ -100,8 +100,18 @@ class TestSearchAmenitiesE2E:
         self, setup_tool, mock_api_client
     ):
         """Test E2E: Búsqueda básica retorna estructura esperada"""
-        # Act
-        result = await setup_tool()
+        # Act - IMPORTANTE: Siempre pasar todos los parámetros explícitamente (required y optional)
+        result = await setup_tool(
+            page=1,
+            size=25,
+            sort_column="order",
+            sort_direction="asc",
+            search=None,
+            group_id=None,
+            is_public=None,
+            public_searchable=None,
+            is_filterable=None,
+        )
 
         # Assert - Verificar comportamiento, no implementación
         assert result is not None
@@ -120,9 +130,17 @@ class TestSearchAmenitiesE2E:
         self, setup_tool, mock_api_client
     ):
         """Test E2E: Búsqueda con filtros funciona correctamente"""
-        # Act
+        # Act - Pasar TODOS los parámetros explícitamente
         result = await setup_tool(
-            group_id=1, is_public=1, public_searchable=1, is_filterable=1
+            page=1,
+            size=25,
+            sort_column="order",
+            sort_direction="asc",
+            search=None,  # IMPORTANTE: Pasar también los string opcionales
+            group_id=1,
+            is_public=1,
+            public_searchable=1,
+            is_filterable=1,
         )
 
         # Assert - Verificar comportamiento
@@ -145,7 +163,7 @@ class TestSearchAmenitiesE2E:
         """Test E2E: Búsqueda con ordenamiento"""
         # Act
         result = await setup_tool(
-            sort_column="id", sort_direction="desc", search="pool"
+            page=1, size=25, sort_column="id", sort_direction="desc", search="pool"
         )
 
         # Assert
@@ -162,7 +180,9 @@ class TestSearchAmenitiesE2E:
     async def test_search_with_pagination(self, setup_tool, mock_api_client):
         """Test E2E: Búsqueda con paginación"""
         # Act
-        result = await setup_tool(page=2, size=50)
+        result = await setup_tool(
+            page=2, size=50, sort_column="order", sort_direction="asc"
+        )
 
         # Assert
         assert result is not None
@@ -215,14 +235,14 @@ class TestSearchAmenitiesE2E:
         with pytest.raises(
             Exception, match="Unauthorized: Invalid authentication credentials"
         ):
-            await setup_tool()
+            await setup_tool(page=1, size=25, sort_column="order", sort_direction="asc")
 
     @pytest.mark.asyncio
     async def test_search_handles_validation_errors(self, setup_tool, mock_api_client):
         """Test E2E: Búsqueda maneja errores de validación"""
         # Act & Assert
         with pytest.raises(Exception, match="Page debe ser mayor o igual a 1"):
-            await setup_tool(page=0)
+            await setup_tool(page=0, size=25, sort_column="order", sort_direction="asc")
 
     @pytest.mark.asyncio
     async def test_search_handles_invalid_boolean_params(
@@ -231,7 +251,9 @@ class TestSearchAmenitiesE2E:
         """Test E2E: Búsqueda maneja parámetros booleanos inválidos"""
         # Act & Assert
         with pytest.raises(Exception, match="is_public must be 0 or 1"):
-            await setup_tool(is_public=2)
+            await setup_tool(
+                page=1, size=25, sort_column="order", sort_direction="asc", is_public=2
+            )
 
     @pytest.mark.asyncio
     async def test_search_handles_invalid_sort_column(
@@ -240,7 +262,9 @@ class TestSearchAmenitiesE2E:
         """Test E2E: Búsqueda maneja columna de ordenamiento inválida"""
         # Act & Assert
         with pytest.raises(Exception, match="API request failed"):
-            await setup_tool(sort_column="invalid_column")
+            await setup_tool(
+                page=1, size=25, sort_column="invalid_column", sort_direction="asc"
+            )
 
     @pytest.mark.asyncio
     async def test_search_handles_pagination_limit(self, setup_tool, mock_api_client):
@@ -290,7 +314,9 @@ class TestSearchAmenitiesE2E:
     ):
         """Test E2E: Validación de estructura de respuesta"""
         # Act
-        result = await setup_tool()
+        result = await setup_tool(
+            page=1, size=25, sort_column="order", sort_direction="asc"
+        )
 
         # Assert - Verificar estructura completa de respuesta
         assert "_embedded" in result
@@ -318,6 +344,8 @@ class TestSearchAmenitiesE2E:
         result = await setup_tool(
             page="2",  # String que debe convertirse a int
             size=50.0,  # Float que debe convertirse a int
+            sort_column="order",
+            sort_direction="asc",
             group_id="1",  # String que debe convertirse a int
             is_public="1",  # String que debe convertirse a 0/1
             public_searchable=1.0,  # Float que debe convertirse a 0/1

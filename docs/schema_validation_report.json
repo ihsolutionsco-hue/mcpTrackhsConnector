@@ -1,0 +1,132 @@
+[
+  {
+    "tool": "search_reservations",
+    "issues": [
+      "[COMPAT] Propiedad 'search' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'tags' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'node_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'unit_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'contact_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'travel_agent_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'campaign_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'user_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'unit_type_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'rate_type_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'reservation_type_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'booked_start' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'booked_end' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'arrival_start' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'arrival_end' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'departure_start' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'departure_end' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'updated_since' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'status' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'in_house_today' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'group_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'checkin_office_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'scroll' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[INFO] Recomendado: agregar 'additionalProperties: false'"
+    ]
+  },
+  {
+    "tool": "get_reservation",
+    "issues": [
+      "[INFO] Recomendado: agregar 'additionalProperties: false'"
+    ]
+  },
+  {
+    "tool": "get_folio",
+    "issues": [
+      "[INFO] Recomendado: agregar 'additionalProperties: false'"
+    ]
+  },
+  {
+    "tool": "search_units",
+    "issues": [
+      "[COMPAT] Propiedad 'search' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'term' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'unit_code' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'short_name' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'node_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'amenity_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'unit_type_id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'id' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'calendar_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'role_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'bedrooms' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'min_bedrooms' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'max_bedrooms' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'bathrooms' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'min_bathrooms' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'max_bathrooms' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'pets_friendly' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'allow_unit_rates' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'computed' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'inherited' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'limited' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'is_bookable' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'include_descriptions' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'is_active' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'events_allowed' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'smoking_allowed' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'children_allowed' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'is_accessible' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'arrival' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'departure' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'content_updated_since' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'updated_since' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'unit_status' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[INFO] Recomendado: agregar 'additionalProperties: false'"
+    ]
+  },
+  {
+    "tool": "search_amenities",
+    "issues": [
+      "[COMPAT] Propiedad 'search' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'group_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'is_public' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'public_searchable' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'is_filterable' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[INFO] Recomendado: agregar 'additionalProperties: false'"
+    ]
+  },
+  {
+    "tool": "create_maintenance_work_order",
+    "issues": [
+      "[COMPAT] Propiedad 'date_scheduled' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'user_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'vendor_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'unit_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'reservation_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'reference_number' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'description' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'work_performed' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'source' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'source_name' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'source_phone' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'actual_time' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'block_checkin' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[INFO] Recomendado: agregar 'additionalProperties: false'"
+    ]
+  },
+  {
+    "tool": "create_housekeeping_work_order",
+    "issues": [
+      "[COMPAT] Propiedad 'unit_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'unit_block_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'is_inspection' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'clean_type_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'time_estimate' tiene anyOf con 2 tipos: ['number', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'actual_time' tiene anyOf con 2 tipos: ['number', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'user_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'vendor_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'reservation_id' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'is_turn' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'is_manual' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'charge_owner' tiene anyOf con 2 tipos: ['integer', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'comments' tiene anyOf con 2 tipos: ['string', 'null']. Algunos clientes pueden tener problemas.",
+      "[COMPAT] Propiedad 'cost' tiene anyOf con 2 tipos: ['number', 'null']. Algunos clientes pueden tener problemas.",
+      "[INFO] Recomendado: agregar 'additionalProperties: false'"
+    ]
+  }
+]

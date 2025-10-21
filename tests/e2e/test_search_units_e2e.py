@@ -92,7 +92,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -134,7 +134,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 10,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -179,7 +179,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -232,7 +232,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -275,7 +275,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -312,7 +312,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "desc",
@@ -350,7 +350,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -391,7 +391,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -433,7 +433,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -483,7 +483,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,
+                "page": 0,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -523,7 +523,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 2,
+                "page": 1,  # page=2 (1-based) → page=1 (0-based)
                 "size": 100,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -534,11 +534,11 @@ class TestSearchUnitsE2E:
     async def test_e2e_search_validation_errors(self, setup_tool):
         """Test E2E de errores de validación"""
         # Test página negativa
-        with pytest.raises(Exception, match="API request failed"):
+        with pytest.raises(Exception, match="Page must be >= 1"):
             await setup_tool(page=-1)
 
         # Test tamaño inválido
-        with pytest.raises(Exception, match="API request failed"):
+        with pytest.raises(Exception, match="Size must be >= 1"):
             await setup_tool(size=0)
 
         # Test límite total de resultados (ahora con page=102 para exceder 10k)
@@ -552,7 +552,9 @@ class TestSearchUnitsE2E:
             await setup_tool(arrival="01/01/2024")
 
         # Test rango de habitaciones inválido
-        with pytest.raises(Exception, match="min_bedrooms must be <= max_bedrooms"):
+        with pytest.raises(
+            Exception, match="min_bedrooms cannot be greater than max_bedrooms"
+        ):
             await setup_tool(min_bedrooms=3, max_bedrooms=1)
 
     @pytest.mark.asyncio

@@ -1,9 +1,11 @@
 """
 Herramienta MCP para obtener una reserva específica por ID en TrackHS API V2
-Basado en el endpoint GET /v2/pms/reservations/{reservationId}
+Versión mejorada con tipos específicos siguiendo mejores prácticas MCP
 """
 
 from typing import TYPE_CHECKING, Any, Dict
+
+from pydantic import Field
 
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
@@ -16,71 +18,34 @@ from ..utils.user_friendly_messages import format_required_error, format_type_er
 
 
 def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
-    """Registra la herramienta get_reservation_v2"""
+    """Registra la herramienta get_reservation_v2 mejorada"""
 
     @mcp.tool(name="get_reservation")
     @error_handler("get_reservation")
-    async def get_reservation_v2(reservation_id: str) -> Dict[str, Any]:
+    async def get_reservation_v2(
+        reservation_id: str = Field(
+            description=(
+                "Unique reservation ID (positive integer as string). "
+                "Example: '12345' or '37152796'"
+            ),
+            pattern=r"^\d+$",
+            min_length=1,
+            max_length=20,
+        )
+    ) -> Dict[str, Any]:
         """
-        Obtiene una reserva específica por ID desde TrackHS API V2.
+        Get complete reservation details by ID from TrackHS API V2.
 
-        Esta herramienta MCP permite obtener todos los detalles de una reserva
-        individual, incluyendo información financiera completa, datos embebidos
-        de unidad, contacto, políticas y más.
+        Retrieves all information for a specific reservation including financial data,
+        embedded objects (unit, contact, policies), occupants, and metadata.
 
-        **Características Principales:**
-        - ✅ Obtiene reserva completa por ID
-        - ✅ Incluye datos embebidos (unit, contact, policies, user, etc.)
-        - ✅ Información financiera detallada (guest_breakdown, owner_breakdown)
-        - ✅ Datos de ocupantes y políticas
-        - ✅ Manejo robusto de errores
-        - ✅ Optimizado para integración con modelos de IA
+        Returns:
+            Complete reservation object with guest information, unit details, pricing,
+            policies, payment breakdowns, and all embedded data.
 
-        **Casos de Uso:**
-        - Verificar detalles de una reserva específica
-        - Análisis financiero de reserva individual
-        - Validación de estado y políticas
-        - Extracción de información de contacto
-        - Auditoría de reservas
-
-        **Ejemplos de Uso:**
-
-        # Obtener reserva por ID
-        get_reservation_v2(reservation_id=12345)
-
-        # Verificar estado de reserva
-        get_reservation_v2(reservation_id=67890)
-
-        # Análisis financiero
-        get_reservation_v2(reservation_id=11111)
-
-        **Parámetros:**
-        - reservation_id: ID único de la reserva (string que representa un entero positivo requerido)
-
-        **Respuesta:**
-        Objeto completo de reserva con:
-        - Datos básicos: ID, estado, fechas, huésped, unidad
-        - Información financiera: breakdowns, tarifas, impuestos, pagos
-        - Datos embebidos: unit, contact, policies, user, type, rateType
-        - Ocupantes y políticas de garantía/cancelación
-        - Enlaces y metadatos
-
-        **Manejo de Errores:**
-        - 401: Credenciales inválidas o expiradas
-        - 403: Permisos insuficientes para acceder a la reserva
-        - 404: Reserva no encontrada con el ID especificado
-        - 500: Error interno del servidor de TrackHS
-
-        **Notas Importantes:**
-        - El ID debe ser un string que represente un entero positivo válido
-        - La respuesta incluye todos los datos embebidos disponibles
-        - Los datos financieros están en formato de string para precisión
-        - Las fechas están en formato ISO 8601
-
-        **Common Errors:**
-        - reservation_id: Required parameter (reservation_id="37152796")
-        - ID format: Must be positive integer as string ("12345")
-        - Authentication: Check TRACKHS_USERNAME and TRACKHS_PASSWORD
+        Raises:
+            ValidationError: If reservation_id is invalid or reservation not found
+            APIError: If API request fails (401, 403, 404, 500)
         """
         # Validar parámetros de entrada
         if not reservation_id or not reservation_id.strip():

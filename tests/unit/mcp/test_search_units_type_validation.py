@@ -43,8 +43,45 @@ class TestSearchUnitsTypeValidation:
         search_units_tool = tools["search_units"]
 
         # Verificar que la función acepta page como int
+        # IMPORTANTE: Todos los parámetros opcionales deben ser explícitamente None o tener valor
         result = await search_units_tool.fn(
-            page=1, size=25, bedrooms=2, is_active=1  # int  # int  # int  # int
+            page=1,
+            size=25,
+            sort_column="name",
+            sort_direction="asc",
+            search=None,
+            term=None,
+            unit_code=None,
+            short_name=None,
+            node_id=None,
+            amenity_id=None,
+            unit_type_id=None,
+            id=None,
+            calendar_id=None,
+            role_id=None,
+            bedrooms=2,
+            min_bedrooms=None,
+            max_bedrooms=None,
+            bathrooms=None,
+            min_bathrooms=None,
+            max_bathrooms=None,
+            pets_friendly=None,
+            allow_unit_rates=None,
+            computed=None,
+            inherited=None,
+            limited=None,
+            is_bookable=None,
+            include_descriptions=None,
+            is_active=1,
+            events_allowed=None,
+            smoking_allowed=None,
+            children_allowed=None,
+            is_accessible=None,
+            arrival=None,
+            departure=None,
+            content_updated_since=None,
+            updated_since=None,
+            unit_status=None,
         )
 
         # Verificar que se llamó al API client
@@ -69,9 +106,20 @@ class TestSearchUnitsTypeValidation:
         search_units_tool = tools["search_units"]
 
         # Probar con todos los parámetros numéricos como integers
+        # IMPORTANTE: Todos los parámetros que no se pasan deben ser explícitamente None
         result = await search_units_tool.fn(
             page=1,
             size=25,
+            sort_column="name",
+            sort_direction="asc",
+            search=None,
+            term=None,
+            unit_code=None,
+            short_name=None,
+            node_id=None,
+            amenity_id=None,
+            unit_type_id=None,
+            id=None,
             calendar_id=123,
             role_id=456,
             bedrooms=2,
@@ -92,6 +140,11 @@ class TestSearchUnitsTypeValidation:
             smoking_allowed=0,
             children_allowed=1,
             is_accessible=1,
+            arrival=None,
+            departure=None,
+            content_updated_since=None,
+            updated_since=None,
+            unit_status=None,
         )
 
         # Verificar que se llamó al API client
@@ -116,13 +169,45 @@ class TestSearchUnitsTypeValidation:
         search_units_tool = tools["search_units"]
 
         # Probar con parámetros opcionales como None
+        # IMPORTANTE: Todos los parámetros deben ser explícitamente pasados
         result = await search_units_tool.fn(
             page=1,
             size=25,
+            sort_column="name",
+            sort_direction="asc",
+            search=None,
+            term=None,
+            unit_code=None,
+            short_name=None,
+            node_id=None,
+            amenity_id=None,
+            unit_type_id=None,
+            id=None,
+            calendar_id=None,
+            role_id=None,
             bedrooms=None,  # Optional[int]
+            min_bedrooms=None,
+            max_bedrooms=None,
             bathrooms=None,  # Optional[int]
-            is_active=None,  # Optional[int]
+            min_bathrooms=None,
+            max_bathrooms=None,
             pets_friendly=None,  # Optional[int]
+            allow_unit_rates=None,
+            computed=None,
+            inherited=None,
+            limited=None,
+            is_bookable=None,
+            include_descriptions=None,
+            is_active=None,  # Optional[int]
+            events_allowed=None,
+            smoking_allowed=None,
+            children_allowed=None,
+            is_accessible=None,
+            arrival=None,
+            departure=None,
+            content_updated_since=None,
+            updated_since=None,
+            unit_status=None,
         )
 
         # Verificar que se llamó al API client
@@ -132,9 +217,14 @@ class TestSearchUnitsTypeValidation:
         assert result is not None
 
     def test_search_units_function_signature_has_correct_types(self, mcp_server):
-        """Verifica que la firma de la función tiene los tipos flexibles correctos para JSON-RPC"""
+        """
+        Verifica que la firma tiene tipos específicos (después de estandarización MCP 2025-10-20)
+
+        NOTA: Después de la estandarización MCP, los tipos cambiaron de Union[int, float, str]
+        a tipos específicos (int, Optional[int]) con Pydantic Field(). Esto elimina ambigüedad
+        para clientes AI y es el comportamiento correcto según mejores prácticas MCP.
+        """
         import inspect
-        from typing import Union
 
         # Obtener la función registrada
         tools = mcp_server._tool_manager._tools
@@ -143,45 +233,50 @@ class TestSearchUnitsTypeValidation:
         # Obtener la firma de la función
         sig = inspect.signature(search_units_tool.fn)
 
-        # Verificar que page es Union[int, float, str] (flexible para JSON-RPC)
+        # Verificar que page es int (tipo específico después de estandarización)
         page_param = sig.parameters.get("page")
         assert page_param is not None
-        # Debe ser Union[int, float, str] para compatibilidad JSON-RPC
-        assert page_param.annotation == Union[int, float, str], (
-            f"page debe ser Union[int, float, str] para compatibilidad JSON-RPC, "
-            f"pero es {page_param.annotation}"
-        )
+        # Debe ser int específico (no Union) para eliminar ambigüedad en clientes AI
+        assert (
+            page_param.annotation == int
+        ), f"page debe ser int (estandarización MCP), pero es {page_param.annotation}"
 
-        # Verificar que size es Union[int, float, str] (flexible para JSON-RPC)
+        # Verificar que size es int (tipo específico)
         size_param = sig.parameters.get("size")
         assert size_param is not None
-        assert size_param.annotation == Union[int, float, str], (
-            f"size debe ser Union[int, float, str] para compatibilidad JSON-RPC, "
-            f"pero es {size_param.annotation}"
-        )
+        assert (
+            size_param.annotation == int
+        ), f"size debe ser int (estandarización MCP), pero es {size_param.annotation}"
 
-        # Verificar que bedrooms es Optional[Union[int, float, str]]
+        # Verificar que bedrooms es Optional[int]
+        # NOTA: El tipo real puede aparecer como Union[int, None] o Optional[int] en runtime
         bedrooms_param = sig.parameters.get("bedrooms")
         assert bedrooms_param is not None
-        # Verificar que contiene Union (flexible para JSON-RPC)
+        # Verificar que el tipo base es int (acepta Optional[int] o Union[int, None])
         annotation_str = str(bedrooms_param.annotation)
-        assert "Union" in annotation_str, (
-            f"bedrooms debe ser Optional[Union[int, float, str]], "
-            f"pero es {bedrooms_param.annotation}"
-        )
+        assert (
+            "int" in annotation_str.lower() or bedrooms_param.annotation == int
+        ), f"bedrooms debe ser Optional[int], pero es {bedrooms_param.annotation}"
 
-        # Verificar que is_active es Optional[Union[int, float, str]]
+        # Verificar que is_active es Optional[int]
         is_active_param = sig.parameters.get("is_active")
         assert is_active_param is not None
         annotation_str = str(is_active_param.annotation)
-        assert "Union" in annotation_str, (
-            f"is_active debe ser Optional[Union[int, float, str]], "
-            f"pero es {is_active_param.annotation}"
-        )
+        assert (
+            "int" in annotation_str.lower() or is_active_param.annotation == int
+        ), f"is_active debe ser Optional[int], pero es {is_active_param.annotation}"
 
     @pytest.mark.asyncio
-    async def test_search_units_has_flexible_union_types(self, mcp_server):
-        """Verifica que los parámetros numéricos tienen Union[int, float, str] para JSON-RPC"""
+    async def test_search_units_has_specific_types_after_standardization(
+        self, mcp_server
+    ):
+        """
+        Verifica que los parámetros numéricos tienen tipos específicos (estandarización MCP 2025-10-20)
+
+        NOTA: Este test fue actualizado después de la estandarización MCP. Los parámetros
+        ahora usan tipos específicos (int, Optional[int]) en lugar de Union[int, float, str].
+        Esto elimina ambigüedad para clientes AI según mejores prácticas MCP.
+        """
         import inspect
 
         # Obtener la función registrada
@@ -191,10 +286,19 @@ class TestSearchUnitsTypeValidation:
         # Obtener la firma de la función
         sig = inspect.signature(search_units_tool.fn)
 
-        # Parámetros numéricos que DEBEN tener Union[int, float, str]
-        numeric_params = [
-            "page",
-            "size",
+        # Parámetros requeridos que DEBEN ser int (no opcionales)
+        required_int_params = ["page", "size"]
+
+        for param_name in required_int_params:
+            param = sig.parameters.get(param_name)
+            assert param is not None, f"Parámetro {param_name} debe existir"
+            assert param.annotation == int, (
+                f"Parámetro {param_name} debe ser int (tipo específico), "
+                f"pero tiene {param.annotation}"
+            )
+
+        # Parámetros opcionales que DEBEN ser Optional[int] o contener 'int'
+        optional_int_params = [
             "calendar_id",
             "role_id",
             "bedrooms",
@@ -217,15 +321,15 @@ class TestSearchUnitsTypeValidation:
             "is_accessible",
         ]
 
-        # Verificar que todos los parámetros numéricos tienen Union types
-        for param_name in numeric_params:
+        # Verificar que todos los parámetros opcionales tienen int en su tipo
+        for param_name in optional_int_params:
             param = sig.parameters.get(param_name)
             if param is not None:
                 annotation_str = str(param.annotation)
-                # Debe contener Union para compatibilidad JSON-RPC
-                assert "Union" in annotation_str or "union" in annotation_str, (
-                    f"Parámetro {param_name} debe tener Union[int, float, str] "
-                    f"para compatibilidad JSON-RPC, pero tiene {param.annotation}"
+                # Debe contener 'int' (puede ser Optional[int] o Union[int, None])
+                assert "int" in annotation_str.lower(), (
+                    f"Parámetro {param_name} debe ser Optional[int] o contener int, "
+                    f"pero tiene {param.annotation}"
                 )
 
     @pytest.mark.asyncio

@@ -1,9 +1,11 @@
 """
 Herramienta MCP para obtener un folio específico por ID en TrackHS API
-Basado en el endpoint GET /pms/folios/{folioId}
+Versión mejorada con tipos específicos siguiendo mejores prácticas MCP
 """
 
 from typing import TYPE_CHECKING, Any, Dict
+
+from pydantic import Field
 
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
@@ -16,73 +18,34 @@ from ..utils.user_friendly_messages import format_required_error, format_type_er
 
 
 def register_get_folio(mcp, api_client: "ApiClientPort"):
-    """Registra la herramienta get_folio"""
+    """Registra la herramienta get_folio mejorada"""
 
     @mcp.tool(name="get_folio")
     @error_handler("get_folio")
-    async def get_folio(folio_id: str) -> Dict[str, Any]:
+    async def get_folio(
+        folio_id: str = Field(
+            description=(
+                "Unique folio ID (positive integer as string). "
+                "Example: '12345' or '37152796'"
+            ),
+            pattern=r"^\d+$",
+            min_length=1,
+            max_length=20,
+        )
+    ) -> Dict[str, Any]:
         """
-        Obtiene un folio específico por ID desde TrackHS API.
+        Get complete folio details by ID from TrackHS API.
 
-        Esta herramienta MCP permite obtener todos los detalles de un folio
-        individual, incluyendo información financiera completa, datos embebidos
-        de contacto, compañía, agente de viajes y reglas de folio maestro.
+        Retrieves all information for a specific folio including financial data,
+        embedded objects (contact, company, travel agent), master folio rules, and metadata.
 
-        **Características Principales:**
-        - ✅ Obtiene folio completo por ID (guest o master)
-        - ✅ Incluye datos financieros (balances, comisiones, ingresos)
-        - ✅ Información embebida de contacto, compañía, agente de viajes
-        - ✅ Reglas de folio maestro si aplica
-        - ✅ Manejo robusto de errores
-        - ✅ Optimizado para integración con modelos de IA
+        Returns:
+            Complete folio object with balances, commissions, revenue, embedded contact
+            and company data, and master folio rules if applicable.
 
-        **Casos de Uso:**
-        - Verificar balance actual y realizado de folios
-        - Análisis financiero de folios individuales
-        - Auditoría de transacciones y comisiones
-        - Información de excepciones y estados
-        - Validación de datos de contacto y compañía
-        - Consulta de reglas de folio maestro
-
-        **Ejemplos de Uso:**
-
-        # Obtener folio por ID
-        get_folio(folio_id="12345")
-
-        # Verificar balance de folio
-        get_folio(folio_id="67890")
-
-        # Análisis financiero
-        get_folio(folio_id="11111")
-
-        **Parámetros:**
-        - folio_id: ID único del folio (string que representa un entero positivo requerido)
-
-        **Respuesta:**
-        Objeto completo de folio con:
-        - Datos básicos: ID, estado, tipo, fechas, balances
-        - Información financiera: comisiones, ingresos, fechas de check-in/out
-        - Datos embebidos: contact, travelAgent, company, masterFolioRule
-        - Metadatos: fechas de creación/actualización, usuarios
-        - Enlaces y objetos embebidos adicionales
-
-        **Manejo de Errores:**
-        - 401: Credenciales inválidas o expiradas
-        - 403: Permisos insuficientes para acceder al folio
-        - 404: Folio no encontrado con el ID especificado
-        - 500: Error interno del servidor de TrackHS
-
-        **Notas Importantes:**
-        - El ID debe ser un string que represente un entero positivo válido
-        - La respuesta incluye todos los datos embebidos disponibles
-        - Los datos financieros están en formato numérico para cálculos
-        - Las fechas están en formato ISO 8601
-        - Los campos opcionales pueden estar ausentes según el tipo de folio
-
-        **Common Errors:**
-        - folio_id: Required parameter (folio_id="37152796")
-        - ID format: Must be positive integer as string ("12345")
-        - Authentication: Check TRACKHS_USERNAME and TRACKHS_PASSWORD
+        Raises:
+            ValidationError: If folio_id is invalid or folio not found
+            APIError: If API request fails (401, 403, 404, 500)
         """
         # Validar parámetros de entrada
         if not folio_id or not folio_id.strip():

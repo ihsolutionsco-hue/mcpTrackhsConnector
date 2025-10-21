@@ -6,9 +6,8 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
-    _is_valid_date_format as v2_is_valid_date_format,
-)
+# NOTA: _is_valid_date_format fue eliminada después de la estandarización MCP
+# La validación ahora se hace con Pydantic Field() + pattern
 from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
     register_search_reservations_v2,
 )
@@ -27,17 +26,11 @@ class TestSearchReservationsIntegration:
         """Mock del servidor MCP"""
         return Mock()
 
-    def test_v2_date_format_validation(self):
-        """Test validación de formato de fecha V2"""
-        # Formatos válidos
-        assert v2_is_valid_date_format("2024-01-01")
-        assert v2_is_valid_date_format("2024-01-01T00:00:00Z")
-        assert v2_is_valid_date_format("2024-01-01T00:00:00")
-
-        # Formatos inválidos
-        assert not v2_is_valid_date_format("01/01/2024")
-        assert not v2_is_valid_date_format("invalid-date")
-        assert not v2_is_valid_date_format("")
+    # NOTA: Test comentado - _is_valid_date_format fue eliminada después
+    # de la estandarización MCP. Validación ahora automática con Pydantic Field()
+    # def test_v2_date_format_validation(self):
+    #     """Test validación de formato de fecha V2 - DEPRECATED"""
+    #     pass
 
     def test_register_search_reservations_v2(self, mock_mcp, mock_api_client):
         """Test registro de search_reservations_v2"""

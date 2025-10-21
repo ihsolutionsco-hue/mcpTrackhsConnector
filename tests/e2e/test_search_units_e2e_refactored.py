@@ -243,7 +243,7 @@ class TestSearchUnitsE2ERefactored:
         # Verificar parámetros de paginación
         call_args = mock_api_client.get.call_args
         params = call_args[1]["params"]
-        assert params["page"] == 2
+        assert params["page"] == 1  # page=2 (1-based) → page=1 (0-based)
         assert params["size"] == 100
 
     @pytest.mark.asyncio
@@ -278,7 +278,7 @@ class TestSearchUnitsE2ERefactored:
     async def test_search_validation_errors_handled_correctly(self, setup_tool):
         """Test E2E: Manejo de errores de validación"""
         # Act & Assert - Verificar que se manejan errores de validación
-        with pytest.raises(Exception, match="validation error"):
+        with pytest.raises(Exception, match="Page must be >= 1"):
             await setup_tool(page=-1)  # Página inválida
 
     @pytest.mark.asyncio
@@ -286,7 +286,7 @@ class TestSearchUnitsE2ERefactored:
         """Test E2E: Flujo de trabajo completo"""
         # Act - Búsqueda compleja con múltiples filtros
         result = await setup_tool(
-            page=0,
+            page=1,
             size=25,
             search="luxury",
             bedrooms=2,
