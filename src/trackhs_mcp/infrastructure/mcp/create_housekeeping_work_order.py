@@ -15,7 +15,6 @@ from trackhs_mcp.application.use_cases.create_housekeeping_work_order import (
 )
 from trackhs_mcp.domain.entities.housekeeping_work_orders import (
     CreateHousekeepingWorkOrderParams,
-    HousekeepingWorkOrderResponse,
     HousekeepingWorkOrderStatus,
 )
 from trackhs_mcp.domain.exceptions import (

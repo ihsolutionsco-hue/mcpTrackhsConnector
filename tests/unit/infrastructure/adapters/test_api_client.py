@@ -2,7 +2,7 @@
 Tests unitarios para TrackHSApiClient
 """
 
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import httpx
 import pytest
@@ -299,3 +299,287 @@ class TestTrackHSApiClient:
                     assert client is not None
 
                 mock_close.assert_called_once()
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_custom_headers(self, api_client):
+        """Test request con headers personalizados"""
+        # Arrange
+        custom_headers = {"X-Custom-Header": "test-value"}
+        options = RequestOptions(headers=custom_headers)
+
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = True
+            mock_response.status_code = 200
+            mock_response.headers = {"content-type": "application/json"}
+            mock_response.json.return_value = {"data": "test"}
+            mock_request.return_value = mock_response
+
+            # Act
+            result = await api_client.request("/test", options=options)
+
+            # Assert
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert "headers" in call_args[1]
+            headers = call_args[1]["headers"]
+            assert "X-Custom-Header" in headers
+            assert headers["X-Custom-Header"] == "test-value"
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_body(self, api_client):
+        """Test request con body"""
+        # Arrange
+        body_data = '{"key": "value"}'
+        options = RequestOptions(method="POST", body=body_data)
+
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = True
+            mock_response.status_code = 200
+            mock_response.headers = {"content-type": "application/json"}
+            mock_response.json.return_value = {"data": "test"}
+            mock_request.return_value = mock_response
+
+            # Act
+            result = await api_client.request("/test", options=options)
+
+            # Assert
+            mock_request.assert_called_once()
+            call_args = mock_request.call_args
+            assert "data" in call_args[1]
+            assert call_args[1]["data"] == body_data
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_400_bad_request(self, api_client):
+        """Test manejo de error 400 Bad Request"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = False
+            mock_response.status_code = 400
+            mock_response.text = "Bad Request Error"
+            mock_response.headers = {"content-type": "text/plain"}
+            mock_request.return_value = mock_response
+
+            # Act & Assert
+            with pytest.raises(ApiError) as exc_info:
+                await api_client.request("/test")
+
+            assert "Bad Request" in str(exc_info.value)
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_400_with_json_error(self, api_client):
+        """Test manejo de error 400 con JSON de error"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = False
+            mock_response.status_code = 400
+            mock_response.text = '{"error": "validation failed"}'
+            mock_response.headers = {"content-type": "application/json"}
+            mock_response.json.return_value = {"error": "validation failed"}
+            mock_request.return_value = mock_response
+
+            # Act & Assert
+            with pytest.raises(ApiError) as exc_info:
+                await api_client.request("/test")
+
+            assert "Bad Request" in str(exc_info.value)
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_400_with_invalid_json(self, api_client):
+        """Test manejo de error 400 con JSON inválido"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = False
+            mock_response.status_code = 400
+            mock_response.text = "Invalid JSON response"
+            mock_response.headers = {"content-type": "text/plain"}
+            mock_response.json.side_effect = Exception("Invalid JSON")
+            mock_request.return_value = mock_response
+
+            # Act & Assert
+            with pytest.raises(ApiError) as exc_info:
+                await api_client.request("/test")
+
+            assert "Bad Request" in str(exc_info.value)
+            assert exc_info.value.status_code == 400
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_retry_on_server_error(self, api_client):
+        """Test reintentos en errores del servidor"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            # Primera llamada falla con 500, segunda es exitosa
+            mock_response_500 = MagicMock()
+            mock_response_500.is_success = False
+            mock_response_500.status_code = 500
+            mock_response_500.reason_phrase = "Internal Server Error"
+
+            mock_response_200 = MagicMock()
+            mock_response_200.is_success = True
+            mock_response_200.status_code = 200
+            mock_response_200.headers = {"content-type": "application/json"}
+            mock_response_200.json.return_value = {"data": "success"}
+
+            # Configurar side_effect para devolver las respuestas directamente
+            mock_request.side_effect = [mock_response_500, mock_response_200]
+
+            # Act
+            result = await api_client.request("/test")
+
+            # Assert
+            assert result == {"data": "success"}
+            assert mock_request.call_count == 2
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_max_retries_exceeded(self, api_client):
+        """Test cuando se exceden los reintentos máximos"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = False
+            mock_response.status_code = 500
+            mock_response.reason_phrase = "Internal Server Error"
+            mock_request.return_value = mock_response
+
+            # Act & Assert
+            with pytest.raises(ApiError) as exc_info:
+                await api_client.request("/test", max_retries=2)
+
+            assert "Server error" in str(exc_info.value)
+            assert exc_info.value.status_code == 500
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_text_response(self, api_client):
+        """Test manejo de respuesta de texto"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = True
+            mock_response.status_code = 200
+            mock_response.headers = {"content-type": "text/plain"}
+            mock_response.text = "Plain text response"
+            mock_request.return_value = mock_response
+
+            # Act
+            result = await api_client.request("/test")
+
+            # Assert
+            assert result == "Plain text response"
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_xml_response(self, api_client):
+        """Test manejo de respuesta XML"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = True
+            mock_response.status_code = 200
+            mock_response.headers = {"content-type": "application/xml"}
+            mock_response.text = "<xml>data</xml>"
+            mock_request.return_value = mock_response
+
+            # Act
+            result = await api_client.request("/test")
+
+            # Assert
+            assert result == "<xml>data</xml>"
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_unknown_content_type(self, api_client):
+        """Test manejo de tipo de contenido desconocido"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = True
+            mock_response.status_code = 200
+            mock_response.headers = {"content-type": "application/octet-stream"}
+            mock_response.text = "Binary data"
+            mock_request.return_value = mock_response
+
+            # Act
+            result = await api_client.request("/test")
+
+            # Assert
+            assert result == "Binary data"
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_awaitable_response(self, api_client):
+        """Test manejo de respuesta que es awaitable"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            # Crear un mock que simula una respuesta awaitable
+            mock_response = MagicMock()
+            mock_response.is_success = True
+            mock_response.status_code = 200
+            mock_response.headers = {"content-type": "application/json"}
+            mock_response.json.return_value = {"data": "test"}
+
+            # Simular que la respuesta es awaitable
+            mock_request.return_value = mock_response
+
+            # Act
+            result = await api_client.request("/test")
+
+            # Assert
+            assert result == {"data": "test"}
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_debug_logging(self, api_client):
+        """Test logging de debug cuando DEBUG=true"""
+        # Arrange
+        import os
+
+        with patch.dict(os.environ, {"DEBUG": "true"}):
+            with patch.object(api_client.client, "request") as mock_request:
+                with patch("logging.getLogger") as mock_logger:
+                    mock_response = MagicMock()
+                    mock_response.is_success = True
+                    mock_response.status_code = 200
+                    mock_response.headers = {"content-type": "application/json"}
+                    mock_response.json.return_value = {"data": "test"}
+                    mock_request.return_value = mock_response
+
+                    # Act
+                    result = await api_client.request("/test", params={"key": "value"})
+
+                    # Assert
+                    assert result == {"data": "test"}
+                    # Verificar que se llamó al logger de debug
+                    mock_logger.assert_called()
+
+    @pytest.mark.unit
+    @pytest.mark.asyncio
+    async def test_request_with_other_status_codes(self, api_client):
+        """Test manejo de otros códigos de estado"""
+        # Arrange
+        with patch.object(api_client.client, "request") as mock_request:
+            mock_response = AsyncMock()
+            mock_response.is_success = False
+            mock_response.status_code = 418  # I'm a teapot
+            mock_response.reason_phrase = "I'm a teapot"
+            mock_request.return_value = mock_response
+
+            # Act & Assert
+            with pytest.raises(ApiError) as exc_info:
+                await api_client.request("/test")
+
+            assert "API Error" in str(exc_info.value)
+            assert exc_info.value.status_code == 418

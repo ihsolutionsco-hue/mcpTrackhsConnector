@@ -3,7 +3,7 @@ Modelos Pydantic para Amenities de Track HS Channel API
 Basado en la especificación completa de la API Get Unit Amenities Collection
 """
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 

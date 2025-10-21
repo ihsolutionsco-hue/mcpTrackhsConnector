@@ -9,9 +9,8 @@ Problema:
 - ✅ "minimum": 0, "maximum": 1, "type": "integer"
 """
 
-import json
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 

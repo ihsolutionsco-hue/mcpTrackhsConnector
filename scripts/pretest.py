@@ -16,10 +16,13 @@ def check_python_version():
     print("Verificando version de Python...")
     version = sys.version_info
     if version.major != 3 or version.minor < 8:
-        print(f"ERROR: Python {version.major}.{version.minor} no es compatible. Se requiere Python 3.8+")
+        print(
+            f"ERROR: Python {version.major}.{version.minor} no es compatible. Se requiere Python 3.8+"
+        )
         return False
     print(f"OK: Python {version.major}.{version.minor}.{version.micro} es compatible")
     return True
+
 
 def check_required_files():
     """Verificar que todos los archivos requeridos existan"""
@@ -31,7 +34,7 @@ def check_required_files():
         "src/trackhs_mcp/infrastructure/adapters/config.py",
         "src/trackhs_mcp/infrastructure/adapters/trackhs_api_client.py",
         "requirements.txt",
-        "pyproject.toml"
+        "pyproject.toml",
     ]
 
     missing_files = []
@@ -49,6 +52,7 @@ def check_required_files():
     print("✅ Todos los archivos requeridos están presentes")
     return True
 
+
 def check_imports():
     """Verificar que todos los imports funcionen correctamente"""
     print("\n📦 Verificando imports...")
@@ -63,10 +67,12 @@ def check_imports():
             TrackHSApiClient,
         )
         from trackhs_mcp.infrastructure.mcp.server import register_all_components
+
         print("✅ Imports básicos funcionan")
 
         # Test FastMCP import
         from fastmcp import FastMCP
+
         print("✅ FastMCP import funciona")
 
         return True
@@ -77,6 +83,7 @@ def check_imports():
     except Exception as e:
         print(f"❌ Error inesperado: {e}")
         return False
+
 
 def check_main_file():
     """Verificar que el archivo __main__.py sea válido"""
@@ -89,10 +96,10 @@ def check_main_file():
 
     try:
         # Verificar que el archivo se puede compilar
-        with open(main_file, 'r', encoding='utf-8') as f:
+        with open(main_file, "r", encoding="utf-8") as f:
             code = f.read()
 
-        compile(code, str(main_file), 'exec')
+        compile(code, str(main_file), "exec")
         print("✅ Archivo __main__.py es válido")
         return True
 
@@ -102,6 +109,7 @@ def check_main_file():
     except Exception as e:
         print(f"❌ Error al verificar __main__.py: {e}")
         return False
+
 
 def check_environment_variables():
     """Verificar configuración de variables de entorno"""
@@ -122,6 +130,7 @@ def check_environment_variables():
         print("✅ Variables de entorno configuradas")
         return True
 
+
 def check_dependencies():
     """Verificar que las dependencias estén en requirements.txt"""
     print("\n📋 Verificando dependencias...")
@@ -131,15 +140,10 @@ def check_dependencies():
         print("❌ requirements.txt no encontrado")
         return False
 
-    required_deps = [
-        "fastmcp",
-        "httpx",
-        "pydantic",
-        "python-dotenv"
-    ]
+    required_deps = ["fastmcp", "httpx", "pydantic", "python-dotenv"]
 
     try:
-        with open(requirements_file, 'r') as f:
+        with open(requirements_file, "r") as f:
             content = f.read()
 
         missing_deps = []
@@ -158,6 +162,7 @@ def check_dependencies():
         print(f"❌ Error al verificar requirements.txt: {e}")
         return False
 
+
 def run_tests():
     """Ejecutar suite completa de tests"""
     print("\n🧪 Ejecutando suite completa de tests...")
@@ -170,17 +175,24 @@ def run_tests():
             return True
 
         # Ejecutar tests con cobertura y timeout extendido
-        result = subprocess.run([
-            sys.executable, "-m", "pytest",
-            "tests/",
-            "-v",
-            "--tb=short",
-            "--maxfail=5",
-            "--cov=src",
-            "--cov-report=term-missing",
-            "--cov-fail-under=80",
-            "--timeout=300"
-        ], capture_output=True, text=True, timeout=600)
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                "tests/",
+                "-v",
+                "--tb=short",
+                "--maxfail=5",
+                "--cov=src",
+                "--cov-report=term-missing",
+                "--cov-fail-under=80",
+                "--timeout=300",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
 
         # Analizar resultados
         if result.returncode == 0:
@@ -188,7 +200,7 @@ def run_tests():
             return True
         else:
             # Analizar la salida para determinar si es aceptable
-            output_lines = result.stdout.split('\n')
+            output_lines = result.stdout.split("\n")
             passed_count = 0
             failed_count = 0
             coverage_info = ""
@@ -204,7 +216,9 @@ def run_tests():
             total_tests = passed_count + failed_count
             if total_tests > 0:
                 success_rate = (passed_count / total_tests) * 100
-                print(f"📊 Tests: {passed_count} pasaron, {failed_count} fallaron ({success_rate:.1f}% éxito)")
+                print(
+                    f"📊 Tests: {passed_count} pasaron, {failed_count} fallaron ({success_rate:.1f}% éxito)"
+                )
 
                 if coverage_info:
                     print(f"📊 Cobertura: {coverage_info}")
@@ -227,6 +241,7 @@ def run_tests():
         print(f"⚠️  Error ejecutando tests: {e}")
         return True  # No es crítico para el pre-test
 
+
 def main():
     """Ejecutar todos los pre-tests"""
     print("Ejecutando pre-tests para FastMCP Cloud...")
@@ -239,7 +254,7 @@ def main():
         check_main_file,
         check_environment_variables,
         check_dependencies,
-        run_tests
+        run_tests,
     ]
 
     passed = 0
@@ -256,11 +271,14 @@ def main():
     print(f"📊 Resultados: {passed}/{total} tests pasaron")
 
     if passed == total:
-        print("✅ Todos los pre-tests pasaron. El despliegue debería funcionar correctamente.")
+        print(
+            "✅ Todos los pre-tests pasaron. El despliegue debería funcionar correctamente."
+        )
         return 0
     else:
         print("❌ Algunos pre-tests fallaron. Revisa los errores antes del commit.")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

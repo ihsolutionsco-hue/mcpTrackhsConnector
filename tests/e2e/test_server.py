@@ -108,7 +108,9 @@ class TestServerE2E:
         with (
             patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
             patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
-            patch("src.trackhs_mcp.server.FastMCP") as mock_fastmcp_class,
+            patch(
+                "trackhs_mcp.infrastructure.mcp.schema_hook.FastMCP"
+            ) as mock_fastmcp_class,
         ):
 
             mock_config_class.return_value = mock_config
@@ -204,7 +206,9 @@ class TestServerE2E:
         with (
             patch("src.trackhs_mcp.server.TrackHSConfig") as mock_config_class,
             patch("src.trackhs_mcp.server.TrackHSApiClient") as mock_client_class,
-            patch("src.trackhs_mcp.server.FastMCP") as mock_fastmcp_class,
+            patch(
+                "trackhs_mcp.infrastructure.mcp.schema_hook.FastMCP"
+            ) as mock_fastmcp_class,
         ):
 
             mock_config_class.return_value = mock_config

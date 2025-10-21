@@ -3,7 +3,7 @@ Examples resources para Search Queries
 Ejemplos de búsquedas comunes para las APIs
 """
 
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ....application.ports.api_client_port import ApiClientPort

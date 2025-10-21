@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastmcp import FastMCP
 
 # Agregar el directorio src al PYTHONPATH para que FastMCP pueda encontrar el módulo
 current_dir = Path(__file__).parent

@@ -5,8 +5,7 @@ Esta herramienta permite crear work orders en TrackHS siguiendo
 el patrón de herramientas MCP existentes.
 """
 
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import Field
 
@@ -14,7 +13,6 @@ from trackhs_mcp.application.ports.api_client_port import ApiClientPort
 from trackhs_mcp.application.use_cases.create_work_order import CreateWorkOrderUseCase
 from trackhs_mcp.domain.entities.work_orders import (
     CreateWorkOrderParams,
-    WorkOrderResponse,
     WorkOrderStatus,
 )
 from trackhs_mcp.domain.exceptions import (

@@ -6,7 +6,7 @@ siguiendo los principios de Clean Architecture.
 """
 
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from trackhs_mcp.application.ports.api_client_port import ApiClientPort
 from trackhs_mcp.domain.entities.work_orders import (
