@@ -16,7 +16,8 @@ from fastmcp.exceptions import ToolError
 from ...application.use_cases.search_amenities import SearchAmenitiesUseCase
 from ...domain.entities.amenities import SearchAmenitiesParams
 from ..utils.error_handling import error_handler
-from ..utils.type_normalization import normalize_binary_int, normalize_int
+
+# Removed type normalization imports - using Pydantic automatic conversion
 
 
 @dataclass
@@ -101,21 +102,11 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
         if type(search).__name__ == "FieldInfo":
             search = None
 
-        # Normalizar parámetros numéricos primero (para compatibilidad JSON-RPC)
-        page = normalize_int(page, "page")
-        size = normalize_int(size, "size")
-        group_id = normalize_int(group_id, "group_id")
-
-        # Asegurar defaults para page y size si normalize_int retorna None (FieldInfo objects)
+        # Validar parámetros (Pydantic ya maneja la conversión automática)
         if page is None:
             page = 1
         if size is None:
             size = 25
-
-        # Normalizar flags booleanos (0/1)
-        is_public = normalize_binary_int(is_public, "is_public")
-        public_searchable = normalize_binary_int(public_searchable, "public_searchable")
-        is_filterable = normalize_binary_int(is_filterable, "is_filterable")
 
         # Validar límite total de resultados (10k máximo) - validación de negocio
         # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)

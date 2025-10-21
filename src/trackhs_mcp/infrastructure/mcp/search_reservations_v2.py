@@ -15,11 +15,8 @@ from ...domain.entities.reservations import SearchReservationsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
-from ..utils.type_normalization import (
-    normalize_binary_int,
-    normalize_int,
-    normalize_optional_binary_int,
-)
+
+# Removed type normalization imports - using Pydantic automatic conversion
 from ..utils.user_friendly_messages import format_date_error
 
 
@@ -266,47 +263,36 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             scroll = None
 
         # Normalizar parámetros numéricos para backward compatibility
-        # (en caso de que vengan como string de otros sistemas)
-        page_normalized = normalize_int(page, "page")
-        size_normalized = normalize_int(size, "size")
-        in_house_today_normalized = normalize_optional_binary_int(
-            in_house_today, "in_house_today"
-        )
-        group_id_normalized = normalize_int(group_id, "group_id")
-        checkin_office_id_normalized = normalize_int(
-            checkin_office_id, "checkin_office_id"
-        )
-
-        # Asegurar defaults para page y size si normalize_int retorna None (FieldInfo objects)
-        if page_normalized is None:
-            page_normalized = 1  # Default: 1 (1-based pagination)
-        if size_normalized is None:
-            size_normalized = 10  # Default: 10
+        # Validar parámetros (Pydantic ya maneja la conversión automática)
+        if page is None:
+            page = 1
+        if size is None:
+            size = 10
 
         # Validar parámetros básicos según documentación API V2
-        if page_normalized < 0:
+        if page < 0:
             raise ValidationError("Page must be >= 0", "page")
-        if size_normalized < 1:
+        if size < 1:
             raise ValidationError("Size must be >= 1", "size")
-        if size_normalized > 1000:
+        if size > 1000:
             raise ValidationError("Size must be <= 1000", "size")
 
         # Validar límite total de resultados (10k máximo)
-        if page_normalized * size_normalized > 10000:
+        if page * size > 10000:
             raise ValidationError(
                 "Total results (page * size) must be <= 10,000", "page"
             )
 
         # Validar parámetro scroll según documentación API V2
-        scroll_normalized = None
+        scroll_value = None
         if scroll is not None:
             # Convertir scroll a formato apropiado
             if scroll == "1" or scroll == 1:
-                scroll_normalized = 1
+                scroll_value = 1
             elif isinstance(scroll, str) and scroll.strip():
-                scroll_normalized = scroll.strip()
+                scroll_value = scroll.strip()
             elif isinstance(scroll, int):
-                scroll_normalized = scroll
+                scroll_value = scroll
             else:
                 raise ValidationError("Scroll string cannot be empty", "scroll")
 
@@ -349,8 +335,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
 
             # Crear parámetros de búsqueda
             search_params = SearchReservationsParams(
-                page=page_normalized,
-                size=size_normalized,
+                page=page,
+                size=size,
                 sort_column=sort_column if sort_column != "altConf" else "altCon",
                 sort_direction=sort_direction,
                 search=search,
@@ -371,11 +357,11 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
                 departure_start=departure_start,
                 departure_end=departure_end,
                 updated_since=updated_since,
-                scroll=scroll_normalized,
-                in_house_today=in_house_today_normalized,
+                scroll=scroll_value,
+                in_house_today=in_house_today,
                 status=status_list,
-                group_id=group_id_normalized,
-                checkin_office_id=checkin_office_id_normalized,
+                group_id=group_id,
+                checkin_office_id=checkin_office_id,
             )
 
             # Ejecutar caso de uso

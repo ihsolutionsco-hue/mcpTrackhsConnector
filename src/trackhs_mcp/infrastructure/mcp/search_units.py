@@ -17,12 +17,8 @@ from ...application.use_cases.search_units import SearchUnitsUseCase
 from ...domain.entities.units import SearchUnitsParams
 from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
-from ..utils.type_normalization import (
-    normalize_binary_int,
-    normalize_int,
-    normalize_optional_binary_int,
-    normalize_optional_int,
-)
+
+# Removed type normalization imports - using Pydantic automatic conversion
 from ..utils.user_friendly_messages import format_date_error
 
 
@@ -319,86 +315,37 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         if type(unit_status).__name__ == "FieldInfo":
             unit_status = None
 
-        # Normalizar parámetros numéricos para backward compatibility
-        page_normalized = normalize_int(page, "page")
-        size_normalized = normalize_int(size, "size")
+        # Validar parámetros (Pydantic ya maneja la conversión automática)
+        if page is None:
+            page = 1
+        if size is None:
+            size = 25
 
-        # Validar parámetros antes de aplicar defaults
-        if page_normalized is not None and page_normalized < 1:
+        # Validar parámetros
+        if page < 1:
             raise ToolError("Page must be >= 1")
-        if size_normalized is not None and size_normalized < 1:
+        if size < 1:
             raise ToolError("Size must be >= 1")
-        if size_normalized is not None and size_normalized > 1000:
+        if size > 1000:
             raise ToolError("Size must be <= 1000")
 
-        # Aplicar valores por defecto cuando se detectan FieldInfo objects
-        page_normalized = page_normalized or 1  # Default: 1
-        size_normalized = size_normalized or 25  # Default: 25
-        calendar_id_normalized = normalize_optional_int(calendar_id, "calendar_id")
-        role_id_normalized = normalize_optional_int(role_id, "role_id")
-        bedrooms_normalized = normalize_optional_int(bedrooms, "bedrooms")
-        min_bedrooms_normalized = normalize_optional_int(min_bedrooms, "min_bedrooms")
-        max_bedrooms_normalized = normalize_optional_int(max_bedrooms, "max_bedrooms")
-        bathrooms_normalized = normalize_optional_int(bathrooms, "bathrooms")
-        min_bathrooms_normalized = normalize_optional_int(
-            min_bathrooms, "min_bathrooms"
-        )
-        max_bathrooms_normalized = normalize_optional_int(
-            max_bathrooms, "max_bathrooms"
-        )
-        pets_friendly_normalized = normalize_optional_binary_int(
-            pets_friendly, "pets_friendly"
-        )
-        allow_unit_rates_normalized = normalize_optional_binary_int(
-            allow_unit_rates, "allow_unit_rates"
-        )
-        computed_normalized = normalize_optional_binary_int(computed, "computed")
-        inherited_normalized = normalize_optional_binary_int(inherited, "inherited")
-        limited_normalized = normalize_optional_binary_int(limited, "limited")
-        is_bookable_normalized = normalize_optional_binary_int(
-            is_bookable, "is_bookable"
-        )
-        include_descriptions_normalized = normalize_optional_binary_int(
-            include_descriptions, "include_descriptions"
-        )
-        is_active_normalized = normalize_optional_binary_int(is_active, "is_active")
-        events_allowed_normalized = normalize_optional_binary_int(
-            events_allowed, "events_allowed"
-        )
-        smoking_allowed_normalized = normalize_optional_binary_int(
-            smoking_allowed, "smoking_allowed"
-        )
-        children_allowed_normalized = normalize_optional_binary_int(
-            children_allowed, "children_allowed"
-        )
-        is_accessible_normalized = normalize_optional_binary_int(
-            is_accessible, "is_accessible"
-        )
-
-        # Asegurar que los valores sean enteros para comparaciones
-        try:
-            page_normalized = int(page_normalized)
-            size_normalized = int(size_normalized)
-        except (ValueError, TypeError):
-            raise ToolError("Page and size must be valid integers")
-
         # Validar límite total de resultados (10k máximo)
-        if page_normalized * size_normalized > 10000:
+        if page * size > 10000:
             raise ToolError("Total results (page * size) must be <= 10,000")
 
         # Validar rango de habitaciones
         if (
-            min_bedrooms_normalized is not None
-            and max_bedrooms_normalized is not None
-            and min_bedrooms_normalized > max_bedrooms_normalized
+            min_bedrooms is not None
+            and max_bedrooms is not None
+            and min_bedrooms > max_bedrooms
         ):
             raise ToolError("min_bedrooms cannot be greater than max_bedrooms")
 
         # Validar rango de baños
         if (
-            min_bathrooms_normalized is not None
-            and max_bathrooms_normalized is not None
-            and min_bathrooms_normalized > max_bathrooms_normalized
+            min_bathrooms is not None
+            and max_bathrooms is not None
+            and min_bathrooms > max_bathrooms
         ):
             raise ToolError("min_bathrooms cannot be greater than max_bathrooms")
 
@@ -429,12 +376,12 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
             # La API de TrackHS usa paginación 1-based, no necesitamos conversión
             # El usuario envía page=1 para la primera página, y la API también espera page=1
-            page_for_api = page_normalized
+            page_for_api = page
 
             # Crear parámetros de búsqueda
             search_params = SearchUnitsParams(
                 page=page_for_api,
-                size=size_normalized,
+                size=size,
                 sort_column=sort_column,
                 sort_direction=sort_direction,
                 search=search,
@@ -445,26 +392,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 amenity_id=_parse_id_string(amenity_id),
                 unit_type_id=_parse_id_string(unit_type_id),
                 id=_parse_id_string(id),
-                calendar_id=calendar_id_normalized,
-                role_id=role_id_normalized,
-                bedrooms=bedrooms_normalized,
-                min_bedrooms=min_bedrooms_normalized,
-                max_bedrooms=max_bedrooms_normalized,
-                bathrooms=bathrooms_normalized,
-                min_bathrooms=min_bathrooms_normalized,
-                max_bathrooms=max_bathrooms_normalized,
-                pets_friendly=pets_friendly_normalized,
-                allow_unit_rates=allow_unit_rates_normalized,
-                computed=computed_normalized,
-                inherited=inherited_normalized,
-                limited=limited_normalized,
-                is_bookable=is_bookable_normalized,
-                include_descriptions=include_descriptions_normalized,
-                is_active=is_active_normalized,
-                events_allowed=events_allowed_normalized,
-                smoking_allowed=smoking_allowed_normalized,
-                children_allowed=children_allowed_normalized,
-                is_accessible=is_accessible_normalized,
+                calendar_id=calendar_id,
+                role_id=role_id,
+                bedrooms=bedrooms,
+                min_bedrooms=min_bedrooms,
+                max_bedrooms=max_bedrooms,
+                bathrooms=bathrooms,
+                min_bathrooms=min_bathrooms,
+                max_bathrooms=max_bathrooms,
+                pets_friendly=pets_friendly,
+                allow_unit_rates=allow_unit_rates,
+                computed=computed,
+                inherited=inherited,
+                limited=limited,
+                is_bookable=is_bookable,
+                include_descriptions=include_descriptions,
+                is_active=is_active,
+                events_allowed=events_allowed,
+                smoking_allowed=smoking_allowed,
+                children_allowed=children_allowed,
+                is_accessible=is_accessible,
                 arrival=arrival,
                 departure=departure,
                 content_updated_since=content_updated_since,

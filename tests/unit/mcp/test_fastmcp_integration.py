@@ -21,10 +21,40 @@ class TestFastMCPIntegration:
     @pytest.fixture
     def mock_api_client(self):
         """Mock del cliente API"""
-        client = MagicMock(spec=TrackHSApiClient)
-        # Configurar métodos que serán llamados por los use cases
-        client.search_units = AsyncMock()
-        client.search_amenities = AsyncMock()
+        client = MagicMock()
+
+        # Configurar métodos async específicos
+        async def mock_search_units(*args, **kwargs):
+            return {
+                "units": [
+                    {"id": 1, "name": "Unit 1", "type": "apartment"},
+                    {"id": 2, "name": "Unit 2", "type": "house"},
+                ],
+                "total": 2,
+                "page": 1,
+                "size": 25,
+                "total_pages": 1,
+                "has_next": False,
+                "has_previous": False,
+            }
+
+        async def mock_search_amenities(*args, **kwargs):
+            return {
+                "amenities": [
+                    {"id": 1, "name": "WiFi", "group_id": 1},
+                    {"id": 2, "name": "Pool", "group_id": 2},
+                ],
+                "total": 2,
+                "page": 1,
+                "size": 25,
+                "total_pages": 1,
+                "has_next": False,
+                "has_previous": False,
+            }
+
+        client.search_units = mock_search_units
+        client.search_amenities = mock_search_amenities
+
         return client
 
     @pytest.fixture
