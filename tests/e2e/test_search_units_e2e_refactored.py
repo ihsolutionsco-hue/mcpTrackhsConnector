@@ -243,7 +243,7 @@ class TestSearchUnitsE2ERefactored:
         # Verificar parámetros de paginación
         call_args = mock_api_client.get.call_args
         params = call_args[1]["params"]
-        assert params["page"] == 1  # page=2 (1-based) → page=1 (0-based)
+        assert params["page"] == 2  # page=2 (1-based) → page=2 (1-based)
         assert params["size"] == 100
 
     @pytest.mark.asyncio
@@ -318,7 +318,7 @@ class TestSearchUnitsE2ERefactored:
         params = call_args[1]["params"]
 
         # Verificar parámetros principales
-        assert params["page"] == 0
+        assert params["page"] == 1
         assert params["size"] == 25
         assert params["search"] == "luxury"
         assert params["bedrooms"] == 2

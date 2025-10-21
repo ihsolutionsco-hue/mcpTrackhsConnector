@@ -72,7 +72,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -92,7 +92,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -116,7 +116,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 10,
             "total_items": 1,
@@ -134,7 +134,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 10,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -161,7 +161,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -179,7 +179,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -216,7 +216,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -232,7 +232,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -259,7 +259,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -275,7 +275,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -296,7 +296,7 @@ class TestSearchUnitsE2E:
                     {"id": 1, "name": "A Apartment"},
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 3,
@@ -312,7 +312,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "desc",
@@ -334,7 +334,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -350,7 +350,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -375,7 +375,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -391,7 +391,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -417,7 +417,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -433,7 +433,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -461,7 +461,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -483,7 +483,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 0,
+                "page": 1,
                 "size": 25,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -523,7 +523,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.assert_called_once_with(
             "/pms/units",
             params={
-                "page": 1,  # page=2 (1-based) → page=1 (0-based)
+                "page": 2,  # page=2 (1-based) → page=2 (1-based)
                 "size": 100,
                 "sortColumn": "name",
                 "sortDirection": "asc",
@@ -534,11 +534,11 @@ class TestSearchUnitsE2E:
     async def test_e2e_search_validation_errors(self, setup_tool):
         """Test E2E de errores de validación"""
         # Test página negativa
-        with pytest.raises(Exception, match="Page must be >= 1"):
+        with pytest.raises(ValidationError, match="Page must be >= 1"):
             await setup_tool(page=-1)
 
         # Test tamaño inválido
-        with pytest.raises(Exception, match="Size must be >= 1"):
+        with pytest.raises(ValidationError, match="Size must be >= 1"):
             await setup_tool(size=0)
 
         # Test límite total de resultados (ahora con page=102 para exceder 10k)
@@ -624,7 +624,7 @@ class TestSearchUnitsE2E:
                     }
                 ]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 5,
             "total_items": 1,
@@ -655,7 +655,7 @@ class TestSearchUnitsE2E:
             "_embedded": {
                 "units": [{"id": 1, "name": "Unit 1", "bedrooms": 2, "bathrooms": 1}]
             },
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,
@@ -719,7 +719,7 @@ class TestSearchUnitsE2E:
         # Mock response
         expected_response = {
             "_embedded": {"units": [{"id": 1, "name": "Unit 1"}]},
-            "page": 0,
+            "page": 1,
             "page_count": 1,
             "page_size": 25,
             "total_items": 1,

@@ -56,7 +56,7 @@ class TestCreateMaintenanceWorkOrderTool:
         register_create_maintenance_work_order(mcp=mock_mcp, api_client=mock_api_client)
         return registered_function
 
-    def test_tool_registration(self, mock_mcp, mock_api_client):
+    async def test_tool_registration(self, mock_mcp, mock_api_client):
         """Test que la herramienta se registra correctamente."""
         register_create_maintenance_work_order(mcp=mock_mcp, api_client=mock_api_client)
 
@@ -68,15 +68,17 @@ class TestCreateMaintenanceWorkOrderTool:
         assert call_args[1]["name"] == "create_maintenance_work_order"
         assert "description" in call_args[1]
 
-    def test_successful_creation_minimal(
+    async def test_successful_creation_minimal(
         self, tool_function, mock_api_client, sample_work_order_minimal
     ):
         """Test creación exitosa con campos mínimos."""
         # Configurar mock
-        mock_api_client.post.return_value = sample_work_order_minimal
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
 
         # Ejecutar función
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -86,6 +88,8 @@ class TestCreateMaintenanceWorkOrderTool:
         )
 
         # Verificar resultado
+        print(f"Result type: {type(result)}")
+        print(f"Result content: {result}")
         assert result["success"] is True
         assert result["work_order"]["id"] == 67890
         assert result["work_order"]["summary"] == "Mantenimiento preventivo"
@@ -99,15 +103,17 @@ class TestCreateMaintenanceWorkOrderTool:
         assert call_args[1]["data"]["priority"] == 3
         assert call_args[1]["data"]["status"] == "not-started"
 
-    def test_successful_creation_complete(
+    async def test_successful_creation_complete(
         self, tool_function, mock_api_client, sample_work_order_response
     ):
         """Test creación exitosa con todos los campos."""
         # Configurar mock
-        mock_api_client.post.return_value = sample_work_order_response
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_response)
 
         # Ejecutar función
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=5,
             status="open",
@@ -153,13 +159,15 @@ class TestCreateMaintenanceWorkOrderTool:
         assert payload["sourcePhone"] == "+1234567890"
         assert payload["blockCheckin"] is True
 
-    def test_type_conversion_string_to_int(
+    async def test_type_conversion_string_to_int(
         self, tool_function, mock_api_client, sample_work_order_minimal
     ):
         """Test conversión de tipos string a int."""
-        mock_api_client.post.return_value = sample_work_order_minimal
+        from unittest.mock import AsyncMock
 
-        result = tool_function(
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
+
+        result = await tool_function(
             date_received="2024-01-15",
             priority="3",  # String
             status="not-started",
@@ -187,13 +195,15 @@ class TestCreateMaintenanceWorkOrderTool:
         assert payload["reservationId"] == 37165851
         assert payload["actualTime"] == 90
 
-    def test_type_conversion_string_to_bool(
+    async def test_type_conversion_string_to_bool(
         self, tool_function, mock_api_client, sample_work_order_minimal
     ):
         """Test conversión de tipos string a bool."""
-        mock_api_client.post.return_value = sample_work_order_minimal
+        from unittest.mock import AsyncMock
 
-        result = tool_function(
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
+
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -210,10 +220,10 @@ class TestCreateMaintenanceWorkOrderTool:
         payload = call_args[1]["data"]
         assert payload["blockCheckin"] is True
 
-    def test_validation_missing_required_fields(self, tool_function):
+    async def test_validation_missing_required_fields(self, tool_function):
         """Test validación de campos requeridos faltantes."""
         # Fecha faltante
-        result = tool_function(
+        result = await tool_function(
             date_received="",  # Vacío
             priority=3,
             status="not-started",
@@ -226,9 +236,9 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "fecha de recepción es requerida" in result["message"]
 
-    def test_validation_invalid_date_format(self, tool_function):
+    async def test_validation_invalid_date_format(self, tool_function):
         """Test validación de formato de fecha inválido."""
-        result = tool_function(
+        result = await tool_function(
             date_received="15-01-2024",  # Formato inválido
             priority=3,
             status="not-started",
@@ -241,9 +251,9 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "formato ISO 8601" in result["message"]
 
-    def test_validation_invalid_priority(self, tool_function):
+    async def test_validation_invalid_priority(self, tool_function):
         """Test validación de prioridad inválida."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=2,  # Inválida
             status="not-started",
@@ -256,9 +266,9 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "prioridad debe ser 1 (Baja), 3 (Media) o 5 (Alta)" in result["message"]
 
-    def test_validation_invalid_status(self, tool_function):
+    async def test_validation_invalid_status(self, tool_function):
         """Test validación de estado inválido."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="invalid-status",  # Inválido
@@ -271,9 +281,9 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "Estado inválido" in result["message"]
 
-    def test_validation_negative_cost(self, tool_function):
+    async def test_validation_negative_cost(self, tool_function):
         """Test validación de costo negativo."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -286,9 +296,9 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "costo estimado no puede ser negativo" in result["message"]
 
-    def test_validation_zero_time(self, tool_function):
+    async def test_validation_zero_time(self, tool_function):
         """Test validación de tiempo cero."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -301,9 +311,9 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "tiempo estimado debe ser mayor a 0" in result["message"]
 
-    def test_validation_invalid_scheduled_date(self, tool_function):
+    async def test_validation_invalid_scheduled_date(self, tool_function):
         """Test validación de fecha programada inválida."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -317,9 +327,9 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "fecha programada debe estar en formato ISO 8601" in result["message"]
 
-    def test_validation_negative_ids(self, tool_function):
+    async def test_validation_negative_ids(self, tool_function):
         """Test validación de IDs negativos."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -335,9 +345,9 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "ID de usuario debe ser un entero positivo" in result["message"]
 
-    def test_validation_zero_actual_time(self, tool_function):
+    async def test_validation_zero_actual_time(self, tool_function):
         """Test validación de tiempo real cero."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -351,12 +361,12 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "tiempo real debe ser mayor a 0" in result["message"]
 
-    def test_authentication_error(self, tool_function, mock_api_client):
+    async def test_authentication_error(self, tool_function, mock_api_client):
         """Test manejo de error de autenticación."""
         # Configurar mock para lanzar AuthenticationError
         mock_api_client.post.side_effect = AuthenticationError("Credenciales inválidas")
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -369,12 +379,12 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "No autorizado"
         assert "Credenciales inválidas" in result["message"]
 
-    def test_authorization_error(self, tool_function, mock_api_client):
+    async def test_authorization_error(self, tool_function, mock_api_client):
         """Test manejo de error de autorización."""
         # Configurar mock para lanzar AuthorizationError
         mock_api_client.post.side_effect = AuthorizationError("Permisos insuficientes")
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -387,12 +397,12 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Prohibido"
         assert "Permisos insuficientes" in result["message"]
 
-    def test_api_error_401(self, tool_function, mock_api_client):
+    async def test_api_error_401(self, tool_function, mock_api_client):
         """Test manejo de error 401 de API."""
         # Configurar mock para lanzar ApiError 401
         mock_api_client.post.side_effect = ApiError("Unauthorized", 401)
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -405,12 +415,12 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "No autorizado"
         assert "Credenciales de autenticación inválidas" in result["message"]
 
-    def test_api_error_403(self, tool_function, mock_api_client):
+    async def test_api_error_403(self, tool_function, mock_api_client):
         """Test manejo de error 403 de API."""
         # Configurar mock para lanzar ApiError 403
         mock_api_client.post.side_effect = ApiError("Forbidden", 403)
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -423,12 +433,12 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Prohibido"
         assert "Permisos insuficientes" in result["message"]
 
-    def test_api_error_422(self, tool_function, mock_api_client):
+    async def test_api_error_422(self, tool_function, mock_api_client):
         """Test manejo de error 422 de API."""
         # Configurar mock para lanzar ApiError 422
         mock_api_client.post.side_effect = ApiError("Validation failed", 422)
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -441,12 +451,12 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Datos inválidos"
         assert "Validation failed" in result["message"]
 
-    def test_api_error_500(self, tool_function, mock_api_client):
+    async def test_api_error_500(self, tool_function, mock_api_client):
         """Test manejo de error 500 de API."""
         # Configurar mock para lanzar ApiError 500
         mock_api_client.post.side_effect = ApiError("Internal Server Error", 500)
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -459,12 +469,12 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Error inesperado"
         assert "Error interno del servidor" in result["message"]
 
-    def test_unexpected_error(self, tool_function, mock_api_client):
+    async def test_unexpected_error(self, tool_function, mock_api_client):
         """Test manejo de error inesperado."""
         # Configurar mock para lanzar excepción genérica
         mock_api_client.post.side_effect = Exception("Unexpected error")
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -477,11 +487,13 @@ class TestCreateMaintenanceWorkOrderTool:
         assert result["error"] == "Error de API"
         assert "Unexpected error" in result["message"]
 
-    def test_all_valid_statuses(
+    async def test_all_valid_statuses(
         self, tool_function, mock_api_client, sample_work_order_minimal
     ):
         """Test todos los estados válidos."""
-        mock_api_client.post.return_value = sample_work_order_minimal
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
 
         valid_statuses = [
             "open",
@@ -498,7 +510,7 @@ class TestCreateMaintenanceWorkOrderTool:
         ]
 
         for status in valid_statuses:
-            result = tool_function(
+            result = await tool_function(
                 date_received="2024-01-15",
                 priority=3,
                 status=status,
@@ -509,16 +521,18 @@ class TestCreateMaintenanceWorkOrderTool:
 
             assert result["success"] is True, f"Status {status} should be valid"
 
-    def test_all_valid_priorities(
+    async def test_all_valid_priorities(
         self, tool_function, mock_api_client, sample_work_order_minimal
     ):
         """Test todas las prioridades válidas."""
-        mock_api_client.post.return_value = sample_work_order_minimal
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
 
         valid_priorities = [1, 3, 5]
 
         for priority in valid_priorities:
-            result = tool_function(
+            result = await tool_function(
                 date_received="2024-01-15",
                 priority=priority,
                 status="not-started",
@@ -529,13 +543,15 @@ class TestCreateMaintenanceWorkOrderTool:
 
             assert result["success"] is True, f"Priority {priority} should be valid"
 
-    def test_response_format(
+    async def test_response_format(
         self, tool_function, mock_api_client, sample_work_order_response
     ):
         """Test formato de respuesta correcto."""
-        mock_api_client.post.return_value = sample_work_order_response
+        from unittest.mock import AsyncMock
 
-        result = tool_function(
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_response)
+
+        result = await tool_function(
             date_received="2024-01-15",
             priority=5,
             status="open",

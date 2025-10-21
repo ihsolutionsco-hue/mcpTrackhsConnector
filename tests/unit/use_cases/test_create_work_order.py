@@ -5,7 +5,7 @@ Este módulo contiene tests que se enfocan en la funcionalidad real del use case
 no en las validaciones de Pydantic que ya funcionan correctamente.
 """
 
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -32,17 +32,17 @@ class TestCreateWorkOrderUseCase:
         """Caso de uso para testing."""
         return CreateWorkOrderUseCase(mock_api_client)
 
-    def test_successful_execution(
+    async def test_successful_execution(
         self, use_case, mock_api_client, sample_work_order_minimal
     ):
         """Test ejecución exitosa del caso de uso."""
         # Configurar mock para devolver datos síncronos
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock
 
-        mock_api_client.post = Mock(return_value=sample_work_order_minimal)
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
 
         # Ejecutar caso de uso
-        result = use_case.execute(
+        result = await use_case.execute(
             CreateWorkOrderParams(
                 dateReceived="2024-01-15",
                 priority=3,
@@ -71,13 +71,13 @@ class TestCreateWorkOrderUseCase:
         assert call_args[1]["data"]["priority"] == 3
         assert call_args[1]["data"]["status"] == "not-started"
 
-    def test_payload_construction_minimal(
+    async def test_payload_construction_minimal(
         self, use_case, mock_api_client, sample_work_order_minimal
     ):
         """Test construcción de payload con campos mínimos."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(return_value=sample_work_order_minimal)
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
 
         params = CreateWorkOrderParams(
             dateReceived="2024-01-15",
@@ -88,7 +88,7 @@ class TestCreateWorkOrderUseCase:
             estimatedTime=60,
         )
 
-        result = use_case.execute(params)
+        result = await use_case.execute(params)
 
         # Verificar que se llamó a la API
         mock_api_client.post.assert_called_once()
@@ -103,13 +103,13 @@ class TestCreateWorkOrderUseCase:
         assert payload["estimatedCost"] == 75.50
         assert payload["estimatedTime"] == 60
 
-    def test_payload_construction_complete(
+    async def test_payload_construction_complete(
         self, use_case, mock_api_client, sample_work_order_response
     ):
         """Test construcción de payload con todos los campos."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(return_value=sample_work_order_response)
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_response)
 
         params = CreateWorkOrderParams(
             dateReceived="2024-01-15",
@@ -133,7 +133,7 @@ class TestCreateWorkOrderUseCase:
             blockCheckin=True,
         )
 
-        result = use_case.execute(params)
+        result = await use_case.execute(params)
 
         # Verificar que se llamó a la API
         mock_api_client.post.assert_called_once()
@@ -161,11 +161,11 @@ class TestCreateWorkOrderUseCase:
         assert payload["actualTime"] == 90
         assert payload["blockCheckin"] is True
 
-    def test_api_error_401_handling(self, use_case, mock_api_client):
+    async def test_api_error_401_handling(self, use_case, mock_api_client):
         """Test manejo de error 401 de API."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(side_effect=ApiError("Unauthorized", 401))
+        mock_api_client.post = AsyncMock(side_effect=ApiError("Unauthorized", 401))
 
         params = CreateWorkOrderParams(
             dateReceived="2024-01-15",
@@ -177,15 +177,15 @@ class TestCreateWorkOrderUseCase:
         )
 
         with pytest.raises(AuthenticationError) as exc_info:
-            use_case.execute(params)
+            await use_case.execute(params)
 
         assert "No autorizado" in str(exc_info.value)
 
-    def test_api_error_403_handling(self, use_case, mock_api_client):
+    async def test_api_error_403_handling(self, use_case, mock_api_client):
         """Test manejo de error 403 de API."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(side_effect=ApiError("Forbidden", 403))
+        mock_api_client.post = AsyncMock(side_effect=ApiError("Forbidden", 403))
 
         params = CreateWorkOrderParams(
             dateReceived="2024-01-15",
@@ -197,15 +197,15 @@ class TestCreateWorkOrderUseCase:
         )
 
         with pytest.raises(AuthorizationError) as exc_info:
-            use_case.execute(params)
+            await use_case.execute(params)
 
         assert "Prohibido" in str(exc_info.value)
 
-    def test_api_error_422_handling(self, use_case, mock_api_client):
+    async def test_api_error_422_handling(self, use_case, mock_api_client):
         """Test manejo de error 422 de API."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(side_effect=ApiError("Validation failed", 422))
+        mock_api_client.post = AsyncMock(side_effect=ApiError("Validation failed", 422))
 
         params = CreateWorkOrderParams(
             dateReceived="2024-01-15",
@@ -217,15 +217,17 @@ class TestCreateWorkOrderUseCase:
         )
 
         with pytest.raises(ValidationError) as exc_info:
-            use_case.execute(params)
+            await use_case.execute(params)
 
         assert "Datos inválidos" in str(exc_info.value)
 
-    def test_api_error_500_handling(self, use_case, mock_api_client):
+    async def test_api_error_500_handling(self, use_case, mock_api_client):
         """Test manejo de error 500 de API."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(side_effect=ApiError("Internal Server Error", 500))
+        mock_api_client.post = AsyncMock(
+            side_effect=ApiError("Internal Server Error", 500)
+        )
 
         params = CreateWorkOrderParams(
             dateReceived="2024-01-15",
@@ -237,15 +239,15 @@ class TestCreateWorkOrderUseCase:
         )
 
         with pytest.raises(ServerError) as exc_info:
-            use_case.execute(params)
+            await use_case.execute(params)
 
         assert "Error interno del servidor" in str(exc_info.value)
 
-    def test_unexpected_error_handling(self, use_case, mock_api_client):
+    async def test_unexpected_error_handling(self, use_case, mock_api_client):
         """Test manejo de error inesperado."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(side_effect=Exception("Unexpected error"))
+        mock_api_client.post = AsyncMock(side_effect=Exception("Unexpected error"))
 
         params = CreateWorkOrderParams(
             dateReceived="2024-01-15",
@@ -257,17 +259,17 @@ class TestCreateWorkOrderUseCase:
         )
 
         with pytest.raises(ApiError) as exc_info:
-            use_case.execute(params)
+            await use_case.execute(params)
 
         assert "Error inesperado" in str(exc_info.value)
 
-    def test_work_order_response_creation(
+    async def test_work_order_response_creation(
         self, use_case, mock_api_client, sample_work_order_response
     ):
         """Test creación de respuesta WorkOrderResponse."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(return_value=sample_work_order_response)
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_response)
 
         params = CreateWorkOrderParams(
             dateReceived="2024-01-15",
@@ -278,7 +280,7 @@ class TestCreateWorkOrderUseCase:
             estimatedTime=120,
         )
 
-        result = use_case.execute(params)
+        result = await use_case.execute(params)
 
         # Verificar estructura de respuesta
         assert result.success is True
@@ -289,13 +291,13 @@ class TestCreateWorkOrderUseCase:
         assert result.work_order.estimated_cost == 150.00
         assert result.work_order.estimated_time == 120
 
-    def test_iso8601_date_validation_valid_dates(
+    async def test_iso8601_date_validation_valid_dates(
         self, use_case, mock_api_client, sample_work_order_minimal
     ):
         """Test validación de fechas ISO 8601 válidas."""
-        from unittest.mock import Mock
+        from unittest.mock import AsyncMock, Mock
 
-        mock_api_client.post = Mock(return_value=sample_work_order_minimal)
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
 
         valid_dates = [
             "2024-01-15",
@@ -314,7 +316,7 @@ class TestCreateWorkOrderUseCase:
                 estimatedTime=60,
             )
 
-            result = use_case.execute(params)
+            result = await use_case.execute(params)
             assert result.success is True
             # Verificar que el payload se construyó correctamente con la fecha
             call_args = mock_api_client.post.call_args

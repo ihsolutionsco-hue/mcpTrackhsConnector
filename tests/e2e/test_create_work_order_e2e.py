@@ -57,15 +57,17 @@ class TestCreateWorkOrderE2E:
         return registered_function
 
     @pytest.mark.e2e
-    def test_complete_flow_minimal_work_order(
+    async def test_complete_flow_minimal_work_order(
         self, tool_function, mock_api_client, sample_work_order_minimal
     ):
         """Test flujo completo con campos mínimos."""
         # Configurar mock
-        mock_api_client.post.return_value = sample_work_order_minimal
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
 
         # Ejecutar función
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -98,15 +100,17 @@ class TestCreateWorkOrderE2E:
         assert payload["estimatedTime"] == 60
 
     @pytest.mark.e2e
-    def test_complete_flow_full_work_order(
+    async def test_complete_flow_full_work_order(
         self, tool_function, mock_api_client, sample_work_order_response
     ):
         """Test flujo completo con todos los campos."""
         # Configurar mock
-        mock_api_client.post.return_value = sample_work_order_response
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_response)
 
         # Ejecutar función
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=5,
             status="open",
@@ -177,15 +181,17 @@ class TestCreateWorkOrderE2E:
         assert payload["blockCheckin"] is True
 
     @pytest.mark.e2e
-    def test_high_priority_emergency_work_order(
+    async def test_high_priority_emergency_work_order(
         self, tool_function, mock_api_client, sample_work_order_high_priority
     ):
         """Test creación de work order de alta prioridad para emergencia."""
         # Configurar mock
-        mock_api_client.post.return_value = sample_work_order_high_priority
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_high_priority)
 
         # Ejecutar función
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15T14:30:00Z",
             priority=5,
             status="in-progress",
@@ -215,15 +221,17 @@ class TestCreateWorkOrderE2E:
         assert result["work_order"]["blockCheckin"] is True
 
     @pytest.mark.e2e
-    def test_vendor_assigned_work_order(
+    async def test_vendor_assigned_work_order(
         self, tool_function, mock_api_client, sample_work_order_vendor_assigned
     ):
         """Test creación de work order asignada a proveedor."""
         # Configurar mock
-        mock_api_client.post.return_value = sample_work_order_vendor_assigned
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_vendor_assigned)
 
         # Ejecutar función
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-14",
             priority=3,
             status="vendor-assigned",
@@ -258,15 +266,17 @@ class TestCreateWorkOrderE2E:
         assert result["work_order"]["blockCheckin"] is False
 
     @pytest.mark.e2e
-    def test_type_conversion_string_parameters(
+    async def test_type_conversion_string_parameters(
         self, tool_function, mock_api_client, sample_work_order_minimal
     ):
         """Test conversión de tipos string a tipos correctos."""
         # Configurar mock
-        mock_api_client.post.return_value = sample_work_order_minimal
+        from unittest.mock import AsyncMock
+
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_minimal)
 
         # Ejecutar función con parámetros string
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority="5",  # String
             status="open",
@@ -298,7 +308,7 @@ class TestCreateWorkOrderE2E:
         assert payload["blockCheckin"] is True
 
     @pytest.mark.e2e
-    def test_all_valid_priorities(self, tool_function, mock_api_client):
+    async def test_all_valid_priorities(self, tool_function, mock_api_client):
         """Test todas las prioridades válidas."""
         valid_priorities = [1, 3, 5]
 
@@ -319,9 +329,11 @@ class TestCreateWorkOrderE2E:
                 "_embedded": {},
                 "_links": {"self": {"href": "/api/pms/maintenance/work-orders/67890"}},
             }
-            mock_api_client.post.return_value = mock_response
+            from unittest.mock import AsyncMock
 
-            result = tool_function(
+            mock_api_client.post = AsyncMock(return_value=mock_response)
+
+            result = await tool_function(
                 date_received="2024-01-15",
                 priority=priority,
                 status="not-started",
@@ -334,7 +346,7 @@ class TestCreateWorkOrderE2E:
             assert result["work_order"]["priority"] == priority
 
     @pytest.mark.e2e
-    def test_all_valid_statuses(self, tool_function, mock_api_client):
+    async def test_all_valid_statuses(self, tool_function, mock_api_client):
         """Test todos los estados válidos."""
         valid_statuses = [
             "open",
@@ -367,9 +379,11 @@ class TestCreateWorkOrderE2E:
                 "_embedded": {},
                 "_links": {"self": {"href": "/api/pms/maintenance/work-orders/67890"}},
             }
-            mock_api_client.post.return_value = mock_response
+            from unittest.mock import AsyncMock
 
-            result = tool_function(
+            mock_api_client.post = AsyncMock(return_value=mock_response)
+
+            result = await tool_function(
                 date_received="2024-01-15",
                 priority=3,
                 status=status,
@@ -382,10 +396,10 @@ class TestCreateWorkOrderE2E:
             assert result["work_order"]["status"] == status
 
     @pytest.mark.e2e
-    def test_validation_error_missing_required_fields(self, tool_function):
+    async def test_validation_error_missing_required_fields(self, tool_function):
         """Test error de validación con campos requeridos faltantes."""
         # Fecha faltante
-        result = tool_function(
+        result = await tool_function(
             date_received="",  # Vacío
             priority=3,
             status="not-started",
@@ -399,9 +413,9 @@ class TestCreateWorkOrderE2E:
         assert "fecha de recepción es requerida" in result["message"]
 
     @pytest.mark.e2e
-    def test_validation_error_invalid_date_format(self, tool_function):
+    async def test_validation_error_invalid_date_format(self, tool_function):
         """Test error de validación con formato de fecha inválido."""
-        result = tool_function(
+        result = await tool_function(
             date_received="15-01-2024",  # Formato inválido
             priority=3,
             status="not-started",
@@ -415,9 +429,9 @@ class TestCreateWorkOrderE2E:
         assert "formato ISO 8601" in result["message"]
 
     @pytest.mark.e2e
-    def test_validation_error_invalid_priority(self, tool_function):
+    async def test_validation_error_invalid_priority(self, tool_function):
         """Test error de validación con prioridad inválida."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=2,  # Inválida
             status="not-started",
@@ -431,9 +445,9 @@ class TestCreateWorkOrderE2E:
         assert "prioridad debe ser 1 (Baja), 3 (Media) o 5 (Alta)" in result["message"]
 
     @pytest.mark.e2e
-    def test_validation_error_invalid_status(self, tool_function):
+    async def test_validation_error_invalid_status(self, tool_function):
         """Test error de validación con estado inválido."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="invalid-status",  # Inválido
@@ -447,9 +461,9 @@ class TestCreateWorkOrderE2E:
         assert "Estado inválido" in result["message"]
 
     @pytest.mark.e2e
-    def test_validation_error_negative_cost(self, tool_function):
+    async def test_validation_error_negative_cost(self, tool_function):
         """Test error de validación con costo negativo."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -463,9 +477,9 @@ class TestCreateWorkOrderE2E:
         assert "costo estimado no puede ser negativo" in result["message"]
 
     @pytest.mark.e2e
-    def test_validation_error_zero_time(self, tool_function):
+    async def test_validation_error_zero_time(self, tool_function):
         """Test error de validación con tiempo cero."""
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -479,12 +493,12 @@ class TestCreateWorkOrderE2E:
         assert "tiempo estimado debe ser mayor a 0" in result["message"]
 
     @pytest.mark.e2e
-    def test_authentication_error_handling(self, tool_function, mock_api_client):
+    async def test_authentication_error_handling(self, tool_function, mock_api_client):
         """Test manejo de error de autenticación."""
         # Configurar mock para lanzar AuthenticationError
         mock_api_client.post.side_effect = AuthenticationError("Credenciales inválidas")
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -498,12 +512,12 @@ class TestCreateWorkOrderE2E:
         assert "Credenciales inválidas" in result["message"]
 
     @pytest.mark.e2e
-    def test_authorization_error_handling(self, tool_function, mock_api_client):
+    async def test_authorization_error_handling(self, tool_function, mock_api_client):
         """Test manejo de error de autorización."""
         # Configurar mock para lanzar AuthorizationError
         mock_api_client.post.side_effect = AuthorizationError("Permisos insuficientes")
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -517,12 +531,12 @@ class TestCreateWorkOrderE2E:
         assert "Permisos insuficientes" in result["message"]
 
     @pytest.mark.e2e
-    def test_api_error_401_handling(self, tool_function, mock_api_client):
+    async def test_api_error_401_handling(self, tool_function, mock_api_client):
         """Test manejo de error 401 de API."""
         # Configurar mock para lanzar ApiError 401
         mock_api_client.post.side_effect = ApiError("Unauthorized", 401)
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -536,12 +550,12 @@ class TestCreateWorkOrderE2E:
         assert "Credenciales de autenticación inválidas" in result["message"]
 
     @pytest.mark.e2e
-    def test_api_error_403_handling(self, tool_function, mock_api_client):
+    async def test_api_error_403_handling(self, tool_function, mock_api_client):
         """Test manejo de error 403 de API."""
         # Configurar mock para lanzar ApiError 403
         mock_api_client.post.side_effect = ApiError("Forbidden", 403)
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -555,12 +569,12 @@ class TestCreateWorkOrderE2E:
         assert "Permisos insuficientes" in result["message"]
 
     @pytest.mark.e2e
-    def test_api_error_422_handling(self, tool_function, mock_api_client):
+    async def test_api_error_422_handling(self, tool_function, mock_api_client):
         """Test manejo de error 422 de API."""
         # Configurar mock para lanzar ApiError 422
         mock_api_client.post.side_effect = ApiError("Validation failed", 422)
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -574,12 +588,12 @@ class TestCreateWorkOrderE2E:
         assert "Validation failed" in result["message"]
 
     @pytest.mark.e2e
-    def test_api_error_500_handling(self, tool_function, mock_api_client):
+    async def test_api_error_500_handling(self, tool_function, mock_api_client):
         """Test manejo de error 500 de API."""
         # Configurar mock para lanzar ApiError 500
         mock_api_client.post.side_effect = ApiError("Internal Server Error", 500)
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -593,12 +607,12 @@ class TestCreateWorkOrderE2E:
         assert "Error interno del servidor" in result["message"]
 
     @pytest.mark.e2e
-    def test_unexpected_error_handling(self, tool_function, mock_api_client):
+    async def test_unexpected_error_handling(self, tool_function, mock_api_client):
         """Test manejo de error inesperado."""
         # Configurar mock para lanzar excepción genérica
         mock_api_client.post.side_effect = Exception("Unexpected error")
 
-        result = tool_function(
+        result = await tool_function(
             date_received="2024-01-15",
             priority=3,
             status="not-started",
@@ -612,14 +626,16 @@ class TestCreateWorkOrderE2E:
         assert "Unexpected error" in result["message"]
 
     @pytest.mark.e2e
-    def test_response_format_with_embedded_data(
+    async def test_response_format_with_embedded_data(
         self, tool_function, mock_api_client, sample_work_order_response
     ):
         """Test formato de respuesta con datos embebidos."""
         # Configurar mock
-        mock_api_client.post.return_value = sample_work_order_response
+        from unittest.mock import AsyncMock
 
-        result = tool_function(
+        mock_api_client.post = AsyncMock(return_value=sample_work_order_response)
+
+        result = await tool_function(
             date_received="2024-01-15",
             priority=5,
             status="open",
@@ -656,7 +672,7 @@ class TestCreateWorkOrderE2E:
         assert "vendor" in work_order["_links"]
 
     @pytest.mark.e2e
-    def test_iso8601_date_formats(self, tool_function, mock_api_client):
+    async def test_iso8601_date_formats(self, tool_function, mock_api_client):
         """Test diferentes formatos de fecha ISO 8601."""
         valid_date_formats = [
             "2024-01-15",
@@ -682,9 +698,11 @@ class TestCreateWorkOrderE2E:
                 "_embedded": {},
                 "_links": {"self": {"href": "/api/pms/maintenance/work-orders/67890"}},
             }
-            mock_api_client.post.return_value = mock_response
+            from unittest.mock import AsyncMock
 
-            result = tool_function(
+            mock_api_client.post = AsyncMock(return_value=mock_response)
+
+            result = await tool_function(
                 date_received=date_format,
                 priority=3,
                 status="not-started",

@@ -300,9 +300,20 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             unit_status = None
 
         # Normalizar parámetros numéricos para backward compatibility
+        page_normalized = normalize_int(page, "page")
+        size_normalized = normalize_int(size, "size")
+
+        # Validar parámetros antes de aplicar defaults
+        if page_normalized is not None and page_normalized < 1:
+            raise ValidationError("Page must be >= 1", "page")
+        if size_normalized is not None and size_normalized < 1:
+            raise ValidationError("Size must be >= 1", "size")
+        if size_normalized is not None and size_normalized > 1000:
+            raise ValidationError("Size must be <= 1000", "size")
+
         # Aplicar valores por defecto cuando se detectan FieldInfo objects
-        page_normalized = normalize_int(page, "page") or 1  # Default: 1
-        size_normalized = normalize_int(size, "size") or 25  # Default: 25
+        page_normalized = page_normalized or 1  # Default: 1
+        size_normalized = size_normalized or 25  # Default: 25
         calendar_id_normalized = normalize_int(calendar_id, "calendar_id")
         role_id_normalized = normalize_int(role_id, "role_id")
         bedrooms_normalized = normalize_int(bedrooms, "bedrooms")
@@ -340,14 +351,6 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             size_normalized = int(size_normalized)
         except (ValueError, TypeError):
             raise ValidationError("Page and size must be valid integers", "parameters")
-
-        # Validar parámetros básicos según documentación Channel API
-        if page_normalized < 1:
-            raise ValidationError("Page must be >= 1", "page")
-        if size_normalized < 1:
-            raise ValidationError("Size must be >= 1", "size")
-        if size_normalized > 1000:
-            raise ValidationError("Size must be <= 1000", "size")
 
         # Validar límite total de resultados (10k máximo)
         if page_normalized * size_normalized > 10000:
