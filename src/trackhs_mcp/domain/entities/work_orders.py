@@ -182,12 +182,15 @@ class WorkOrder(BaseModel):
     @classmethod
     def from_api_response(cls, data: Dict[str, Any]) -> "WorkOrder":
         """Crear instancia desde respuesta de API."""
+        # Crear una copia del diccionario para no modificar el original
+        data_copy = data.copy()
+
         # Extraer campos embebidos si existen
-        embedded = data.pop("_embedded", None)
-        links = data.pop("_links", None)
+        embedded = data_copy.pop("_embedded", None)
+        links = data_copy.pop("_links", None)
 
         # Crear instancia
-        work_order = cls(**data)
+        work_order = cls(**data_copy)
 
         # Asignar campos embebidos si existen
         if embedded is not None:

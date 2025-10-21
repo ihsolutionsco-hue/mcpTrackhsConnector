@@ -106,6 +106,10 @@ class TrackHSApiClient(ApiClientPort):
                 # Realizar petición usando endpoint relativo
                 response = await self.client.request(method, endpoint, **request_kwargs)
 
+                # Asegurar que response no sea una corrutina
+                if hasattr(response, "__await__"):
+                    response = await response
+
                 # Verificar si la respuesta es exitosa
                 if not response.is_success:
                     if response.status_code == 401:

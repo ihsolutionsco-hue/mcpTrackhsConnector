@@ -30,7 +30,7 @@ class CreateWorkOrderUseCase:
         """Inicializar el caso de uso con el cliente API."""
         self.api_client = api_client
 
-    def execute(self, params: CreateWorkOrderParams) -> WorkOrderResponse:
+    async def execute(self, params: CreateWorkOrderParams) -> WorkOrderResponse:
         """
         Ejecutar la creación de una orden de trabajo.
 
@@ -54,11 +54,11 @@ class CreateWorkOrderUseCase:
             payload = self._build_payload(params)
 
             # Llamar a la API
-            response_data = self.api_client.post(
+            response_data = await self.api_client.post(
                 "/pms/maintenance/work-orders", data=payload
             )
 
-            # Crear respuesta
+            # La API devuelve directamente el objeto del work order (201 Created)
             work_order = WorkOrder.from_api_response(response_data)
             return WorkOrderResponse(work_order=work_order)
 

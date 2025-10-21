@@ -46,7 +46,7 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
         name="create_maintenance_work_order",
         description="Crear una nueva orden de trabajo de mantenimiento en TrackHS",
     )
-    def create_maintenance_work_order(
+    async def create_maintenance_work_order(
         date_received: str = Field(
             description="Date received in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15'",
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
@@ -266,7 +266,7 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
 
             # Ejecutar caso de uso
             use_case = CreateWorkOrderUseCase(api_client)
-            response = use_case.execute(params)
+            response = await use_case.execute(params)
 
             # Retornar respuesta
             return {

@@ -66,16 +66,12 @@ class SearchUnitsUseCase:
                 raise ValidationError("Size debe estar entre 1 y 1000")
 
         # Validar límite total de resultados (10k máximo)
-        # Ajustar page para cálculo (API usa 1-based, pero calculamos con 0-based)
-        # Asegurar que page y size sean enteros para evitar errores de comparación
-        if params.page:
-            page_int = int(params.page) if isinstance(params.page, str) else params.page
-            adjusted_page = max(0, page_int - 1) if page_int > 0 else 0
-        else:
-            adjusted_page = 0
+        # La API usa paginación 1-based, calculamos el total de resultados directamente
         if params.page and params.size:
+            page_int = int(params.page) if isinstance(params.page, str) else params.page
             size_int = int(params.size) if isinstance(params.size, str) else params.size
-            if adjusted_page * size_int > 10000:
+            total_results = page_int * size_int
+            if total_results > 10000:
                 raise ValidationError("Total results (page * size) must be <= 10,000")
 
         # Validar fechas si están presentes

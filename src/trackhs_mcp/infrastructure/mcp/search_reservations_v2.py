@@ -275,9 +275,9 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
 
         # Asegurar defaults para page y size si normalize_int retorna None (FieldInfo objects)
         if page_normalized is None:
-            page_normalized = 0
+            page_normalized = 1  # Default: 1 (1-based pagination)
         if size_normalized is None:
-            size_normalized = 10
+            size_normalized = 10  # Default: 10
 
         # Validar parámetros básicos según documentación API V2
         if page_normalized < 0:

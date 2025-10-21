@@ -300,8 +300,9 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             unit_status = None
 
         # Normalizar parámetros numéricos para backward compatibility
-        page_normalized = normalize_int(page, "page")
-        size_normalized = normalize_int(size, "size")
+        # Aplicar valores por defecto cuando se detectan FieldInfo objects
+        page_normalized = normalize_int(page, "page") or 1  # Default: 1
+        size_normalized = normalize_int(size, "size") or 25  # Default: 25
         calendar_id_normalized = normalize_int(calendar_id, "calendar_id")
         role_id_normalized = normalize_int(role_id, "role_id")
         bedrooms_normalized = normalize_int(bedrooms, "bedrooms")
@@ -332,12 +333,6 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             children_allowed, "children_allowed"
         )
         is_accessible_normalized = normalize_binary_int(is_accessible, "is_accessible")
-
-        # Asegurar defaults para page y size si normalize_int retorna None (FieldInfo objects)
-        if page_normalized is None:
-            page_normalized = 1
-        if size_normalized is None:
-            size_normalized = 25
 
         # Asegurar que los valores sean enteros para comparaciones
         try:
@@ -407,9 +402,9 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             # Crear caso de uso
             use_case = SearchUnitsUseCase(api_client)
 
-            # Convertir page de 1-based (user) a 0-based (API/use case)
-            # El usuario envía page=1 para la primera página, pero la API espera page=0
-            page_for_api = page_normalized - 1 if page_normalized > 0 else 0
+            # La API de TrackHS usa paginación 1-based, no necesitamos conversión
+            # El usuario envía page=1 para la primera página, y la API también espera page=1
+            page_for_api = page_normalized
 
             # Crear parámetros de búsqueda
             search_params = SearchUnitsParams(
