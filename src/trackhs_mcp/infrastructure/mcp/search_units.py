@@ -20,7 +20,7 @@ from ..utils.user_friendly_messages import format_date_error
 
 
 def _parse_id_string(
-    id_value: Optional[Union[str, int]]
+    id_value: Optional[Union[str, int]],
 ) -> Optional[Union[int, List[int]]]:
     """
     Parse ID string to int or list of ints.
