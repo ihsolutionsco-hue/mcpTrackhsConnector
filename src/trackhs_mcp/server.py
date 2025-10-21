@@ -39,4 +39,5 @@ register_all_components(mcp, api_client)
 
 # Start the server
 if __name__ == "__main__":
-    mcp.run()
+    # Especificar transport="http" para compatibilidad con ElevenLabs y FastMCP Cloud
+    mcp.run(transport="http")

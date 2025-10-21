@@ -77,9 +77,9 @@ if __name__ == "__main__":
         logger.info("Iniciando servidor MCP...")
 
         # FastMCP Cloud maneja automáticamente el transporte HTTP
-        # No necesitamos configurar transporte, host, puerto o CORS aquí
-        # La configuración está en fastmcp.yaml
-        mcp.run()
+        # Especificamos transport="http" para compatibilidad con ElevenLabs y FastMCP Cloud
+        # La configuración de host, puerto y CORS está en fastmcp.yaml
+        mcp.run(transport="http")
     except KeyboardInterrupt:
         logger.info("Servidor detenido por el usuario")
     except Exception as e:

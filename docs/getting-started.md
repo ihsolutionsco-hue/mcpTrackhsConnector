@@ -194,9 +194,9 @@ print('API connection test:', client.test_connection())
 
 ## First Steps with Claude Desktop
 
-### 1. Configure Claude Desktop
+### Método 1: STDIO Transport (Local)
 
-Create or edit `claude_desktop_config.json`:
+Para desarrollo local, usa STDIO transport:
 
 ```json
 {
@@ -215,6 +215,24 @@ Create or edit `claude_desktop_config.json`:
 }
 ```
 
+### Método 2: HTTP Transport (Remoto) ⭐ **Recomendado**
+
+Para usar con FastMCP Cloud y ElevenLabs, usa HTTP transport:
+
+```json
+{
+  "mcpServers": {
+    "trackhs": {
+      "url": "https://tu-servidor.fastmcp.cloud/mcp",
+      "transport": "http",
+      "headers": {
+        "Authorization": "Bearer tu-token-opcional"
+      }
+    }
+  }
+}
+```
+
 ### 2. Restart Claude Desktop
 
 After configuring, restart Claude Desktop to load the MCP server.
@@ -223,9 +241,40 @@ After configuring, restart Claude Desktop to load the MCP server.
 
 In Claude Desktop, you can now:
 
-- Use the `search_reservations` tool
-- Access Track HS resources
+- Use the `search_reservations_v2` tool
+- Access Track HS resources and schemas
 - Use pre-built prompts for reservation management
+- Search units and amenities
+- Create work orders
+
+## Conexión HTTP para FastMCP Cloud
+
+### 1. Deploy en FastMCP Cloud
+
+1. Conecta tu repositorio en [FastMCP Cloud](https://fastmcp.cloud)
+2. Configura las variables de entorno:
+   ```
+   TRACKHS_API_URL=https://api.trackhs.com/api
+   TRACKHS_USERNAME=tu_usuario
+   TRACKHS_PASSWORD=tu_contraseña
+   ```
+3. Haz push a main para deploy automático
+
+### 2. Obtener URL del Servidor
+
+FastMCP Cloud proporciona automáticamente una URL como:
+```
+https://tu-servidor.fastmcp.cloud/mcp
+```
+
+### 3. Conectar desde Clientes
+
+Usa la URL HTTP para conectar desde:
+- **ElevenLabs**: Configuración de servidor MCP personalizado
+- **Claude Desktop**: HTTP transport en configuración JSON
+- **Clientes Python**: `StreamableHttpTransport`
+
+Ver [Guía de Conexión de Clientes](guides/CLIENT_CONNECTION_GUIDE.md) para ejemplos detallados.
 
 ## Common Issues & Solutions
 

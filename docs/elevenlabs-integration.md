@@ -55,23 +55,83 @@ curl -X POST https://tu-servidor.fastmcp.cloud/mcp \
 
 2. **Configurar conexión**:
    - **URL**: `https://tu-servidor.fastmcp.cloud/mcp`
-   - **Transport**: `Streamable HTTP`
-   - **Headers**: (dejar vacío si no usas autenticación)
+   - **Transport**: `HTTP Streamable` (recomendado)
+   - **Headers**: (opcional) Headers de autenticación
 
 3. **Configurar permisos**:
-   - **Aprobación de herramientas**: `Siempre Preguntar` (recomendado)
+   - **Aprobación de herramientas**: `Always Ask` (recomendado para seguridad)
    - **Acceso a datos**: `Solo datos necesarios`
 
-### 3. Probar Conexión
+### 3. Configuración Avanzada
+
+#### Headers de Autenticación (Opcional)
+Si tu servidor requiere autenticación adicional:
+
+```json
+{
+  "Authorization": "Bearer tu-token-aqui",
+  "X-API-Key": "tu-api-key-aqui"
+}
+```
+
+#### Modos de Aprobación
+ElevenLabs ofrece 3 modos de aprobación:
+
+- **Always Ask**: Máxima seguridad, requiere aprobación para cada herramienta
+- **Fine-Grained**: Control granular por herramienta
+- **No Approval**: Sin aprobación (solo para desarrollo)
+
+### 4. Probar Conexión
 
 1. **Verificar conexión**: ElevenLabs debería mostrar "Conectado"
-2. **Listar herramientas**: Deberías ver las 6 tools disponibles:
-   - `search_reservations_v2`
-   - `get_reservation_v2`
-   - `get_folio`
-   - `search_units`
-   - `search_amenities`
-   - `create_maintenance_work_order`
+2. **Listar herramientas**: Deberías ver las 7 tools disponibles:
+   - `search_reservations_v2` - Buscar reservaciones
+   - `get_reservation_v2` - Obtener reservación específica
+   - `get_folio` - Obtener folio financiero
+   - `search_units` - Buscar unidades disponibles
+   - `search_amenities` - Buscar amenidades
+   - `create_maintenance_work_order` - Crear orden de mantenimiento
+   - `create_housekeeping_work_order` - Crear orden de limpieza
+
+### 5. Testing con Cliente Python
+
+Para probar la conexión programáticamente:
+
+```python
+import asyncio
+from fastmcp import Client
+from fastmcp.client.transports import StreamableHttpTransport
+
+async def test_elevenlabs_connection():
+    server_url = "https://tu-servidor.fastmcp.cloud/mcp"
+
+    transport = StreamableHttpTransport(url=server_url)
+    client = Client(transport)
+
+    async with client:
+        # Test de conectividad
+        await client.ping()
+        print("✅ Servidor accesible desde ElevenLabs")
+
+        # Listar herramientas
+        tools = await client.list_tools()
+        print(f"✅ {len(tools.tools)} herramientas disponibles")
+
+        # Probar búsqueda de reservaciones
+        result = await client.call_tool(
+            "search_reservations_v2",
+            {
+                "arrival_start": "2024-01-01",
+                "arrival_end": "2024-01-31",
+                "status": "Confirmed",
+                "size": 5
+            }
+        )
+        print(f"✅ Búsqueda exitosa: {result.content}")
+
+# Ejecutar test
+asyncio.run(test_elevenlabs_connection())
+```
 
 ## Uso de las Herramientas
 
