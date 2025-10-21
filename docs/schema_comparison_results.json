@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "total_tools": 3,
+    "tools_with_discrepancies": 3,
+    "total_discrepancies": 8
+  },
+  "comparisons": [
+    {
+      "tool": "search_units",
+      "discrepancies": [
+        {
+          "parameter": "page",
+          "issues": [
+            "Parámetro faltante en esquema MCP"
+          ]
+        },
+        {
+          "parameter": "size",
+          "issues": [
+            "Parámetro faltante en esquema MCP"
+          ]
+        },
+        {
+          "parameter": "petsFriendly",
+          "issues": [
+            "Parámetro faltante en esquema MCP"
+          ]
+        }
+      ],
+      "recommendations": []
+    },
+    {
+      "tool": "search_amenities",
+      "discrepancies": [
+        {
+          "parameter": "page",
+          "issues": [
+            "Parámetro faltante en esquema MCP"
+          ]
+        },
+        {
+          "parameter": "size",
+          "issues": [
+            "Parámetro faltante en esquema MCP"
+          ]
+        },
+        {
+          "parameter": "sortColumn",
+          "issues": [
+            "Parámetro faltante en esquema MCP"
+          ]
+        }
+      ],
+      "recommendations": []
+    },
+    {
+      "tool": "search_reservations",
+      "discrepancies": [
+        {
+          "parameter": "page",
+          "issues": [
+            "Parámetro faltante en esquema MCP"
+          ]
+        },
+        {
+          "parameter": "size",
+          "issues": [
+            "Parámetro faltante en esquema MCP"
+          ]
+        }
+      ],
+      "recommendations": []
+    }
+  ]
+}

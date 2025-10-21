@@ -1,0 +1,47 @@
+[
+  {
+    "tool": "search_units",
+    "parameter": "page",
+    "issue": "Minimum esperado: 1, actual: None"
+  },
+  {
+    "tool": "search_units",
+    "parameter": "page",
+    "issue": "Documentación dice minimum=0, maximum=0 (posible error)"
+  },
+  {
+    "tool": "search_units",
+    "parameter": "size",
+    "issue": "Minimum esperado: 1, actual: None"
+  },
+  {
+    "tool": "search_units",
+    "parameter": "pets_friendly",
+    "issue": "Minimum esperado: 0, actual: None"
+  },
+  {
+    "tool": "search_amenities",
+    "parameter": "page",
+    "issue": "Documentación dice type=number, minimum=0, maximum=0"
+  },
+  {
+    "tool": "search_amenities",
+    "parameter": "size",
+    "issue": "Documentación dice type=number"
+  },
+  {
+    "tool": "search_amenities",
+    "parameter": "sort_column",
+    "issue": "Tipo esperado: string, actual: unknown"
+  },
+  {
+    "tool": "search_reservations",
+    "parameter": "page",
+    "issue": "Minimum esperado: 0, actual: None"
+  },
+  {
+    "tool": "search_reservations",
+    "parameter": "size",
+    "issue": "Minimum esperado: 1, actual: None"
+  }
+]
