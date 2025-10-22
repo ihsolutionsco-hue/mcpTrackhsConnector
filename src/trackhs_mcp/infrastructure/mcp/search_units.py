@@ -76,7 +76,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             le=10000,
         ),
         size: int = Field(
-            default=25, description="Number of results per page (1-1000)", ge=1, le=1000
+            default=3, description="Number of results per page (1-5)", ge=1, le=5
         ),
         # Parámetros de ordenamiento
         sort_column: str = Field(
@@ -308,12 +308,12 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             raise ValidationError("Page must be >= 1", "page")
         if size_normalized is not None and size_normalized < 1:
             raise ValidationError("Size must be >= 1", "size")
-        if size_normalized is not None and size_normalized > 1000:
-            raise ValidationError("Size must be <= 1000", "size")
+        if size_normalized is not None and size_normalized > 5:
+            raise ValidationError("Size must be <= 5", "size")
 
         # Aplicar valores por defecto cuando se detectan FieldInfo objects
         page_normalized = page_normalized or 1  # Default: 1
-        size_normalized = size_normalized or 25  # Default: 25
+        size_normalized = size_normalized or 3  # Default: 3
         calendar_id_normalized = normalize_int(calendar_id, "calendar_id")
         role_id_normalized = normalize_int(role_id, "role_id")
         bedrooms_normalized = normalize_int(bedrooms, "bedrooms")

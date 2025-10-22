@@ -15,8 +15,8 @@ class UnitsExamples:
         return [
             {
                 "name": "Búsqueda básica",
-                "description": "Obtener las primeras 25 unidades",
-                "parameters": {"page": 0, "size": 25},
+                "description": "Obtener las primeras 3 unidades",
+                "parameters": {"page": 0, "size": 3},
                 "expected_result": "Lista de 25 unidades con información básica",
             },
             {
@@ -275,7 +275,7 @@ class UnitsExamples:
                     },
                     "page": 0,
                     "page_count": 13,
-                    "page_size": 25,
+                    "page_size": 3,
                     "total_items": 304,
                     "_links": {
                         "self": {

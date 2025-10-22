@@ -36,9 +36,9 @@ class UnitsAPIDocumentation:
                 },
                 "size": {
                     "type": "integer",
-                    "default": 25,
+                    "default": 3,
                     "minimum": 1,
-                    "maximum": 1000,
+                    "maximum": 5,
                     "description": "Tamaño de página",
                 },
             },
@@ -355,7 +355,7 @@ class UnitsAPIDocumentation:
             "pagination": {
                 "max_page_size": 1000,
                 "max_total_results": 10000,
-                "default_page_size": 25,
+                "default_page_size": 3,
             },
             "rate_limits": {
                 "requests_per_minute": "Varies by account",

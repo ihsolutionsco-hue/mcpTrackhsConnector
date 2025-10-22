@@ -369,9 +369,9 @@
           "type": "integer"
         },
         "size": {
-          "default": 25,
-          "description": "Number of results per page (1-1000)",
-          "maximum": 1000,
+          "default": 3,
+          "description": "Number of results per page (1-5)",
+          "maximum": 5,
           "minimum": 1,
           "type": "integer"
         },

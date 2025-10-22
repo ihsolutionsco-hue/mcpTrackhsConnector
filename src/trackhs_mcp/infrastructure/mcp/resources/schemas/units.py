@@ -82,7 +82,7 @@ def register_units_schema(mcp, api_client):
         **Ejemplos de Uso:**
 
         # Búsqueda básica
-        GET /pms/units?page=0&size=25
+        GET /pms/units?page=0&size=3
 
         # Filtro por características
         GET /pms/units?bedrooms=2&bathrooms=2&petsFriendly=1
@@ -228,7 +228,7 @@ def register_units_schema(mcp, api_client):
                 "unstable_fields": ["unitType", "customData"],
             },
             "examples": {
-                "basic_search": "GET /pms/units?page=0&size=25",
+                "basic_search": "GET /pms/units?page=0&size=3",
                 "filter_by_features": "GET /pms/units?bedrooms=2&bathrooms=2&petsFriendly=1",
                 "availability_search": "GET /pms/units?arrival=2024-01-01&departure=2024-01-07&isBookable=1",
                 "amenity_filter": "GET /pms/units?amenityId=1,2,3&petsFriendly=1",
@@ -381,7 +381,7 @@ class SearchUnitsParamsSchema(BaseModel):
 
     # Paginación
     page: int = Field(default=0, description="Número de página (0-based)")
-    size: int = Field(default=25, description="Tamaño de página (máximo 1000)")
+    size: int = Field(default=3, description="Tamaño de página (máximo 5)")
 
     # Ordenamiento
     sort_column: Literal["id", "name", "nodeName", "unitTypeName"] = Field(
