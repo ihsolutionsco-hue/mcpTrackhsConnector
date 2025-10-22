@@ -123,104 +123,70 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         id: Optional[str] = Field(
             default=None, description="Filter by unit IDs (comma-separated: '1,2,3')"
         ),
-        # Filtros numéricos - Aceptar múltiples tipos para compatibilidad MCP
-        calendar_id: Optional[Union[int, float, str]] = Field(
+        # Filtros numéricos - Aceptar strings para compatibilidad MCP
+        calendar_id: Optional[str] = Field(
             default=None, description="Filter by calendar ID"
         ),
-        role_id: Optional[Union[int, float, str]] = Field(
-            default=None, description="Filter by role ID"
+        role_id: Optional[str] = Field(default=None, description="Filter by role ID"),
+        # Filtros de habitaciones y baños - Aceptar strings para compatibilidad MCP
+        bedrooms: Optional[str] = Field(
+            default=None, description="Filter by exact number of bedrooms"
         ),
-        # Filtros de habitaciones y baños - Aceptar múltiples tipos para compatibilidad MCP
-        bedrooms: Optional[Union[int, float, str]] = Field(
-            default=None, description="Filter by exact number of bedrooms", ge=0
+        min_bedrooms: Optional[str] = Field(
+            default=None, description="Filter by minimum number of bedrooms"
         ),
-        min_bedrooms: Optional[Union[int, float, str]] = Field(
-            default=None, description="Filter by minimum number of bedrooms", ge=0
+        max_bedrooms: Optional[str] = Field(
+            default=None, description="Filter by maximum number of bedrooms"
         ),
-        max_bedrooms: Optional[Union[int, float, str]] = Field(
-            default=None, description="Filter by maximum number of bedrooms", ge=0
+        bathrooms: Optional[str] = Field(
+            default=None, description="Filter by exact number of bathrooms"
         ),
-        bathrooms: Optional[Union[int, float, str]] = Field(
-            default=None, description="Filter by exact number of bathrooms", ge=0
+        min_bathrooms: Optional[str] = Field(
+            default=None, description="Filter by minimum number of bathrooms"
         ),
-        min_bathrooms: Optional[Union[int, float, str]] = Field(
-            default=None, description="Filter by minimum number of bathrooms", ge=0
+        max_bathrooms: Optional[str] = Field(
+            default=None, description="Filter by maximum number of bathrooms"
         ),
-        max_bathrooms: Optional[Union[int, float, str]] = Field(
-            default=None, description="Filter by maximum number of bathrooms", ge=0
+        # Filtros booleanos (0/1) - Aceptar strings para compatibilidad MCP
+        pets_friendly: Optional[str] = Field(
+            default=None, description="Filter by pet-friendly units (0=no, 1=yes)"
         ),
-        # Filtros booleanos (0/1) - Aceptar múltiples tipos para compatibilidad MCP
-        pets_friendly: Optional[Union[int, float, str, bool]] = Field(
-            default=None,
-            description="Filter by pet-friendly units (0=no, 1=yes)",
-            ge=0,
-            le=1,
-        ),
-        allow_unit_rates: Optional[Union[int, float, str, bool]] = Field(
+        allow_unit_rates: Optional[str] = Field(
             default=None,
             description="Filter by units that allow unit-specific rates (0=no, 1=yes)",
-            ge=0,
-            le=1,
         ),
-        computed: Optional[Union[int, float, str, bool]] = Field(
-            default=None,
-            description="Filter by computed units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+        computed: Optional[str] = Field(
+            default=None, description="Filter by computed units (0=no, 1=yes)"
         ),
-        inherited: Optional[Union[int, float, str, bool]] = Field(
-            default=None,
-            description="Filter by inherited units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+        inherited: Optional[str] = Field(
+            default=None, description="Filter by inherited units (0=no, 1=yes)"
         ),
-        limited: Optional[Union[int, float, str, bool]] = Field(
+        limited: Optional[str] = Field(
             default=None,
             description="Filter by limited availability units (0=no, 1=yes)",
-            ge=0,
-            le=1,
         ),
-        is_bookable: Optional[Union[int, float, str, bool]] = Field(
-            default=None,
-            description="Filter by bookable units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+        is_bookable: Optional[str] = Field(
+            default=None, description="Filter by bookable units (0=no, 1=yes)"
         ),
-        include_descriptions: Optional[Union[int, float, str, bool]] = Field(
+        include_descriptions: Optional[str] = Field(
             default=None,
             description="Include unit descriptions in response (0=no, 1=yes)",
-            ge=0,
-            le=1,
         ),
-        is_active: Optional[Union[int, float, str, bool]] = Field(
-            default=None,
-            description="Filter by active units (0=inactive, 1=active)",
-            ge=0,
-            le=1,
+        is_active: Optional[str] = Field(
+            default=None, description="Filter by active units (0=inactive, 1=active)"
         ),
-        events_allowed: Optional[Union[int, float, str, bool]] = Field(
-            default=None,
-            description="Filter by units allowing events (0=no, 1=yes)",
-            ge=0,
-            le=1,
+        events_allowed: Optional[str] = Field(
+            default=None, description="Filter by units allowing events (0=no, 1=yes)"
         ),
-        smoking_allowed: Optional[Union[int, float, str, bool]] = Field(
-            default=None,
-            description="Filter by units allowing smoking (0=no, 1=yes)",
-            ge=0,
-            le=1,
+        smoking_allowed: Optional[str] = Field(
+            default=None, description="Filter by units allowing smoking (0=no, 1=yes)"
         ),
-        children_allowed: Optional[Union[int, float, str, bool]] = Field(
-            default=None,
-            description="Filter by units allowing children (0=no, 1=yes)",
-            ge=0,
-            le=1,
+        children_allowed: Optional[str] = Field(
+            default=None, description="Filter by units allowing children (0=no, 1=yes)"
         ),
-        is_accessible: Optional[Union[int, float, str, bool]] = Field(
+        is_accessible: Optional[str] = Field(
             default=None,
             description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes)",
-            ge=0,
-            le=1,
         ),
         # Filtros de fechas (ISO 8601)
         arrival: Optional[str] = Field(

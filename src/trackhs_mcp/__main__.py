@@ -56,10 +56,11 @@ def main():
         logger.info("Inicializando cliente API...")
         api_client = TrackHSApiClient(config)
 
-        # Create MCP server instance with strict validation
+        # Create MCP server instance with flexible validation for MCP compatibility
         logger.info("Creando servidor MCP...")
         mcp = FastMCP(
             name="TrackHS MCP Server",
+            strict_input_validation=False,  # Validación flexible para compatibilidad MCP
             mask_error_details=False,  # Mostrar detalles de error en desarrollo
             include_fastmcp_meta=True,  # Incluir metadatos FastMCP
         )
