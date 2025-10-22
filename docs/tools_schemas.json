@@ -1207,16 +1207,14 @@
         "is_inspection": {
           "anyOf": [
             {
-              "maximum": 1,
-              "minimum": 0,
-              "type": "integer"
+              "type": "boolean"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Is inspection flag (0=no, 1=yes). Required if clean_type_id not provided"
+          "description": "Is inspection flag (true=yes, false=no). Required if clean_type_id not provided"
         },
         "clean_type_id": {
           "anyOf": [

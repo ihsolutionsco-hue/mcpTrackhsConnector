@@ -66,11 +66,9 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             description="Unit block ID (positive integer). Required if unit_id not provided. Example: 456",
             ge=1,
         ),
-        is_inspection: Optional[int] = Field(
+        is_inspection: Optional[bool] = Field(
             default=None,
-            description="Is inspection flag (0=no, 1=yes). Required if clean_type_id not provided",
-            ge=0,
-            le=1,
+            description="Is inspection flag (true=yes, false=no). Required if clean_type_id not provided",
         ),
         clean_type_id: Optional[int] = Field(
             default=None,
