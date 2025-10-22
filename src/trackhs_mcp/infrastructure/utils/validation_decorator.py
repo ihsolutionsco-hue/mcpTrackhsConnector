@@ -130,35 +130,35 @@ def validate_mcp_parameters(
 def validate_search_reservations_params(func: Callable) -> Callable:
     """
     Decorador mejorado para validar parámetros de search_reservations.
-    
+
     Aplica validación robusta con mensajes de error descriptivos
     y validación de tipos estricta.
     """
     from ..validation.enhanced_validation import validate_search_reservations_parameters, ValidationError
-    
+
     async def wrapper(*args, **kwargs):
         try:
             # Extraer parámetros de kwargs
             params = {k: v for k, v in kwargs.items() if k != 'api_client'}
-            
+
             # Aplicar validación mejorada
             validated_params = validate_search_reservations_parameters(params)
-            
+
             # Actualizar kwargs con parámetros validados
             for key, value in validated_params.items():
                 if key in kwargs:
                     kwargs[key] = value
-            
+
             # Ejecutar función original
             return await func(*args, **kwargs)
-            
+
         except ValidationError as e:
             # Re-lanzar ValidationError con mensaje mejorado
             raise ValueError(str(e))
         except Exception as e:
             # Manejar otros errores
             raise ValueError(f"❌ Error validating search_reservations parameters: {str(e)}")
-    
+
     return wrapper
 
 

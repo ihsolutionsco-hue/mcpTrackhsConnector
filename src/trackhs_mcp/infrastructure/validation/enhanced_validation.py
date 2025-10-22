@@ -47,20 +47,20 @@ class SortDirection(Enum):
 def validate_date_parameter(value: Any, param_name: str) -> Optional[str]:
     """
     Valida parámetros de fecha con formato ISO 8601
-    
+
     Args:
         value: Valor a validar
         param_name: Nombre del parámetro para mensajes de error
-        
+
     Returns:
         Fecha validada o None si es None
-        
+
     Raises:
         ValidationError: Si el formato es inválido
     """
     if value is None:
         return None
-        
+
     if isinstance(value, str):
         # Rechazar strings que representan null
         if value.lower() in ['null', 'none', '']:
@@ -69,7 +69,7 @@ def validate_date_parameter(value: Any, param_name: str) -> Optional[str]:
                 f"✅ Use ISO 8601 format like '2024-03-01' or omit the parameter entirely.\n"
                 f"💡 Example: {param_name}='2024-03-01' (not 'null' or empty string)"
             )
-        
+
         # Validar formato ISO 8601
         iso_pattern = r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$'
         if not re.match(iso_pattern, value):
@@ -78,7 +78,7 @@ def validate_date_parameter(value: Any, param_name: str) -> Optional[str]:
                 f"✅ Use ISO 8601 format like '2024-03-01' or '2024-03-01T10:00:00Z'\n"
                 f"💡 Example: {param_name}='2024-03-01'"
             )
-        
+
         # Validar que la fecha sea válida
         try:
             if 'T' in value:
@@ -91,31 +91,31 @@ def validate_date_parameter(value: Any, param_name: str) -> Optional[str]:
                 f"✅ Use valid ISO 8601 date format\n"
                 f"💡 Example: {param_name}='2024-03-01'"
             )
-    
+
     return str(value)
 
 
 def validate_enum_parameter(value: Any, param_name: str, enum_class: Enum, allow_multiple: bool = False) -> Optional[str]:
     """
     Valida parámetros enum con valores permitidos
-    
+
     Args:
         value: Valor a validar
         param_name: Nombre del parámetro
         enum_class: Clase enum con valores válidos
         allow_multiple: Si permite múltiples valores separados por coma
-        
+
     Returns:
         Valor validado o None si es None
-        
+
     Raises:
         ValidationError: Si el valor no es válido
     """
     if value is None:
         return None
-    
+
     valid_values = [e.value for e in enum_class]
-    
+
     if isinstance(value, str):
         if allow_multiple:
             # Permitir múltiples valores separados por coma
@@ -134,29 +134,29 @@ def validate_enum_parameter(value: Any, param_name: str, enum_class: Enum, allow
                     f"✅ Valid values: {', '.join(valid_values)}\n"
                     f"💡 Example: {param_name}='{valid_values[0]}'"
                 )
-    
+
     return str(value)
 
 
 def validate_integer_parameter(value: Any, param_name: str, min_val: Optional[int] = None, max_val: Optional[int] = None) -> Optional[int]:
     """
     Valida parámetros enteros con rangos
-    
+
     Args:
         value: Valor a validar
         param_name: Nombre del parámetro
         min_val: Valor mínimo permitido
         max_val: Valor máximo permitido
-        
+
     Returns:
         Entero validado o None si es None
-        
+
     Raises:
         ValidationError: Si el valor no es válido
     """
     if value is None:
         return None
-    
+
     # Convertir string a int si es posible
     if isinstance(value, str):
         try:
@@ -167,48 +167,48 @@ def validate_integer_parameter(value: Any, param_name: str, min_val: Optional[in
                 f"✅ Use integer values only\n"
                 f"💡 Example: {param_name}=1"
             )
-    
+
     if not isinstance(value, int):
         raise ValidationError(
             f"❌ Invalid {param_name} '{value}'.\n"
             f"✅ Use integer values only\n"
             f"💡 Example: {param_name}=1"
         )
-    
+
     if min_val is not None and value < min_val:
         raise ValidationError(
             f"❌ Invalid {param_name} '{value}'.\n"
             f"✅ Minimum value: {min_val}\n"
             f"💡 Example: {param_name}={min_val}"
         )
-    
+
     if max_val is not None and value > max_val:
         raise ValidationError(
             f"❌ Invalid {param_name} '{value}'.\n"
             f"✅ Maximum value: {max_val}\n"
             f"💡 Example: {param_name}={max_val}"
         )
-    
+
     return value
 
 
 def validate_id_list_parameter(value: Any, param_name: str) -> Optional[str]:
     """
     Valida parámetros de lista de IDs (separados por coma)
-    
+
     Args:
         value: Valor a validar
         param_name: Nombre del parámetro
-        
+
     Returns:
         String validado o None si es None
-        
+
     Raises:
         ValidationError: Si el formato es inválido
     """
     if value is None:
         return None
-    
+
     if isinstance(value, str):
         # Dividir por comas y validar cada ID
         ids = [id_val.strip() for id_val in value.split(',')]
@@ -219,49 +219,49 @@ def validate_id_list_parameter(value: Any, param_name: str) -> Optional[str]:
                     f"✅ Use numeric IDs only\n"
                     f"💡 Example: {param_name}='123' or {param_name}='123,456'"
                 )
-    
+
     return str(value)
 
 
 def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Validación completa y mejorada para parámetros de search_reservations
-    
+
     Args:
         params: Diccionario de parámetros a validar
-        
+
     Returns:
         Diccionario con parámetros validados
-        
+
     Raises:
         ValidationError: Si hay errores de validación
     """
     validated_params = {}
     errors = []
-    
+
     try:
         # Validar parámetros de paginación
         if 'page' in params:
             validated_params['page'] = validate_integer_parameter(
                 params['page'], 'page', min_val=0, max_val=10000
             )
-        
+
         if 'size' in params:
             validated_params['size'] = validate_integer_parameter(
                 params['size'], 'size', min_val=1, max_val=100
             )
-        
+
         # Validar parámetros de ordenamiento
         if 'sort_column' in params:
             validated_params['sort_column'] = validate_enum_parameter(
                 params['sort_column'], 'sort_column', SortColumn
             )
-        
+
         if 'sort_direction' in params:
             validated_params['sort_direction'] = validate_enum_parameter(
                 params['sort_direction'], 'sort_direction', SortDirection
             )
-        
+
         # Validar parámetros de búsqueda
         if 'search' in params and params['search'] is not None:
             search = params['search']
@@ -272,7 +272,7 @@ def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str,
                     f"💡 Example: search='John Smith'"
                 )
             validated_params['search'] = search
-        
+
         # Validar parámetros de fecha
         date_params = [
             'booked_start', 'booked_end', 'arrival_start', 'arrival_end',
@@ -281,7 +281,7 @@ def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str,
         for param in date_params:
             if param in params:
                 validated_params[param] = validate_date_parameter(params[param], param)
-        
+
         # Validar parámetros de ID
         id_params = [
             'tags', 'node_id', 'unit_id', 'contact_id', 'travel_agent_id',
@@ -290,13 +290,13 @@ def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str,
         for param in id_params:
             if param in params:
                 validated_params[param] = validate_id_list_parameter(params[param], param)
-        
+
         # Validar status
         if 'status' in params:
             validated_params['status'] = validate_enum_parameter(
                 params['status'], 'status', ReservationStatus, allow_multiple=True
             )
-        
+
         # Validar in_house_today
         if 'in_house_today' in params:
             value = params['in_house_today']
@@ -311,41 +311,41 @@ def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str,
                             f"✅ Use integer values: 0 (not in house) or 1 (in house)\n"
                             f"💡 Example: in_house_today=1"
                         )
-                
+
                 if value not in [0, 1]:
                     raise ValidationError(
                         f"❌ Invalid in_house_today '{value}'.\n"
                         f"✅ Use integer values: 0 (not in house) or 1 (in house)\n"
                         f"💡 Example: in_house_today=1"
                     )
-                
+
                 validated_params['in_house_today'] = value
-        
+
         # Validar otros parámetros enteros
         if 'group_id' in params:
             validated_params['group_id'] = validate_integer_parameter(params['group_id'], 'group_id')
-        
+
         if 'checkin_office_id' in params:
             validated_params['checkin_office_id'] = validate_integer_parameter(params['checkin_office_id'], 'checkin_office_id')
-        
+
         # Parámetros que no requieren validación especial
         simple_params = ['scroll']
         for param in simple_params:
             if param in params:
                 validated_params[param] = params[param]
-        
+
     except ValidationError as e:
         raise e
     except Exception as e:
         raise ValidationError(f"❌ Unexpected validation error: {str(e)}")
-    
+
     return validated_params
 
 
 def get_usage_examples() -> Dict[str, Dict[str, Any]]:
     """
     Retorna ejemplos de uso para la documentación
-    
+
     Returns:
         Diccionario con ejemplos de uso
     """
