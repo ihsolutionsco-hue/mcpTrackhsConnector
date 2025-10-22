@@ -155,6 +155,10 @@ def normalize_binary_int(
     if value is None:
         return None
 
+    # Manejar booleanos directamente
+    if isinstance(value, bool):
+        return 1 if value else 0
+
     # Normalizar a int primero usando normalize_int
     int_value = normalize_int(value, param_name)
 
