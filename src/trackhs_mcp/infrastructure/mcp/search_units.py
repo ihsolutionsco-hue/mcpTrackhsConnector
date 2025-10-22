@@ -3,7 +3,7 @@ Herramienta MCP para buscar unidades en Track HS Channel API
 Versión mejorada con tipos específicos siguiendo mejores prácticas MCP
 """
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from pydantic import Field
 
@@ -243,7 +243,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 "clean, dirty, occupied, inspection, inprogress"
             ),
         ),
-    ) -> str:
+    ) -> Dict[str, Any]:
         """
         Search units in Track HS Channel API with advanced filtering and pagination.
 

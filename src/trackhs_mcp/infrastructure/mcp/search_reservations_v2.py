@@ -3,7 +3,7 @@ Herramienta MCP para buscar reservas en Track HS API V2
 Versión mejorada con tipos específicos siguiendo mejores prácticas MCP
 """
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from pydantic import Field
 
@@ -192,7 +192,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
                 "Disables sorting when active."
             ),
         ),
-    ) -> str:
+    ) -> Dict[str, Any]:
         """
         Search reservations in Track HS API with advanced filtering and pagination.
 

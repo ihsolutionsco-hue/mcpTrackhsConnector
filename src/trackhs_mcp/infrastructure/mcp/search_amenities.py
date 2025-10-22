@@ -3,7 +3,7 @@ Herramienta MCP para buscar amenidades en Track HS Channel API
 Basado en la especificación completa de la API Get Unit Amenities Collection
 """
 
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional
 
 from pydantic import Field
 
@@ -70,7 +70,7 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
             ge=0,
             le=1,
         ),
-    ):
+    ) -> Dict[str, Any]:
         """
         Search amenities in Track HS Channel API with filtering and pagination.
 
