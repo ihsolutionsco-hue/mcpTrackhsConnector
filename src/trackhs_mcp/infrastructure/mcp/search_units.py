@@ -123,70 +123,86 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         id: Optional[str] = Field(
             default=None, description="Filter by unit IDs (comma-separated: '1,2,3')"
         ),
-        # Filtros numéricos - Usar str para compatibilidad MCP (se convierten internamente)
-        calendar_id: Optional[str] = Field(
-            default=None, description="Filter by calendar ID"
+        # Filtros numéricos - Usar Union types según documentación FastMCP
+        calendar_id: Optional[Union[str, int]] = Field(
+            default=None, description="Filter by calendar ID (integer or string)"
         ),
-        role_id: Optional[str] = Field(default=None, description="Filter by role ID"),
-        # Filtros de habitaciones y baños - Usar str para compatibilidad MCP
-        bedrooms: Optional[str] = Field(
-            default=None, description="Filter by exact number of bedrooms"
+        role_id: Optional[Union[str, int]] = Field(
+            default=None, description="Filter by role ID (integer or string)"
         ),
-        min_bedrooms: Optional[str] = Field(
-            default=None, description="Filter by minimum number of bedrooms"
-        ),
-        max_bedrooms: Optional[str] = Field(
-            default=None, description="Filter by maximum number of bedrooms"
-        ),
-        bathrooms: Optional[str] = Field(
-            default=None, description="Filter by exact number of bathrooms"
-        ),
-        min_bathrooms: Optional[str] = Field(
-            default=None, description="Filter by minimum number of bathrooms"
-        ),
-        max_bathrooms: Optional[str] = Field(
-            default=None, description="Filter by maximum number of bathrooms"
-        ),
-        # Filtros booleanos (0/1) - Usar str para compatibilidad MCP
-        pets_friendly: Optional[str] = Field(
-            default=None, description="Filter by pet-friendly units (0=no, 1=yes)"
-        ),
-        allow_unit_rates: Optional[str] = Field(
+        # Filtros de habitaciones y baños - Usar Union types
+        bedrooms: Optional[Union[str, int]] = Field(
             default=None,
-            description="Filter by units that allow unit-specific rates (0=no, 1=yes)",
+            description="Filter by exact number of bedrooms (integer or string)",
         ),
-        computed: Optional[str] = Field(
-            default=None, description="Filter by computed units (0=no, 1=yes)"
-        ),
-        inherited: Optional[str] = Field(
-            default=None, description="Filter by inherited units (0=no, 1=yes)"
-        ),
-        limited: Optional[str] = Field(
+        min_bedrooms: Optional[Union[str, int]] = Field(
             default=None,
-            description="Filter by limited availability units (0=no, 1=yes)",
+            description="Filter by minimum number of bedrooms (integer or string)",
         ),
-        is_bookable: Optional[str] = Field(
-            default=None, description="Filter by bookable units (0=no, 1=yes)"
-        ),
-        include_descriptions: Optional[str] = Field(
+        max_bedrooms: Optional[Union[str, int]] = Field(
             default=None,
-            description="Include unit descriptions in response (0=no, 1=yes)",
+            description="Filter by maximum number of bedrooms (integer or string)",
         ),
-        is_active: Optional[str] = Field(
-            default=None, description="Filter by active units (0=inactive, 1=active)"
-        ),
-        events_allowed: Optional[str] = Field(
-            default=None, description="Filter by units allowing events (0=no, 1=yes)"
-        ),
-        smoking_allowed: Optional[str] = Field(
-            default=None, description="Filter by units allowing smoking (0=no, 1=yes)"
-        ),
-        children_allowed: Optional[str] = Field(
-            default=None, description="Filter by units allowing children (0=no, 1=yes)"
-        ),
-        is_accessible: Optional[str] = Field(
+        bathrooms: Optional[Union[str, int]] = Field(
             default=None,
-            description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes)",
+            description="Filter by exact number of bathrooms (integer or string)",
+        ),
+        min_bathrooms: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by minimum number of bathrooms (integer or string)",
+        ),
+        max_bathrooms: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by maximum number of bathrooms (integer or string)",
+        ),
+        # Filtros booleanos (0/1) - Usar Union types
+        pets_friendly: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by pet-friendly units (0=no, 1=yes, integer or string)",
+        ),
+        allow_unit_rates: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by units that allow unit-specific rates (0=no, 1=yes, integer or string)",
+        ),
+        computed: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by computed units (0=no, 1=yes, integer or string)",
+        ),
+        inherited: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by inherited units (0=no, 1=yes, integer or string)",
+        ),
+        limited: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by limited availability units (0=no, 1=yes, integer or string)",
+        ),
+        is_bookable: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by bookable units (0=no, 1=yes, integer or string)",
+        ),
+        include_descriptions: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Include unit descriptions in response (0=no, 1=yes, integer or string)",
+        ),
+        is_active: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by active units (0=inactive, 1=active, integer or string)",
+        ),
+        events_allowed: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by units allowing events (0=no, 1=yes, integer or string)",
+        ),
+        smoking_allowed: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by units allowing smoking (0=no, 1=yes, integer or string)",
+        ),
+        children_allowed: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by units allowing children (0=no, 1=yes, integer or string)",
+        ),
+        is_accessible: Optional[Union[str, int]] = Field(
+            default=None,
+            description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes, integer or string)",
         ),
         # Filtros de fechas (ISO 8601)
         arrival: Optional[str] = Field(
@@ -232,6 +248,14 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         - Location and amenity filtering
         - Housekeeping status filtering
         - Comprehensive unit details including descriptions, images, and rates
+        - Flexible parameter types (accepts both string and integer for numeric/boolean filters)
+
+        Parameter Types:
+        - Numeric parameters (bedrooms, bathrooms, etc.): Accept integer or string
+        - Boolean parameters (pets_friendly, is_active, etc.): Accept 0/1 as integer or string
+        - Text parameters (search, term, etc.): Accept string only
+        - Date parameters: Accept ISO 8601 formatted strings
+        - ID parameters: Accept integer, string, or comma-separated strings
 
         Returns:
             JSON string with unit data including property features, amenities,

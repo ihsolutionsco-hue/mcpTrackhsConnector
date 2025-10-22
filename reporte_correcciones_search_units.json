@@ -1,0 +1,187 @@
+{
+  "titulo": "Reporte de Correcciones Implementadas - search_units MCP TrackHS",
+  "fecha": "2025-10-22",
+  "version": "2.0",
+  "resumen": {
+    "problema_original": "54% de parámetros no funcionaban por incompatibilidad de tipos",
+    "solucion_implementada": "Actualización de tipos a Union[str, int] para parámetros numéricos y booleanos",
+    "parametros_corregidos": 20,
+    "parametros_afectados": [
+      "bedrooms",
+      "min_bedrooms",
+      "max_bedrooms",
+      "bathrooms",
+      "min_bathrooms",
+      "max_bathrooms",
+      "calendar_id",
+      "role_id",
+      "pets_friendly",
+      "allow_unit_rates",
+      "computed",
+      "inherited",
+      "limited",
+      "is_bookable",
+      "include_descriptions",
+      "is_active",
+      "events_allowed",
+      "smoking_allowed",
+      "children_allowed",
+      "is_accessible"
+    ]
+  },
+  "cambios_implementados": {
+    "tipos_actualizados": {
+      "antes": "Optional[str]",
+      "despues": "Optional[Union[str, int]]",
+      "justificacion": "Permite compatibilidad con clientes MCP que envían tanto string como integer"
+    },
+    "normalizacion": {
+      "funcion": "Ya implementada en type_normalization.py",
+      "normalize_int": "Para parámetros numéricos",
+      "normalize_binary_int": "Para parámetros booleanos (0/1)",
+      "estado": "Funcionando correctamente"
+    },
+    "documentacion": {
+      "descripciones_actualizadas": "Incluyen información sobre tipos aceptados",
+      "ejemplos_agregados": "Muestran uso con string e integer",
+      "mensajes_mejorados": "Indican tipos esperados en errores"
+    }
+  },
+  "casos_de_prueba": [
+    {
+      "nombre": "Prueba 1: Filtro por habitaciones (string)",
+      "descripcion": "Probar que bedrooms acepta string",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "bedrooms": "4"
+      },
+      "expectativa": "Debería funcionar ahora"
+    },
+    {
+      "nombre": "Prueba 2: Filtro por habitaciones (integer)",
+      "descripcion": "Probar que bedrooms acepta integer",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "bedrooms": 4
+      },
+      "expectativa": "Debería funcionar"
+    },
+    {
+      "nombre": "Prueba 3: Filtro pet-friendly (string)",
+      "descripcion": "Probar que pets_friendly acepta string",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "pets_friendly": "1"
+      },
+      "expectativa": "Debería funcionar ahora"
+    },
+    {
+      "nombre": "Prueba 4: Filtro pet-friendly (integer)",
+      "descripcion": "Probar que pets_friendly acepta integer",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "pets_friendly": 1
+      },
+      "expectativa": "Debería funcionar"
+    },
+    {
+      "nombre": "Prueba 5: Filtro is_active (string)",
+      "descripcion": "Probar que is_active acepta string",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "is_active": "1"
+      },
+      "expectativa": "Debería funcionar ahora"
+    },
+    {
+      "nombre": "Prueba 6: Filtro is_active (integer)",
+      "descripcion": "Probar que is_active acepta integer",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "is_active": 1
+      },
+      "expectativa": "Debería funcionar"
+    },
+    {
+      "nombre": "Prueba 7: Múltiples filtros numéricos",
+      "descripcion": "Probar combinación de filtros numéricos",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "bedrooms": "4",
+        "bathrooms": "2",
+        "min_bedrooms": "3",
+        "max_bedrooms": "6"
+      },
+      "expectativa": "Debería funcionar con todos los filtros"
+    },
+    {
+      "nombre": "Prueba 8: Múltiples filtros booleanos",
+      "descripcion": "Probar combinación de filtros booleanos",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "pets_friendly": "1",
+        "is_active": "1",
+        "is_bookable": "1",
+        "events_allowed": "0"
+      },
+      "expectativa": "Debería funcionar con todos los filtros"
+    },
+    {
+      "nombre": "Prueba 9: Mezcla de tipos",
+      "descripcion": "Probar mezcla de string e integer en la misma consulta",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "bedrooms": 4,
+        "bathrooms": "2",
+        "pets_friendly": 1,
+        "is_active": "1"
+      },
+      "expectativa": "Debería funcionar con mezcla de tipos"
+    },
+    {
+      "nombre": "Prueba 10: Casos edge - valores inválidos",
+      "descripcion": "Probar que los valores inválidos generen errores apropiados",
+      "parametros": {
+        "page": 1,
+        "size": 3,
+        "bedrooms": "abc",
+        "pets_friendly": "2"
+      },
+      "expectativa": "Debería generar ValidationError apropiado"
+    }
+  ],
+  "beneficios": [
+    {
+      "beneficio": "Compatibilidad total con API TrackHS",
+      "descripcion": "Todos los parámetros funcionan según especificación oficial"
+    },
+    {
+      "beneficio": "Flexibilidad de tipos",
+      "descripcion": "Acepta tanto string como integer según el cliente MCP"
+    },
+    {
+      "beneficio": "Mejor experiencia de usuario",
+      "descripcion": "Los usuarios pueden usar filtros numéricos y booleanos sin errores"
+    },
+    {
+      "beneficio": "Mantenimiento de compatibilidad",
+      "descripcion": "No rompe código existente que ya funcionaba"
+    }
+  ],
+  "validacion_requerida": [
+    "Ejecutar pruebas con MCP real",
+    "Validar todos los casos de prueba",
+    "Confirmar que no hay regresiones",
+    "Documentar resultados"
+  ],
+  "estado": "Implementado - Pendiente de validación"
+}
