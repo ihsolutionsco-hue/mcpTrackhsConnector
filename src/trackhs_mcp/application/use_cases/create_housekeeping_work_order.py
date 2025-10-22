@@ -81,7 +81,7 @@ class CreateHousekeepingWorkOrderUseCase:
 
         # Agregar campos de unidad (exactamente uno)
         if params.unit_id:
-            request_data["unitId"] = int(params.unit_id)
+            request_data["unitId"] = params.unit_id
         elif params.unit_block_id:
             request_data["unitBlockId"] = params.unit_block_id
 
@@ -97,7 +97,7 @@ class CreateHousekeepingWorkOrderUseCase:
         if params.vendor_id is not None:
             request_data["vendorId"] = params.vendor_id
         if params.reservation_id is not None:
-            request_data["reservationId"] = int(params.reservation_id)
+            request_data["reservationId"] = params.reservation_id
         if params.is_turn is not None:
             request_data["isTurn"] = params.is_turn
         if params.charge_owner is not None:

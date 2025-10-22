@@ -51,9 +51,10 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             min_length=10,
             max_length=20,
         ),
-        unit_id: Optional[str] = Field(
+        unit_id: Optional[int] = Field(
             default=None,
             description="Unit ID (positive integer). Required if unit_block_id not provided. Example: 123",
+            ge=1,
         ),
         unit_block_id: Optional[int] = Field(
             default=None,
@@ -77,9 +78,10 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
         vendor_id: Optional[int] = Field(
             default=None, description="Vendor ID (positive integer). Example: 321", ge=1
         ),
-        reservation_id: Optional[str] = Field(
+        reservation_id: Optional[int] = Field(
             default=None,
             description="Related reservation ID (positive integer). Example: 987654",
+            ge=1,
         ),
         is_turn: Optional[bool] = Field(
             default=None, description="Is turn flag (true=yes, false=no)"

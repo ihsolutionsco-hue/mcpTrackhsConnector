@@ -1172,12 +1172,6 @@
           "pattern": "^\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2}:\\d{2}Z)?$",
           "type": "string"
         },
-        "status": {
-          "description": "Work order status. Valid: pending, not-started, in-progress, completed, processed, cancelled, exception",
-          "maxLength": 50,
-          "minLength": 1,
-          "type": "string"
-        },
         "unit_id": {
           "anyOf": [
             {
@@ -1229,32 +1223,6 @@
           "default": null,
           "description": "Clean type ID (positive integer). Required if is_inspection not provided. Example: 5"
         },
-        "time_estimate": {
-          "anyOf": [
-            {
-              "minimum": 0.0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Estimated time in minutes (must be >= 0). Example: 60.0"
-        },
-        "actual_time": {
-          "anyOf": [
-            {
-              "minimum": 0.0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Actual time spent in minutes (must be >= 0). Example: 75.5"
-        },
         "user_id": {
           "anyOf": [
             {
@@ -1305,18 +1273,6 @@
           ],
           "default": null,
           "description": "Is turn flag (true=yes, false=no)"
-        },
-        "is_manual": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Is manual flag (true=yes, false=no)"
         },
         "charge_owner": {
           "anyOf": [

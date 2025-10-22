@@ -33,7 +33,9 @@ class CreateHousekeepingWorkOrderParams(BaseModel):
     )
 
     # Campos condicionales - exactamente uno de unit_id o unit_block_id
-    unit_id: Optional[str] = Field(None, alias="unitId", description="ID de la unidad")
+    unit_id: Optional[int] = Field(
+        None, alias="unitId", gt=0, description="ID de la unidad"
+    )
     unit_block_id: Optional[int] = Field(
         None, alias="unitBlockId", gt=0, description="ID del bloque de unidad"
     )
@@ -53,8 +55,8 @@ class CreateHousekeepingWorkOrderParams(BaseModel):
     vendor_id: Optional[int] = Field(
         None, alias="vendorId", gt=0, description="ID del proveedor"
     )
-    reservation_id: Optional[str] = Field(
-        None, alias="reservationId", description="ID de la reserva"
+    reservation_id: Optional[int] = Field(
+        None, alias="reservationId", gt=0, description="ID de la reserva"
     )
     is_turn: Optional[bool] = Field(None, alias="isTurn", description="Si es un turno")
     charge_owner: Optional[bool] = Field(
