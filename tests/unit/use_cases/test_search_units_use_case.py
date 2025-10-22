@@ -79,7 +79,7 @@ class TestSearchUnitsUseCase:
             "/pms/units",
             params={
                 "page": 0,
-                "size": 10,
+                "size": 3,
                 "sortColumn": "name",
                 "sortDirection": "asc",
                 "nodeId": 1,
@@ -111,7 +111,7 @@ class TestSearchUnitsUseCase:
             "/pms/units",
             params={
                 "page": 1,
-                "size": 10,
+                "size": 3,
                 "sortColumn": "name",
                 "sortDirection": "asc",
                 "arrival": "2024-01-01",
@@ -139,7 +139,7 @@ class TestSearchUnitsUseCase:
             "/pms/units",
             params={
                 "page": 1,
-                "size": 10,
+                "size": 3,
                 "sortColumn": "name",
                 "sortDirection": "asc",
                 "nodeId": [1, 2, 3],
@@ -159,11 +159,11 @@ class TestSearchUnitsUseCase:
         """Test de validación de tamaño inválido"""
         # Arrange & Act & Assert
         # Pydantic valida automáticamente, no necesitamos validación personalizada
-        with pytest.raises(Exception):  # Pydantic validation error
+        with pytest.raises(ValueError):  # Pydantic validation error
             SearchUnitsParams(size=0)
 
         # Test tamaño máximo
-        with pytest.raises(Exception):  # Pydantic validation error
+        with pytest.raises(ValueError):  # Pydantic validation error
             SearchUnitsParams(size=6)
 
     def test_validate_params_total_results_limit(self, use_case):
