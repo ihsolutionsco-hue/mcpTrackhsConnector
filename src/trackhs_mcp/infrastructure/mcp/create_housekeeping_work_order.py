@@ -23,7 +23,10 @@ from trackhs_mcp.domain.exceptions import (
     AuthorizationError,
     ValidationError,
 )
-from trackhs_mcp.infrastructure.utils.date_validation import is_valid_iso8601_date
+from trackhs_mcp.infrastructure.utils.date_validation import (
+    is_valid_iso8601_date,
+    normalize_date_to_iso8601,
+)
 from trackhs_mcp.infrastructure.utils.type_normalization import (
     normalize_string_to_bool,
     normalize_string_to_float,
@@ -46,8 +49,8 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
     )
     async def create_housekeeping_work_order(
         scheduled_at: str = Field(
-            description="Scheduled date in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15T10:00:00Z'",
-            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            description="Scheduled date in ISO 8601 format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DD HH:MM:SS). Example: '2024-01-15T10:00:00Z' or '2024-01-15 10:00:00'",
+            pattern=r"^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}:\d{2}(Z)?)?$",
             min_length=10,
             max_length=20,
         ),
@@ -107,8 +110,11 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             # Validar fecha programada
             if not is_valid_iso8601_date(scheduled_at):
                 raise ValidationError(
-                    "scheduled_at debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ)"
+                    "scheduled_at debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ o YYYY-MM-DD HH:MM:SS)"
                 )
+
+            # Normalizar fecha a formato ISO 8601 estándar
+            scheduled_at_normalized = normalize_date_to_iso8601(scheduled_at)
 
             # Validar campos de unidad (exactamente uno requerido)
             unit_id_norm = (
@@ -188,7 +194,7 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
 
             # Crear parámetros del use case
             params = CreateHousekeepingWorkOrderParams(
-                scheduled_at=scheduled_at,
+                scheduled_at=scheduled_at_normalized,
                 unit_id=unit_id_norm,
                 unit_block_id=unit_block_id_norm,
                 is_inspection=is_inspection_norm,
