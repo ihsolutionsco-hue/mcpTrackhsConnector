@@ -1314,8 +1314,7 @@
         }
       },
       "required": [
-        "scheduled_at",
-        "status"
+        "scheduled_at"
       ],
       "type": "object"
     }
