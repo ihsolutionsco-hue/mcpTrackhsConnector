@@ -266,7 +266,7 @@ class TestSearchUnitsUseCase:
         # Assert
         expected = {
             "page": 1,
-            "size": 50,
+            "size": 3,
             "sortColumn": "name",
             "sortDirection": "desc",
             "search": "villa",

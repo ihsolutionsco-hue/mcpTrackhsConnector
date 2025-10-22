@@ -503,7 +503,7 @@ class TestSearchUnitsE2E:
             "_embedded": {"units": []},
             "page": 2,
             "page_count": 10,
-            "page_size": 100,
+            "page_size": 5,
             "total_items": 1000,
             "_links": {
                 "self": {"href": "https://api.example.com/api/pms/units/?page=2"},
@@ -524,7 +524,7 @@ class TestSearchUnitsE2E:
             "/pms/units",
             params={
                 "page": 2,  # page=2 (1-based) → page=2 (1-based)
-                "size": 100,
+                "size": 5,
                 "sortColumn": "name",
                 "sortDirection": "asc",
             },

@@ -117,7 +117,7 @@ class TestSearchUnitsIntegration:
             "/pms/units",
             params={
                 "page": 1,
-                "size": 50,
+                "size": 3,
                 "sortColumn": "name",
                 "sortDirection": "desc",
                 "search": "villa",
@@ -369,7 +369,7 @@ class TestSearchUnitsIntegration:
             "/pms/units",
             params={
                 "page": 2,
-                "size": 100,
+                "size": 5,
                 "sortColumn": "name",
                 "sortDirection": "asc",
             },
