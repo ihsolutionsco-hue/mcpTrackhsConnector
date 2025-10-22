@@ -27,7 +27,7 @@ class TestIsFieldInfo:
         # Mock FieldInfo object
         field_info = Mock()
         field_info.__class__.__name__ = "FieldInfo"
-        
+
         assert _is_field_info(field_info) is True
 
     def test_non_field_info(self):
@@ -67,7 +67,7 @@ class TestNormalizeInt:
         """Probar strings inválidos"""
         with pytest.raises(ValidationError, match="must be a valid integer string"):
             normalize_int("abc", "test")
-        
+
         with pytest.raises(ValidationError, match="must be a valid integer string"):
             normalize_int("42.5", "test")
 
@@ -84,7 +84,7 @@ class TestNormalizeInt:
         """Probar FieldInfo object"""
         field_info = Mock()
         field_info.__class__.__name__ = "FieldInfo"
-        
+
         assert normalize_int(field_info, "test") is None
 
 
@@ -115,7 +115,7 @@ class TestNormalizeBinaryInt:
         """Probar valores inválidos"""
         with pytest.raises(ValidationError, match="must be 0 or 1"):
             normalize_binary_int(2, "test")
-        
+
         with pytest.raises(ValidationError, match="must be 0 or 1"):
             normalize_binary_int(-1, "test")
 
@@ -127,7 +127,7 @@ class TestNormalizeBinaryInt:
         """Probar FieldInfo object"""
         field_info = Mock()
         field_info.__class__.__name__ = "FieldInfo"
-        
+
         assert normalize_binary_int(field_info, "test") is None
 
 
@@ -171,7 +171,7 @@ class TestNormalizeBool:
         """Probar FieldInfo object"""
         field_info = Mock()
         field_info.__class__.__name__ = "FieldInfo"
-        
+
         assert normalize_bool(field_info, "test") is None
 
 
@@ -206,7 +206,7 @@ class TestNormalizeFloat:
         """Probar FieldInfo object"""
         field_info = Mock()
         field_info.__class__.__name__ = "FieldInfo"
-        
+
         assert normalize_float(field_info, "test") is None
 
 
