@@ -15,6 +15,7 @@ from ...domain.entities.units import SearchUnitsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
+from ..utils.type_normalization import normalize_int
 
 # Las funciones de normalización ya no son necesarias
 # FastMCP maneja la validación automáticamente con Field constraints
@@ -132,109 +133,157 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         role_id: Optional[int] = Field(
             default=None, description="Filter by role ID (positive integer)", ge=1
         ),
-        # Filtros de habitaciones y baños - Tipos específicos con constraints
-        bedrooms: Optional[int] = Field(
+        # Filtros de habitaciones y baños - Tipos string con conversión interna
+        bedrooms: Optional[str] = Field(
             default=None,
-            description="Filter by exact number of bedrooms (non-negative integer)",
-            ge=0,
+            description=(
+                "Filter by exact number of bedrooms. "
+                "Pass the number as a string. "
+                "Examples: '2' for 2 bedrooms, '4' for 4 bedrooms. "
+                "Valid range: 0 or greater."
+            ),
         ),
-        min_bedrooms: Optional[int] = Field(
+        min_bedrooms: Optional[str] = Field(
             default=None,
-            description="Filter by minimum number of bedrooms (non-negative integer)",
-            ge=0,
+            description=(
+                "Filter by minimum number of bedrooms. "
+                "Pass the number as a string. "
+                "Examples: '1' for 1+ bedrooms, '3' for 3+ bedrooms. "
+                "Valid range: 0 or greater."
+            ),
         ),
-        max_bedrooms: Optional[int] = Field(
+        max_bedrooms: Optional[str] = Field(
             default=None,
-            description="Filter by maximum number of bedrooms (non-negative integer)",
-            ge=0,
+            description=(
+                "Filter by maximum number of bedrooms. "
+                "Pass the number as a string. "
+                "Examples: '2' for up to 2 bedrooms, '5' for up to 5 bedrooms. "
+                "Valid range: 0 or greater."
+            ),
         ),
-        bathrooms: Optional[int] = Field(
+        bathrooms: Optional[str] = Field(
             default=None,
-            description="Filter by exact number of bathrooms (non-negative integer)",
-            ge=0,
+            description=(
+                "Filter by exact number of bathrooms. "
+                "Pass the number as a string. "
+                "Examples: '1' for 1 bathroom, '3' for 3 bathrooms. "
+                "Valid range: 0 or greater."
+            ),
         ),
-        min_bathrooms: Optional[int] = Field(
+        min_bathrooms: Optional[str] = Field(
             default=None,
-            description="Filter by minimum number of bathrooms (non-negative integer)",
-            ge=0,
+            description=(
+                "Filter by minimum number of bathrooms. "
+                "Pass the number as a string. "
+                "Examples: '1' for 1+ bathrooms, '2' for 2+ bathrooms. "
+                "Valid range: 0 or greater."
+            ),
         ),
-        max_bathrooms: Optional[int] = Field(
+        max_bathrooms: Optional[str] = Field(
             default=None,
-            description="Filter by maximum number of bathrooms (non-negative integer)",
-            ge=0,
+            description=(
+                "Filter by maximum number of bathrooms. "
+                "Pass the number as a string. "
+                "Examples: '2' for up to 2 bathrooms, '4' for up to 4 bathrooms. "
+                "Valid range: 0 or greater."
+            ),
         ),
-        # Filtros booleanos (0/1) - Tipos específicos con constraints
-        pets_friendly: Optional[int] = Field(
+        # Filtros booleanos (0/1) - Tipos string con conversión interna
+        pets_friendly: Optional[str] = Field(
             default=None,
-            description="Filter by pet-friendly units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter units that allow pets. "
+                "Pass '1' for pet-friendly units, '0' for units that don't allow pets. "
+                "Leave empty to show all units regardless of pet policy."
+            ),
         ),
-        allow_unit_rates: Optional[int] = Field(
+        allow_unit_rates: Optional[str] = Field(
             default=None,
-            description="Filter by units that allow unit-specific rates (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter units that allow unit-specific rates. "
+                "Pass '1' for units with custom rates, '0' for standard rates only. "
+                "Leave empty to show all units regardless of rate type."
+            ),
         ),
-        computed: Optional[int] = Field(
+        computed: Optional[str] = Field(
             default=None,
-            description="Filter by computed units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter computed units (units with calculated attributes). "
+                "Pass '1' for computed units, '0' for non-computed units. "
+                "Leave empty to show all units regardless of computation status."
+            ),
         ),
-        inherited: Optional[int] = Field(
+        inherited: Optional[str] = Field(
             default=None,
-            description="Filter by inherited units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter inherited units (units with inherited attributes). "
+                "Pass '1' for inherited units, '0' for non-inherited units. "
+                "Leave empty to show all units regardless of inheritance status."
+            ),
         ),
-        limited: Optional[int] = Field(
+        limited: Optional[str] = Field(
             default=None,
-            description="Filter by limited availability units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter limited availability units. "
+                "Pass '1' for limited units, '0' for unlimited units. "
+                "Leave empty to show all units regardless of availability limits."
+            ),
         ),
-        is_bookable: Optional[int] = Field(
+        is_bookable: Optional[str] = Field(
             default=None,
-            description="Filter by bookable units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter bookable units. "
+                "Pass '1' for bookable units, '0' for non-bookable units. "
+                "Leave empty to show all units regardless of booking status."
+            ),
         ),
-        include_descriptions: Optional[int] = Field(
+        include_descriptions: Optional[str] = Field(
             default=None,
-            description="Include unit descriptions in response (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Include unit descriptions in response. "
+                "Pass '1' to include descriptions, '0' to exclude them. "
+                "Leave empty to use default behavior."
+            ),
         ),
-        is_active: Optional[int] = Field(
+        is_active: Optional[str] = Field(
             default=None,
-            description="Filter by active units (0=inactive, 1=active)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter by active units. "
+                "Pass '1' for active units, '0' for inactive units. "
+                "Leave empty to show all units regardless of status."
+            ),
         ),
-        events_allowed: Optional[int] = Field(
+        events_allowed: Optional[str] = Field(
             default=None,
-            description="Filter by units allowing events (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter units that allow events. "
+                "Pass '1' for units allowing events, '0' for units that don't allow events. "
+                "Leave empty to show all units regardless of event policy."
+            ),
         ),
-        smoking_allowed: Optional[int] = Field(
+        smoking_allowed: Optional[str] = Field(
             default=None,
-            description="Filter by units allowing smoking (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter units that allow smoking. "
+                "Pass '1' for units allowing smoking, '0' for non-smoking units. "
+                "Leave empty to show all units regardless of smoking policy."
+            ),
         ),
-        children_allowed: Optional[int] = Field(
+        children_allowed: Optional[str] = Field(
             default=None,
-            description="Filter by units allowing children (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter units that allow children. "
+                "Pass '1' for units allowing children, '0' for adults-only units. "
+                "Leave empty to show all units regardless of children policy."
+            ),
         ),
-        is_accessible: Optional[int] = Field(
+        is_accessible: Optional[str] = Field(
             default=None,
-            description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes)",
-            ge=0,
-            le=1,
+            description=(
+                "Filter accessible/wheelchair-friendly units. "
+                "Pass '1' for accessible units, '0' for non-accessible units. "
+                "Leave empty to show all units regardless of accessibility."
+            ),
         ),
         # Filtros de fechas (ISO 8601)
         arrival: Optional[str] = Field(
@@ -283,8 +332,8 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         - Flexible parameter types (accepts both string and integer for numeric/boolean filters)
 
         Parameter Types:
-        - Numeric parameters (bedrooms, bathrooms, etc.): Accept integer with validation constraints
-        - Boolean parameters (pets_friendly, is_active, etc.): Accept 0/1 as integer with range validation
+        - Numeric parameters (bedrooms, bathrooms, etc.): Accept numeric strings (e.g., '3', '4') with automatic conversion
+        - Boolean parameters (pets_friendly, is_active, etc.): Accept '0'/'1' as strings with automatic conversion
         - Text parameters (search, term, etc.): Accept string only
         - Date parameters: Accept ISO 8601 formatted strings with pattern validation
         - ID parameters: Accept integer, string, or comma-separated strings
@@ -329,8 +378,31 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         if type(unit_status).__name__ == "FieldInfo":
             unit_status = None
 
-        # Los parámetros ya están validados por FastMCP con Field constraints
-        # No necesitamos normalización manual - FastMCP maneja la coerción automáticamente
+        # Convertir parámetros numéricos de string a int
+        bedrooms = normalize_int(bedrooms, "bedrooms")
+        min_bedrooms = normalize_int(min_bedrooms, "min_bedrooms")
+        max_bedrooms = normalize_int(max_bedrooms, "max_bedrooms")
+        bathrooms = normalize_int(bathrooms, "bathrooms")
+        min_bathrooms = normalize_int(min_bathrooms, "min_bathrooms")
+        max_bathrooms = normalize_int(max_bathrooms, "max_bathrooms")
+        calendar_id = normalize_int(calendar_id, "calendar_id")
+        role_id = normalize_int(role_id, "role_id")
+
+        # Convertir parámetros booleanos (0/1)
+        pets_friendly = normalize_int(pets_friendly, "pets_friendly")
+        allow_unit_rates = normalize_int(allow_unit_rates, "allow_unit_rates")
+        computed = normalize_int(computed, "computed")
+        inherited = normalize_int(inherited, "inherited")
+        limited = normalize_int(limited, "limited")
+        is_bookable = normalize_int(is_bookable, "is_bookable")
+        include_descriptions = normalize_int(
+            include_descriptions, "include_descriptions"
+        )
+        is_active = normalize_int(is_active, "is_active")
+        events_allowed = normalize_int(events_allowed, "events_allowed")
+        smoking_allowed = normalize_int(smoking_allowed, "smoking_allowed")
+        children_allowed = normalize_int(children_allowed, "children_allowed")
+        is_accessible = normalize_int(is_accessible, "is_accessible")
 
         # Validar límite total de resultados (10k máximo)
         if page * size > 10000:
