@@ -441,6 +441,180 @@ async def search_reservations_v2(
 def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_reservations_v2 mejorada"""
 
-    @mcp.tool(name="search_reservations")
-    async def wrapped_search_reservations_v2(**kwargs):
-        return await search_reservations_v2(api_client, **kwargs)
+    # Crear una función wrapper que capture api_client en el closure
+    async def wrapped_search_reservations_v2(
+        # Parámetros de paginación
+        page: int = Field(
+            default=0,
+            description="Page number (0-based indexing). Max total results: 10,000.",
+            ge=0,
+            le=10000,
+        ),
+        size: int = Field(
+            default=10, description="Number of results per page (1-100)", ge=1, le=100
+        ),
+        # Parámetros de ordenamiento
+        sort_column: Literal[
+            "name",
+            "status",
+            "altConf",
+            "agreementStatus",
+            "type",
+            "guest",
+            "guests",
+            "unit",
+            "units",
+            "checkin",
+            "checkout",
+            "nights",
+        ] = Field(
+            default="name",
+            description=(
+                "Column to sort by. Valid values: name, status, altConf, "
+                "agreementStatus, type, guest, guests, unit, units, checkin, "
+                "checkout, nights. Disabled when using scroll."
+            ),
+        ),
+        sort_direction: Literal["asc", "desc"] = Field(
+            default="asc",
+            description="Sort direction: 'asc' or 'desc'. Disabled when using scroll.",
+        ),
+        # Parámetros de búsqueda de texto
+        search: Optional[str] = Field(
+            default=None,
+            description="Full-text search in reservation names, guest names, and descriptions. Example: 'John Smith' or 'Villa Paradise'",
+            max_length=200,
+        ),
+        # Filtros por IDs (strings que pueden contener valores separados por comas)
+        tags: Optional[str] = Field(
+            default=None, description="Filter by tag IDs (comma-separated: '1,2,3')"
+        ),
+        node_id: Optional[str] = Field(
+            default=None,
+            description="Filter by node IDs. Example: '1' for single ID or '1,2,3' for multiple IDs",
+        ),
+        unit_id: Optional[str] = Field(
+            default=None,
+            description="Filter by unit IDs. Example: '10' for single unit or '10,20,30' for multiple units",
+        ),
+        contact_id: Optional[str] = Field(
+            default=None, description="Filter by contact IDs (comma-separated)"
+        ),
+        travel_agent_id: Optional[str] = Field(
+            default=None, description="Filter by travel agent IDs (comma-separated)"
+        ),
+        campaign_id: Optional[str] = Field(
+            default=None, description="Filter by campaign IDs (comma-separated)"
+        ),
+        user_id: Optional[str] = Field(
+            default=None, description="Filter by user IDs (comma-separated)"
+        ),
+        unit_type_id: Optional[str] = Field(
+            default=None, description="Filter by unit type IDs (comma-separated)"
+        ),
+        rate_type_id: Optional[str] = Field(
+            default=None, description="Filter by rate type IDs (comma-separated)"
+        ),
+        reservation_type_id: Optional[str] = Field(
+            default=None, description="Filter by reservation type IDs (comma-separated)"
+        ),
+        # Filtros de fechas (ISO 8601)
+        booked_start: Optional[str] = Field(
+            default=None,
+            description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        booked_end: Optional[str] = Field(
+            default=None,
+            description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        arrival_start: Optional[str] = Field(
+            default=None,
+            description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        arrival_end: Optional[str] = Field(
+            default=None,
+            description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        departure_start: Optional[str] = Field(
+            default=None,
+            description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        departure_end: Optional[str] = Field(
+            default=None,
+            description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        updated_since: Optional[str] = Field(
+            default=None,
+            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        ),
+        # Otros filtros
+        status: Optional[
+            Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"]
+        ] = Field(
+            default=None,
+            description=(
+                "Filter by reservation status. Valid statuses: Hold, Confirmed, "
+                "Cancelled, Checked In, Checked Out. For multiple statuses, "
+                "use comma-separated values like 'Confirmed,Cancelled'"
+            ),
+        ),
+        in_house_today: Optional[Literal[0, 1]] = Field(
+            default=None,
+            description="Filter by in-house today (0=not in house, 1=in house)",
+        ),
+        group_id: Optional[int] = Field(default=None, description="Filter by group ID"),
+        checkin_office_id: Optional[int] = Field(
+            default=None, description="Filter by check-in office ID"
+        ),
+        folio_id: Optional[str] = Field(default=None, description="Filter by folio ID"),
+        # Elasticsearch scroll para grandes conjuntos de datos
+        scroll: Optional[str] = Field(
+            default=None,
+            description=(
+                "Elasticsearch scroll for large datasets. Use '1' to start a new "
+                "scroll, or provide the scroll ID from previous response to continue. "
+                "Disables sorting when active. Example: '1' to start or 'scroll_id_123' to continue"
+            ),
+        ),
+    ) -> Dict[str, Any]:
+        """Search reservations in Track HS API with advanced filtering and pagination."""
+        return await search_reservations_v2(
+            api_client,
+            page=page,
+            size=size,
+            sort_column=sort_column,
+            sort_direction=sort_direction,
+            search=search,
+            tags=tags,
+            node_id=node_id,
+            unit_id=unit_id,
+            contact_id=contact_id,
+            travel_agent_id=travel_agent_id,
+            campaign_id=campaign_id,
+            user_id=user_id,
+            unit_type_id=unit_type_id,
+            rate_type_id=rate_type_id,
+            reservation_type_id=reservation_type_id,
+            booked_start=booked_start,
+            booked_end=booked_end,
+            arrival_start=arrival_start,
+            arrival_end=arrival_end,
+            departure_start=departure_start,
+            departure_end=departure_end,
+            updated_since=updated_since,
+            status=status,
+            in_house_today=in_house_today,
+            group_id=group_id,
+            checkin_office_id=checkin_office_id,
+            folio_id=folio_id,
+            scroll=scroll,
+        )
+
+    mcp.tool(name="search_reservations")(wrapped_search_reservations_v2)
