@@ -26,16 +26,16 @@ def validate_mcp_parameters(
 ) -> Callable:
     """
     Decorador para validar y normalizar automáticamente parámetros MCP.
-    
+
     Args:
         binary_params: Lista de parámetros que deben ser 0 o 1
         int_params: Lista de parámetros que deben ser enteros
         float_params: Lista de parámetros que deben ser flotantes
         string_params: Lista de parámetros que deben ser strings
-    
+
     Returns:
         Decorador que valida y normaliza parámetros automáticamente
-        
+
     Examples:
         @validate_mcp_parameters(
             binary_params=['in_house_today', 'is_active'],
@@ -62,7 +62,7 @@ def validate_mcp_parameters(
                                     f"Valor recibido: {kwargs[param]}",
                                     param
                                 )
-                
+
                 # Normalizar parámetros enteros
                 if int_params:
                     for param in int_params:
@@ -76,7 +76,7 @@ def validate_mcp_parameters(
                                     f"Valor recibido: {kwargs[param]}",
                                     param
                                 )
-                
+
                 # Normalizar parámetros flotantes
                 if float_params:
                     for param in float_params:
@@ -91,7 +91,7 @@ def validate_mcp_parameters(
                                     f"Valor recibido: {kwargs[param]}",
                                     param
                                 )
-                
+
                 # Normalizar parámetros string
                 if string_params:
                     for param in string_params:
@@ -100,16 +100,16 @@ def validate_mcp_parameters(
                                 kwargs[param] = str(kwargs[param])
                             # Limpiar espacios
                             kwargs[param] = kwargs[param].strip()
-                
+
                 logger.debug(f"Parámetros normalizados para {func.__name__}: {kwargs}")
-                
+
                 # Ejecutar la función con parámetros normalizados
                 return await func(*args, **kwargs)
-                
+
             except Exception as e:
                 logger.error(f"Error en validación de parámetros para {func.__name__}: {e}")
                 raise
-        
+
         return wrapper
     return decorator
 
@@ -117,7 +117,7 @@ def validate_mcp_parameters(
 def validate_search_reservations_params(func: Callable) -> Callable:
     """
     Decorador específico para validar parámetros de search_reservations.
-    
+
     Aplica validación automática para los parámetros más comunes
     en búsquedas de reservas.
     """
@@ -131,7 +131,7 @@ def validate_search_reservations_params(func: Callable) -> Callable:
 def validate_search_units_params(func: Callable) -> Callable:
     """
     Decorador específico para validar parámetros de search_units.
-    
+
     Aplica validación automática para los parámetros más comunes
     en búsquedas de unidades.
     """
@@ -145,7 +145,7 @@ def validate_search_units_params(func: Callable) -> Callable:
 def validate_work_order_params(func: Callable) -> Callable:
     """
     Decorador específico para validar parámetros de órdenes de trabajo.
-    
+
     Aplica validación automática para los parámetros más comunes
     en creación de órdenes de trabajo.
     """

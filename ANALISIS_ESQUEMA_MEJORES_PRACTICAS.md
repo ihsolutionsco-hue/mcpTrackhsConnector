@@ -150,7 +150,7 @@ page: Union[int, str] = Field(...)
 size: Union[int, str] = Field(...)
 
 # ===========================================
-# SORTING PARAMETERS  
+# SORTING PARAMETERS
 # ===========================================
 sort_column: Literal[...] = Field(...)
 sort_direction: Literal["asc", "desc"] = Field(...)
@@ -167,7 +167,7 @@ search: Optional[str] = Field(...)
 booked_start: Optional[str] = Field(...)
 booked_end: Optional[str] = Field(...)
 
-# Arrival date range  
+# Arrival date range
 arrival_start: Optional[str] = Field(...)
 arrival_end: Optional[str] = Field(...)
 

@@ -11,7 +11,7 @@
 Se han implementado exitosamente **todas las recomendaciones** identificadas en la revisión de la documentación de FastMCP, corrigiendo específicamente las **áreas de mejora** solicitadas:
 
 - ✅ **Validación de parámetros**: Tipos específicos corregidos
-- ✅ **Manejo de fechas**: Formato ISO 8601 validado  
+- ✅ **Manejo de fechas**: Formato ISO 8601 validado
 - ✅ **Filtros booleanos**: Valores enteros (0/1) implementados
 - ✅ **Esquema perfecto**: Alineado con documentación oficial
 
