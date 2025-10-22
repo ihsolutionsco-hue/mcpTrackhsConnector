@@ -333,6 +333,9 @@ async def search_reservations_v2(
     - Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15')
     - Do NOT use timestamps or 'null' values
     - To omit date filters, simply don't include the parameter
+    - Examples: '2024-03-01' for March 1, 2024
+    - ❌ WRONG: arrival_start="null" (will be ignored)
+    - ✅ CORRECT: arrival_start="2024-03-01" (will filter correctly)
 
     🔍 STATUS FILTERING:
     - Single status: 'Confirmed'
@@ -424,22 +427,40 @@ async def search_reservations_v2(
             f"Size must be <= 100. Received: {size_normalized}", "size"
         )
 
-    # Validar fechas opcionales
-    try:
-        arrival_start = DateValidator.validate_optional_date(arrival_start)
-        arrival_end = DateValidator.validate_optional_date(arrival_end)
-        departure_start = DateValidator.validate_optional_date(departure_start)
-        departure_end = DateValidator.validate_optional_date(departure_end)
-        updated_since = DateValidator.validate_optional_date(updated_since)
-        booked_start = DateValidator.validate_optional_date(booked_start)
-        booked_end = DateValidator.validate_optional_date(booked_end)
-    except ValueError as e:
-        raise ValidationError(
-            f"❌ Invalid date format: {str(e)}. "
-            f"✅ Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
-            f"💡 To omit date filters, simply don't include the parameter.",
-            "date_validation",
-        )
+    # Validar fechas opcionales con validación personalizada
+    # (No usar DateValidator que permite "null")
+    date_params = {
+        "arrival_start": arrival_start,
+        "arrival_end": arrival_end,
+        "departure_start": departure_start,
+        "departure_end": departure_end,
+        "updated_since": updated_since,
+        "booked_start": booked_start,
+        "booked_end": booked_end,
+    }
+
+    for param_name, param_value in date_params.items():
+        # Verificar si el parámetro está presente (no None)
+        if param_value is not None:
+            # Detectar uso incorrecto de "null", "none", o string vacío
+            if (
+                param_value.lower() in ["null", "none"]
+                or param_value == "null"
+                or param_value.strip() == ""
+            ):
+                raise ValidationError(
+                    f"❌ Invalid date parameter '{param_name}': '{param_value}' is not a valid date. "
+                    f"✅ Use ISO 8601 format like '2024-03-01' or omit the parameter entirely. "
+                    f"💡 Example: {param_name}='2024-03-01' (not 'null' or empty string)",
+                    param_name,
+                )
+
+            # Validar formato de fecha
+            if not is_valid_iso8601_date(param_value):
+                raise ValidationError(
+                    format_date_error(param_name),
+                    param_name,
+                )
 
     # Validar estados múltiples
     valid_statuses = {"Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"}
@@ -481,24 +502,6 @@ async def search_reservations_v2(
         if sort_column != "name" or sort_direction != "asc":
             # Solo advertir, no fallar
             pass
-
-    # Validar fechas si se proporcionan
-    date_params = {
-        "booked_start": booked_start,
-        "booked_end": booked_end,
-        "arrival_start": arrival_start,
-        "arrival_end": arrival_end,
-        "departure_start": departure_start,
-        "departure_end": departure_end,
-        "updated_since": updated_since,
-    }
-
-    for param_name, param_value in date_params.items():
-        if param_value and not is_valid_iso8601_date(param_value):
-            raise ValidationError(
-                format_date_error(param_name),
-                param_name,
-            )
 
     # Usar lista de estados ya validada anteriormente
 
@@ -695,34 +698,34 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         # Booking date range
         booked_start: Optional[str] = Field(
             default=None,
-            description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Use 'null' to omit filter. Maps to API parameter 'bookedStart'.",
+            description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'bookedStart'.",
         ),
         booked_end: Optional[str] = Field(
             default=None,
-            description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Use 'null' to omit filter. Maps to API parameter 'bookedEnd'.",
+            description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-12-31'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'bookedEnd'.",
         ),
         # Arrival date range
         arrival_start: Optional[str] = Field(
             default=None,
-            description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'arrivalStart'.",
+            description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'arrivalStart'.",
         ),
         arrival_end: Optional[str] = Field(
             default=None,
-            description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'arrivalEnd'.",
+            description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'arrivalEnd'.",
         ),
         # Departure date range
         departure_start: Optional[str] = Field(
             default=None,
-            description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'departureStart'.",
+            description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'departureStart'.",
         ),
         departure_end: Optional[str] = Field(
             default=None,
-            description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'departureEnd'.",
+            description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'departureEnd'.",
         ),
         # Last update filter
         updated_since: Optional[str] = Field(
             default=None,
-            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'updatedSince'.",
+            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'updatedSince'.",
         ),
         # Otros filtros
         status: Optional[str] = Field(
