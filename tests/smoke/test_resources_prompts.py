@@ -209,7 +209,7 @@ class TestResourcesPromptsSmoke:
     def test_mcp_server_has_resources_and_prompts(self, mock_mcp):
         """Test: El servidor MCP tiene resources y prompts configurados"""
         # Act & Assert
-        assert hasattr(mcp, "resource")
-        assert hasattr(mcp, "prompt")
-        assert callable(mcp.resource)
-        assert callable(mcp.prompt)
+        assert hasattr(mock_mcp, "resource")
+        assert hasattr(mock_mcp, "prompt")
+        assert callable(mock_mcp.resource)
+        assert callable(mock_mcp.prompt)

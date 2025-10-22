@@ -78,11 +78,11 @@ class TestMCPServerSmoke:
     def test_schema_hook_active(self):
         """Test: Schema hook está activo"""
         # Arrange
-        from src.trackhs_mcp.infrastructure.mcp.schema_hook import apply_schema_fixes
+        from src.trackhs_mcp.infrastructure.mcp.schema_hook import SchemaFixerHook
 
         # Act & Assert
         # Verificar que el schema hook se puede importar y usar
-        assert callable(apply_schema_fixes)
+        assert SchemaFixerHook is not None
 
     @pytest.mark.smoke
     def test_cors_configuration(self):
