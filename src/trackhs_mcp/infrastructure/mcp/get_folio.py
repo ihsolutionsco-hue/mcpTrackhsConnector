@@ -25,11 +25,14 @@ def register_get_folio(mcp, api_client: "ApiClientPort"):
     @mcp.tool(name="get_folio")
     @error_handler("get_folio")
     async def get_folio(
-        folio_id: int = Field(
+        folio_id: str = Field(
             description=(
-                "Unique folio ID (positive integer). " "Example: 12345 or 37152796"
+                "Unique folio ID (positive integer as string). "
+                "Example: '12345' or '37152796'"
             ),
-            ge=1,
+            pattern=r"^\d+$",
+            min_length=1,
+            max_length=20,
         )
     ) -> Dict[str, Any]:
         """
@@ -46,16 +49,26 @@ def register_get_folio(mcp, api_client: "ApiClientPort"):
             ValidationError: If folio_id is invalid or folio not found
             APIError: If API request fails (401, 403, 404, 500)
         """
-        # Pydantic ya valida que sea int >= 1, solo necesitamos validación básica
-        if folio_id <= 0:
-            raise ToolError("El ID del folio debe ser un número entero positivo")
+        # Validar parámetros de entrada
+        if not folio_id or not folio_id.strip():
+            raise ToolError(format_required_error("folio_id"))
+
+        # Validar que sea un número entero positivo válido
+        try:
+            folio_id_int = int(folio_id.strip())
+            if folio_id_int <= 0:
+                raise ToolError("El ID del folio debe ser un número entero positivo")
+        except (ValueError, TypeError):
+            raise ToolError(
+                format_type_error("folio_id", "número entero positivo", folio_id)
+            )
 
         try:
             # Crear caso de uso
             use_case = GetFolioUseCase(api_client)
 
-            # Crear parámetros con el ID
-            params = GetFolioParams(folio_id=folio_id)
+            # Crear parámetros con el ID convertido a entero
+            params = GetFolioParams(folio_id=folio_id_int)
 
             # Ejecutar caso de uso
             folio = await use_case.execute(params)
