@@ -94,7 +94,7 @@ class CreateHousekeepingWorkOrderUseCase:
 
         # Agregar campos de unidad (exactamente uno)
         if params.unit_id:
-            request_data["unitId"] = int(params.unit_id)
+            request_data["unitId"] = params.unit_id
         elif params.unit_block_id:
             request_data["unitBlockId"] = params.unit_block_id
 

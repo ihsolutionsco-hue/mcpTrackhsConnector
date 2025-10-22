@@ -51,9 +51,10 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             min_length=10,
             max_length=20,
         ),
-        unit_id: Optional[str] = Field(
+        unit_id: Optional[int] = Field(
             default=None,
             description="Unit ID (positive integer). Required if unit_block_id not provided. Example: 123",
+            ge=1,
         ),
         unit_block_id: Optional[int] = Field(
             default=None,
