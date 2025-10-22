@@ -38,6 +38,7 @@ class SearchReservationsUseCase:
 
         # Realizar petición a la API con timeout extendido para búsquedas complejas
         from ...domain.value_objects.request import RequestOptions
+
         options = RequestOptions(method="GET")
         response = await self.api_client.search_request(
             "/v2/pms/reservations", options=options, params=request_params

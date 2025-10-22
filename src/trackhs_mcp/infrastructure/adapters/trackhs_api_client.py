@@ -36,19 +36,18 @@ class TrackHSApiClient(ApiClientPort):
         # Configurar cliente httpx con timeouts específicos
         timeout_config = httpx.Timeout(
             connect=10.0,  # Timeout para establecer conexión
-            read=config.timeout or 60.0,  # Timeout para leer respuesta (aumentado para búsquedas complejas)
+            read=config.timeout
+            or 60.0,  # Timeout para leer respuesta (aumentado para búsquedas complejas)
             write=10.0,  # Timeout para escribir datos
-            pool=5.0  # Timeout para obtener conexión del pool
+            pool=5.0,  # Timeout para obtener conexión del pool
         )
-        
+
         self.client = httpx.AsyncClient(
-            base_url=config.base_url, 
+            base_url=config.base_url,
             timeout=timeout_config,
             limits=httpx.Limits(
-                max_keepalive_connections=20,
-                max_connections=100,
-                keepalive_expiry=30.0
-            )
+                max_keepalive_connections=20, max_connections=100, keepalive_expiry=30.0
+            ),
         )
 
     async def __aenter__(self):
@@ -75,12 +74,9 @@ class TrackHSApiClient(ApiClientPort):
         """
         # Crear timeout específico para búsquedas
         search_timeout = httpx.Timeout(
-            connect=10.0,
-            read=self.config.search_timeout or 120.0,
-            write=10.0,
-            pool=5.0
+            connect=10.0, read=self.config.search_timeout or 120.0, write=10.0, pool=5.0
         )
-        
+
         # Usar el método request normal pero con timeout personalizado
         return await self._request_with_timeout(
             endpoint, options, max_retries, params, search_timeout
@@ -152,7 +148,9 @@ class TrackHSApiClient(ApiClientPort):
                         if os.getenv("DEBUG", "false").lower() == "true":
                             logger = logging.getLogger(__name__)
                             logger.debug(f"JSON parsing failed: {json_error}")
-                            logger.debug(f"Response text (first 500 chars): {response_text[:500]}")
+                            logger.debug(
+                                f"Response text (first 500 chars): {response_text[:500]}"
+                            )
 
                         # Intentar parsear manualmente
                         try:
@@ -161,8 +159,12 @@ class TrackHSApiClient(ApiClientPort):
                         except Exception as manual_parse_error:
                             if os.getenv("DEBUG", "false").lower() == "true":
                                 logger = logging.getLogger(__name__)
-                                logger.debug(f"Manual JSON parsing also failed: {manual_parse_error}")
-                                logger.debug(f"Response text (first 500 chars): {response_text[:500]}")
+                                logger.debug(
+                                    f"Manual JSON parsing also failed: {manual_parse_error}"
+                                )
+                                logger.debug(
+                                    f"Response text (first 500 chars): {response_text[:500]}"
+                                )
 
                             # Si todo falla, lanzar error en lugar de devolver string
                             raise ApiError(

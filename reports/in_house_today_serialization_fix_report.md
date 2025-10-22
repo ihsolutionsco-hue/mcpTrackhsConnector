@@ -1,6 +1,6 @@
 # Corrección del Problema de Serialización - in_house_today
 
-**Fecha:** 2024-01-15  
+**Fecha:** 2024-01-15
 **Estado:** Completado ✅
 
 ## Problema Identificado
@@ -37,7 +37,7 @@ def normalize_binary_int(value, param_name):
     # Manejar booleanos directamente
     if isinstance(value, bool):
         return 1 if value else 0
-    
+
     int_value = normalize_int(value, param_name)
     # ... resto de la lógica
 ```
@@ -176,8 +176,8 @@ El parámetro `in_house_today` ahora:
 4. **Serializa correctamente** en JSON y mapeo a API
 5. **Pasa todos los tests** de validación y casos edge
 
-**Impacto:** Alto - Resuelve el problema persistente de serialización  
-**Tiempo de corrección:** 1 hora  
+**Impacto:** Alto - Resuelve el problema persistente de serialización
+**Tiempo de corrección:** 1 hora
 **Resultado:** Parámetro completamente funcional con serialización robusta
 
 El parámetro `in_house_today` está ahora completamente libre de problemas de serialización y listo para uso en producción.

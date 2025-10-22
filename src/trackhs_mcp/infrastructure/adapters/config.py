@@ -56,11 +56,11 @@ class TrackHSConfig(BaseTrackHSConfig):
             pass
 
         return cls(
-            base_url=base_url, 
-            username=username, 
-            password=password, 
+            base_url=base_url,
+            username=username,
+            password=password,
             timeout=timeout,
-            search_timeout=search_timeout
+            search_timeout=search_timeout,
         )
 
     def validate_url(self) -> bool:

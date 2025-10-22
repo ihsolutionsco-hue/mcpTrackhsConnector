@@ -1,6 +1,6 @@
 # Corrección del Parámetro in_house_today
 
-**Fecha:** 2024-01-15  
+**Fecha:** 2024-01-15
 **Estado:** Completado ✅
 
 ## Problema Identificado
@@ -163,8 +163,8 @@ El parámetro `in_house_today` ahora:
 3. **Funcionalidad completa** - Mapeo correcto a `inHouseToday` en la API
 4. **Tests exhaustivos** - Validación completa de todos los casos
 
-**Impacto:** Bajo (parámetro específico) pero **crítico para cumplimiento de API**  
-**Tiempo de corrección:** 30 minutos  
+**Impacto:** Bajo (parámetro específico) pero **crítico para cumplimiento de API**
+**Tiempo de corrección:** 30 minutos
 **Resultado:** Parámetro completamente funcional y conforme a documentación
 
 El parámetro `in_house_today` está ahora listo para uso en producción con validación estricta y cumplimiento total de la documentación API.
