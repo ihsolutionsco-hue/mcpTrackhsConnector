@@ -142,7 +142,7 @@ def validate_search_reservations_params(func: Callable) -> Callable:
     async def wrapper(*args, **kwargs):
         try:
             # Extraer parámetros de kwargs
-            params = {k: v for k, v in kwargs.items() if k != 'api_client'}
+            params = {k: v for k, v in kwargs.items() if k != "api_client"}
 
             # Aplicar validación mejorada
             validated_params = validate_search_reservations_parameters(params)
@@ -160,7 +160,9 @@ def validate_search_reservations_params(func: Callable) -> Callable:
             raise ValueError(str(e))
         except Exception as e:
             # Manejar otros errores
-            raise ValueError(f"❌ Error validating search_reservations parameters: {str(e)}")
+            raise ValueError(
+                f"❌ Error validating search_reservations parameters: {str(e)}"
+            )
 
     return wrapper
 

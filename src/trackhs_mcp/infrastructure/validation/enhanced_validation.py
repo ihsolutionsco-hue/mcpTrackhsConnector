@@ -63,7 +63,7 @@ def validate_date_parameter(value: Any, param_name: str) -> Optional[str]:
 
     if isinstance(value, str):
         # Rechazar strings que representan null
-        if value.lower() in ['null', 'none', '']:
+        if value.lower() in ["null", "none", ""]:
             raise ValidationError(
                 f"❌ Invalid date parameter '{param_name}': '{value}' is not a valid date.\n"
                 f"✅ Use ISO 8601 format like '2024-03-01' or omit the parameter entirely.\n"
@@ -71,7 +71,7 @@ def validate_date_parameter(value: Any, param_name: str) -> Optional[str]:
             )
 
         # Validar formato ISO 8601
-        iso_pattern = r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$'
+        iso_pattern = r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$"
         if not re.match(iso_pattern, value):
             raise ValidationError(
                 f"❌ Invalid date format for '{param_name}': '{value}'.\n"
@@ -81,8 +81,8 @@ def validate_date_parameter(value: Any, param_name: str) -> Optional[str]:
 
         # Validar que la fecha sea válida
         try:
-            if 'T' in value:
-                datetime.fromisoformat(value.replace('Z', '+00:00'))
+            if "T" in value:
+                datetime.fromisoformat(value.replace("Z", "+00:00"))
             else:
                 datetime.fromisoformat(value)
         except ValueError:
@@ -95,7 +95,9 @@ def validate_date_parameter(value: Any, param_name: str) -> Optional[str]:
     return str(value)
 
 
-def validate_enum_parameter(value: Any, param_name: str, enum_class: Enum, allow_multiple: bool = False) -> Optional[str]:
+def validate_enum_parameter(
+    value: Any, param_name: str, enum_class: Enum, allow_multiple: bool = False
+) -> Optional[str]:
     """
     Valida parámetros enum con valores permitidos
 
@@ -119,7 +121,7 @@ def validate_enum_parameter(value: Any, param_name: str, enum_class: Enum, allow
     if isinstance(value, str):
         if allow_multiple:
             # Permitir múltiples valores separados por coma
-            values = [v.strip() for v in value.split(',')]
+            values = [v.strip() for v in value.split(",")]
             for v in values:
                 if v not in valid_values:
                     raise ValidationError(
@@ -138,7 +140,12 @@ def validate_enum_parameter(value: Any, param_name: str, enum_class: Enum, allow
     return str(value)
 
 
-def validate_integer_parameter(value: Any, param_name: str, min_val: Optional[int] = None, max_val: Optional[int] = None) -> Optional[int]:
+def validate_integer_parameter(
+    value: Any,
+    param_name: str,
+    min_val: Optional[int] = None,
+    max_val: Optional[int] = None,
+) -> Optional[int]:
     """
     Valida parámetros enteros con rangos
 
@@ -211,9 +218,9 @@ def validate_id_list_parameter(value: Any, param_name: str) -> Optional[str]:
 
     if isinstance(value, str):
         # Dividir por comas y validar cada ID
-        ids = [id_val.strip() for id_val in value.split(',')]
+        ids = [id_val.strip() for id_val in value.split(",")]
         for id_val in ids:
-            if not re.match(r'^\d+$', id_val):
+            if not re.match(r"^\d+$", id_val):
                 raise ValidationError(
                     f"❌ Invalid {param_name} '{id_val}'.\n"
                     f"✅ Use numeric IDs only\n"
@@ -223,7 +230,9 @@ def validate_id_list_parameter(value: Any, param_name: str) -> Optional[str]:
     return str(value)
 
 
-def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str, Any]:
+def validate_search_reservations_parameters(
+    params: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     Validación completa y mejorada para parámetros de search_reservations
 
@@ -241,65 +250,82 @@ def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str,
 
     try:
         # Validar parámetros de paginación
-        if 'page' in params:
-            validated_params['page'] = validate_integer_parameter(
-                params['page'], 'page', min_val=0, max_val=10000
+        if "page" in params:
+            validated_params["page"] = validate_integer_parameter(
+                params["page"], "page", min_val=0, max_val=10000
             )
 
-        if 'size' in params:
-            validated_params['size'] = validate_integer_parameter(
-                params['size'], 'size', min_val=1, max_val=100
+        if "size" in params:
+            validated_params["size"] = validate_integer_parameter(
+                params["size"], "size", min_val=1, max_val=100
             )
 
         # Validar parámetros de ordenamiento
-        if 'sort_column' in params:
-            validated_params['sort_column'] = validate_enum_parameter(
-                params['sort_column'], 'sort_column', SortColumn
+        if "sort_column" in params:
+            validated_params["sort_column"] = validate_enum_parameter(
+                params["sort_column"], "sort_column", SortColumn
             )
 
-        if 'sort_direction' in params:
-            validated_params['sort_direction'] = validate_enum_parameter(
-                params['sort_direction'], 'sort_direction', SortDirection
+        if "sort_direction" in params:
+            validated_params["sort_direction"] = validate_enum_parameter(
+                params["sort_direction"], "sort_direction", SortDirection
             )
 
         # Validar parámetros de búsqueda
-        if 'search' in params and params['search'] is not None:
-            search = params['search']
+        if "search" in params and params["search"] is not None:
+            search = params["search"]
             if isinstance(search, str) and len(search) > 200:
                 raise ValidationError(
                     f"❌ Invalid search parameter: too long ({len(search)} characters).\n"
                     f"✅ Maximum length: 200 characters\n"
                     f"💡 Example: search='John Smith'"
                 )
-            validated_params['search'] = search
+            validated_params["search"] = search
 
         # Validar parámetros de fecha
         date_params = [
-            'booked_start', 'booked_end', 'arrival_start', 'arrival_end',
-            'departure_start', 'departure_end', 'updated_since'
+            "booked_start",
+            "booked_end",
+            "arrival_start",
+            "arrival_end",
+            "departure_start",
+            "departure_end",
+            "updated_since",
         ]
         for param in date_params:
             if param in params:
-                validated_params[param] = validate_date_parameter(params[param], param)
+                validated_params[param] = validate_date_parameter(
+                    params[param], param
+                )
 
         # Validar parámetros de ID
         id_params = [
-            'tags', 'node_id', 'unit_id', 'contact_id', 'travel_agent_id',
-            'campaign_id', 'user_id', 'unit_type_id', 'rate_type_id', 'reservation_type_id'
+            "tags",
+            "node_id",
+            "unit_id",
+            "contact_id",
+            "travel_agent_id",
+            "campaign_id",
+            "user_id",
+            "unit_type_id",
+            "rate_type_id",
+            "reservation_type_id",
         ]
         for param in id_params:
             if param in params:
-                validated_params[param] = validate_id_list_parameter(params[param], param)
+                validated_params[param] = validate_id_list_parameter(
+                    params[param], param
+                )
 
         # Validar status
-        if 'status' in params:
-            validated_params['status'] = validate_enum_parameter(
-                params['status'], 'status', ReservationStatus, allow_multiple=True
+        if "status" in params:
+            validated_params["status"] = validate_enum_parameter(
+                params["status"], "status", ReservationStatus, allow_multiple=True
             )
 
         # Validar in_house_today
-        if 'in_house_today' in params:
-            value = params['in_house_today']
+        if "in_house_today" in params:
+            value = params["in_house_today"]
             if value is not None:
                 # Convertir string a int si es necesario
                 if isinstance(value, str):
@@ -319,17 +345,21 @@ def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str,
                         f"💡 Example: in_house_today=1"
                     )
 
-                validated_params['in_house_today'] = value
+                validated_params["in_house_today"] = value
 
         # Validar otros parámetros enteros
-        if 'group_id' in params:
-            validated_params['group_id'] = validate_integer_parameter(params['group_id'], 'group_id')
+        if "group_id" in params:
+            validated_params["group_id"] = validate_integer_parameter(
+                params["group_id"], "group_id"
+            )
 
-        if 'checkin_office_id' in params:
-            validated_params['checkin_office_id'] = validate_integer_parameter(params['checkin_office_id'], 'checkin_office_id')
+        if "checkin_office_id" in params:
+            validated_params["checkin_office_id"] = validate_integer_parameter(
+                params["checkin_office_id"], "checkin_office_id"
+            )
 
         # Parámetros que no requieren validación especial
-        simple_params = ['scroll']
+        simple_params = ["scroll"]
         for param in simple_params:
             if param in params:
                 validated_params[param] = params[param]
@@ -352,39 +382,27 @@ def get_usage_examples() -> Dict[str, Dict[str, Any]]:
     return {
         "basic_search": {
             "description": "Basic reservation search",
-            "example": {
-                "size": 10,
-                "page": 0
-            }
+            "example": {"size": 10, "page": 0},
         },
         "search_by_guest": {
             "description": "Search by guest name",
-            "example": {
-                "search": "John Smith",
-                "size": 5
-            }
+            "example": {"search": "John Smith", "size": 5},
         },
         "filter_by_status": {
             "description": "Filter by reservation status",
-            "example": {
-                "status": "Confirmed",
-                "size": 10
-            }
+            "example": {"status": "Confirmed", "size": 10},
         },
         "filter_by_dates": {
             "description": "Filter by arrival date range",
             "example": {
                 "arrival_start": "2024-01-01",
                 "arrival_end": "2024-12-31",
-                "size": 10
-            }
+                "size": 10,
+            },
         },
         "filter_in_house": {
             "description": "Find guests currently checked in",
-            "example": {
-                "in_house_today": 1,
-                "size": 5
-            }
+            "example": {"in_house_today": 1, "size": 5},
         },
         "complex_filter": {
             "description": "Complex filtering with multiple parameters",
@@ -393,7 +411,7 @@ def get_usage_examples() -> Dict[str, Dict[str, Any]]:
                 "arrival_start": "2024-03-01",
                 "arrival_end": "2024-03-31",
                 "unit_id": "58",
-                "size": 5
-            }
-        }
+                "size": 5,
+            },
+        },
     }
