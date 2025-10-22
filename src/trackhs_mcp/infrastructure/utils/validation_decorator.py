@@ -45,6 +45,7 @@ def validate_mcp_parameters(
             # Los parámetros ya están validados y normalizados
             pass
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> Any:
@@ -54,13 +55,17 @@ def validate_mcp_parameters(
                     for param in binary_params:
                         if param in kwargs and kwargs[param] is not None:
                             try:
-                                kwargs[param] = normalize_binary_int(kwargs[param], param)
+                                kwargs[param] = normalize_binary_int(
+                                    kwargs[param], param
+                                )
                             except ValidationError as e:
-                                logger.warning(f"Error normalizando parámetro binario {param}: {e}")
+                                logger.warning(
+                                    f"Error normalizando parámetro binario {param}: {e}"
+                                )
                                 raise ValidationError(
                                     f"Parámetro {param} debe ser 0, 1, '0', '1', o None. "
                                     f"Valor recibido: {kwargs[param]}",
-                                    param
+                                    param,
                                 )
 
                 # Normalizar parámetros enteros
@@ -70,11 +75,13 @@ def validate_mcp_parameters(
                             try:
                                 kwargs[param] = normalize_int(kwargs[param], param)
                             except ValidationError as e:
-                                logger.warning(f"Error normalizando parámetro entero {param}: {e}")
+                                logger.warning(
+                                    f"Error normalizando parámetro entero {param}: {e}"
+                                )
                                 raise ValidationError(
                                     f"Parámetro {param} debe ser un entero válido. "
                                     f"Valor recibido: {kwargs[param]}",
-                                    param
+                                    param,
                                 )
 
                 # Normalizar parámetros flotantes
@@ -83,13 +90,16 @@ def validate_mcp_parameters(
                         if param in kwargs and kwargs[param] is not None:
                             try:
                                 from .type_normalization import normalize_float
+
                                 kwargs[param] = normalize_float(kwargs[param], param)
                             except ValidationError as e:
-                                logger.warning(f"Error normalizando parámetro flotante {param}: {e}")
+                                logger.warning(
+                                    f"Error normalizando parámetro flotante {param}: {e}"
+                                )
                                 raise ValidationError(
                                     f"Parámetro {param} debe ser un número flotante válido. "
                                     f"Valor recibido: {kwargs[param]}",
-                                    param
+                                    param,
                                 )
 
                 # Normalizar parámetros string
@@ -107,10 +117,13 @@ def validate_mcp_parameters(
                 return await func(*args, **kwargs)
 
             except Exception as e:
-                logger.error(f"Error en validación de parámetros para {func.__name__}: {e}")
+                logger.error(
+                    f"Error en validación de parámetros para {func.__name__}: {e}"
+                )
                 raise
 
         return wrapper
+
     return decorator
 
 
@@ -122,9 +135,9 @@ def validate_search_reservations_params(func: Callable) -> Callable:
     en búsquedas de reservas.
     """
     return validate_mcp_parameters(
-        binary_params=['in_house_today'],
-        int_params=['page', 'size', 'group_id', 'checkin_office_id'],
-        string_params=['search', 'status', 'tags', 'node_id', 'unit_id', 'contact_id']
+        binary_params=["in_house_today"],
+        int_params=["page", "size", "group_id", "checkin_office_id"],
+        string_params=["search", "status", "tags", "node_id", "unit_id", "contact_id"],
     )(func)
 
 
@@ -136,9 +149,16 @@ def validate_search_units_params(func: Callable) -> Callable:
     en búsquedas de unidades.
     """
     return validate_mcp_parameters(
-        binary_params=['pets_friendly', 'is_active', 'is_bookable', 'is_accessible'],
-        int_params=['page', 'size', 'bedrooms', 'bathrooms', 'min_bedrooms', 'max_bedrooms'],
-        string_params=['search', 'term', 'unit_code', 'short_name', 'node_id']
+        binary_params=["pets_friendly", "is_active", "is_bookable", "is_accessible"],
+        int_params=[
+            "page",
+            "size",
+            "bedrooms",
+            "bathrooms",
+            "min_bedrooms",
+            "max_bedrooms",
+        ],
+        string_params=["search", "term", "unit_code", "short_name", "node_id"],
     )(func)
 
 
@@ -150,7 +170,14 @@ def validate_work_order_params(func: Callable) -> Callable:
     en creación de órdenes de trabajo.
     """
     return validate_mcp_parameters(
-        int_params=['priority', 'estimated_time', 'actual_time', 'user_id', 'vendor_id', 'unit_id'],
-        float_params=['estimated_cost', 'cost'],
-        string_params=['summary', 'description', 'status', 'source']
+        int_params=[
+            "priority",
+            "estimated_time",
+            "actual_time",
+            "user_id",
+            "vendor_id",
+            "unit_id",
+        ],
+        float_params=["estimated_cost", "cost"],
+        string_params=["summary", "description", "status", "source"],
     )(func)

@@ -458,7 +458,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             default=10,
             description="Number of results per page (1-100). Accepts: integer or string. Maps to API parameter 'size'.",
             ge=1,
-            le=100
+            le=100,
         ),
         # ===========================================
         # SORTING PARAMETERS
@@ -501,7 +501,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         # ===========================================
         tags: Optional[str] = Field(
             default=None,
-            description="Filter by tag IDs (comma-separated: '1,2,3'). Maps to API parameter 'tags'."
+            description="Filter by tag IDs (comma-separated: '1,2,3'). Maps to API parameter 'tags'.",
         ),
         node_id: Optional[str] = Field(
             default=None,
@@ -513,31 +513,31 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         ),
         contact_id: Optional[str] = Field(
             default=None,
-            description="Filter by contact IDs (guest contacts). Example: '123' for single contact or '123,456' for multiple contacts. Maps to API parameter 'contactId'."
+            description="Filter by contact IDs (guest contacts). Example: '123' for single contact or '123,456' for multiple contacts. Maps to API parameter 'contactId'.",
         ),
         travel_agent_id: Optional[str] = Field(
             default=None,
-            description="Filter by travel agent IDs (booking agents). Example: '21' for single agent or '21,22' for multiple agents. Maps to API parameter 'travelAgentId'."
+            description="Filter by travel agent IDs (booking agents). Example: '21' for single agent or '21,22' for multiple agents. Maps to API parameter 'travelAgentId'.",
         ),
         campaign_id: Optional[str] = Field(
             default=None,
-            description="Filter by campaign IDs (marketing campaigns). Example: '5' for single campaign or '5,6' for multiple campaigns. Maps to API parameter 'campaignId'."
+            description="Filter by campaign IDs (marketing campaigns). Example: '5' for single campaign or '5,6' for multiple campaigns. Maps to API parameter 'campaignId'.",
         ),
         user_id: Optional[str] = Field(
             default=None,
-            description="Filter by user IDs (system users). Example: '100' for single user or '100,101' for multiple users. Maps to API parameter 'userId'."
+            description="Filter by user IDs (system users). Example: '100' for single user or '100,101' for multiple users. Maps to API parameter 'userId'.",
         ),
         unit_type_id: Optional[str] = Field(
             default=None,
-            description="Filter by unit type IDs (property types). Example: '2' for single type or '2,3' for multiple types. Maps to API parameter 'unitTypeId'."
+            description="Filter by unit type IDs (property types). Example: '2' for single type or '2,3' for multiple types. Maps to API parameter 'unitTypeId'.",
         ),
         rate_type_id: Optional[str] = Field(
             default=None,
-            description="Filter by rate type IDs (pricing types). Example: '1' for single rate type or '1,2' for multiple rate types. Maps to API parameter 'rateTypeId'."
+            description="Filter by rate type IDs (pricing types). Example: '1' for single rate type or '1,2' for multiple rate types. Maps to API parameter 'rateTypeId'.",
         ),
         reservation_type_id: Optional[str] = Field(
             default=None,
-            description="Filter by reservation type IDs (booking types). Example: '3' for single type or '3,4' for multiple types. Maps to API parameter 'reservationTypeId'."
+            description="Filter by reservation type IDs (booking types). Example: '3' for single type or '3,4' for multiple types. Maps to API parameter 'reservationTypeId'.",
         ),
         # ===========================================
         # DATE RANGE FILTERS
@@ -597,12 +597,11 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             description="Filter by in-house today (0=not in house, 1=in house). Accepts: 0, 1, '0', '1'. Maps to API parameter 'inHouseToday'.",
         ),
         group_id: Optional[Union[int, str]] = Field(
-            default=None,
-            description="Filter by group ID. Accepts: integer or string"
+            default=None, description="Filter by group ID. Accepts: integer or string"
         ),
         checkin_office_id: Optional[Union[int, str]] = Field(
             default=None,
-            description="Filter by check-in office ID. Accepts: integer or string"
+            description="Filter by check-in office ID. Accepts: integer or string",
         ),
         folio_id: Optional[str] = Field(default=None, description="Filter by folio ID"),
         # Elasticsearch scroll para grandes conjuntos de datos

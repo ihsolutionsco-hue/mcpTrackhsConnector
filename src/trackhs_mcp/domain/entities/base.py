@@ -11,10 +11,15 @@ class PaginationParams(BaseModel):
     """Parámetros de paginación"""
 
     page: Optional[Union[int, str]] = Field(
-        default=0, ge=0, description="Número de página (0-based). Accepts: integer or string"
+        default=0,
+        ge=0,
+        description="Número de página (0-based). Accepts: integer or string",
     )
     size: Optional[Union[int, str]] = Field(
-        default=10, ge=1, le=100, description="Tamaño de página. Accepts: integer or string"
+        default=10,
+        ge=1,
+        le=100,
+        description="Tamaño de página. Accepts: integer or string",
     )
     sort_column: Optional[str] = Field(default="id", description="Columna para ordenar")
     sort_direction: Optional[str] = Field(
