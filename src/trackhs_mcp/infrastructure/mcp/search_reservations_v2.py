@@ -274,11 +274,11 @@ async def search_reservations_v2(
             "use comma-separated values like 'Confirmed,Hold'"
         ),
     ),
-    in_house_today: Optional[Literal[0, 1]] = Field(
+    in_house_today: Optional[Union[int, str]] = Field(
         default=None,
         description=(
             "Filter by in-house today status. Use 0 (not in house) or 1 (in house). "
-            "Examples: 1 (guests currently in house), 0 (not in house). "
+            "Accepts: 0, 1, '0', '1'. Examples: 1 (guests currently in house), 0 (not in house). "
             "To omit this filter, simply don't include this parameter."
         ),
     ),
