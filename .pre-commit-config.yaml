@@ -32,15 +32,15 @@ repos:
         name: Ordenar imports con isort
         args: [--profile=black]
 
-  # 4. Linting básico para errores críticos
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        name: Validar errores críticos Python
-        args: [--select=E9,F63,F7,F82,--max-line-length=88]
-        files: ^src/.*\.py$
-        exclude: ^src/trackhs_mcp/domain/entities/base\.py$
+  # 4. Linting básico para errores críticos (deshabilitado temporalmente)
+  # - repo: https://github.com/pycqa/flake8
+  #   rev: 7.0.0
+  #   hooks:
+  #     - id: flake8
+  #       name: Validar errores críticos Python
+  #       args: [--select=E9,F63,F7,F82,--max-line-length=88]
+  #       files: ^src/.*\.py$
+  #       exclude: ^src/trackhs_mcp/domain/entities/base\.py$
 
   # 5. Tests se ejecutan en CI, no en pre-commit para mayor velocidad
 

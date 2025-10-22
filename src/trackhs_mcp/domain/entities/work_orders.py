@@ -185,7 +185,7 @@ class WorkOrder(BaseModel):
         # Validar que data no sea None
         if data is None:
             raise ValueError("Response data cannot be None")
-        
+
         # Validar que data sea un diccionario
         if not isinstance(data, dict):
             # Si es un string, intentar parsearlo como JSON
@@ -194,9 +194,10 @@ class WorkOrder(BaseModel):
                 data = data.strip()
                 if not data:
                     raise ValueError("Response data cannot be empty string")
-                
+
                 try:
                     import json
+
                     data = json.loads(data)
                 except json.JSONDecodeError as e:
                     raise ValueError(
@@ -206,7 +207,7 @@ class WorkOrder(BaseModel):
                 raise ValueError(
                     f"Expected dict for API response, got {type(data).__name__}: {data}"
                 )
-        
+
         # Crear una copia del diccionario para no modificar el original
         data_copy = data.copy()
 
