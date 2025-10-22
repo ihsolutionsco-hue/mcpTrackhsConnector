@@ -65,9 +65,9 @@ class SearchReservationsUseCase:
         request_params: Dict[str, Any] = {}
 
         # Parámetros de paginación
-        if params.page:
+        if params.page is not None:
             request_params["page"] = params.page
-        if params.size:
+        if params.size is not None:
             request_params["size"] = params.size
 
         # Parámetros de ordenamiento
