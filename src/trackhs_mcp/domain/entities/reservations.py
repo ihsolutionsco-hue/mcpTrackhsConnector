@@ -561,7 +561,6 @@ class SearchReservationsParams(PaginationParams, SearchParams):
         default=None,
         description="ID de la oficina de check-in. Accepts: integer or string",
     )
-    folio_id: Optional[str] = Field(default=None, description="ID del folio")
 
 
 class SearchReservationsResponse(BaseModel):

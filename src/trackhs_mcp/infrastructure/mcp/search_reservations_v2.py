@@ -5,7 +5,7 @@ Versión mejorada con tipos específicos siguiendo mejores prácticas MCP
 
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
@@ -18,6 +18,7 @@ from ..utils.error_handling import error_handler
 from ..utils.type_normalization import normalize_binary_int, normalize_int
 from ..utils.user_friendly_messages import format_date_error
 from ..utils.validation_decorator import validate_search_reservations_params
+from ..validation.date_validators import DateValidator
 
 
 def _parse_id_string(
@@ -69,12 +70,23 @@ async def search_reservations_v2(
     # Parámetros de paginación
     page: int = Field(
         default=0,
-        description="Page number (0-based indexing). Max total results: 10,000.",
+        description=(
+            "Page number for pagination. Use 0-based indexing (0, 1, 2, ...). "
+            "Range: 0-9999. Examples: 0 (first page), 1 (second page). "
+            "Default: 0. Max total results: 10,000."
+        ),
         ge=0,
-        le=10000,
+        le=9999,
     ),
     size: int = Field(
-        default=10, description="Number of results per page (1-100)", ge=1, le=100
+        default=10,
+        description=(
+            "Number of results per page. Range: 1-100. "
+            "Examples: 10 (default), 25, 50, 100. "
+            "Use smaller values for faster responses."
+        ),
+        ge=1,
+        le=100,
     ),
     # Parámetros de ordenamiento
     sort_column: Literal[
@@ -93,110 +105,197 @@ async def search_reservations_v2(
     ] = Field(
         default="name",
         description=(
-            "Column to sort by. Valid values: name, status, altConf, "
-            "agreementStatus, type, guest, guests, unit, units, checkin, "
-            "checkout, nights. Disabled when using scroll."
+            "Column to sort results by. Valid options: 'name' (reservation name), 'status' (reservation status), "
+            "'checkin' (check-in date), 'checkout' (check-out date), 'guest' (guest name), 'unit' (unit name), "
+            "'nights' (number of nights). Default: 'name'. Disabled when using scroll parameter."
         ),
     ),
     sort_direction: Literal["asc", "desc"] = Field(
         default="asc",
-        description="Sort direction: 'asc' or 'desc'. Disabled when using scroll.",
+        description=(
+            "Sort direction. Use 'asc' for ascending (A-Z, 0-9) or 'desc' for descending (Z-A, 9-0). "
+            "Default: 'asc'. Disabled when using scroll parameter."
+        ),
     ),
     # Parámetros de búsqueda de texto
     search: Optional[str] = Field(
         default=None,
-        description="Full-text search in reservation names, guest names, and descriptions. Example: 'John Smith' or 'Villa Paradise'",
+        description=(
+            "Full-text search across reservation names, guest names, and descriptions. "
+            "Examples: 'John Smith' (guest name), 'Villa Paradise' (property name), 'Beach House' (description). "
+            "To omit this filter, simply don't include this parameter. Max length: 200 characters."
+        ),
         max_length=200,
     ),
     # Filtros por IDs (strings que pueden contener valores separados por comas)
     tags: Optional[str] = Field(
-        default=None, description="Filter by tag IDs (comma-separated: '1,2,3')"
+        default=None,
+        description=(
+            "Filter by tag IDs. Use comma-separated values for multiple tags. "
+            "Examples: '1' (single tag) or '1,2,3' (multiple tags). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     node_id: Optional[str] = Field(
         default=None,
-        description="Filter by node IDs. Example: '1' for single ID or '1,2,3' for multiple IDs",
+        description=(
+            "Filter by node IDs. Use comma-separated values for multiple nodes. "
+            "Examples: '1' (single node) or '1,2,3' (multiple nodes). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     unit_id: Optional[str] = Field(
         default=None,
-        description="Filter by unit IDs. Example: '10' for single unit or '10,20,30' for multiple units",
+        description=(
+            "Filter by unit IDs. Use comma-separated values for multiple units. "
+            "Examples: '10' (single unit) or '10,20,30' (multiple units). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     contact_id: Optional[str] = Field(
-        default=None, description="Filter by contact IDs (comma-separated)"
+        default=None,
+        description=(
+            "Filter by contact IDs. Use comma-separated values for multiple contacts. "
+            "Examples: '123' (single contact) or '123,456,789' (multiple contacts). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     travel_agent_id: Optional[str] = Field(
-        default=None, description="Filter by travel agent IDs (comma-separated)"
+        default=None,
+        description=(
+            "Filter by travel agent IDs. Use comma-separated values for multiple agents. "
+            "Examples: '5' (single agent) or '5,10,15' (multiple agents). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     campaign_id: Optional[str] = Field(
-        default=None, description="Filter by campaign IDs (comma-separated)"
+        default=None,
+        description=(
+            "Filter by campaign IDs. Use comma-separated values for multiple campaigns. "
+            "Examples: '1' (single campaign) or '1,2,3' (multiple campaigns). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     user_id: Optional[str] = Field(
-        default=None, description="Filter by user IDs (comma-separated)"
+        default=None,
+        description=(
+            "Filter by user IDs. Use comma-separated values for multiple users. "
+            "Examples: '5' (single user) or '5,10,15' (multiple users). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     unit_type_id: Optional[str] = Field(
-        default=None, description="Filter by unit type IDs (comma-separated)"
+        default=None,
+        description=(
+            "Filter by unit type IDs. Use comma-separated values for multiple types. "
+            "Examples: '1' (single type) or '1,2,3' (multiple types). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     rate_type_id: Optional[str] = Field(
-        default=None, description="Filter by rate type IDs (comma-separated)"
+        default=None,
+        description=(
+            "Filter by rate type IDs. Use comma-separated values for multiple rate types. "
+            "Examples: '1' (single rate type) or '1,2,3' (multiple rate types). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     reservation_type_id: Optional[str] = Field(
-        default=None, description="Filter by reservation type IDs (comma-separated)"
+        default=None,
+        description=(
+            "Filter by reservation type IDs. Use comma-separated values for multiple types. "
+            "Examples: '1' (single type) or '1,2,3' (multiple types). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
     # Filtros de fechas (ISO 8601)
     booked_start: Optional[str] = Field(
         default=None,
-        description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        description=(
+            "Filter by booking date start. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            "To omit this filter, simply don't include this parameter. "
+            "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
+        ),
     ),
     booked_end: Optional[str] = Field(
         default=None,
-        description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        description=(
+            "Filter by booking date end. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-12-31'). "
+            "To omit this filter, simply don't include this parameter. "
+            "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
+        ),
     ),
     arrival_start: Optional[str] = Field(
         default=None,
-        description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        description=(
+            "Filter by arrival date start. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            "To omit this filter, simply don't include this parameter. "
+            "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
+        ),
     ),
     arrival_end: Optional[str] = Field(
         default=None,
-        description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        description=(
+            "Filter by arrival date end. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-12-31'). "
+            "To omit this filter, simply don't include this parameter. "
+            "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
+        ),
     ),
     departure_start: Optional[str] = Field(
         default=None,
-        description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        description=(
+            "Filter by departure date start. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            "To omit this filter, simply don't include this parameter. "
+            "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
+        ),
     ),
     departure_end: Optional[str] = Field(
         default=None,
-        description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        description=(
+            "Filter by departure date end. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-12-31'). "
+            "To omit this filter, simply don't include this parameter. "
+            "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
+        ),
     ),
     updated_since: Optional[str] = Field(
         default=None,
-        description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
-        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        description=(
+            "Filter by last update date. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            "To omit this filter, simply don't include this parameter. "
+            "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
+        ),
     ),
     # Otros filtros
-    status: Optional[
-        Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"]
-    ] = Field(
+    status: Optional[str] = Field(
         default=None,
         description=(
             "Filter by reservation status. Valid statuses: Hold, Confirmed, "
             "Cancelled, Checked In, Checked Out. For multiple statuses, "
-            "use comma-separated values like 'Confirmed,Cancelled'"
+            "use comma-separated values like 'Confirmed,Hold'"
         ),
     ),
     in_house_today: Optional[Literal[0, 1]] = Field(
         default=None,
-        description="Filter by in-house today (0=not in house, 1=in house)",
+        description=(
+            "Filter by in-house today status. Use 0 (not in house) or 1 (in house). "
+            "Examples: 1 (guests currently in house), 0 (not in house). "
+            "To omit this filter, simply don't include this parameter."
+        ),
     ),
-    group_id: Optional[int] = Field(default=None, description="Filter by group ID"),
+    group_id: Optional[int] = Field(
+        default=None,
+        description=(
+            "Filter by group ID. Use integer format. "
+            "Examples: 123. To omit this filter, simply don't include this parameter."
+        ),
+    ),
     checkin_office_id: Optional[int] = Field(
-        default=None, description="Filter by check-in office ID"
+        default=None,
+        description=(
+            "Filter by check-in office ID. Use integer format. "
+            "Examples: 1. To omit this filter, simply don't include this parameter."
+        ),
     ),
-    folio_id: Optional[str] = Field(default=None, description="Filter by folio ID"),
     # Elasticsearch scroll para grandes conjuntos de datos
     scroll: Optional[str] = Field(
         default=None,
@@ -214,12 +313,36 @@ async def search_reservations_v2(
     full-text search, date range filtering, status filtering, and pagination. It's
     optimized for AI model integration with the MCP protocol.
 
-    Key features:
+    🎯 KEY FEATURES:
     - Full API V2 compatibility with 25+ filter parameters
     - Standard pagination and Elasticsearch scroll for large datasets
     - Comprehensive date range filtering (booking, arrival, departure)
     - Multiple ID filtering with comma-separated values
     - Flexible status and text search
+
+    📋 AVAILABLE PARAMETERS:
+    - Pagination: page (0-based), size (1-100)
+    - Sorting: sort_column, sort_direction
+    - Text Search: search, tags
+    - ID Filters: node_id, unit_id, contact_id, travel_agent_id, campaign_id, user_id, unit_type_id, rate_type_id, reservation_type_id
+    - Date Filters: booked_start, booked_end, arrival_start, arrival_end, departure_start, departure_end, updated_since
+    - Status Filters: status (single or comma-separated), in_house_today
+    - Other: group_id, checkin_office_id, folio_id, scroll
+
+    📅 DATE FORMAT REQUIREMENTS:
+    - Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15')
+    - Do NOT use timestamps or 'null' values
+    - To omit date filters, simply don't include the parameter
+
+    🔍 STATUS FILTERING:
+    - Single status: 'Confirmed'
+    - Multiple statuses: 'Confirmed,Cancelled'
+    - Valid statuses: 'Hold', 'Confirmed', 'Cancelled', 'Checked In', 'Checked Out'
+
+    📊 PAGINATION:
+    - page: 0-based indexing (0, 1, 2, ...)
+    - size: 1-100 results per page
+    - Default: page=0, size=10
 
     Returns:
         JSON string with reservation data including guest information, unit details,
@@ -291,13 +414,49 @@ async def search_reservations_v2(
     if size_normalized is None:
         size_normalized = 10  # Default: 10
 
-    # Validar parámetros básicos según documentación API V2
+    # Validar parámetros de paginación según documentación API V2
     if page_normalized < 0:
-        raise ValidationError("Page must be >= 0", "page")
+        raise ValidationError(
+            f"Page must be >= 0 (0-based indexing). Received: {page_normalized}", "page"
+        )
     if size_normalized < 1:
-        raise ValidationError("Size must be >= 1", "size")
+        raise ValidationError(f"Size must be >= 1. Received: {size_normalized}", "size")
     if size_normalized > 100:
-        raise ValidationError("Size must be <= 100", "size")
+        raise ValidationError(
+            f"Size must be <= 100. Received: {size_normalized}", "size"
+        )
+
+    # Validar fechas opcionales
+    try:
+        arrival_start = DateValidator.validate_optional_date(arrival_start)
+        arrival_end = DateValidator.validate_optional_date(arrival_end)
+        departure_start = DateValidator.validate_optional_date(departure_start)
+        departure_end = DateValidator.validate_optional_date(departure_end)
+        updated_since = DateValidator.validate_optional_date(updated_since)
+        booked_start = DateValidator.validate_optional_date(booked_start)
+        booked_end = DateValidator.validate_optional_date(booked_end)
+    except ValueError as e:
+        raise ValidationError(
+            f"❌ Invalid date format: {str(e)}. "
+            f"✅ Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            f"💡 To omit date filters, simply don't include the parameter.",
+            "date_validation",
+        )
+
+    # Validar estados múltiples
+    valid_statuses = {"Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"}
+    if status:
+        status_list = [s.strip() for s in status.split(",") if s.strip()]
+        invalid_statuses = [s for s in status_list if s not in valid_statuses]
+        if invalid_statuses:
+            raise ValidationError(
+                f"❌ Invalid status values: {invalid_statuses}. "
+                f"✅ Valid statuses: {', '.join(sorted(valid_statuses))}. "
+                f"💡 Examples: 'Confirmed' (single) or 'Confirmed,Cancelled' (multiple).",
+                "status",
+            )
+    else:
+        status_list = None
 
     # Validar límite total de resultados (10k máximo)
     # Para 0-based indexing: (page + 1) * size <= 10000
@@ -343,13 +502,7 @@ async def search_reservations_v2(
                 param_name,
             )
 
-    # Parsear status (puede venir como string con comas o como lista)
-    status_list = None
-    if status:
-        if isinstance(status, list):
-            status_list = status
-        else:
-            status_list = [s.strip() for s in status.split(",") if s.strip()]
+    # Usar lista de estados ya validada anteriormente
 
     try:
         # Crear caso de uso
@@ -384,7 +537,6 @@ async def search_reservations_v2(
             status=status_list,
             group_id=group_id_normalized,
             checkin_office_id=checkin_office_id_normalized,
-            folio_id=folio_id,
         )
 
         # Ejecutar caso de uso
@@ -545,51 +697,43 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         # Booking date range
         booked_start: Optional[str] = Field(
             default=None,
-            description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'bookedStart'.",
-            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Use 'null' to omit filter. Maps to API parameter 'bookedStart'.",
         ),
         booked_end: Optional[str] = Field(
             default=None,
-            description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'bookedEnd'.",
-            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Use 'null' to omit filter. Maps to API parameter 'bookedEnd'.",
         ),
         # Arrival date range
         arrival_start: Optional[str] = Field(
             default=None,
-            description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'arrivalStart'.",
-            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'arrivalStart'.",
         ),
         arrival_end: Optional[str] = Field(
             default=None,
-            description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'arrivalEnd'.",
-            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'arrivalEnd'.",
         ),
         # Departure date range
         departure_start: Optional[str] = Field(
             default=None,
-            description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'departureStart'.",
-            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'departureStart'.",
         ),
         departure_end: Optional[str] = Field(
             default=None,
-            description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'departureEnd'.",
-            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'departureEnd'.",
         ),
         # Last update filter
         updated_since: Optional[str] = Field(
             default=None,
-            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'updatedSince'.",
-            pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Use 'null' to omit. Maps to API parameter 'updatedSince'.",
         ),
         # Otros filtros
-        status: Optional[
-            Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"]
-        ] = Field(
+        status: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by reservation status. Valid statuses: Hold, Confirmed, "
-                "Cancelled, Checked In, Checked Out. For multiple statuses, "
-                "use comma-separated values like 'Confirmed,Cancelled'"
+                "Filter by reservation status. Use single status or comma-separated for multiple. "
+                "Valid statuses: 'Hold', 'Confirmed', 'Cancelled', 'Checked In', 'Checked Out'. "
+                "Examples: 'Confirmed' (single) or 'Confirmed,Cancelled' (multiple). "
+                "To omit this filter, simply don't include this parameter."
             ),
         ),
         in_house_today: Optional[Union[int, str]] = Field(
@@ -603,7 +747,6 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             default=None,
             description="Filter by check-in office ID. Accepts: integer or string",
         ),
-        folio_id: Optional[str] = Field(default=None, description="Filter by folio ID"),
         # Elasticsearch scroll para grandes conjuntos de datos
         scroll: Optional[str] = Field(
             default=None,
@@ -643,7 +786,6 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             in_house_today=in_house_today,
             group_id=group_id,
             checkin_office_id=checkin_office_id,
-            folio_id=folio_id,
             scroll=scroll,
         )
 
