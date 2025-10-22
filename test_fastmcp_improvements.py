@@ -96,12 +96,17 @@ async def test_decorator_validation():
     print("=" * 50)
 
     try:
-        from src.trackhs_mcp.infrastructure.utils.validation_decorator import validate_search_reservations_params
+        from src.trackhs_mcp.infrastructure.utils.validation_decorator import (
+            validate_search_reservations_params,
+        )
 
         print("✅ Decorador importado correctamente")
 
         # Test de normalización de tipos
-        from src.trackhs_mcp.infrastructure.utils.type_normalization import normalize_binary_int, normalize_int
+        from src.trackhs_mcp.infrastructure.utils.type_normalization import (
+            normalize_binary_int,
+            normalize_int,
+        )
 
         # Test normalize_int
         test_cases_int = [
