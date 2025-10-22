@@ -132,6 +132,26 @@ class CreateHousekeepingWorkOrderUseCase:
         Returns:
             Modelo de orden de trabajo de housekeeping
         """
+        # Validar que response_data no sea None
+        if response_data is None:
+            raise ValueError("Response data cannot be None")
+        
+        # Manejar caso donde response_data es un string JSON
+        if isinstance(response_data, str):
+            # Limpiar espacios y validar que no esté vacío
+            response_data = response_data.strip()
+            if not response_data:
+                raise ValueError("Response data cannot be empty string")
+            
+            try:
+                import json
+                response_data = json.loads(response_data)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Expected dict for API response, got string that cannot be parsed as JSON: {e}")
+        
+        # Validar que response_data sea un diccionario
+        if not isinstance(response_data, dict):
+            raise ValueError(f"Expected dict for API response, got {type(response_data).__name__}: {response_data}")
         return HousekeepingWorkOrder(
             id=response_data.get("id"),
             scheduled_at=response_data.get("scheduledAt"),

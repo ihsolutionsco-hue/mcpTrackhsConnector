@@ -182,9 +182,26 @@ class WorkOrder(BaseModel):
     @classmethod
     def from_api_response(cls, data: Dict[str, Any]) -> "WorkOrder":
         """Crear instancia desde respuesta de API."""
+        # Validar que data no sea None
+        if data is None:
+            raise ValueError("Response data cannot be None")
+        
         # Validar que data sea un diccionario
         if not isinstance(data, dict):
-            raise ValueError(f"Expected dict for API response, got {type(data).__name__}: {data}")
+            # Si es un string, intentar parsearlo como JSON
+            if isinstance(data, str):
+                # Limpiar espacios y validar que no esté vacío
+                data = data.strip()
+                if not data:
+                    raise ValueError("Response data cannot be empty string")
+                
+                try:
+                    import json
+                    data = json.loads(data)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Expected dict for API response, got string that cannot be parsed as JSON: {e}")
+            else:
+                raise ValueError(f"Expected dict for API response, got {type(data).__name__}: {data}")
         
         # Crear una copia del diccionario para no modificar el original
         data_copy = data.copy()
