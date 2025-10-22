@@ -32,13 +32,14 @@ repos:
         name: Ordenar imports con isort
         args: [--profile=black]
 
-        # 4. Linting básico (temporalmente deshabilitado para MVP)
-        # - repo: https://github.com/pycqa/flake8
-        #   rev: 7.0.0
-        #   hooks:
-        #     - id: flake8
-        #       name: Validar sintaxis Python
-        #       args: [--max-line-length=100, --extend-ignore=E501,W503,E402,F401,F841,F811,F402,E712,W605]
+  # 4. Linting básico para errores críticos
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        name: Validar errores críticos Python
+        args: [--select=E9,F63,F7,F82,--max-line-length=88]
+        files: ^src/.*\.py$
 
   # 5. Tests se ejecutan en CI, no en pre-commit para mayor velocidad
 
