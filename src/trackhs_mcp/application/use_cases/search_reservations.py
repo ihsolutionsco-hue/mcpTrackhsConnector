@@ -132,6 +132,8 @@ class SearchReservationsUseCase:
             request_params["groupId"] = params.group_id
         if params.checkin_office_id:
             request_params["checkinOfficeId"] = params.checkin_office_id
+        if params.folio_id:
+            request_params["folioId"] = params.folio_id
 
         return request_params
 
@@ -147,8 +149,20 @@ class SearchReservationsUseCase:
             return status
         return ",".join(status)
 
-    def _process_response(self, response: Dict[str, Any]) -> Dict[str, Any]:
+    def _process_response(self, response: Union[Dict[str, Any], str]) -> Dict[str, Any]:
         """Procesar respuesta de la API"""
-        # Retornar directamente la respuesta de la API sin validación estricta
-        # para evitar errores de validación con datos de prueba
-        return response
+        # Si la respuesta es un string JSON, parsearlo a dict
+        if isinstance(response, str):
+            try:
+                import json
+
+                return json.loads(response)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON response: {e}")
+
+        # Si ya es un dict, devolverlo directamente
+        if isinstance(response, dict):
+            return response
+
+        # Si es otro tipo, intentar convertirlo
+        raise ValueError(f"Unexpected response type: {type(response)}")

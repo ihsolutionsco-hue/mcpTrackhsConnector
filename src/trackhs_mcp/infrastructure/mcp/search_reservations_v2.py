@@ -200,6 +200,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         checkin_office_id: Optional[int] = Field(
             default=None, description="Filter by check-in office ID"
         ),
+        folio_id: Optional[str] = Field(default=None, description="Filter by folio ID"),
         # Elasticsearch scroll para grandes conjuntos de datos
         scroll: Optional[str] = Field(
             default=None,
@@ -277,6 +278,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             status = None
         if type(scroll).__name__ == "FieldInfo":
             scroll = None
+        if type(folio_id).__name__ == "FieldInfo":
+            folio_id = None
 
         # Normalizar parámetros numéricos para backward compatibility
         # (en caso de que vengan como string de otros sistemas)
@@ -389,6 +392,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
                 status=status_list,
                 group_id=group_id_normalized,
                 checkin_office_id=checkin_office_id_normalized,
+                folio_id=folio_id,
             )
 
             # Ejecutar caso de uso
