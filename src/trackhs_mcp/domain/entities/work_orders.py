@@ -182,6 +182,10 @@ class WorkOrder(BaseModel):
     @classmethod
     def from_api_response(cls, data: Dict[str, Any]) -> "WorkOrder":
         """Crear instancia desde respuesta de API."""
+        # Validar que data sea un diccionario
+        if not isinstance(data, dict):
+            raise ValueError(f"Expected dict for API response, got {type(data).__name__}: {data}")
+        
         # Crear una copia del diccionario para no modificar el original
         data_copy = data.copy()
 

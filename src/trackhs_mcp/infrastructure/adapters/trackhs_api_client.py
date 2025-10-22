@@ -185,7 +185,6 @@ class TrackHSApiClient(ApiClientPort):
                         return json_data
                     except Exception as json_error:
                         # Si falla el parsing JSON, intentar parsear manualmente
-
                         try:
                             response_text = response.text
                             if os.getenv("DEBUG", "false").lower() == "true":
@@ -213,10 +212,21 @@ class TrackHSApiClient(ApiClientPort):
                                     f"{response_text[:500]}"
                                 )
 
-                            # Si todo falla, devolver el texto como está
-                            return response_text
+                            # Si todo falla, lanzar error en lugar de devolver string
+                            raise ApiError(
+                                f"Failed to parse JSON response: {manual_parse_error}",
+                                response.status_code,
+                                endpoint,
+                            )
                 else:
-                    return response.text
+                    # Para contenido no-JSON, intentar parsear como JSON de todas formas
+                    try:
+                        response_text = response.text
+                        json_data = json.loads(response_text)
+                        return json_data
+                    except Exception:
+                        # Si no es JSON válido, devolver el texto
+                        return response.text
 
             except httpx.TimeoutException as e:
                 last_error = TimeoutError(f"Request timeout: {str(e)}")
