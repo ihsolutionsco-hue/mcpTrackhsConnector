@@ -22,6 +22,7 @@ class TestSearchReservationsV2:
     @pytest.mark.asyncio
     async def test_basic_search(self):
         """Probar búsqueda básica"""
+        mock_api_client = AsyncMock()
         with patch(
             "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
         ) as mock_use_case:
@@ -30,7 +31,11 @@ class TestSearchReservationsV2:
             mock_use_case.return_value = mock_instance
 
             result = await search_reservations_v2(
-                page=0, size=10, sort_column="name", sort_direction="asc"
+                api_client=mock_api_client,
+                page=0,
+                size=10,
+                sort_column="name",
+                sort_direction="asc",
             )
 
             assert result == {"reservations": []}
@@ -39,6 +44,7 @@ class TestSearchReservationsV2:
     @pytest.mark.asyncio
     async def test_search_with_filters(self):
         """Probar búsqueda con filtros"""
+        mock_api_client = AsyncMock()
         with patch(
             "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
         ) as mock_use_case:
@@ -47,7 +53,12 @@ class TestSearchReservationsV2:
             mock_use_case.return_value = mock_instance
 
             result = await search_reservations_v2(
-                page=0, size=10, search="John", status="Confirmed", in_house_today=1
+                api_client=mock_api_client,
+                page=0,
+                size=10,
+                search="John",
+                status="Confirmed",
+                in_house_today=1,
             )
 
             assert result == {"reservations": []}
@@ -56,54 +67,34 @@ class TestSearchReservationsV2:
     @pytest.mark.asyncio
     async def test_validation_errors(self):
         """Probar errores de validación"""
+        mock_api_client = AsyncMock()
         with pytest.raises(APIValidationError):
-            await search_reservations_v2(page=-1, size=10)  # Página inválida
+            await search_reservations_v2(
+                api_client=mock_api_client, page=-1, size=10
+            )  # Página inválida
 
     @pytest.mark.asyncio
     async def test_size_validation(self):
         """Probar validación de tamaño"""
+        mock_api_client = AsyncMock()
         with pytest.raises(APIValidationError):
-            await search_reservations_v2(page=0, size=101)  # Tamaño inválido
+            await search_reservations_v2(
+                api_client=mock_api_client, page=0, size=101
+            )  # Tamaño inválido
 
     @pytest.mark.asyncio
     async def test_total_results_validation(self):
         """Probar validación de total de resultados"""
+        mock_api_client = AsyncMock()
         with pytest.raises(APIValidationError):
-            await search_reservations_v2(page=1000, size=10)  # Página que excede límite
+            await search_reservations_v2(
+                api_client=mock_api_client, page=1000, size=10
+            )  # Página que excede límite
 
     @pytest.mark.asyncio
     async def test_scroll_parameter(self):
         """Probar parámetro scroll"""
-        with patch(
-            "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
-        ) as mock_use_case:
-            mock_instance = AsyncMock()
-            mock_instance.execute.return_value = {"reservations": []}
-            mock_use_case.return_value = mock_instance
-
-            result = await search_reservations_v2(page=0, size=10, scroll="1")
-
-            assert result == {"reservations": []}
-            mock_instance.execute.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_folio_id_parameter(self):
-        """Probar parámetro folio_id"""
-        with patch(
-            "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
-        ) as mock_use_case:
-            mock_instance = AsyncMock()
-            mock_instance.execute.return_value = {"reservations": []}
-            mock_use_case.return_value = mock_instance
-
-            result = await search_reservations_v2(page=0, size=10, folio_id="12345")
-
-            assert result == {"reservations": []}
-            mock_instance.execute.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_date_filters(self):
-        """Probar filtros de fecha"""
+        mock_api_client = AsyncMock()
         with patch(
             "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
         ) as mock_use_case:
@@ -112,7 +103,47 @@ class TestSearchReservationsV2:
             mock_use_case.return_value = mock_instance
 
             result = await search_reservations_v2(
-                page=0, size=10, arrival_start="2024-01-01", arrival_end="2024-01-31"
+                api_client=mock_api_client, page=0, size=10, scroll="1"
+            )
+
+            assert result == {"reservations": []}
+            mock_instance.execute.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_folio_id_parameter(self):
+        """Probar parámetro folio_id"""
+        mock_api_client = AsyncMock()
+        with patch(
+            "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
+        ) as mock_use_case:
+            mock_instance = AsyncMock()
+            mock_instance.execute.return_value = {"reservations": []}
+            mock_use_case.return_value = mock_instance
+
+            result = await search_reservations_v2(
+                api_client=mock_api_client, page=0, size=10, folio_id="12345"
+            )
+
+            assert result == {"reservations": []}
+            mock_instance.execute.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_date_filters(self):
+        """Probar filtros de fecha"""
+        mock_api_client = AsyncMock()
+        with patch(
+            "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
+        ) as mock_use_case:
+            mock_instance = AsyncMock()
+            mock_instance.execute.return_value = {"reservations": []}
+            mock_use_case.return_value = mock_instance
+
+            result = await search_reservations_v2(
+                api_client=mock_api_client,
+                page=0,
+                size=10,
+                arrival_start="2024-01-01",
+                arrival_end="2024-01-31",
             )
 
             assert result == {"reservations": []}
@@ -121,6 +152,7 @@ class TestSearchReservationsV2:
     @pytest.mark.asyncio
     async def test_id_filters(self):
         """Probar filtros de ID"""
+        mock_api_client = AsyncMock()
         with patch(
             "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
         ) as mock_use_case:
@@ -129,7 +161,11 @@ class TestSearchReservationsV2:
             mock_use_case.return_value = mock_instance
 
             result = await search_reservations_v2(
-                page=0, size=10, unit_id="123", contact_id="456"
+                api_client=mock_api_client,
+                page=0,
+                size=10,
+                unit_id="123",
+                contact_id="456",
             )
 
             assert result == {"reservations": []}
@@ -138,6 +174,7 @@ class TestSearchReservationsV2:
     @pytest.mark.asyncio
     async def test_error_handling(self):
         """Probar manejo de errores"""
+        mock_api_client = AsyncMock()
         with patch(
             "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.SearchReservationsUseCase"
         ) as mock_use_case:
@@ -146,7 +183,9 @@ class TestSearchReservationsV2:
             mock_use_case.return_value = mock_instance
 
             with pytest.raises(Exception, match="API Error"):
-                await search_reservations_v2(page=0, size=10)
+                await search_reservations_v2(
+                    api_client=mock_api_client, page=0, size=10
+                )
 
     def test_field_info_handling(self):
         """Probar manejo de FieldInfo objects"""
