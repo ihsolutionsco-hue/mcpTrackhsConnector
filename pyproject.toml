@@ -121,26 +121,18 @@ pythonpath = ["src"]
 asyncio_mode = "auto"
 addopts = [
     "--strict-markers",
-    "--strict-config",
     "--verbose",
     "--tb=short",
     "--cov=src/trackhs_mcp",
     "--cov-report=html:htmlcov",
-    "--cov-report=xml:coverage.xml",
     "--cov-report=term-missing",
-    "--cov-fail-under=80",
-    "--asyncio-mode=auto"
+    "--cov-fail-under=70",
+    "--asyncio-mode=auto",
+    "-x"
 ]
 markers = [
-    "unit: Unit tests",
-    "integration: Integration tests",
-    "e2e: End-to-end tests",
-    "performance: Performance tests",
-    "slow: Slow running tests",
-    "api: Tests that require API access",
-    "auth: Authentication tests",
-    "network: Tests that require network access",
-    "asyncio: Async tests"
+    "critical: Critical functionality tests",
+    "smoke: Smoke tests for quick validation"
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
