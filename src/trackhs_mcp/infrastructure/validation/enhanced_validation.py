@@ -127,7 +127,8 @@ def validate_enum_parameter(
                     raise ValidationError(
                         f"❌ Invalid {param_name} '{v}'.\n"
                         f"✅ Valid values: {', '.join(valid_values)}\n"
-                        f"💡 Example: {param_name}='{valid_values[0]}' or {param_name}='{valid_values[0]},{valid_values[1]}'"
+                        f"💡 Example: {param_name}='{valid_values[0]}' or "
+                        f"{param_name}='{valid_values[0]},{valid_values[1]}'"
                     )
         else:
             if value not in valid_values:
