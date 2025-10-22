@@ -1,0 +1,107 @@
+{
+  "timestamp": "2024-01-15T10:00:00Z",
+  "analysis": {
+    "documentation": {
+      "page_limits": {
+        "error": "Page limits not found in documentation"
+      },
+      "size_limits": {
+        "type": "integer",
+        "description": "Size of page - Limited to 10k total results (page * size)"
+      },
+      "status_values": [],
+      "sort_columns": [
+        "asc",
+        "desc"
+      ],
+      "scroll_behavior": {
+        "description": "Elasticsearch scrolling, start with `1` and then string to continue scrolling. sorting is disabled though in that case\\nuse `_links.next` to request the next page of scrolling data\\n",
+        "type": "integer|string"
+      },
+      "date_formats": [
+        "ISO 8601 date-time format"
+      ]
+    },
+    "implementation": {
+      "tool_implementation": {
+        "page": {
+          "default": 1,
+          "min": 0,
+          "max": 10000
+        },
+        "size": {
+          "default": 10,
+          "min": 1,
+          "max": 1000
+        },
+        "scroll_validation": true,
+        "altconf_mapping": true
+      },
+      "use_case_validation": {
+        "page_min": 1,
+        "size_min": 1,
+        "size_max": 100
+      },
+      "domain_entities": {
+        "status_enum": [
+          "itemize",
+          "rent",
+          "tax",
+          "service"
+        ]
+      }
+    }
+  },
+  "discrepancies": [
+    {
+      "type": "size_limits",
+      "description": "Different size limits in tool vs use case",
+      "tool_max": 1000,
+      "usecase_max": 100,
+      "severity": "medium"
+    },
+    {
+      "type": "status_values",
+      "description": "Status values differ between documentation and implementation",
+      "doc_status": [],
+      "impl_status": [
+        "itemize",
+        "rent",
+        "tax",
+        "service"
+      ],
+      "severity": "medium"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "high",
+      "category": "pagination",
+      "title": "Standardize page indexing",
+      "description": "Determine if page should be 0-based or 1-based and apply consistently",
+      "files": [
+        "src/trackhs_mcp/infrastructure/mcp/search_reservations_v2.py",
+        "src/trackhs_mcp/application/use_cases/search_reservations.py"
+      ]
+    },
+    {
+      "priority": "medium",
+      "category": "validation",
+      "title": "Unify size limits",
+      "description": "Ensure size limits are consistent across tool and use case",
+      "files": [
+        "src/trackhs_mcp/infrastructure/mcp/search_reservations_v2.py",
+        "src/trackhs_mcp/application/use_cases/search_reservations.py"
+      ]
+    },
+    {
+      "priority": "low",
+      "category": "documentation",
+      "title": "Document altConf mapping",
+      "description": "Add comments explaining why altConf is mapped to altCon",
+      "files": [
+        "src/trackhs_mcp/infrastructure/mcp/search_reservations_v2.py"
+      ]
+    }
+  ]
+}

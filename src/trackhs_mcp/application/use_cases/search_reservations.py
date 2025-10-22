@@ -46,8 +46,8 @@ class SearchReservationsUseCase:
 
     def _validate_params(self, params: SearchReservationsParams) -> None:
         """Validar parámetros de entrada"""
-        if params.page and params.page < 1:
-            raise ValidationError("Page debe ser mayor a 0")
+        if params.page and params.page < 0:
+            raise ValidationError("Page debe ser mayor o igual a 0 (0-based indexing)")
 
         if params.size and (params.size < 1 or params.size > 100):
             raise ValidationError("Size debe estar entre 1 y 100")

@@ -10,8 +10,12 @@ from pydantic import BaseModel, Field
 class PaginationParams(BaseModel):
     """Parámetros de paginación"""
 
-    page: Optional[int] = Field(default=1, ge=0, description="Número de página")
-    size: Optional[int] = Field(default=3, ge=1, le=5, description="Tamaño de página")
+    page: Optional[int] = Field(
+        default=0, ge=0, description="Número de página (0-based)"
+    )
+    size: Optional[int] = Field(
+        default=10, ge=1, le=100, description="Tamaño de página"
+    )
     sort_column: Optional[str] = Field(default="id", description="Columna para ordenar")
     sort_direction: Optional[str] = Field(
         default="asc", pattern="^(asc|desc)$", description="Dirección de ordenamiento"

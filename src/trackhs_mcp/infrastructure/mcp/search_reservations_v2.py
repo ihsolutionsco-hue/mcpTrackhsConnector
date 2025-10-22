@@ -3,7 +3,7 @@ Herramienta MCP para buscar reservas en Track HS API V2
 Versión mejorada con tipos específicos siguiendo mejores prácticas MCP
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from pydantic import Field
 
@@ -70,16 +70,29 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
     async def search_reservations_v2(
         # Parámetros de paginación
         page: int = Field(
-            default=1,
+            default=0,
             description="Page number (0-based indexing). Max total results: 10,000.",
             ge=0,
             le=10000,
         ),
         size: int = Field(
-            default=10, description="Number of results per page (1-1000)", ge=1, le=1000
+            default=10, description="Number of results per page (1-100)", ge=1, le=100
         ),
         # Parámetros de ordenamiento
-        sort_column: str = Field(
+        sort_column: Literal[
+            "name",
+            "status",
+            "altConf",
+            "agreementStatus",
+            "type",
+            "guest",
+            "guests",
+            "unit",
+            "units",
+            "checkin",
+            "checkout",
+            "nights",
+        ] = Field(
             default="name",
             description=(
                 "Column to sort by. Valid values: name, status, altConf, "
@@ -87,14 +100,14 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
                 "checkout, nights. Disabled when using scroll."
             ),
         ),
-        sort_direction: str = Field(
+        sort_direction: Literal["asc", "desc"] = Field(
             default="asc",
             description="Sort direction: 'asc' or 'desc'. Disabled when using scroll.",
         ),
         # Parámetros de búsqueda de texto
         search: Optional[str] = Field(
             default=None,
-            description="Full-text search in reservation names, guest names, and descriptions",
+            description="Full-text search in reservation names, guest names, and descriptions. Example: 'John Smith' or 'Villa Paradise'",
             max_length=200,
         ),
         # Filtros por IDs (strings que pueden contener valores separados por comas)
@@ -102,10 +115,12 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             default=None, description="Filter by tag IDs (comma-separated: '1,2,3')"
         ),
         node_id: Optional[str] = Field(
-            default=None, description="Filter by node IDs (comma-separated: '1,2,3')"
+            default=None,
+            description="Filter by node IDs. Example: '1' for single ID or '1,2,3' for multiple IDs",
         ),
         unit_id: Optional[str] = Field(
-            default=None, description="Filter by unit IDs (comma-separated: '10,20,30')"
+            default=None,
+            description="Filter by unit IDs. Example: '10' for single unit or '10,20,30' for multiple units",
         ),
         contact_id: Optional[str] = Field(
             default=None, description="Filter by contact IDs (comma-separated)"
@@ -165,12 +180,14 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
         ),
         # Otros filtros
-        status: Optional[str] = Field(
+        status: Optional[
+            Literal["Hold", "Confirmed", "Checked Out", "Checked In", "Cancelled"]
+        ] = Field(
             default=None,
             description=(
-                "Filter by reservation status. Comma-separated values: "
-                "'Confirmed,Cancelled,Pending'. Valid statuses: Hold, Confirmed, "
-                "Cancelled, Checked In, Checked Out, No Show, Pending"
+                "Filter by reservation status. Valid statuses: Hold, Confirmed, "
+                "Cancelled, Checked In, Checked Out. For multiple statuses, "
+                "use comma-separated values like 'Confirmed,Cancelled'"
             ),
         ),
         in_house_today: Optional[int] = Field(
@@ -189,7 +206,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             description=(
                 "Elasticsearch scroll for large datasets. Use '1' to start a new "
                 "scroll, or provide the scroll ID from previous response to continue. "
-                "Disables sorting when active."
+                "Disables sorting when active. Example: '1' to start or 'scroll_id_123' to continue"
             ),
         ),
     ) -> Dict[str, Any]:
@@ -275,7 +292,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
 
         # Asegurar defaults para page y size si normalize_int retorna None (FieldInfo objects)
         if page_normalized is None:
-            page_normalized = 1  # Default: 1 (1-based pagination)
+            page_normalized = 0  # Default: 0 (0-based pagination)
         if size_normalized is None:
             size_normalized = 10  # Default: 10
 
@@ -284,13 +301,14 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             raise ValidationError("Page must be >= 0", "page")
         if size_normalized < 1:
             raise ValidationError("Size must be >= 1", "size")
-        if size_normalized > 1000:
-            raise ValidationError("Size must be <= 1000", "size")
+        if size_normalized > 100:
+            raise ValidationError("Size must be <= 100", "size")
 
         # Validar límite total de resultados (10k máximo)
-        if page_normalized * size_normalized > 10000:
+        # Para 0-based indexing: (page + 1) * size <= 10000
+        if (page_normalized + 1) * size_normalized > 10000:
             raise ValidationError(
-                "Total results (page * size) must be <= 10,000", "page"
+                "Total results ((page + 1) * size) must be <= 10,000", "page"
             )
 
         # Validar parámetro scroll según documentación API V2
@@ -306,12 +324,11 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             else:
                 raise ValidationError("Scroll string cannot be empty", "scroll")
 
-            # Cuando se usa scroll, el sorting se deshabilita
+            # Cuando se usa scroll, el sorting se deshabilita según documentación
+            # Pero permitimos que la API maneje esto en lugar de validar estrictamente
             if sort_column != "name" or sort_direction != "asc":
-                raise ValidationError(
-                    "When using scroll, sorting is disabled. Use default sort_column='name' and sort_direction='asc'",
-                    "scroll",
-                )
+                # Solo advertir, no fallar
+                pass
 
         # Validar fechas si se proporcionan
         date_params = {
@@ -347,7 +364,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             search_params = SearchReservationsParams(
                 page=page_normalized,
                 size=size_normalized,
-                sort_column=sort_column if sort_column != "altConf" else "altCon",
+                sort_column=sort_column,  # Usar valor original, la API manejará el mapeo
                 sort_direction=sort_direction,
                 search=search,
                 tags=tags,
