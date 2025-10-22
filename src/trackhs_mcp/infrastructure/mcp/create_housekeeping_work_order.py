@@ -51,11 +51,6 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             min_length=10,
             max_length=20,
         ),
-        status: str = Field(
-            description="Work order status. Valid: pending, not-started, in-progress, completed, processed, cancelled, exception",
-            min_length=1,
-            max_length=50,
-        ),
         unit_id: Optional[int] = Field(
             default=None,
             description="Unit ID (positive integer). Required if unit_block_id not provided. Example: 123",
@@ -75,16 +70,6 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             description="Clean type ID (positive integer). Required if is_inspection not provided. Example: 5",
             ge=1,
         ),
-        time_estimate: Optional[float] = Field(
-            default=None,
-            description="Estimated time in minutes (must be >= 0). Example: 60.0",
-            ge=0.0,
-        ),
-        actual_time: Optional[float] = Field(
-            default=None,
-            description="Actual time spent in minutes (must be >= 0). Example: 75.5",
-            ge=0.0,
-        ),
         user_id: Optional[int] = Field(
             default=None,
             description="Assigned user ID (positive integer). Example: 789",
@@ -98,14 +83,11 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             description="Related reservation ID (positive integer). Example: 987654",
             ge=1,
         ),
-        is_turn: Optional[int] = Field(
-            default=None, description="Is turn flag (0=no, 1=yes)", ge=0, le=1
+        is_turn: Optional[bool] = Field(
+            default=None, description="Is turn flag (true=yes, false=no)"
         ),
-        is_manual: Optional[int] = Field(
-            default=None, description="Is manual flag (0=no, 1=yes)", ge=0, le=1
-        ),
-        charge_owner: Optional[int] = Field(
-            default=None, description="Charge owner flag (0=no, 1=yes)", ge=0, le=1
+        charge_owner: Optional[bool] = Field(
+            default=None, description="Charge owner flag (true=yes, false=no)"
         ),
         comments: Optional[str] = Field(
             default=None, description="Additional comments or notes", max_length=2000
@@ -128,13 +110,6 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             if not is_valid_iso8601_date(scheduled_at):
                 raise ValidationError(
                     "scheduled_at debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ)"
-                )
-
-            # Validar estado
-            valid_statuses = [s.value for s in HousekeepingWorkOrderStatus]
-            if status not in valid_statuses:
-                raise ValidationError(
-                    f"status debe ser uno de: {', '.join(valid_statuses)}"
                 )
 
             # Validar campos de unidad (exactamente uno requerido)
@@ -178,16 +153,6 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
                 )
 
             # Normalizar campos opcionales
-            time_estimate_norm = (
-                normalize_string_to_float(time_estimate)
-                if time_estimate is not None
-                else None
-            )
-            actual_time_norm = (
-                normalize_string_to_float(actual_time)
-                if actual_time is not None
-                else None
-            )
             user_id_norm = (
                 normalize_string_to_int(user_id) if user_id is not None else None
             )
@@ -202,9 +167,6 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             is_turn_norm = (
                 normalize_string_to_bool(is_turn) if is_turn is not None else None
             )
-            is_manual_norm = (
-                normalize_string_to_bool(is_manual) if is_manual is not None else None
-            )
             charge_owner_norm = (
                 normalize_string_to_bool(charge_owner)
                 if charge_owner is not None
@@ -213,10 +175,6 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             cost_norm = normalize_string_to_float(cost) if cost is not None else None
 
             # Validar valores numéricos
-            if time_estimate_norm is not None and time_estimate_norm < 0:
-                raise ValidationError("time_estimate debe ser >= 0")
-            if actual_time_norm is not None and actual_time_norm < 0:
-                raise ValidationError("actual_time debe ser >= 0")
             if cost_norm is not None and cost_norm < 0:
                 raise ValidationError("cost debe ser >= 0")
 
@@ -233,18 +191,14 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             # Crear parámetros del use case
             params = CreateHousekeepingWorkOrderParams(
                 scheduled_at=scheduled_at,
-                status=HousekeepingWorkOrderStatus(status),
                 unit_id=unit_id_norm,
                 unit_block_id=unit_block_id_norm,
                 is_inspection=is_inspection_norm,
                 clean_type_id=clean_type_id_norm,
-                time_estimate=time_estimate_norm,
-                actual_time=actual_time_norm,
                 user_id=user_id_norm,
                 vendor_id=vendor_id_norm,
                 reservation_id=reservation_id_norm,
                 is_turn=is_turn_norm,
-                is_manual=is_manual_norm,
                 charge_owner=charge_owner_norm,
                 comments=comments,
                 cost=cost_norm,

@@ -77,11 +77,6 @@ class CreateHousekeepingWorkOrderUseCase:
         """
         request_data = {
             "scheduledAt": params.scheduled_at,
-            "status": (
-                params.status.value
-                if hasattr(params.status, "value")
-                else str(params.status)
-            ),
         }
 
         # Agregar campos de unidad (exactamente uno)
@@ -97,10 +92,6 @@ class CreateHousekeepingWorkOrderUseCase:
             request_data["cleanTypeId"] = params.clean_type_id
 
         # Agregar campos opcionales
-        if params.time_estimate is not None:
-            request_data["timeEstimate"] = params.time_estimate
-        if params.actual_time is not None:
-            request_data["actualTime"] = params.actual_time
         if params.user_id is not None:
             request_data["userId"] = params.user_id
         if params.vendor_id is not None:
@@ -109,8 +100,6 @@ class CreateHousekeepingWorkOrderUseCase:
             request_data["reservationId"] = params.reservation_id
         if params.is_turn is not None:
             request_data["isTurn"] = params.is_turn
-        if params.is_manual is not None:
-            request_data["isManual"] = params.is_manual
         if params.charge_owner is not None:
             request_data["chargeOwner"] = params.charge_owner
         if params.comments:

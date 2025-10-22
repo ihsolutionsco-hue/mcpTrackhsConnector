@@ -1297,44 +1297,38 @@
         "is_turn": {
           "anyOf": [
             {
-              "maximum": 1,
-              "minimum": 0,
-              "type": "integer"
+              "type": "boolean"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Is turn flag (0=no, 1=yes)"
+          "description": "Is turn flag (true=yes, false=no)"
         },
         "is_manual": {
           "anyOf": [
             {
-              "maximum": 1,
-              "minimum": 0,
-              "type": "integer"
+              "type": "boolean"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Is manual flag (0=no, 1=yes)"
+          "description": "Is manual flag (true=yes, false=no)"
         },
         "charge_owner": {
           "anyOf": [
             {
-              "maximum": 1,
-              "minimum": 0,
-              "type": "integer"
+              "type": "boolean"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "description": "Charge owner flag (0=no, 1=yes)"
+          "description": "Charge owner flag (true=yes, false=no)"
         },
         "comments": {
           "anyOf": [

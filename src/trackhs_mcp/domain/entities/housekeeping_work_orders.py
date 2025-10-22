@@ -31,9 +31,6 @@ class CreateHousekeepingWorkOrderParams(BaseModel):
     scheduled_at: str = Field(
         ..., alias="scheduledAt", description="Fecha programada en formato ISO 8601"
     )
-    status: HousekeepingWorkOrderStatus = Field(
-        ..., description="Estado de la orden de trabajo"
-    )
 
     # Campos condicionales - exactamente uno de unit_id o unit_block_id
     unit_id: Optional[int] = Field(
@@ -52,12 +49,6 @@ class CreateHousekeepingWorkOrderParams(BaseModel):
     )
 
     # Campos opcionales
-    time_estimate: Optional[float] = Field(
-        None, alias="timeEstimate", ge=0, description="Tiempo estimado en minutos"
-    )
-    actual_time: Optional[float] = Field(
-        None, alias="actualTime", ge=0, description="Tiempo real en minutos"
-    )
     user_id: Optional[int] = Field(
         None, alias="userId", gt=0, description="ID del usuario asignado"
     )
@@ -68,9 +59,6 @@ class CreateHousekeepingWorkOrderParams(BaseModel):
         None, alias="reservationId", gt=0, description="ID de la reserva"
     )
     is_turn: Optional[bool] = Field(None, alias="isTurn", description="Si es un turno")
-    is_manual: Optional[bool] = Field(
-        None, alias="isManual", description="Si es manual"
-    )
     charge_owner: Optional[bool] = Field(
         None, alias="chargeOwner", description="Si se cobra al propietario"
     )
