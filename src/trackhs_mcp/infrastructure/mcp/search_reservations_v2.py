@@ -327,7 +327,7 @@ async def search_reservations_v2(
     - ID Filters: node_id, unit_id, contact_id, travel_agent_id, campaign_id, user_id, unit_type_id, rate_type_id, reservation_type_id
     - Date Filters: booked_start, booked_end, arrival_start, arrival_end, departure_start, departure_end, updated_since
     - Status Filters: status (single or comma-separated), in_house_today
-    - Other: group_id, checkin_office_id, folio_id, scroll
+    - Other: group_id, checkin_office_id, scroll
 
     📅 DATE FORMAT REQUIREMENTS:
     - Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15')
@@ -397,8 +397,6 @@ async def search_reservations_v2(
         status = None
     if type(scroll).__name__ == "FieldInfo":
         scroll = None
-    if type(folio_id).__name__ == "FieldInfo":
-        folio_id = None
 
     # Normalizar parámetros numéricos para backward compatibility
     # (en caso de que vengan como string de otros sistemas)
