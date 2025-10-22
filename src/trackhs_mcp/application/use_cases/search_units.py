@@ -62,8 +62,8 @@ class SearchUnitsUseCase:
 
         if params.size:
             size_val = int(params.size) if isinstance(params.size, str) else params.size
-            if size_val < 1 or size_val > 5:
-                raise ValidationError("Size debe estar entre 1 y 5")
+            if size_val < 1 or size_val > 25:
+                raise ValidationError("Size debe estar entre 1 y 25")
 
         # Validar límite total de resultados (10k máximo)
         # La API usa paginación 1-based, calculamos el total de resultados directamente
