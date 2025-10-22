@@ -36,9 +36,11 @@ class SearchReservationsUseCase:
         # Construir parámetros de la petición
         request_params = self._build_request_params(params)
 
-        # Realizar petición a la API
-        response = await self.api_client.get(
-            "/v2/pms/reservations", params=request_params
+        # Realizar petición a la API con timeout extendido para búsquedas complejas
+        from ...domain.value_objects.request import RequestOptions
+        options = RequestOptions(method="GET")
+        response = await self.api_client.search_request(
+            "/v2/pms/reservations", options=options, params=request_params
         )
 
         # Procesar respuesta

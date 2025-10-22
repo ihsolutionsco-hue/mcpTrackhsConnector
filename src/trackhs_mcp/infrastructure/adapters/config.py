@@ -18,7 +18,8 @@ class TrackHSConfig(BaseTrackHSConfig):
     base_url: str
     username: str
     password: str
-    timeout: int = 30
+    timeout: int = 60  # Aumentado para búsquedas complejas
+    search_timeout: int = 120  # Timeout específico para búsquedas complejas
 
     @classmethod
     def from_env(cls) -> "TrackHSConfig":
@@ -26,7 +27,8 @@ class TrackHSConfig(BaseTrackHSConfig):
         base_url = os.getenv("TRACKHS_API_URL", cls.DEFAULT_URL)
         username = os.getenv("TRACKHS_USERNAME")
         password = os.getenv("TRACKHS_PASSWORD")
-        timeout = int(os.getenv("TRACKHS_TIMEOUT", "30"))
+        timeout = int(os.getenv("TRACKHS_TIMEOUT", "60"))
+        search_timeout = int(os.getenv("TRACKHS_SEARCH_TIMEOUT", "120"))
 
         # Validar que las credenciales estén configuradas
         if not username or not password:
@@ -54,7 +56,11 @@ class TrackHSConfig(BaseTrackHSConfig):
             pass
 
         return cls(
-            base_url=base_url, username=username, password=password, timeout=timeout
+            base_url=base_url, 
+            username=username, 
+            password=password, 
+            timeout=timeout,
+            search_timeout=search_timeout
         )
 
     def validate_url(self) -> bool:

@@ -18,10 +18,10 @@
     "name": "TrackHS MCP Server",
     "description": "Conector MCP para TrackHS API - IHVM Vacations",
     "version": "1.0.0",
-    "website_url": "https://github.com/your-org/MCPtrackhsConnector",
+    "website_url": "https://github.com/ihsolutionsco-hue/mcpTrackhsConnector",
     "icons": [
       {
-        "src": "https://raw.githubusercontent.com/EQUIPO/MCPtrackhsConnector/main/assets/logo.png",
+        "src": "https://raw.githubusercontent.com/ihsolutionsco-hue/mcpTrackhsConnector/main/assets/logo.png",
         "mimeType": "image/png",
         "sizes": ["48x48", "96x96", "any"]
       }
@@ -55,6 +55,7 @@
     "optional": [
       "TRACKHS_API_URL",
       "TRACKHS_TIMEOUT",
+      "TRACKHS_SEARCH_TIMEOUT",
       "FASTMCP_LOG_LEVEL",
       "FASTMCP_MASK_ERROR_DETAILS",
       "FASTMCP_STRICT_INPUT_VALIDATION"

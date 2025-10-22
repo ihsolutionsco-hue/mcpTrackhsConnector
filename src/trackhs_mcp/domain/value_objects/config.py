@@ -14,5 +14,8 @@ class TrackHSConfig(BaseModel):
     username: str = Field(..., description="Nombre de usuario para autenticación")
     password: str = Field(..., description="Contraseña para autenticación")
     timeout: Optional[int] = Field(
-        default=30, description="Timeout en segundos para las peticiones"
+        default=60, description="Timeout en segundos para las peticiones generales"
+    )
+    search_timeout: Optional[int] = Field(
+        default=120, description="Timeout en segundos para búsquedas complejas"
     )
