@@ -17,6 +17,7 @@ from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
 from ..utils.type_normalization import normalize_binary_int, normalize_int
 from ..utils.user_friendly_messages import format_date_error
+from ..utils.validation_decorator import validate_search_reservations_params
 
 
 def _parse_id_string(
@@ -442,18 +443,26 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_reservations_v2 mejorada"""
 
     # Crear una función wrapper que capture api_client en el closure
+    @validate_search_reservations_params
     async def wrapped_search_reservations_v2(
-        # Parámetros de paginación
-        page: int = Field(
+        # ===========================================
+        # PAGINATION PARAMETERS
+        # ===========================================
+        page: Union[int, str] = Field(
             default=0,
-            description="Page number (0-based indexing). Max total results: 10,000.",
+            description="Page number (0-based indexing). Max total results: 10,000. Accepts: integer or string. Maps to API parameter 'page'.",
             ge=0,
             le=10000,
         ),
-        size: int = Field(
-            default=10, description="Number of results per page (1-100)", ge=1, le=100
+        size: Union[int, str] = Field(
+            default=10, 
+            description="Number of results per page (1-100). Accepts: integer or string. Maps to API parameter 'size'.", 
+            ge=1, 
+            le=100
         ),
-        # Parámetros de ordenamiento
+        # ===========================================
+        # SORTING PARAMETERS
+        # ===========================================
         sort_column: Literal[
             "name",
             "status",
@@ -472,86 +481,104 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             description=(
                 "Column to sort by. Valid values: name, status, altConf, "
                 "agreementStatus, type, guest, guests, unit, units, checkin, "
-                "checkout, nights. Disabled when using scroll."
+                "checkout, nights. Disabled when using scroll. Maps to API parameter 'sortColumn'."
             ),
         ),
         sort_direction: Literal["asc", "desc"] = Field(
             default="asc",
-            description="Sort direction: 'asc' or 'desc'. Disabled when using scroll.",
+            description="Sort direction: 'asc' or 'desc'. Disabled when using scroll. Maps to API parameter 'sortDirection'.",
         ),
-        # Parámetros de búsqueda de texto
+        # ===========================================
+        # SEARCH PARAMETERS
+        # ===========================================
         search: Optional[str] = Field(
             default=None,
-            description="Full-text search in reservation names, guest names, and descriptions. Example: 'John Smith' or 'Villa Paradise'",
+            description="Full-text search in reservation names, guest names, and descriptions. Example: 'John Smith' or 'Villa Paradise'. Maximum 200 characters. Maps to API parameter 'search'.",
             max_length=200,
         ),
-        # Filtros por IDs (strings que pueden contener valores separados por comas)
+        # ===========================================
+        # ID FILTERS
+        # ===========================================
         tags: Optional[str] = Field(
-            default=None, description="Filter by tag IDs (comma-separated: '1,2,3')"
+            default=None, 
+            description="Filter by tag IDs (comma-separated: '1,2,3'). Maps to API parameter 'tags'."
         ),
         node_id: Optional[str] = Field(
             default=None,
-            description="Filter by node IDs. Example: '1' for single ID or '1,2,3' for multiple IDs",
+            description="Filter by node IDs (property locations). Example: '1' for single node or '1,2,3' for multiple nodes. Maps to API parameter 'nodeId'.",
         ),
         unit_id: Optional[str] = Field(
             default=None,
-            description="Filter by unit IDs. Example: '10' for single unit or '10,20,30' for multiple units",
+            description="Filter by unit IDs (specific rental units). Example: '10' for single unit or '10,20,30' for multiple units. Maps to API parameter 'unitId'.",
         ),
         contact_id: Optional[str] = Field(
-            default=None, description="Filter by contact IDs (comma-separated)"
+            default=None, 
+            description="Filter by contact IDs (guest contacts). Example: '123' for single contact or '123,456' for multiple contacts. Maps to API parameter 'contactId'."
         ),
         travel_agent_id: Optional[str] = Field(
-            default=None, description="Filter by travel agent IDs (comma-separated)"
+            default=None, 
+            description="Filter by travel agent IDs (booking agents). Example: '21' for single agent or '21,22' for multiple agents. Maps to API parameter 'travelAgentId'."
         ),
         campaign_id: Optional[str] = Field(
-            default=None, description="Filter by campaign IDs (comma-separated)"
+            default=None, 
+            description="Filter by campaign IDs (marketing campaigns). Example: '5' for single campaign or '5,6' for multiple campaigns. Maps to API parameter 'campaignId'."
         ),
         user_id: Optional[str] = Field(
-            default=None, description="Filter by user IDs (comma-separated)"
+            default=None, 
+            description="Filter by user IDs (system users). Example: '100' for single user or '100,101' for multiple users. Maps to API parameter 'userId'."
         ),
         unit_type_id: Optional[str] = Field(
-            default=None, description="Filter by unit type IDs (comma-separated)"
+            default=None, 
+            description="Filter by unit type IDs (property types). Example: '2' for single type or '2,3' for multiple types. Maps to API parameter 'unitTypeId'."
         ),
         rate_type_id: Optional[str] = Field(
-            default=None, description="Filter by rate type IDs (comma-separated)"
+            default=None, 
+            description="Filter by rate type IDs (pricing types). Example: '1' for single rate type or '1,2' for multiple rate types. Maps to API parameter 'rateTypeId'."
         ),
         reservation_type_id: Optional[str] = Field(
-            default=None, description="Filter by reservation type IDs (comma-separated)"
+            default=None, 
+            description="Filter by reservation type IDs (booking types). Example: '3' for single type or '3,4' for multiple types. Maps to API parameter 'reservationTypeId'."
         ),
-        # Filtros de fechas (ISO 8601)
+        # ===========================================
+        # DATE RANGE FILTERS
+        # ===========================================
+        # Booking date range
         booked_start: Optional[str] = Field(
             default=None,
-            description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'bookedStart'.",
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
         ),
         booked_end: Optional[str] = Field(
             default=None,
-            description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'bookedEnd'.",
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
         ),
+        # Arrival date range
         arrival_start: Optional[str] = Field(
             default=None,
-            description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'arrivalStart'.",
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
         ),
         arrival_end: Optional[str] = Field(
             default=None,
-            description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'arrivalEnd'.",
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
         ),
+        # Departure date range
         departure_start: Optional[str] = Field(
             default=None,
-            description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'departureStart'.",
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
         ),
         departure_end: Optional[str] = Field(
             default=None,
-            description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'departureEnd'.",
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
         ),
+        # Last update filter
         updated_since: Optional[str] = Field(
             default=None,
-            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ)",
+            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. Maps to API parameter 'updatedSince'.",
             pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
         ),
         # Otros filtros
@@ -565,13 +592,17 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
                 "use comma-separated values like 'Confirmed,Cancelled'"
             ),
         ),
-        in_house_today: Optional[Literal[0, 1]] = Field(
+        in_house_today: Optional[Union[int, str]] = Field(
             default=None,
-            description="Filter by in-house today (0=not in house, 1=in house)",
+            description="Filter by in-house today (0=not in house, 1=in house). Accepts: 0, 1, '0', '1'. Maps to API parameter 'inHouseToday'.",
         ),
-        group_id: Optional[int] = Field(default=None, description="Filter by group ID"),
-        checkin_office_id: Optional[int] = Field(
-            default=None, description="Filter by check-in office ID"
+        group_id: Optional[Union[int, str]] = Field(
+            default=None, 
+            description="Filter by group ID. Accepts: integer or string"
+        ),
+        checkin_office_id: Optional[Union[int, str]] = Field(
+            default=None, 
+            description="Filter by check-in office ID. Accepts: integer or string"
         ),
         folio_id: Optional[str] = Field(default=None, description="Filter by folio ID"),
         # Elasticsearch scroll para grandes conjuntos de datos

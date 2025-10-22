@@ -2,7 +2,7 @@
 Modelos base para TrackHS MCP Connector
 """
 
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -10,11 +10,11 @@ from pydantic import BaseModel, Field
 class PaginationParams(BaseModel):
     """Parámetros de paginación"""
 
-    page: Optional[int] = Field(
-        default=0, ge=0, description="Número de página (0-based)"
+    page: Optional[Union[int, str]] = Field(
+        default=0, ge=0, description="Número de página (0-based). Accepts: integer or string"
     )
-    size: Optional[int] = Field(
-        default=10, ge=1, le=100, description="Tamaño de página"
+    size: Optional[Union[int, str]] = Field(
+        default=10, ge=1, le=100, description="Tamaño de página. Accepts: integer or string"
     )
     sort_column: Optional[str] = Field(default="id", description="Columna para ordenar")
     sort_direction: Optional[str] = Field(

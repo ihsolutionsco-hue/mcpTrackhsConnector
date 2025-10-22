@@ -544,8 +544,8 @@ class SearchReservationsParams(PaginationParams, SearchParams):
         default=None,
         description="Scroll de Elasticsearch (1 para empezar, string para continuar)",
     )
-    in_house_today: Optional[Literal[0, 1]] = Field(
-        default=None, description="Filtrar por en casa hoy"
+    in_house_today: Optional[Union[int, str]] = Field(
+        default=None, description="Filtrar por en casa hoy (0=no en casa, 1=en casa). Accepts: 0, 1, '0', '1'"
     )
     status: Optional[
         Union[
@@ -553,9 +553,9 @@ class SearchReservationsParams(PaginationParams, SearchParams):
             List[str],
         ]
     ] = Field(default=None, description="Estado(s) de la reserva")
-    group_id: Optional[int] = Field(default=None, description="ID del grupo conectado")
-    checkin_office_id: Optional[int] = Field(
-        default=None, description="ID de la oficina de check-in"
+    group_id: Optional[Union[int, str]] = Field(default=None, description="ID del grupo conectado. Accepts: integer or string")
+    checkin_office_id: Optional[Union[int, str]] = Field(
+        default=None, description="ID de la oficina de check-in. Accepts: integer or string"
     )
     folio_id: Optional[str] = Field(default=None, description="ID del folio")
 
