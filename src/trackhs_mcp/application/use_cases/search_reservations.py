@@ -135,8 +135,6 @@ class SearchReservationsUseCase:
             request_params["groupId"] = params.group_id
         if params.checkin_office_id:
             request_params["checkinOfficeId"] = params.checkin_office_id
-        if params.folio_id:
-            request_params["folioId"] = params.folio_id
 
         return request_params
 
