@@ -75,6 +75,19 @@ class CreateHousekeepingWorkOrderUseCase:
         Returns:
             Diccionario con los datos para la API
         """
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        # Log de debug para ver qué está recibiendo
+        logger.error(f"DEBUG: Parámetros recibidos: {params.model_dump()}")
+        logger.error(
+            f"DEBUG: unit_id tipo: {type(params.unit_id)}, valor: {params.unit_id}"
+        )
+        logger.error(
+            f"DEBUG: reservation_id tipo: {type(params.reservation_id)}, valor: {params.reservation_id}"
+        )
+
         request_data = {
             "scheduledAt": params.scheduled_at,
         }
@@ -106,6 +119,15 @@ class CreateHousekeepingWorkOrderUseCase:
             request_data["comments"] = params.comments
         if params.cost is not None:
             request_data["cost"] = params.cost
+
+        # Log de debug para ver qué se está enviando a la API
+        logger.error(f"DEBUG: Request data final: {request_data}")
+        logger.error(
+            f"DEBUG: unitId tipo: {type(request_data.get('unitId'))}, valor: {request_data.get('unitId')}"
+        )
+        logger.error(
+            f"DEBUG: reservationId tipo: {type(request_data.get('reservationId'))}, valor: {request_data.get('reservationId')}"
+        )
 
         return request_data
 
