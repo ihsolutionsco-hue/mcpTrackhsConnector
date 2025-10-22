@@ -227,7 +227,12 @@ def create_schema_fixed_server(name: str = "TrackHS MCP Server") -> FastMCP:
         Servidor FastMCP con hook aplicado
     """
     # Crear servidor FastMCP con validación flexible para compatibilidad MCP
-    mcp_server = FastMCP(name, strict_input_validation=False)
+    # Usar try/except para compatibilidad con versiones anteriores de FastMCP
+    try:
+        mcp_server = FastMCP(name, strict_input_validation=False)
+    except TypeError:
+        # Fallback para versiones anteriores que no soportan strict_input_validation
+        mcp_server = FastMCP(name)
 
     # Aplicar hook de corrección de esquemas
     hook = apply_schema_fixer_hook(mcp_server)

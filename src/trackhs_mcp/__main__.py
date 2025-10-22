@@ -58,12 +58,21 @@ def main():
 
         # Create MCP server instance with flexible validation for MCP compatibility
         logger.info("Creando servidor MCP...")
-        mcp = FastMCP(
-            name="TrackHS MCP Server",
-            strict_input_validation=False,  # Validación flexible para compatibilidad MCP
-            mask_error_details=False,  # Mostrar detalles de error en desarrollo
-            include_fastmcp_meta=True,  # Incluir metadatos FastMCP
-        )
+        # Usar try/except para compatibilidad con versiones anteriores de FastMCP
+        try:
+            mcp = FastMCP(
+                name="TrackHS MCP Server",
+                strict_input_validation=False,  # Validación flexible para compatibilidad MCP
+                mask_error_details=False,  # Mostrar detalles de error en desarrollo
+                include_fastmcp_meta=True,  # Incluir metadatos FastMCP
+            )
+        except TypeError:
+            # Fallback para versiones anteriores que no soportan strict_input_validation
+            mcp = FastMCP(
+                name="TrackHS MCP Server",
+                mask_error_details=False,  # Mostrar detalles de error en desarrollo
+                include_fastmcp_meta=True,  # Incluir metadatos FastMCP
+            )
 
         # Register all components
         logger.info("Registrando componentes...")
