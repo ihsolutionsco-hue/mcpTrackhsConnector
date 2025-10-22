@@ -15,7 +15,9 @@ from ...domain.entities.units import SearchUnitsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
-from ..utils.type_normalization import normalize_binary_int, normalize_int
+
+# Las funciones de normalización ya no son necesarias
+# FastMCP maneja la validación automáticamente con Field constraints
 from ..utils.user_friendly_messages import format_date_error
 
 
@@ -123,86 +125,116 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         id: Optional[str] = Field(
             default=None, description="Filter by unit IDs (comma-separated: '1,2,3')"
         ),
-        # Filtros numéricos - Usar Union types según documentación FastMCP
-        calendar_id: Optional[Union[str, int]] = Field(
-            default=None, description="Filter by calendar ID (integer or string)"
+        # Filtros numéricos - Usar tipos específicos con Field constraints
+        calendar_id: Optional[int] = Field(
+            default=None, description="Filter by calendar ID (positive integer)", ge=1
         ),
-        role_id: Optional[Union[str, int]] = Field(
-            default=None, description="Filter by role ID (integer or string)"
+        role_id: Optional[int] = Field(
+            default=None, description="Filter by role ID (positive integer)", ge=1
         ),
-        # Filtros de habitaciones y baños - Usar Union types
-        bedrooms: Optional[Union[str, int]] = Field(
+        # Filtros de habitaciones y baños - Tipos específicos con constraints
+        bedrooms: Optional[int] = Field(
             default=None,
-            description="Filter by exact number of bedrooms (integer or string)",
+            description="Filter by exact number of bedrooms (non-negative integer)",
+            ge=0,
         ),
-        min_bedrooms: Optional[Union[str, int]] = Field(
+        min_bedrooms: Optional[int] = Field(
             default=None,
-            description="Filter by minimum number of bedrooms (integer or string)",
+            description="Filter by minimum number of bedrooms (non-negative integer)",
+            ge=0,
         ),
-        max_bedrooms: Optional[Union[str, int]] = Field(
+        max_bedrooms: Optional[int] = Field(
             default=None,
-            description="Filter by maximum number of bedrooms (integer or string)",
+            description="Filter by maximum number of bedrooms (non-negative integer)",
+            ge=0,
         ),
-        bathrooms: Optional[Union[str, int]] = Field(
+        bathrooms: Optional[int] = Field(
             default=None,
-            description="Filter by exact number of bathrooms (integer or string)",
+            description="Filter by exact number of bathrooms (non-negative integer)",
+            ge=0,
         ),
-        min_bathrooms: Optional[Union[str, int]] = Field(
+        min_bathrooms: Optional[int] = Field(
             default=None,
-            description="Filter by minimum number of bathrooms (integer or string)",
+            description="Filter by minimum number of bathrooms (non-negative integer)",
+            ge=0,
         ),
-        max_bathrooms: Optional[Union[str, int]] = Field(
+        max_bathrooms: Optional[int] = Field(
             default=None,
-            description="Filter by maximum number of bathrooms (integer or string)",
+            description="Filter by maximum number of bathrooms (non-negative integer)",
+            ge=0,
         ),
-        # Filtros booleanos (0/1) - Usar Union types
-        pets_friendly: Optional[Union[str, int]] = Field(
+        # Filtros booleanos (0/1) - Tipos específicos con constraints
+        pets_friendly: Optional[int] = Field(
             default=None,
-            description="Filter by pet-friendly units (0=no, 1=yes, integer or string)",
+            description="Filter by pet-friendly units (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        allow_unit_rates: Optional[Union[str, int]] = Field(
+        allow_unit_rates: Optional[int] = Field(
             default=None,
-            description="Filter by units that allow unit-specific rates (0=no, 1=yes, integer or string)",
+            description="Filter by units that allow unit-specific rates (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        computed: Optional[Union[str, int]] = Field(
+        computed: Optional[int] = Field(
             default=None,
-            description="Filter by computed units (0=no, 1=yes, integer or string)",
+            description="Filter by computed units (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        inherited: Optional[Union[str, int]] = Field(
+        inherited: Optional[int] = Field(
             default=None,
-            description="Filter by inherited units (0=no, 1=yes, integer or string)",
+            description="Filter by inherited units (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        limited: Optional[Union[str, int]] = Field(
+        limited: Optional[int] = Field(
             default=None,
-            description="Filter by limited availability units (0=no, 1=yes, integer or string)",
+            description="Filter by limited availability units (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        is_bookable: Optional[Union[str, int]] = Field(
+        is_bookable: Optional[int] = Field(
             default=None,
-            description="Filter by bookable units (0=no, 1=yes, integer or string)",
+            description="Filter by bookable units (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        include_descriptions: Optional[Union[str, int]] = Field(
+        include_descriptions: Optional[int] = Field(
             default=None,
-            description="Include unit descriptions in response (0=no, 1=yes, integer or string)",
+            description="Include unit descriptions in response (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        is_active: Optional[Union[str, int]] = Field(
+        is_active: Optional[int] = Field(
             default=None,
-            description="Filter by active units (0=inactive, 1=active, integer or string)",
+            description="Filter by active units (0=inactive, 1=active)",
+            ge=0,
+            le=1,
         ),
-        events_allowed: Optional[Union[str, int]] = Field(
+        events_allowed: Optional[int] = Field(
             default=None,
-            description="Filter by units allowing events (0=no, 1=yes, integer or string)",
+            description="Filter by units allowing events (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        smoking_allowed: Optional[Union[str, int]] = Field(
+        smoking_allowed: Optional[int] = Field(
             default=None,
-            description="Filter by units allowing smoking (0=no, 1=yes, integer or string)",
+            description="Filter by units allowing smoking (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        children_allowed: Optional[Union[str, int]] = Field(
+        children_allowed: Optional[int] = Field(
             default=None,
-            description="Filter by units allowing children (0=no, 1=yes, integer or string)",
+            description="Filter by units allowing children (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
-        is_accessible: Optional[Union[str, int]] = Field(
+        is_accessible: Optional[int] = Field(
             default=None,
-            description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes, integer or string)",
+            description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes)",
+            ge=0,
+            le=1,
         ),
         # Filtros de fechas (ISO 8601)
         arrival: Optional[str] = Field(
@@ -251,10 +283,10 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         - Flexible parameter types (accepts both string and integer for numeric/boolean filters)
 
         Parameter Types:
-        - Numeric parameters (bedrooms, bathrooms, etc.): Accept integer or string
-        - Boolean parameters (pets_friendly, is_active, etc.): Accept 0/1 as integer or string
+        - Numeric parameters (bedrooms, bathrooms, etc.): Accept integer with validation constraints
+        - Boolean parameters (pets_friendly, is_active, etc.): Accept 0/1 as integer with range validation
         - Text parameters (search, term, etc.): Accept string only
-        - Date parameters: Accept ISO 8601 formatted strings
+        - Date parameters: Accept ISO 8601 formatted strings with pattern validation
         - ID parameters: Accept integer, string, or comma-separated strings
 
         Returns:
@@ -297,70 +329,20 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         if type(unit_status).__name__ == "FieldInfo":
             unit_status = None
 
-        # Normalizar parámetros numéricos para backward compatibility
-        page_normalized = normalize_int(page, "page")
-        size_normalized = normalize_int(size, "size")
-
-        # Validar parámetros antes de aplicar defaults
-        if page_normalized is not None and page_normalized < 1:
-            raise ValidationError("Page must be >= 1", "page")
-        if size_normalized is not None and size_normalized < 1:
-            raise ValidationError("Size must be >= 1", "size")
-        if size_normalized is not None and size_normalized > 25:
-            raise ValidationError("Size must be <= 25", "size")
-
-        # Aplicar valores por defecto cuando se detectan FieldInfo objects
-        page_normalized = page_normalized or 1  # Default: 1
-        size_normalized = size_normalized or 3  # Default: 3
-        calendar_id_normalized = normalize_int(calendar_id, "calendar_id")
-        role_id_normalized = normalize_int(role_id, "role_id")
-        bedrooms_normalized = normalize_int(bedrooms, "bedrooms")
-        min_bedrooms_normalized = normalize_int(min_bedrooms, "min_bedrooms")
-        max_bedrooms_normalized = normalize_int(max_bedrooms, "max_bedrooms")
-        bathrooms_normalized = normalize_int(bathrooms, "bathrooms")
-        min_bathrooms_normalized = normalize_int(min_bathrooms, "min_bathrooms")
-        max_bathrooms_normalized = normalize_int(max_bathrooms, "max_bathrooms")
-        pets_friendly_normalized = normalize_binary_int(pets_friendly, "pets_friendly")
-        allow_unit_rates_normalized = normalize_binary_int(
-            allow_unit_rates, "allow_unit_rates"
-        )
-        computed_normalized = normalize_binary_int(computed, "computed")
-        inherited_normalized = normalize_binary_int(inherited, "inherited")
-        limited_normalized = normalize_binary_int(limited, "limited")
-        is_bookable_normalized = normalize_binary_int(is_bookable, "is_bookable")
-        include_descriptions_normalized = normalize_binary_int(
-            include_descriptions, "include_descriptions"
-        )
-        is_active_normalized = normalize_binary_int(is_active, "is_active")
-        events_allowed_normalized = normalize_binary_int(
-            events_allowed, "events_allowed"
-        )
-        smoking_allowed_normalized = normalize_binary_int(
-            smoking_allowed, "smoking_allowed"
-        )
-        children_allowed_normalized = normalize_binary_int(
-            children_allowed, "children_allowed"
-        )
-        is_accessible_normalized = normalize_binary_int(is_accessible, "is_accessible")
-
-        # Asegurar que los valores sean enteros para comparaciones
-        try:
-            page_normalized = int(page_normalized)
-            size_normalized = int(size_normalized)
-        except (ValueError, TypeError):
-            raise ValidationError("Page and size must be valid integers", "parameters")
+        # Los parámetros ya están validados por FastMCP con Field constraints
+        # No necesitamos normalización manual - FastMCP maneja la coerción automáticamente
 
         # Validar límite total de resultados (10k máximo)
-        if page_normalized * size_normalized > 10000:
+        if page * size > 10000:
             raise ValidationError(
                 "Total results (page * size) must be <= 10,000", "page"
             )
 
         # Validar rango de habitaciones
         if (
-            min_bedrooms_normalized is not None
-            and max_bedrooms_normalized is not None
-            and min_bedrooms_normalized > max_bedrooms_normalized
+            min_bedrooms is not None
+            and max_bedrooms is not None
+            and min_bedrooms > max_bedrooms
         ):
             raise ValidationError(
                 "min_bedrooms cannot be greater than max_bedrooms", "min_bedrooms"
@@ -368,9 +350,9 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
         # Validar rango de baños
         if (
-            min_bathrooms_normalized is not None
-            and max_bathrooms_normalized is not None
-            and min_bathrooms_normalized > max_bathrooms_normalized
+            min_bathrooms is not None
+            and max_bathrooms is not None
+            and min_bathrooms > max_bathrooms
         ):
             raise ValidationError(
                 "min_bathrooms cannot be greater than max_bathrooms", "min_bathrooms"
@@ -405,12 +387,12 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
 
             # La API de TrackHS usa paginación 1-based, no necesitamos conversión
             # El usuario envía page=1 para la primera página, y la API también espera page=1
-            page_for_api = page_normalized
+            page_for_api = page
 
             # Crear parámetros de búsqueda
             search_params = SearchUnitsParams(
                 page=page_for_api,
-                size=size_normalized,
+                size=size,
                 sort_column=sort_column,
                 sort_direction=sort_direction,
                 search=search,
@@ -421,26 +403,26 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
                 amenity_id=_parse_id_string(amenity_id),
                 unit_type_id=_parse_id_string(unit_type_id),
                 id=_parse_id_string(id),
-                calendar_id=calendar_id_normalized,
-                role_id=role_id_normalized,
-                bedrooms=bedrooms_normalized,
-                min_bedrooms=min_bedrooms_normalized,
-                max_bedrooms=max_bedrooms_normalized,
-                bathrooms=bathrooms_normalized,
-                min_bathrooms=min_bathrooms_normalized,
-                max_bathrooms=max_bathrooms_normalized,
-                pets_friendly=pets_friendly_normalized,
-                allow_unit_rates=allow_unit_rates_normalized,
-                computed=computed_normalized,
-                inherited=inherited_normalized,
-                limited=limited_normalized,
-                is_bookable=is_bookable_normalized,
-                include_descriptions=include_descriptions_normalized,
-                is_active=is_active_normalized,
-                events_allowed=events_allowed_normalized,
-                smoking_allowed=smoking_allowed_normalized,
-                children_allowed=children_allowed_normalized,
-                is_accessible=is_accessible_normalized,
+                calendar_id=calendar_id,
+                role_id=role_id,
+                bedrooms=bedrooms,
+                min_bedrooms=min_bedrooms,
+                max_bedrooms=max_bedrooms,
+                bathrooms=bathrooms,
+                min_bathrooms=min_bathrooms,
+                max_bathrooms=max_bathrooms,
+                pets_friendly=pets_friendly,
+                allow_unit_rates=allow_unit_rates,
+                computed=computed,
+                inherited=inherited,
+                limited=limited,
+                is_bookable=is_bookable,
+                include_descriptions=include_descriptions,
+                is_active=is_active,
+                events_allowed=events_allowed,
+                smoking_allowed=smoking_allowed,
+                children_allowed=children_allowed,
+                is_accessible=is_accessible,
                 arrival=arrival,
                 departure=departure,
                 content_updated_since=content_updated_since,
