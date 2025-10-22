@@ -82,7 +82,7 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             le=10000,
         ),
         size: int = Field(
-            default=3, description="Number of results per page (1-5)", ge=1, le=5
+            default=3, description="Number of results per page (1-25)", ge=1, le=25
         ),
         # Parámetros de ordenamiento
         sort_column: str = Field(
@@ -123,68 +123,70 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         id: Optional[str] = Field(
             default=None, description="Filter by unit IDs (comma-separated: '1,2,3')"
         ),
-        # Filtros numéricos - Aceptar strings para compatibilidad MCP
-        calendar_id: Optional[str] = Field(
+        # Filtros numéricos - Aceptar Union[int, str] para compatibilidad MCP
+        calendar_id: Optional[Union[int, str]] = Field(
             default=None, description="Filter by calendar ID"
         ),
-        role_id: Optional[str] = Field(default=None, description="Filter by role ID"),
-        # Filtros de habitaciones y baños - Aceptar strings para compatibilidad MCP
-        bedrooms: Optional[str] = Field(
+        role_id: Optional[Union[int, str]] = Field(
+            default=None, description="Filter by role ID"
+        ),
+        # Filtros de habitaciones y baños - Aceptar Union[int, str] para compatibilidad MCP
+        bedrooms: Optional[Union[int, str]] = Field(
             default=None, description="Filter by exact number of bedrooms"
         ),
-        min_bedrooms: Optional[str] = Field(
+        min_bedrooms: Optional[Union[int, str]] = Field(
             default=None, description="Filter by minimum number of bedrooms"
         ),
-        max_bedrooms: Optional[str] = Field(
+        max_bedrooms: Optional[Union[int, str]] = Field(
             default=None, description="Filter by maximum number of bedrooms"
         ),
-        bathrooms: Optional[str] = Field(
+        bathrooms: Optional[Union[int, str]] = Field(
             default=None, description="Filter by exact number of bathrooms"
         ),
-        min_bathrooms: Optional[str] = Field(
+        min_bathrooms: Optional[Union[int, str]] = Field(
             default=None, description="Filter by minimum number of bathrooms"
         ),
-        max_bathrooms: Optional[str] = Field(
+        max_bathrooms: Optional[Union[int, str]] = Field(
             default=None, description="Filter by maximum number of bathrooms"
         ),
-        # Filtros booleanos (0/1) - Aceptar strings para compatibilidad MCP
-        pets_friendly: Optional[str] = Field(
+        # Filtros booleanos (0/1) - Aceptar Union[int, str] para compatibilidad MCP
+        pets_friendly: Optional[Union[int, str]] = Field(
             default=None, description="Filter by pet-friendly units (0=no, 1=yes)"
         ),
-        allow_unit_rates: Optional[str] = Field(
+        allow_unit_rates: Optional[Union[int, str]] = Field(
             default=None,
             description="Filter by units that allow unit-specific rates (0=no, 1=yes)",
         ),
-        computed: Optional[str] = Field(
+        computed: Optional[Union[int, str]] = Field(
             default=None, description="Filter by computed units (0=no, 1=yes)"
         ),
-        inherited: Optional[str] = Field(
+        inherited: Optional[Union[int, str]] = Field(
             default=None, description="Filter by inherited units (0=no, 1=yes)"
         ),
-        limited: Optional[str] = Field(
+        limited: Optional[Union[int, str]] = Field(
             default=None,
             description="Filter by limited availability units (0=no, 1=yes)",
         ),
-        is_bookable: Optional[str] = Field(
+        is_bookable: Optional[Union[int, str]] = Field(
             default=None, description="Filter by bookable units (0=no, 1=yes)"
         ),
-        include_descriptions: Optional[str] = Field(
+        include_descriptions: Optional[Union[int, str]] = Field(
             default=None,
             description="Include unit descriptions in response (0=no, 1=yes)",
         ),
-        is_active: Optional[str] = Field(
+        is_active: Optional[Union[int, str]] = Field(
             default=None, description="Filter by active units (0=inactive, 1=active)"
         ),
-        events_allowed: Optional[str] = Field(
+        events_allowed: Optional[Union[int, str]] = Field(
             default=None, description="Filter by units allowing events (0=no, 1=yes)"
         ),
-        smoking_allowed: Optional[str] = Field(
+        smoking_allowed: Optional[Union[int, str]] = Field(
             default=None, description="Filter by units allowing smoking (0=no, 1=yes)"
         ),
-        children_allowed: Optional[str] = Field(
+        children_allowed: Optional[Union[int, str]] = Field(
             default=None, description="Filter by units allowing children (0=no, 1=yes)"
         ),
-        is_accessible: Optional[str] = Field(
+        is_accessible: Optional[Union[int, str]] = Field(
             default=None,
             description="Filter by accessible/wheelchair-friendly units (0=no, 1=yes)",
         ),
@@ -282,8 +284,8 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             raise ValidationError("Page must be >= 1", "page")
         if size_normalized is not None and size_normalized < 1:
             raise ValidationError("Size must be >= 1", "size")
-        if size_normalized is not None and size_normalized > 5:
-            raise ValidationError("Size must be <= 5", "size")
+        if size_normalized is not None and size_normalized > 25:
+            raise ValidationError("Size must be <= 25", "size")
 
         # Aplicar valores por defecto cuando se detectan FieldInfo objects
         page_normalized = page_normalized or 1  # Default: 1
