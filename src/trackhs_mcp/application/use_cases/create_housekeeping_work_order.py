@@ -147,11 +147,15 @@ class CreateHousekeepingWorkOrderUseCase:
                 import json
                 response_data = json.loads(response_data)
             except json.JSONDecodeError as e:
-                raise ValueError(f"Expected dict for API response, got string that cannot be parsed as JSON: {e}")
+                raise ValueError(
+                    f"Expected dict for API response, got string that cannot be parsed as JSON: {e}"
+                )
         
         # Validar que response_data sea un diccionario
         if not isinstance(response_data, dict):
-            raise ValueError(f"Expected dict for API response, got {type(response_data).__name__}: {response_data}")
+            raise ValueError(
+                f"Expected dict for API response, got {type(response_data).__name__}: {response_data}"
+            )
         return HousekeepingWorkOrder(
             id=response_data.get("id"),
             scheduled_at=response_data.get("scheduledAt"),
