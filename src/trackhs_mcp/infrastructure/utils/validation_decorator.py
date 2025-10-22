@@ -134,7 +134,10 @@ def validate_search_reservations_params(func: Callable) -> Callable:
     Aplica validación robusta con mensajes de error descriptivos
     y validación de tipos estricta.
     """
-    from ..validation.enhanced_validation import validate_search_reservations_parameters, ValidationError
+    from ..validation.enhanced_validation import (
+        ValidationError,
+        validate_search_reservations_parameters,
+    )
 
     async def wrapper(*args, **kwargs):
         try:
