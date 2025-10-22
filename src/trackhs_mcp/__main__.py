@@ -62,13 +62,6 @@ def main():
             name="TrackHS MCP Server",
             mask_error_details=False,  # Mostrar detalles de error en desarrollo
             include_fastmcp_meta=True,  # Incluir metadatos FastMCP
-            icons=[
-                {
-                    "src": "https://raw.githubusercontent.com/EQUIPO/MCPtrackhsConnector/main/assets/logo.png",
-                    "mimeType": "image/png",
-                    "sizes": ["48x48", "96x96", "any"],
-                }
-            ],
         )
 
         # Register all components

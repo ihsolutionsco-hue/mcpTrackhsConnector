@@ -2,8 +2,9 @@
 Tests unitarios para search_reservations.py (use case)
 """
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 from src.trackhs_mcp.application.use_cases.search_reservations import (
     SearchReservationsUseCase,

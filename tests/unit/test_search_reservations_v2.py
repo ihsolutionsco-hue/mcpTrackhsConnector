@@ -2,16 +2,17 @@
 Tests unitarios para search_reservations_v2.py
 """
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from pydantic import ValidationError
 
+from src.trackhs_mcp.domain.exceptions.api_exceptions import (
+    ValidationError as APIValidationError,
+)
 from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
     register_search_reservations_v2,
     search_reservations_v2,
-)
-from src.trackhs_mcp.domain.exceptions.api_exceptions import (
-    ValidationError as APIValidationError,
 )
 
 

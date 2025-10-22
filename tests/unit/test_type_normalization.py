@@ -2,21 +2,22 @@
 Tests unitarios para type_normalization.py
 """
 
-import pytest
 from unittest.mock import Mock
 
+import pytest
+
+from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
 from src.trackhs_mcp.infrastructure.utils.type_normalization import (
     _is_field_info,
-    normalize_int,
     normalize_binary_int,
     normalize_bool,
     normalize_float,
+    normalize_int,
     normalize_positive_int,
-    normalize_string_to_int,
-    normalize_string_to_float,
     normalize_string_to_bool,
+    normalize_string_to_float,
+    normalize_string_to_int,
 )
-from src.trackhs_mcp.domain.exceptions.api_exceptions import ValidationError
 
 
 class TestIsFieldInfo:
