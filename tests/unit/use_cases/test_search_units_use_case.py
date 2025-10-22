@@ -28,12 +28,12 @@ class TestSearchUnitsUseCase:
     async def test_execute_basic_search(self, use_case, mock_api_client):
         """Test de búsqueda básica"""
         # Arrange
-        params = SearchUnitsParams(page=0, size=25)
+        params = SearchUnitsParams(page=0, size=3)
         expected_response = {
             "_embedded": {"units": []},
             "page": 0,
             "page_count": 1,
-            "page_size": 25,
+            "page_size": 3,
             "total_items": 0,
             "_links": {},
         }
@@ -60,7 +60,7 @@ class TestSearchUnitsUseCase:
         # Arrange
         params = SearchUnitsParams(
             page=0,
-            size=10,
+            size=3,
             bedrooms=2,
             bathrooms=2,
             pets_friendly=1,
@@ -164,14 +164,14 @@ class TestSearchUnitsUseCase:
 
         # Test tamaño máximo
         with pytest.raises(Exception):  # Pydantic validation error
-            SearchUnitsParams(size=1001)
+            SearchUnitsParams(size=6)
 
     def test_validate_params_total_results_limit(self, use_case):
         """Test de validación de límite total de resultados"""
         # Arrange
         params = SearchUnitsParams(
-            page=102, size=100
-        )  # adjusted_page = 101, 101 * 100 = 10,100 resultados (excede límite)
+            page=2001, size=5
+        )  # adjusted_page = 2000, 2000 * 5 = 10,000 resultados (excede límite)
 
         # Act & Assert
         # Esta validación se hace en el caso de uso, no en Pydantic
@@ -226,7 +226,7 @@ class TestSearchUnitsUseCase:
         # Arrange
         params = SearchUnitsParams(
             page=1,
-            size=50,
+            size=3,
             sort_column="name",
             sort_direction="desc",
             search="villa",

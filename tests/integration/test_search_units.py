@@ -41,7 +41,7 @@ class TestSearchUnitsIntegration:
     async def test_search_units_basic_integration(self, use_case, mock_api_client):
         """Test de integración básica"""
         # Arrange
-        params = SearchUnitsParams(page=0, size=25)
+        params = SearchUnitsParams(page=0, size=3)
         expected_response = {
             "_embedded": {
                 "units": [
@@ -90,7 +90,7 @@ class TestSearchUnitsIntegration:
         # Arrange
         params = SearchUnitsParams(
             page=1,
-            size=50,
+            size=3,
             sort_column="name",
             sort_direction="desc",
             search="villa",
@@ -343,12 +343,12 @@ class TestSearchUnitsIntegration:
     async def test_search_units_pagination(self, use_case, mock_api_client):
         """Test de integración con paginación"""
         # Arrange
-        params = SearchUnitsParams(page=2, size=100)
+        params = SearchUnitsParams(page=2, size=5)
         expected_response = {
             "_embedded": {"units": []},
             "page": 2,
             "page_count": 10,
-            "page_size": 100,
+            "page_size": 5,
             "total_items": 1000,
             "_links": {
                 "self": {"href": "https://api.example.com/api/pms/units/?page=2"},

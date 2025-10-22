@@ -35,7 +35,7 @@ class TestSearchUnitsTypeValidation:
         # Mock response
         mock_api_client.get.return_value = {
             "data": [],
-            "pagination": {"total": 0, "page": 1, "size": 25},
+            "pagination": {"total": 0, "page": 1, "size": 3},
         }
 
         # Obtener la función registrada
@@ -46,7 +46,7 @@ class TestSearchUnitsTypeValidation:
         # IMPORTANTE: Todos los parámetros opcionales deben ser explícitamente None o tener valor
         result = await search_units_tool.fn(
             page=1,
-            size=25,
+            size=3,
             sort_column="name",
             sort_direction="asc",
             search=None,
@@ -98,7 +98,7 @@ class TestSearchUnitsTypeValidation:
         # Mock response
         mock_api_client.get.return_value = {
             "data": [],
-            "pagination": {"total": 0, "page": 1, "size": 25},
+            "pagination": {"total": 0, "page": 1, "size": 3},
         }
 
         # Obtener la función registrada
@@ -109,7 +109,7 @@ class TestSearchUnitsTypeValidation:
         # IMPORTANTE: Todos los parámetros que no se pasan deben ser explícitamente None
         result = await search_units_tool.fn(
             page=1,
-            size=25,
+            size=3,
             sort_column="name",
             sort_direction="asc",
             search=None,
@@ -161,7 +161,7 @@ class TestSearchUnitsTypeValidation:
         # Mock response
         mock_api_client.get.return_value = {
             "data": [],
-            "pagination": {"total": 0, "page": 1, "size": 25},
+            "pagination": {"total": 0, "page": 1, "size": 3},
         }
 
         # Obtener la función registrada
@@ -172,7 +172,7 @@ class TestSearchUnitsTypeValidation:
         # IMPORTANTE: Todos los parámetros deben ser explícitamente pasados
         result = await search_units_tool.fn(
             page=1,
-            size=25,
+            size=3,
             sort_column="name",
             sort_direction="asc",
             search=None,

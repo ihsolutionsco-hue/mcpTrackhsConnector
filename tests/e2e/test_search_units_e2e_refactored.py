@@ -235,7 +235,7 @@ class TestSearchUnitsE2ERefactored:
     async def test_search_with_pagination(self, setup_tool, mock_api_client):
         """Test E2E: Búsqueda con paginación"""
         # Act
-        result = await setup_tool(page=2, size=100)
+        result = await setup_tool(page=2, size=5)
 
         # Assert
         assert result is not None
@@ -244,7 +244,7 @@ class TestSearchUnitsE2ERefactored:
         call_args = mock_api_client.get.call_args
         params = call_args[1]["params"]
         assert params["page"] == 2  # page=2 (1-based) → page=2 (1-based)
-        assert params["size"] == 100
+        assert params["size"] == 5
 
     @pytest.mark.asyncio
     async def test_search_handles_api_errors_gracefully(self):
@@ -287,7 +287,7 @@ class TestSearchUnitsE2ERefactored:
         # Act - Búsqueda compleja con múltiples filtros
         result = await setup_tool(
             page=1,
-            size=25,
+            size=3,
             search="luxury",
             bedrooms=2,
             bathrooms=2,
@@ -319,7 +319,7 @@ class TestSearchUnitsE2ERefactored:
 
         # Verificar parámetros principales
         assert params["page"] == 1
-        assert params["size"] == 25
+        assert params["size"] == 3
         assert params["search"] == "luxury"
         assert params["bedrooms"] == 2
         assert params["bathrooms"] == 2

@@ -85,7 +85,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.return_value = expected_response
 
         # Act
-        result = await setup_tool(page=1, size=25)
+        result = await setup_tool(page=1, size=3)
 
         # Assert
         assert result == expected_response
@@ -126,7 +126,7 @@ class TestSearchUnitsE2E:
 
         # Act
         result = await setup_tool(
-            page=1, size=10, bedrooms=2, bathrooms=2, pets_friendly=1, is_active=1
+            page=1, size=3, bedrooms=2, bathrooms=2, pets_friendly=1, is_active=1
         )
 
         # Assert
@@ -305,7 +305,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.return_value = expected_response
 
         # Act
-        result = await setup_tool(sort_column="name", sort_direction="desc", size=25)
+        result = await setup_tool(sort_column="name", sort_direction="desc", size=3)
 
         # Assert
         assert result == expected_response
@@ -516,7 +516,7 @@ class TestSearchUnitsE2E:
         mock_api_client.get.return_value = expected_response
 
         # Act
-        result = await setup_tool(page=2, size=100)
+        result = await setup_tool(page=2, size=5)
 
         # Assert
         assert result == expected_response
@@ -545,7 +545,7 @@ class TestSearchUnitsE2E:
         with pytest.raises(
             Exception, match="Total results \\(page \\* size\\) must be <= 10,000"
         ):
-            await setup_tool(page=102, size=100)
+            await setup_tool(page=2001, size=5)
 
         # Test formato de fecha inválido
         with pytest.raises(Exception, match="Formato de fecha inválido"):
@@ -665,7 +665,7 @@ class TestSearchUnitsE2E:
         # Act - Ejecutar con todos los parámetros numéricos
         result = await setup_tool(
             page=1,
-            size=25,
+            size=3,
             calendar_id=123,
             role_id=456,
             bedrooms=2,
@@ -728,7 +728,7 @@ class TestSearchUnitsE2E:
 
         # Medir tiempo de respuesta
         start_time = time.time()
-        result = await setup_tool(page=1, size=25, bedrooms=2)
+        result = await setup_tool(page=1, size=3, bedrooms=2)
         end_time = time.time()
 
         response_time = end_time - start_time
