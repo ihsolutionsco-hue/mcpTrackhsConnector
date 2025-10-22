@@ -190,11 +190,9 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
                 "use comma-separated values like 'Confirmed,Cancelled'"
             ),
         ),
-        in_house_today: Optional[int] = Field(
+        in_house_today: Optional[Literal[0, 1]] = Field(
             default=None,
             description="Filter by in-house today (0=not in house, 1=in house)",
-            ge=0,
-            le=1,
         ),
         group_id: Optional[int] = Field(default=None, description="Filter by group ID"),
         checkin_office_id: Optional[int] = Field(
