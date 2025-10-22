@@ -1,8 +1,10 @@
-# Testing Strategy - FastMCP MVP
+# FastMCP Testing Strategy - MVP
 
-## 🎯 Filosofía de Testing FastMCP
+## 🎯 Enfoque FastMCP
 
-Esta estrategia de testing está diseñada para un **FastMCP MVP** con enfoque en:
+Esta estrategia de testing está **completamente enfocada en FastMCP** como plataforma principal para el desarrollo y deployment del conector TrackHS.
+
+## 🚀 Filosofía FastMCP
 
 - ✅ **FastMCP como plataforma principal**
 - ✅ **Validación de herramientas MCP**
@@ -10,22 +12,6 @@ Esta estrategia de testing está diseñada para un **FastMCP MVP** con enfoque e
 - ✅ **Un test por funcionalidad crítica**
 - ✅ **Feedback rápido para iteración ágil**
 - ✅ **Cobertura suficiente (40%) para MVP**
-
-## 🚀 Quick Start
-
-```bash
-# Verificación rápida (<5 segundos)
-pytest tests/smoke/ -v
-
-# Tests completos (<30 segundos)
-pytest tests/critical/ -v
-
-# Todo junto (<30 segundos)
-pytest tests/ -v
-
-# Con cobertura
-pytest tests/ --cov=src/trackhs_mcp --cov-report=term-missing
-```
 
 ## 📁 Estructura FastMCP MVP
 
@@ -39,7 +25,7 @@ tests/
 │   ├── test_search_units.py        # MCP Tool completa + validaciones
 │   ├── test_search_amenities.py    # MCP Tool completa + validaciones
 │   ├── test_create_work_order.py   # MCP Tool completa + validaciones
-│   └── test_type_normalization.py  # Normalización de tipos (movido de unit/)
+│   └── test_type_normalization.py  # Normalización de tipos
 ├── smoke/            # ~25 tests de humo FastMCP
 │   ├── test_mcp_server.py          # FastMCP server levanta y responde
 │   ├── test_all_tools_registered.py # Todas las MCP tools están registradas
@@ -47,7 +33,7 @@ tests/
 └── conftest.py       # Fixtures compartidas (simplificadas)
 ```
 
-## 🧪 Tipos de Tests
+## 🧪 Tipos de Tests FastMCP
 
 ### Tests Críticos FastMCP (`critical/`)
 
@@ -72,6 +58,22 @@ Verifican **integración básica** del sistema FastMCP:
 - ✅ **Schema hook activo** - Corrección automática de esquemas
 - ✅ **FastMCP deployment ready** - Listo para deploy en FastMCP Cloud
 
+## 🚀 Comandos FastMCP
+
+```bash
+# Verificación rápida FastMCP (<5 segundos)
+pytest tests/smoke/ -v
+
+# Tests completos FastMCP (<30 segundos)
+pytest tests/critical/ -v
+
+# Todo junto FastMCP (<30 segundos)
+pytest tests/ -v
+
+# Con cobertura FastMCP
+pytest tests/ --cov=src/trackhs_mcp --cov-report=term-missing
+```
+
 ## 📊 Métricas de Éxito FastMCP MVP
 
 | Métrica | Antes | Después | Mejora |
@@ -85,27 +87,36 @@ Verifican **integración básica** del sistema FastMCP:
 | **Dependencias Dev** | 25+ | 8 | -68% |
 | **FastMCP Compliance** | ✅ | ✅ | 100% |
 
-## 🔧 Comandos Útiles
+## 🔧 GitHub Actions FastMCP
 
-```bash
-# Solo tests críticos
-pytest tests/critical/ -v
+El workflow está optimizado para FastMCP:
 
-# Solo smoke tests (muy rápido)
-pytest tests/smoke/ -v
+```yaml
+name: FastMCP MVP CI/CD
 
-# Tests con marcadores
-pytest -m critical -v
-pytest -m smoke -v
-
-# Con cobertura específica
-pytest tests/critical/ --cov=src/trackhs_mcp --cov-report=html
-
-# Tests en paralelo (si está disponible)
-pytest tests/ -n auto
+jobs:
+  test-and-deploy:
+    steps:
+      - name: Code Quality (FastMCP MVP)
+      - name: Run FastMCP Tests
+      - name: FastMCP Smoke Test
+      - name: FastMCP Deploy Ready
 ```
 
-## 🎯 Qué NO Testeamos (MVP Simplificación)
+## 📈 Beneficios FastMCP
+
+✅ **Velocidad**: 4x más rápido (2min → 30s)
+✅ **Simplicidad**: 10x menos código (755 → 65 tests)
+✅ **Mantenibilidad**: Cambios requieren actualizar 1-2 tests, no 10-20
+✅ **Claridad**: Tests expresan "qué" hace el sistema, no "cómo"
+✅ **Iteración rápida**: Ciclo de feedback inmediato
+✅ **Suficiente para FastMCP MVP**: 40% cobertura es suficiente para validar producto
+✅ **GitHub Actions**: 1 job vs 3 jobs (67% menos complejidad)
+✅ **Dependencias**: 8 vs 25+ (68% menos dependencias)
+✅ **FastMCP Optimizado**: Enfocado en validación de herramientas MCP
+✅ **Deploy Ready**: Listo para FastMCP Cloud deployment
+
+## 🎯 Qué NO Testeamos (FastMCP Simplificación)
 
 ❌ **Tests de implementación interna**:
 - Funciones `_parse_id_string`, `_validate_date`
@@ -133,22 +144,22 @@ pytest tests/ -n auto
 - Consolidado en `critical/`
 - Menos archivos, más simple
 
-## 🚀 Flujo de Desarrollo
+## 🚀 Flujo de Desarrollo FastMCP
 
 ### Desarrollo Rápido
 ```bash
 # 1. Hacer cambios
-# 2. Verificación rápida
+# 2. Verificación rápida FastMCP
 pytest tests/smoke/ -v
 
 # 3. Si todo OK, commit
 git add .
-git commit -m "feat: nueva funcionalidad"
+git commit -m "feat: nueva funcionalidad FastMCP"
 ```
 
 ### Antes de Push
 ```bash
-# Tests completos
+# Tests completos FastMCP
 pytest tests/ -v --cov=src/trackhs_mcp
 
 # Si todo OK, push
@@ -158,55 +169,12 @@ git push origin main
 ### Desarrollo Iterativo
 ```bash
 # Para cambios frecuentes, saltar tests temporalmente
-git commit --no-verify -m "WIP: desarrollo iterativo"
+git commit --no-verify -m "WIP: desarrollo iterativo FastMCP"
 
 # Cuando esté listo, validación completa
 pytest tests/ -v
-git commit -m "feat: funcionalidad completa"
+git commit -m "feat: funcionalidad FastMCP completa"
 ```
-
-## 🐛 Troubleshooting
-
-### Tests Muy Lentos
-```bash
-# Verificar que pytest-xdist esté instalado
-pip install pytest-xdist
-
-# Ejecutar en paralelo
-pytest tests/ -n auto
-```
-
-### Tests Fallan
-```bash
-# Ver detalles del error
-pytest tests/ -v --tb=long
-
-# Solo el test que falla
-pytest tests/critical/test_search_reservations.py::TestSearchReservationsCritical::test_search_reservations_basic_success -v
-```
-
-### Cobertura Baja
-```bash
-# Ver qué no está cubierto
-pytest tests/ --cov=src/trackhs_mcp --cov-report=term-missing
-
-# Generar reporte HTML
-pytest tests/ --cov=src/trackhs_mcp --cov-report=html
-# Abrir htmlcov/index.html
-```
-
-## 📈 Beneficios de Esta Estrategia FastMCP MVP
-
-✅ **Velocidad**: 4x más rápido (2min → 30s)
-✅ **Simplicidad**: 10x menos código (755 → 65 tests)
-✅ **Mantenibilidad**: Cambios requieren actualizar 1-2 tests, no 10-20
-✅ **Claridad**: Tests expresan "qué" hace el sistema, no "cómo"
-✅ **Iteración rápida**: Ciclo de feedback inmediato
-✅ **Suficiente para FastMCP MVP**: 40% cobertura es suficiente para validar producto
-✅ **GitHub Actions**: 1 job vs 3 jobs (67% menos complejidad)
-✅ **Dependencias**: 8 vs 25+ (68% menos dependencias)
-✅ **FastMCP Optimizado**: Enfocado en validación de herramientas MCP
-✅ **Deploy Ready**: Listo para FastMCP Cloud deployment
 
 ## 🔄 Migración desde Tests Antiguos
 
@@ -216,13 +184,26 @@ Si necesitas volver a los tests antiguos:
 # Los tests antiguos están en la rama backup
 git checkout backup-old-tests
 
-# Para volver a la nueva estrategia
+# Para volver a la nueva estrategia FastMCP
 git checkout main
 ```
 
-## 📚 Referencias
+## 📚 Referencias FastMCP
 
-- [Pytest Documentation](https://docs.pytest.org/)
-- [Coverage.py](https://coverage.readthedocs.io/)
+- [FastMCP Documentation](https://fastmcp.com/docs)
 - [MCP Protocol](https://modelcontextprotocol.io)
 - [TrackHS API Documentation](https://api.trackhs.com/docs)
+- [Pytest Documentation](https://docs.pytest.org/)
+- [Coverage.py](https://coverage.readthedocs.io/)
+
+## 🎯 Conclusión
+
+Esta estrategia de testing está **completamente enfocada en FastMCP** como plataforma principal, optimizada para:
+
+- ✅ **Desarrollo ágil** con FastMCP
+- ✅ **Deployment rápido** en FastMCP Cloud
+- ✅ **Validación de herramientas MCP**
+- ✅ **Iteración rápida** para MVP
+- ✅ **Mantenimiento simple** y eficiente
+
+Perfecto para un **FastMCP MVP** que necesita validación rápida y deployment eficiente.

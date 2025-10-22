@@ -1,45 +1,21 @@
-# TrackHS MCP Connector - Development Dependencies
-# Dependencias para desarrollo y testing
+# TrackHS MCP Connector - MVP Development Dependencies
+# Dependencias mínimas para desarrollo y testing
 
-# Core dependencies
-fastmcp>=2.0.0
-httpx>=0.24.0
-pydantic>=2.0.0
-python-dotenv>=1.0.0
+# Core dependencies (ya en requirements.txt)
+# fastmcp>=2.0.0
+# httpx>=0.24.0
+# pydantic>=2.0.0
+# python-dotenv>=1.0.0
 
-# Testing dependencies
+# Testing dependencies (mínimas)
 pytest>=7.0.0
 pytest-asyncio>=0.21.0
 pytest-cov>=4.0.0
-pytest-benchmark>=4.0.0
-pytest-mock>=3.10.0
-pytest-xdist>=3.5.0  # NUEVO: Tests paralelos
 
-# Code quality dependencies
-flake8>=6.0.0
+# Code quality (esenciales)
 black>=24.8.0
 isort>=5.13.2
-mypy>=1.8.0
-bandit>=1.7.5
-safety>=2.3.2
+flake8>=6.0.0
 
-# Pre-commit and validation dependencies
-pre-commit>=3.6.0
-pyyaml>=6.0.1
-
-# Documentation dependencies
-sphinx>=6.0.0
-sphinx-rtd-theme>=1.2.0
-myst-parser>=1.0.0
-
-# Development tools
-tox>=4.0.0
+# Development tools (básicos)
 coverage>=7.0.0
-
-# Performance testing
-locust>=2.0.0
-memory-profiler>=0.60.0
-psutil>=5.9.0
-
-# Security testing
-# semgrep>=1.0.0  # No compatible con Windows - usar en CI/CD solamente

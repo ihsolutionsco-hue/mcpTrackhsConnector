@@ -114,31 +114,17 @@ exclude_lines = [
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
 pythonpath = ["src"]
 asyncio_mode = "auto"
 addopts = [
-    "--strict-markers",
     "--verbose",
     "--tb=short",
     "--cov=src/trackhs_mcp",
-    "--cov-report=html:htmlcov",
     "--cov-report=term-missing",
     "--cov-fail-under=40",
-    "--asyncio-mode=auto",
     "-x"
 ]
 markers = [
     "critical: Critical functionality tests",
     "smoke: Smoke tests for quick validation"
 ]
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning"
-]
-log_cli = false
-log_cli_level = "INFO"
-log_cli_format = "%(asctime)s [%(levelname)8s] %(name)s: %(message)s"
-log_cli_date_format = "%Y-%m-%d %H:%M:%S"

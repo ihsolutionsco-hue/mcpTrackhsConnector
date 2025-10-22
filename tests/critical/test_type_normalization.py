@@ -253,7 +253,7 @@ class TestNormalizeStringToInt:
 
     def test_invalid_strings(self):
         """Probar strings inválidos"""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             normalize_string_to_int("invalid")
 
 
@@ -272,7 +272,7 @@ class TestNormalizeStringToFloat:
 
     def test_invalid_strings(self):
         """Probar strings inválidos"""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             normalize_string_to_float("invalid")
 
 
@@ -293,5 +293,5 @@ class TestNormalizeStringToBool:
 
     def test_invalid_strings(self):
         """Probar strings inválidos"""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             normalize_string_to_bool("invalid")

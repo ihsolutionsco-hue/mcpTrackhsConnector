@@ -212,6 +212,10 @@ def normalize_bool(
         >>> normalize_bool(None, "flag")
         None
     """
+    # Detectar FieldInfo objects (cuando tests invocan funciones directamente)
+    if _is_field_info(value):
+        return None
+
     if value is None:
         return None
 
@@ -276,6 +280,10 @@ def normalize_float(
         >>> normalize_float(None, "rate")
         None
     """
+    # Detectar FieldInfo objects (cuando tests invocan funciones directamente)
+    if _is_field_info(value):
+        return None
+
     if value is None:
         return None
 
