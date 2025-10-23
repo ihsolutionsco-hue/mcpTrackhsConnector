@@ -21,8 +21,8 @@ if str(project_root) not in sys.path:
 
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from trackhs_mcp.infrastructure.tools.registry import register_all_tools
 from trackhs_mcp.infrastructure.prompts import register_all_prompts
+from trackhs_mcp.infrastructure.tools.registry import register_all_tools
 from trackhs_mcp.infrastructure.tools.resources import register_all_resources
 
 # Load environment variables
