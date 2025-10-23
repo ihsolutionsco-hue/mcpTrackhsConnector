@@ -782,8 +782,14 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         # Convertir parámetros numéricos a enteros si vienen como strings
         page_int = int(page) if isinstance(page, str) else page
         size_int = int(size) if isinstance(size, str) else size
-        group_id_int = int(group_id) if isinstance(group_id, str) and group_id is not None else group_id
-        checkin_office_id_int = int(checkin_office_id) if isinstance(checkin_office_id, str) and checkin_office_id is not None else checkin_office_id
+        group_id_int = (
+            int(group_id) if isinstance(group_id, str) and group_id is not None else group_id
+        )
+        checkin_office_id_int = (
+            int(checkin_office_id)
+            if isinstance(checkin_office_id, str) and checkin_office_id is not None
+            else checkin_office_id
+        )
 
         return await search_reservations_v2(
             api_client,
