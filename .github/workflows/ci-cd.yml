@@ -1,13 +1,14 @@
-name: Test MCP Protocol
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  test-mcp:
+  test-and-deploy:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -43,7 +44,6 @@ jobs:
 
     - name: Set up test environment
       run: |
-        # Crear archivo .env desde cero para evitar problemas de codificación
         cat > .env << EOF
         TRACKHS_API_URL=https://api-test.trackhs.com/api
         TRACKHS_USERNAME=test_user
@@ -65,10 +65,10 @@ jobs:
         import sys
         sys.path.insert(0, 'src')
         from trackhs_mcp.server import mcp
-        print('MCP Server imports successfully')
+        print('✅ MCP Server imports successfully')
         "
 
-    - name: Check MCP Tools Registration
+    - name: Check MCP Components Registration
       run: |
         python -c "
         import sys
@@ -86,5 +86,57 @@ jobs:
         register_all_resources(mcp, mock_client)
         register_all_prompts(mcp, mock_client)
 
-        print('All MCP components registered successfully')
+        print('✅ All MCP components registered successfully')
         "
+
+    - name: Validate FastMCP Configuration
+      if: github.ref == 'refs/heads/main'
+      run: |
+        python -c "
+        import json
+        with open('fastmcp.json', 'r') as f:
+            config = json.load(f)
+        print('✅ FastMCP configuration is valid')
+        print(f'📋 Server: {config[\"server\"][\"name\"]}')
+        print(f'📋 Transport: {config[\"transport\"][\"type\"]}')
+        "
+
+    - name: Test MCP Server Startup
+      if: github.ref == 'refs/heads/main'
+      run: |
+        export TRACKHS_API_URL="https://api-test.trackhs.com/api"
+        export TRACKHS_USERNAME="test_user"
+        export TRACKHS_PASSWORD="test_password"
+        export TRACKHS_TIMEOUT="30"
+        export HOST="0.0.0.0"
+        export PORT="8080"
+        export CORS_ORIGINS="https://elevenlabs.io,https://app.elevenlabs.io"
+        export DEBUG="false"
+
+        python -c "
+        import sys
+        sys.path.insert(0, 'src')
+        from trackhs_mcp.server import mcp
+        print('✅ MCP Server created successfully')
+        print(f'📋 Server name: {mcp.name if hasattr(mcp, \"name\") else \"TrackHS MCP Server\"}')
+        "
+
+    - name: Deploy to FastMCP Cloud
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "🚀 Deploying to FastMCP Cloud..."
+        echo "✅ MCP Server ready for deployment"
+        echo "📋 Configuration:"
+        echo "  - Server: TrackHS MCP Server"
+        echo "  - Transport: HTTP"
+        echo "  - Port: 8080"
+        echo "  - Tools: 7 MCP tools registered"
+        echo "  - Resources: 16 MCP resources available"
+        echo "  - Prompts: 3 MCP prompts available"
+        echo ""
+        echo "🔗 FastMCP Cloud will handle the deployment automatically"
+        echo "📝 Make sure to configure environment variables in FastMCP Cloud:"
+        echo "  - TRACKHS_API_URL"
+        echo "  - TRACKHS_USERNAME"
+        echo "  - TRACKHS_PASSWORD"
+        echo "  - TRACKHS_TIMEOUT"

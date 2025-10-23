@@ -1,294 +1,532 @@
 """
-Ejemplos de uso para la API de Units
-Proporciona ejemplos prácticos de cómo usar la herramienta search_units
+Examples resources para Units
+Ejemplos de uso para la herramienta search_units
 """
 
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ....application.ports.api_client_port import ApiClientPort
 
 
-class UnitsExamples:
-    """Ejemplos de uso para la API de Units"""
+def register_units_examples(mcp, api_client: "ApiClientPort"):
+    """Registra los ejemplos de búsqueda de unidades"""
 
-    @staticmethod
-    def get_basic_examples() -> List[Dict[str, Any]]:
-        """Ejemplos básicos de uso"""
-        return [
-            {
-                "name": "Búsqueda básica",
-                "description": "Obtener las primeras 3 unidades",
-                "parameters": {"page": 0, "size": 3},
-                "expected_result": "Lista de 25 unidades con información básica",
-            },
-            {
-                "name": "Búsqueda con ordenamiento",
-                "description": "Ordenar unidades por nombre en orden descendente",
-                "parameters": {
-                    "sort_column": "name",
-                    "sort_direction": "desc",
-                    "size": 50,
-                },
-                "expected_result": "50 unidades ordenadas por nombre (Z-A)",
-            },
-            {
-                "name": "Búsqueda por texto",
-                "description": "Buscar unidades que contengan 'villa' en nombre o descripción",
-                "parameters": {"search": "villa", "size": 10},
-                "expected_result": "Unidades que contengan 'villa' en nombre o descripción",
-            },
-        ]
+    @mcp.resource(
+        "trackhs://examples/units",
+        name="Units Examples",
+        description="Common units search examples",
+        mime_type="text/plain",
+    )
+    async def units_examples() -> str:
+        """Ejemplos de búsquedas de unidades"""
+        return """# TrackHS Units Search Examples
 
-    @staticmethod
-    def get_filtering_examples() -> List[Dict[str, Any]]:
-        """Ejemplos de filtrado"""
-        return [
-            {
-                "name": "Filtro por características físicas",
-                "description": "Buscar unidades con 2 habitaciones, 2 baños, que permitan mascotas",
-                "parameters": {
-                    "bedrooms": 2,
-                    "bathrooms": 2,
-                    "pets_friendly": 1,
-                    "is_active": 1,
-                },
-                "expected_result": "Unidades con 2 habitaciones, 2 baños, que permitan mascotas y estén activas",
-            },
-            {
-                "name": "Filtro por rango de habitaciones",
-                "description": "Buscar unidades con entre 1 y 3 habitaciones",
-                "parameters": {"min_bedrooms": 1, "max_bedrooms": 3, "is_active": 1},
-                "expected_result": "Unidades con 1-3 habitaciones activas",
-            },
-            {
-                "name": "Filtro por ubicación",
-                "description": "Buscar unidades en nodos específicos",
-                "parameters": {"node_id": "1,2,3", "is_active": 1},
-                "expected_result": "Unidades activas en los nodos 1, 2 o 3",
-            },
-            {
-                "name": "Filtro por amenidades",
-                "description": "Buscar unidades con amenidades específicas",
-                "parameters": {
-                    "amenity_id": "1,2,3",
-                    "pets_friendly": 1,
-                    "events_allowed": 1,
-                },
-                "expected_result": "Unidades con amenidades 1, 2 o 3, que permitan mascotas y eventos",
-            },
-        ]
+## ¿Qué son las Unidades?
 
-    @staticmethod
-    def get_availability_examples() -> List[Dict[str, Any]]:
-        """Ejemplos de búsqueda por disponibilidad"""
-        return [
-            {
-                "name": "Disponibilidad para fechas específicas",
-                "description": "Buscar unidades disponibles para una semana en enero",
-                "parameters": {
-                    "arrival": "2024-01-01",
-                    "departure": "2024-01-07",
-                    "is_bookable": 1,
-                },
-                "expected_result": "Unidades disponibles del 1 al 7 de enero de 2024",
-            },
-            {
-                "name": "Unidades actualizadas recientemente",
-                "description": "Buscar unidades actualizadas en los últimos 7 días",
-                "parameters": {
-                    "content_updated_since": "2024-01-01T00:00:00Z",
-                    "is_active": 1,
-                },
-                "expected_result": "Unidades activas actualizadas desde el 1 de enero de 2024",
-            },
-        ]
+Las **unidades** son propiedades individuales que se pueden reservar (casas, apartamentos, villas, etc.). TrackHS las organiza con:
 
-    @staticmethod
-    def get_advanced_examples() -> List[Dict[str, Any]]:
-        """Ejemplos avanzados"""
-        return [
-            {
-                "name": "Búsqueda compleja con múltiples filtros",
-                "description": "Buscar unidades de lujo con múltiples criterios",
-                "parameters": {
+- **Características**: Habitaciones, baños, capacidad
+- **Amenidades**: WiFi, piscina, gimnasio, etc.
+- **Disponibilidad**: Fechas libres y ocupadas
+- **Ubicación**: Nodos y oficinas locales
+- **Estado**: Limpia, sucia, ocupada, en mantenimiento
+
+## Para Principiantes - Primeros Pasos
+
+### 1. Mi Primera Búsqueda (Más Simple)
+```python
+# Obtener las primeras 3 unidades
+search_units(
+    page=1,
+    size=3
+)
+```
+**¿Qué hace?** Obtiene las primeras 3 unidades del sistema.
+**¿Cuándo usarlo?** Para ver qué unidades están disponibles.
+
+### 2. Buscar por Características Básicas
+```python
+# Buscar unidades con 2 habitaciones
+search_units(
+    bedrooms="2",
+    page=1,
+    size=10
+)
+
+# Buscar unidades con 2 baños
+search_units(
+    bathrooms="2",
+    page=1,
+    size=10
+)
+```
+**¿Qué hace?** Busca unidades por número de habitaciones o baños.
+**¿Cuándo usarlo?** Para filtrar por características básicas.
+
+### 3. Buscar Unidades Activas
+```python
+# Buscar solo unidades activas
+search_units(
+    is_active="1",
+    page=1,
+    size=10
+)
+```
+**¿Qué hace?** Busca solo unidades que están activas y disponibles.
+**¿Cuándo usarlo?** Para mostrar unidades disponibles para reservas.
+
+## Búsquedas Comunes
+
+### 4. Búsqueda por Características Detalladas
+```python
+# Unidades con 3+ habitaciones y 2+ baños
+search_units(
+    min_bedrooms="3",
+    min_bathrooms="2",
+    page=1,
+    size=20
+)
+
+# Unidades exactas: 2 habitaciones, 1 baño
+search_units(
+    bedrooms="2",
+    bathrooms="1",
+    page=1,
+    size=15
+)
+```
+**¿Qué hace?** Busca unidades con características específicas.
+**¿Cuándo usarlo?** Para encontrar unidades que cumplan requisitos específicos.
+
+### 5. Búsqueda por Amenidades
+```python
+# Unidades con WiFi
+search_units(
+    amenity_id="1",  # ID de amenidad WiFi
+    is_active="1",
+    page=1,
+    size=10
+)
+
+# Unidades con piscina
+search_units(
+    amenity_id="5",  # ID de amenidad piscina
+    is_active="1",
+    page=1,
+    size=10
+)
+```
+**¿Qué hace?** Busca unidades que tengan amenidades específicas.
+**¿Cuándo usarlo?** Para filtrar por servicios disponibles.
+
+### 6. Búsqueda por Disponibilidad
+```python
+# Unidades disponibles en fechas específicas
+search_units(
+    arrival="2024-06-15",
+    departure="2024-06-20",
+    is_active="1",
+    page=1,
+    size=10
+)
+```
+**¿Qué hace?** Busca unidades disponibles en fechas específicas.
+**¿Cuándo usarlo?** Para verificar disponibilidad en fechas de viaje.
+
+### 7. Búsqueda por Ubicación
+```python
+# Unidades en nodo específico
+search_units(
+    node_id="1",
+    is_active="1",
+    page=1,
+    size=20
+)
+
+# Unidades de tipo específico
+search_units(
+    unit_type_id="2",  # Ej: villas
+    is_active="1",
+    page=1,
+    size=15
+)
+```
+**¿Qué hace?** Busca unidades por ubicación o tipo.
+**¿Cuándo usarlo?** Para filtrar por ubicación geográfica o tipo de propiedad.
+
+### 8. Búsqueda por Estado de Limpieza
+```python
+# Unidades limpias
+search_units(
+    unit_status="clean",
+    is_active="1",
+    page=1,
+    size=10
+)
+
+# Unidades ocupadas
+search_units(
+    unit_status="occupied",
+    page=1,
+    size=10
+)
+```
+**¿Qué hace?** Busca unidades por estado de housekeeping.
+**¿Cuándo usarlo?** Para gestión de limpieza y mantenimiento.
+
+## Casos de Uso Típicos
+
+### Búsqueda para Huéspedes
+```python
+# Buscar unidades disponibles para 4 personas
+search_units(
+    min_bedrooms="2",
+    min_bathrooms="1",
+    arrival="2024-06-15",
+    departure="2024-06-20",
+    is_active="1",
+    is_bookable="1",
+    page=1,
+    size=20
+)
+```
+**¿Qué hace?** Busca unidades disponibles para huéspedes.
+**¿Cuándo usarlo?** Para mostrar opciones de alojamiento a huéspedes.
+
+### Búsqueda por Amenidades Específicas
+```python
+# Unidades con WiFi y piscina
+search_units(
+    amenity_id="1,5",  # WiFi y piscina
+    is_active="1",
+    is_bookable="1",
+    page=1,
+    size=15
+)
+
+# Unidades pet-friendly
+search_units(
+    pets_friendly="1",
+    is_active="1",
+    page=1,
+    size=10
+)
+```
+**¿Qué hace?** Busca unidades con amenidades específicas.
+**¿Cuándo usarlo?** Para filtros de búsqueda avanzados.
+
+### Búsqueda por Características de Accesibilidad
+```python
+# Unidades accesibles
+search_units(
+    is_accessible="1",
+    is_active="1",
+    page=1,
+    size=10
+)
+
+# Unidades que permiten eventos
+search_units(
+    events_allowed="1",
+    is_active="1",
+    page=1,
+    size=10
+)
+```
+**¿Qué hace?** Busca unidades con características especiales.
+**¿Cuándo usarlo?** Para necesidades específicas de accesibilidad o eventos.
+
+### Búsqueda para Administración
+```python
+# Todas las unidades (administración)
+search_units(
+    page=1,
+    size=100,
+    sort_column="name",
+    sort_direction="asc"
+)
+
+# Unidades actualizadas recientemente
+search_units(
+    updated_since="2024-01-01T00:00:00Z",
+    page=1,
+    size=50
+)
+```
+**¿Qué hace?** Obtiene unidades para administración.
+**¿Cuándo usarlo?** Para gestión y administración de propiedades.
+
+## Tabla de Referencia Rápida
+
+| Parámetro | Tipo | Descripción | Valores |
+|-----------|------|-------------|---------|
+| `page` | int | Número de página | 1, 2, 3... |
+| `size` | int | Resultados por página | 1-25 |
+| `search` | string | Búsqueda por texto | "villa", "apartment" |
+| `bedrooms` | string | Habitaciones exactas | "1", "2", "3" |
+| `min_bedrooms` | string | Mínimo de habitaciones | "2", "3" |
+| `max_bedrooms` | string | Máximo de habitaciones | "4", "5" |
+| `bathrooms` | string | Baños exactos | "1", "2" |
+| `min_bathrooms` | string | Mínimo de baños | "1", "2" |
+| `max_bathrooms` | string | Máximo de baños | "3", "4" |
+| `pets_friendly` | string | Permite mascotas | "0"=No, "1"=Sí |
+| `is_active` | string | Unidad activa | "0"=No, "1"=Sí |
+| `is_bookable` | string | Reservable | "0"=No, "1"=Sí |
+| `is_accessible` | string | Accesible | "0"=No, "1"=Sí |
+| `events_allowed` | string | Permite eventos | "0"=No, "1"=Sí |
+| `smoking_allowed` | string | Permite fumar | "0"=No, "1"=Sí |
+| `children_allowed` | string | Permite niños | "0"=No, "1"=Sí |
+| `arrival` | string | Fecha de llegada | "2024-06-15" |
+| `departure` | string | Fecha de salida | "2024-06-20" |
+| `unit_status` | string | Estado de limpieza | "clean", "dirty", "occupied" |
+| `node_id` | string | ID del nodo | "1", "2", "3" |
+| `unit_type_id` | string | ID del tipo | "1", "2", "3" |
+| `amenity_id` | string | ID de amenidad | "1", "2", "3" |
+
+## Filtros Booleanos Explicados
+
+### `pets_friendly` (Permite Mascotas)
+- **"0"**: No permite mascotas
+- **"1"**: Permite mascotas
+
+### `is_active` (Unidad Activa)
+- **"0"**: Unidad inactiva (no disponible)
+- **"1"**: Unidad activa (disponible)
+
+### `is_bookable` (Reservable)
+- **"0"**: No se puede reservar
+- **"1"**: Se puede reservar
+
+### `is_accessible` (Accesible)
+- **"0"**: No accesible para sillas de ruedas
+- **"1"**: Accesible para sillas de ruedas
+
+### `events_allowed` (Permite Eventos)
+- **"0"**: No permite eventos
+- **"1"**: Permite eventos
+
+### `smoking_allowed` (Permite Fumar)
+- **"0"**: No permite fumar
+- **"1"**: Permite fumar
+
+### `children_allowed` (Permite Niños)
+- **"0"**: No permite niños
+- **"1"**: Permite niños
+
+## Estados de Unidad
+
+| Estado | Descripción | Cuándo Aparece |
+|--------|-------------|----------------|
+| `"clean"` | Unidad limpia y lista | Después de limpieza |
+| `"dirty"` | Unidad sucia | Después de checkout |
+| `"occupied"` | Unidad ocupada | Durante estadía |
+| `"inspection"` | En inspección | Durante revisión |
+| `"inprogress"` | En mantenimiento | Durante reparaciones |
+
+## Mejores Prácticas
+
+### 1. Búsqueda Eficiente
+```python
+# Para búsquedas públicas (pocos resultados)
+search_units(
+    is_active="1",
+    is_bookable="1",
+    page=1,
+    size=10
+)
+
+# Para administración (más resultados)
+search_units(
+    page=1,
+    size=25
+)
+```
+
+### 2. Filtros Combinados
+```python
+# Combinar múltiples filtros
+search_units(
+    min_bedrooms="2",
+    min_bathrooms="1",
+    pets_friendly="1",
+    is_active="1",
+    is_bookable="1",
+    page=1,
+    size=15
+)
+```
+
+### 3. Búsqueda por Disponibilidad
+```python
+# Verificar disponibilidad en fechas específicas
+search_units(
+    arrival="2024-06-15",
+    departure="2024-06-20",
+    is_active="1",
+    is_bookable="1",
+    page=1,
+    size=20
+)
+```
+
+## Respuestas Esperadas
+
+### Respuesta Básica
+```json
+{
+  "_embedded": {
+    "units": [
+      {
+        "id": 101,
+        "name": "Villa Paradise",
+        "code": "VP001",
                     "bedrooms": 3,
-                    "min_bathrooms": 2,
-                    "pets_friendly": 1,
-                    "events_allowed": 1,
-                    "is_accessible": 1,
-                    "is_active": 1,
-                    "include_descriptions": 1,
-                    "sort_column": "name",
-                    "sort_direction": "asc",
-                },
-                "expected_result": "Unidades de lujo con 3 habitaciones, 2+ baños, accesibles, que permitan mascotas y eventos",
-            },
-            {
-                "name": "Búsqueda por estado de unidad",
-                "description": "Buscar unidades limpias y disponibles",
-                "parameters": {
-                    "unit_status": "clean",
-                    "is_bookable": 1,
-                    "is_active": 1,
-                },
-                "expected_result": "Unidades limpias, reservables y activas",
-            },
-            {
-                "name": "Búsqueda con paginación grande",
-                "description": "Obtener un gran conjunto de datos con paginación",
-                "parameters": {
-                    "page": 0,
-                    "size": 1000,
-                    "is_active": 1,
-                    "sort_column": "id",
-                    "sort_direction": "asc",
-                },
-                "expected_result": "1000 unidades activas ordenadas por ID",
-            },
+        "bathrooms": 2,
+        "maxOccupancy": 6,
+        "isActive": true,
+        "isBookable": true,
+        "petsFriendly": true,
+        "isAccessible": false,
+        "eventsAllowed": true,
+        "smokingAllowed": false,
+        "childrenAllowed": true,
+        "unitStatus": "clean",
+        "node": {
+          "id": 1,
+          "name": "Beach Resort"
+        },
+        "unitType": {
+          "id": 2,
+          "name": "Villa"
+        },
+        "amenities": [
+          {
+            "id": 1,
+            "name": "WiFi"
+          },
+          {
+            "id": 5,
+            "name": "Swimming Pool"
+          }
         ]
+      }
+    ]
+  },
+  "page": 1,
+  "page_count": 1,
+  "page_size": 10,
+  "total_items": 1
+}
+```
 
-    @staticmethod
-    def get_error_examples() -> List[Dict[str, Any]]:
-        """Ejemplos de manejo de errores"""
-        return [
-            {
-                "name": "Error de paginación",
-                "description": "Intentar acceder a una página que excede el límite",
-                "parameters": {"page": 100, "size": 100},
-                "expected_error": "Total results (page * size) must be <= 10,000",
-            },
-            {
-                "name": "Error de formato de fecha",
-                "description": "Usar formato de fecha inválido",
-                "parameters": {"arrival": "01/01/2024", "departure": "01/07/2024"},
-                "expected_error": "Invalid date format. Use ISO 8601 format.",
-            },
-            {
-                "name": "Error de valor booleano",
-                "description": "Usar valor booleano incorrecto",
-                "parameters": {"pets_friendly": True, "is_active": False},
-                "expected_error": "Boolean values must be 0 or 1",
-            },
-            {
-                "name": "Error de rango de habitaciones",
-                "description": "Mínimo mayor que máximo",
-                "parameters": {"min_bedrooms": 3, "max_bedrooms": 1},
-                "expected_error": "min_bedrooms must be <= max_bedrooms",
-            },
-        ]
-
-    @staticmethod
-    def get_performance_examples() -> List[Dict[str, Any]]:
-        """Ejemplos de optimización de rendimiento"""
-        return [
-            {
-                "name": "Búsqueda optimizada con filtros específicos",
-                "description": "Usar filtros específicos para reducir resultados",
-                "parameters": {
-                    "node_id": "1",
-                    "is_active": 1,
-                    "is_bookable": 1,
-                    "size": 50,
-                },
-                "tip": "Usar filtros específicos reduce el tiempo de respuesta",
-            },
-            {
-                "name": "Búsqueda con atributos limitados",
-                "description": "Obtener solo información básica para listados",
-                "parameters": {"limited": 1, "size": 100},
-                "tip": "Usar limited=1 para obtener solo campos básicos (id, name, longitude, latitude, isActive)",
-            },
-            {
-                "name": "Búsqueda sin descripciones",
-                "description": "Excluir descripciones para mejorar rendimiento",
-                "parameters": {"include_descriptions": 0, "size": 100},
-                "tip": "Excluir descripciones mejora el rendimiento en listados grandes",
-            },
-        ]
-
-    @staticmethod
-    def get_integration_examples() -> List[Dict[str, Any]]:
-        """Ejemplos de integración"""
-        return [
-            {
-                "name": "Integración con sistema de reservas",
-                "description": "Buscar unidades disponibles para reserva",
-                "parameters": {
-                    "arrival": "2024-01-01",
-                    "departure": "2024-01-07",
-                    "is_bookable": 1,
-                    "is_active": 1,
-                    "unit_status": "clean",
-                },
-                "use_case": "Sistema de reservas online",
-            },
-            {
-                "name": "Integración con sistema de gestión",
-                "description": "Obtener todas las unidades para gestión",
-                "parameters": {
-                    "is_active": 1,
-                    "include_descriptions": 1,
-                    "computed": 1,
-                    "inherited": 1,
-                },
-                "use_case": "Panel de administración",
-            },
-            {
-                "name": "Integración con canal de distribución",
-                "description": "Sincronizar unidades con canal externo",
-                "parameters": {
-                    "content_updated_since": "2024-01-01T00:00:00Z",
-                    "is_active": 1,
-                    "include_descriptions": 1,
-                },
-                "use_case": "Sincronización con OTAs",
-            },
-        ]
-
-    @staticmethod
-    def get_response_examples() -> List[Dict[str, Any]]:
-        """Ejemplos de respuestas"""
-        return [
-            {
-                "name": "Respuesta básica",
-                "description": "Estructura típica de respuesta",
-                "response": {
+### Respuesta con Disponibilidad
+```json
+{
                     "_embedded": {
                         "units": [
                             {
-                                "id": 7,
-                                "name": "Townhome 444",
-                                "shortName": "TH444",
-                                "unitCode": "TH444",
-                                "nodeId": 81,
-                                "bedrooms": 3,
-                                "fullBathrooms": 3,
-                                "maxOccupancy": 12,
-                                "petsFriendly": True,
-                                "maxPets": 1,
-                                "eventsAllowed": False,
-                                "smokingAllowed": False,
-                                "childrenAllowed": True,
-                                "minimumAgeLimit": 25,
-                                "isAccessible": False,
-                                "updatedAt": "2020-05-21T22:30:18-06:00",
-                            }
-                        ]
-                    },
-                    "page": 0,
-                    "page_count": 13,
-                    "page_size": 3,
-                    "total_items": 304,
-                    "_links": {
-                        "self": {
-                            "href": "https://api.example.com/api/pms/units/?page=0"
-                        },
-                        "first": {"href": "https://api.example.com/api/pms/units/"},
-                        "last": {
-                            "href": "https://api.example.com/api/pms/units/?page=12"
-                        },
-                        "next": {
-                            "href": "https://api.example.com/api/pms/units/?page=1"
-                        },
-                    },
-                },
-            }
-        ]
+        "id": 102,
+        "name": "Beach House",
+        "availability": {
+          "2024-06-15": "available",
+          "2024-06-16": "available",
+          "2024-06-17": "occupied"
+        }
+      }
+    ]
+  }
+}
+```
+
+## Errores Comunes y Soluciones
+
+### Error: "Page must be >= 1"
+```python
+# ❌ Incorrecto
+search_units(page=0)
+
+# ✅ Correcto
+search_units(page=1)
+```
+
+### Error: "Size must be between 1 and 25"
+```python
+# ❌ Incorrecto
+search_units(size=50)
+
+# ✅ Correcto
+search_units(size=10)
+```
+
+### Error: "Invalid date format"
+```python
+# ❌ Incorrecto
+search_units(arrival="06/15/2024")
+
+# ✅ Correcto
+search_units(arrival="2024-06-15")
+```
+
+### Error: "Invalid unit status"
+```python
+# ❌ Incorrecto
+search_units(unit_status="available")
+
+# ✅ Correcto
+search_units(unit_status="clean")
+```
+
+## Campos de Ordenamiento Válidos
+
+- `"id"` - Por ID numérico
+- `"name"` - Por nombre alfabético
+- `"nodeName"` - Por nombre del nodo
+- `"unitTypeName"` - Por tipo de unidad
+
+## Casos de Uso Avanzados
+
+### Búsqueda por Rango de Características
+```python
+# Unidades entre 2-4 habitaciones
+search_units(
+    min_bedrooms="2",
+    max_bedrooms="4",
+    is_active="1",
+    page=1,
+    size=20
+)
+```
+
+### Búsqueda por Múltiples Amenidades
+```python
+# Unidades con WiFi, piscina y gimnasio
+search_units(
+    amenity_id="1,5,10",  # WiFi, piscina, gimnasio
+    is_active="1",
+    page=1,
+    size=15
+)
+```
+
+### Búsqueda por Texto
+```python
+# Buscar por nombre o descripción
+search_units(
+    search="villa",
+    is_active="1",
+    page=1,
+    size=10
+)
+```
+
+### Búsqueda por Código de Unidad
+```python
+# Buscar unidad específica por código
+search_units(
+    unit_code="VP001",
+    page=1,
+    size=1
+)
+```
+"""

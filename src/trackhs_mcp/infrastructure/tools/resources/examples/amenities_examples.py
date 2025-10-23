@@ -22,100 +22,42 @@ def register_amenities_examples(mcp, api_client: "ApiClientPort"):
         """Ejemplos de búsquedas de amenidades"""
         return """# TrackHS Amenities Query Examples
 
-## Búsquedas Comunes
+## ¿Qué son las Amenidades?
 
-### 1. Búsqueda Básica
+Las **amenidades** son características y servicios que ofrece una propiedad (WiFi, piscina, gimnasio, etc.). TrackHS las organiza para:
+
+- **Filtros de búsqueda**: Los huéspedes pueden buscar propiedades por amenidades
+- **Listados públicos**: Mostrar qué servicios están disponibles
+- **Administración**: Gestionar qué amenidades están activas
+
+## Para Principiantes - Primeros Pasos
+
+### 1. Mi Primera Búsqueda (Más Simple)
 ```python
-# Obtener las primeras 25 amenidades ordenadas por 'order'
+# Obtener las primeras 25 amenidades
 search_amenities(
     page=1,
-    size=25,
-    sort_column="order",
-    sort_direction="asc"
+    size=25
 )
 ```
+**¿Qué hace?** Obtiene las primeras 25 amenidades del sistema.
+**¿Cuándo usarlo?** Para ver qué amenidades están disponibles.
 
-### 2. Amenidades Públicas
+### 2. Amenidades Públicas (Básico)
 ```python
 # Obtener amenidades visibles al público
 search_amenities(
     is_public=1,
-    public_searchable=1,
-    sort_column="order",
-    sort_direction="asc"
+    page=1,
+    size=25
 )
 ```
+**¿Qué hace?** Busca solo amenidades que son visibles para los huéspedes.
+**¿Cuándo usarlo?** Para mostrar amenidades en sitio web público.
 
-### 3. Amenidades Filtrables
+### 3. Buscar Amenidad Específica
 ```python
-# Obtener amenidades que se pueden usar como filtros
-search_amenities(
-    is_filterable=1,
-    is_public=1,
-    sort_column="name",
-    sort_direction="asc"
-)
-```
-
-### 4. Búsqueda por Texto
-```python
-# Buscar amenidades por nombre
-search_amenities(
-    search="pool",
-    is_public=1,
-    sort_column="name"
-)
-```
-
-### 5. Amenidades por Grupo
-```python
-# Obtener amenidades de un grupo específico
-search_amenities(
-    group_id=1,
-    is_public=1,
-    sort_column="order",
-    sort_direction="asc"
-)
-```
-
-### 6. Todas las Amenidades Activas
-```python
-# Obtener todas las amenidades públicas y buscables
-search_amenities(
-    is_public=1,
-    public_searchable=1,
-    is_filterable=1
-)
-```
-
-## Casos de Uso Comunes
-
-### Filtros de Búsqueda de Unidades
-```python
-# Obtener amenidades para usar como filtros en búsqueda de unidades
-search_amenities(
-    is_filterable=1,
-    is_public=1,
-    sort_column="order",
-    sort_direction="asc",
-    size=100
-)
-```
-
-### Listado Público de Amenidades
-```python
-# Amenidades para mostrar en sitio web público
-search_amenities(
-    is_public=1,
-    public_searchable=1,
-    sort_column="order",
-    sort_direction="asc"
-)
-```
-
-### Búsqueda de Amenidad Específica
-```python
-# Buscar wifi o internet
+# Buscar WiFi
 search_amenities(
     search="wifi",
     is_public=1
@@ -127,74 +69,222 @@ search_amenities(
     is_public=1
 )
 ```
+**¿Qué hace?** Busca amenidades que contengan la palabra especificada.
+**¿Cuándo usarlo?** Para encontrar amenidades específicas.
 
-### Amenidades para Administración
+## Búsquedas Comunes
+
+### 4. Amenidades para Filtros
 ```python
-# Obtener todas las amenidades (públicas y privadas)
+# Obtener amenidades que se pueden usar como filtros
 search_amenities(
-    size=1000,
-    sort_column="id",
+    is_filterable=1,
+    is_public=1,
+    sort_column="order",
+    sort_direction="asc",
+    page=1,
+    size=50
+)
+```
+**¿Qué hace?** Busca amenidades que los huéspedes pueden usar para filtrar búsquedas.
+**¿Cuándo usarlo?** Para configurar filtros de búsqueda en sitio web.
+
+### 5. Amenidades por Grupo
+```python
+# Amenidades de grupo específico (ej: comodidades básicas)
+search_amenities(
+    group_id=1,
+    is_public=1,
+    sort_column="order",
     sort_direction="asc"
 )
 ```
+**¿Qué hace?** Busca amenidades de un grupo específico.
+**¿Cuándo usarlo?** Para mostrar amenidades por categoría.
 
-### Amenidades Actualizadas Recientemente
+### 6. Amenidades Completamente Activas
 ```python
-# Ordenar por fecha de actualización
-search_amenities(
-    is_public=1,
-    sort_column="createdAt",
-    sort_direction="desc"
-)
-```
-
-## Ejemplos de Filtrado Avanzado
-
-### Amenidades Premium
-```python
-# Amenidades de grupos específicos (ej: premium)
-search_amenities(
-    group_id=5,
-    is_public=1,
-    is_filterable=1,
-    sort_column="order"
-)
-```
-
-### Amenidades para OTAs
-```python
-# Amenidades públicas y buscables para canales de distribución
+# Amenidades públicas, buscables y filtrables
 search_amenities(
     is_public=1,
     public_searchable=1,
     is_filterable=1,
     sort_column="order",
+    sort_direction="asc"
+)
+```
+**¿Qué hace?** Busca amenidades que están completamente activas para huéspedes.
+**¿Cuándo usarlo?** Para listados públicos completos.
+
+### 7. Búsqueda por Texto Avanzada
+```python
+# Buscar múltiples términos
+search_amenities(
+    search="wifi internet",
+    is_public=1,
+    sort_column="name"
+)
+
+# Buscar por tipo de amenidad
+search_amenities(
+    search="kitchen",
+    is_public=1,
+    sort_column="name"
+)
+```
+**¿Qué hace?** Busca amenidades que contengan los términos especificados.
+**¿Cuándo usarlo?** Para encontrar amenidades relacionadas.
+
+## Casos de Uso Típicos
+
+### Listado Público de Amenidades
+```python
+# Amenidades para mostrar en sitio web público
+search_amenities(
+    is_public=1,
+    public_searchable=1,
+    sort_column="order",
+    sort_direction="asc",
+    page=1,
     size=100
 )
 ```
+**¿Qué hace?** Obtiene amenidades para mostrar a huéspedes potenciales.
+**¿Cuándo usarlo?** Para páginas de "Servicios y Amenidades" del sitio web.
+
+### Filtros de Búsqueda de Unidades
+```python
+# Amenidades para filtros de búsqueda
+search_amenities(
+    is_filterable=1,
+    is_public=1,
+    sort_column="order",
+    sort_direction="asc",
+    size=50
+)
+```
+**¿Qué hace?** Obtiene amenidades para usar como filtros en búsqueda de propiedades.
+**¿Cuándo usarlo?** Para configurar filtros "WiFi", "Piscina", "Gimnasio", etc.
+
+### Amenidades por Categoría
+```python
+# Amenidades básicas (grupo 1)
+search_amenities(
+    group_id=1,
+    is_public=1,
+    sort_column="order"
+)
+
+# Amenidades premium (grupo 5)
+search_amenities(
+    group_id=5,
+    is_public=1,
+    sort_column="order"
+)
+```
+**¿Qué hace?** Organiza amenidades por categorías o grupos.
+**¿Cuándo usarlo?** Para mostrar amenidades por tipo (básicas, premium, etc.).
+
+### Búsqueda de Amenidades Específicas
+```python
+# Buscar amenidades de conectividad
+search_amenities(
+    search="wifi internet",
+    is_public=1
+)
+
+# Buscar amenidades de entretenimiento
+search_amenities(
+    search="tv entertainment",
+    is_public=1
+)
+
+# Buscar amenidades de cocina
+search_amenities(
+    search="kitchen cooking",
+    is_public=1
+)
+```
+**¿Qué hace?** Busca amenidades por tipo o función específica.
+**¿Cuándo usarlo?** Para encontrar amenidades relacionadas con un tema.
+
+### Administración de Amenidades
+```python
+# Todas las amenidades (públicas y privadas)
+search_amenities(
+    size=1000,
+    sort_column="id",
+    sort_direction="asc"
+)
+
+# Amenidades recientemente creadas
+search_amenities(
+    is_public=1,
+    sort_column="createdAt",
+    sort_direction="desc",
+    page=1,
+    size=50
+)
+```
+**¿Qué hace?** Obtiene amenidades para administración y gestión.
+**¿Cuándo usarlo?** Para configurar y administrar amenidades del sistema.
+
+## Tabla de Referencia Rápida
+
+| Parámetro | Tipo | Descripción | Valores |
+|-----------|------|-------------|---------|
+| `page` | int | Número de página | 1, 2, 3... |
+| `size` | int | Resultados por página | 1-1000 |
+| `search` | string | Búsqueda por texto | "wifi", "pool" |
+| `group_id` | int | ID del grupo | 1, 2, 3... |
+| `is_public` | int | Visible al público | 0=No, 1=Sí |
+| `public_searchable` | int | Buscable públicamente | 0=No, 1=Sí |
+| `is_filterable` | int | Usable como filtro | 0=No, 1=Sí |
+| `sort_column` | string | Campo de ordenamiento | "id", "name", "order", "createdAt" |
+| `sort_direction` | string | Dirección de ordenamiento | "asc", "desc" |
+
+## Filtros Booleanos Explicados
+
+### `is_public` (Visible al Público)
+- **0**: Amenidad privada (solo administradores)
+- **1**: Amenidad visible para huéspedes
+
+### `public_searchable` (Buscable Públicamente)
+- **0**: No aparece en búsquedas de huéspedes
+- **1**: Aparece en búsquedas de huéspedes
+
+### `is_filterable` (Usable como Filtro)
+- **0**: No se puede usar como filtro de búsqueda
+- **1**: Se puede usar como filtro de búsqueda
 
 ## Mejores Prácticas
 
 ### 1. Paginación Eficiente
 ```python
-# Usar tamaño de página apropiado
+# Para listados públicos (pocos resultados)
+search_amenities(
+    is_public=1,
+    page=1,
+    size=25
+)
+
+# Para administración (más resultados)
 search_amenities(
     page=1,
-    size=50,  # Ajustar según necesidades
-    is_public=1
+    size=100
 )
 ```
 
 ### 2. Ordenamiento Correcto
 ```python
-# Ordenar por 'order' para visualización
+# Para visualización (orden lógico)
 search_amenities(
     is_public=1,
-    sort_column="order",  # Orden de visualización
+    sort_column="order",
     sort_direction="asc"
 )
 
-# Ordenar por nombre para listas alfabéticas
+# Para listas alfabéticas
 search_amenities(
     is_public=1,
     sort_column="name",
@@ -204,18 +294,18 @@ search_amenities(
 
 ### 3. Filtros Combinados
 ```python
-# Combinar múltiples filtros
+# Amenidades completamente activas
 search_amenities(
-    group_id=1,
     is_public=1,
-    is_filterable=1,
     public_searchable=1,
+    is_filterable=1,
     sort_column="order"
 )
 ```
 
-## Respuesta Esperada
+## Respuestas Esperadas
 
+### Respuesta Básica
 ```json
 {
   "_embedded": {
@@ -248,4 +338,67 @@ search_amenities(
   "total_items": 45
 }
 ```
+
+### Respuesta con Búsqueda
+```json
+{
+  "_embedded": {
+    "amenities": [
+      {
+        "id": 15,
+        "name": "Free WiFi",
+        "order": 15,
+        "isPublic": true,
+        "publicSearchable": true,
+        "isFilterable": true,
+        "groupId": 1,
+        "createdAt": "2024-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "page": 1,
+  "page_count": 1,
+  "page_size": 25,
+  "total_items": 1
+}
+```
+
+## Errores Comunes y Soluciones
+
+### Error: "Page must be >= 1"
+```python
+# ❌ Incorrecto
+search_amenities(page=0)
+
+# ✅ Correcto
+search_amenities(page=1)
+```
+
+### Error: "Size must be between 1 and 1000"
+```python
+# ❌ Incorrecto
+search_amenities(size=2000)
+
+# ✅ Correcto
+search_amenities(size=100)
+```
+
+### Error: "Invalid sort column"
+```python
+# ❌ Incorrecto
+search_amenities(sort_column="invalid")
+
+# ✅ Correcto
+search_amenities(sort_column="name")
+```
+
+## Campos de Ordenamiento Válidos
+
+- `"id"` - Por ID numérico
+- `"name"` - Por nombre alfabético
+- `"order"` - Por orden de visualización
+- `"isPublic"` - Por visibilidad pública
+- `"publicSearchable"` - Por capacidad de búsqueda
+- `"isFilterable"` - Por capacidad de filtrado
+- `"createdAt"` - Por fecha de creación
 """
