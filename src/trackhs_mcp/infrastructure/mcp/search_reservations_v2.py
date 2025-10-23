@@ -22,7 +22,8 @@ from ..utils.type_normalization import (
 )
 from ..utils.user_friendly_messages import format_date_error
 
-# from ..utils.validation_decorator import validate_search_reservations_params  # Removed: causes *args issue with FastMCP
+# from ..utils.validation_decorator import validate_search_reservations_params
+# Removed: causes *args issue with FastMCP
 from ..validation.date_validators import DateValidator
 
 
@@ -111,7 +112,8 @@ async def search_reservations_v2(
         default="name",
         description=(
             "Column to sort results by. Valid options: 'name' (reservation name), "
-            "'status' (reservation status), 'checkin' (check-in date), 'checkout' (check-out date), "
+            "'status' (reservation status), 'checkin' (check-in date), "
+            "'checkout' (check-out date), "
             "'guest' (guest name), 'unit' (unit name), 'nights' (number of nights). "
             "Default: 'name'. Disabled when using scroll parameter."
         ),
@@ -119,7 +121,8 @@ async def search_reservations_v2(
     sort_direction: Literal["asc", "desc"] = Field(
         default="asc",
         description=(
-            "Sort direction. Use 'asc' for ascending (A-Z, 0-9) or 'desc' for descending (Z-A, 9-0). "
+            "Sort direction. Use 'asc' for ascending (A-Z, 0-9) or "
+            "'desc' for descending (Z-A, 9-0). "
             "Default: 'asc'. Disabled when using scroll parameter."
         ),
     ),
@@ -128,8 +131,10 @@ async def search_reservations_v2(
         default=None,
         description=(
             "Full-text search across reservation names, guest names, and descriptions. "
-            "Examples: 'John Smith' (guest name), 'Villa Paradise' (property name), 'Beach House' (description). "
-            "To omit this filter, simply don't include this parameter. Max length: 200 characters."
+            "Examples: 'John Smith' (guest name), 'Villa Paradise' (property name), "
+            "'Beach House' (description). "
+            "To omit this filter, simply don't include this parameter. "
+            "Max length: 200 characters."
         ),
         max_length=200,
     ),
@@ -332,7 +337,8 @@ async def search_reservations_v2(
     - Text Search: search, tags
     - ID Filters: node_id, unit_id, contact_id, travel_agent_id, campaign_id, user_id,
       unit_type_id, rate_type_id, reservation_type_id
-    - Date Filters: booked_start, booked_end, arrival_start, arrival_end, departure_start,
+    - Date Filters: booked_start, booked_end, arrival_start, arrival_end,
+      departure_start,
       departure_end, updated_since
     - Status Filters: status (single or comma-separated), in_house_today
     - Other: group_id, checkin_office_id, scroll
@@ -417,7 +423,8 @@ async def search_reservations_v2(
     group_id_normalized = normalize_int(group_id, "group_id")
     checkin_office_id_normalized = normalize_int(checkin_office_id, "checkin_office_id")
 
-    # Asegurar defaults para page y size si normalize_int retorna None (FieldInfo objects)
+    # Asegurar defaults para page y size si normalize_int retorna None
+    # (FieldInfo objects)
     if page_normalized is None:
         page_normalized = 0  # Default: 0 (0-based pagination)
     if size_normalized is None:
@@ -495,7 +502,8 @@ async def search_reservations_v2(
             raise ValidationError(
                 f"❌ Invalid status values: {invalid_statuses}. "
                 f"✅ Valid statuses: {', '.join(sorted(valid_statuses))}. "
-                f"💡 Examples: 'Confirmed' (single) or 'Confirmed,Cancelled' (multiple).",
+                f"💡 Examples: 'Confirmed' (single) or 'Confirmed,Cancelled' "
+                f"(multiple).",
                 "status",
             )
     else:
@@ -663,7 +671,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             description=(
                 "Column to sort by. Valid values: name, status, altConf, "
                 "agreementStatus, type, guest, guests, unit, units, checkin, "
-                "checkout, nights. Disabled when using scroll. Maps to API parameter 'sortColumn'."
+                "checkout, nights. Disabled when using scroll. "
+                "Maps to API parameter 'sortColumn'."
             ),
         ),
         sort_direction: Literal["asc", "desc"] = Field(
@@ -774,16 +783,20 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         booked_start: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
-                "Example: '2024-01-15'. To omit this filter, simply don't include this parameter. "
+                "Filter by booking date start (ISO 8601: YYYY-MM-DD or "
+                "YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-01-15'. To omit this filter, simply don't include "
+                "this parameter. "
                 "Do NOT use 'null'. Maps to API parameter 'bookedStart'."
             ),
         ),
         booked_end: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
-                "Example: '2024-12-31'. To omit this filter, simply don't include this parameter. "
+                "Filter by booking date end (ISO 8601: YYYY-MM-DD or "
+                "YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-12-31'. To omit this filter, simply don't include "
+                "this parameter. "
                 "Do NOT use 'null'. Maps to API parameter 'bookedEnd'."
             ),
         ),
@@ -791,7 +804,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         arrival_start: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Filter by arrival date start (ISO 8601: YYYY-MM-DD or "
+                "YYYY-MM-DDTHH:MM:SSZ). "
                 "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
                 "simply don't include this parameter. Do NOT use 'null'. "
                 "Maps to API parameter 'arrivalStart'."
@@ -800,7 +814,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         arrival_end: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Filter by arrival date end (ISO 8601: YYYY-MM-DD or "
+                "YYYY-MM-DDTHH:MM:SSZ). "
                 "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
                 "simply don't include this parameter. Do NOT use 'null'. "
                 "Maps to API parameter 'arrivalEnd'."
@@ -810,7 +825,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         departure_start: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Filter by departure date start (ISO 8601: YYYY-MM-DD or "
+                "YYYY-MM-DDTHH:MM:SSZ). "
                 "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
                 "simply don't include this parameter. Do NOT use 'null'. "
                 "Maps to API parameter 'departureStart'."
@@ -819,7 +835,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         departure_end: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Filter by departure date end (ISO 8601: YYYY-MM-DD or "
+                "YYYY-MM-DDTHH:MM:SSZ). "
                 "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
                 "simply don't include this parameter. Do NOT use 'null'. "
                 "Maps to API parameter 'departureEnd'."
@@ -829,7 +846,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         updated_since: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Filter by last update date (ISO 8601: YYYY-MM-DD or "
+                "YYYY-MM-DDTHH:MM:SSZ). "
                 "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
                 "simply don't include this parameter. Do NOT use 'null'. "
                 "Maps to API parameter 'updatedSince'."
@@ -839,8 +857,10 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         status: Optional[str] = Field(
             default=None,
             description=(
-                "Filter by reservation status. Use single status or comma-separated for multiple. "
-                "Valid statuses: 'Hold', 'Confirmed', 'Cancelled', 'Checked In', 'Checked Out'. "
+                "Filter by reservation status. Use single status or comma-separated "
+                "for multiple. "
+                "Valid statuses: 'Hold', 'Confirmed', 'Cancelled', 'Checked In', "
+                "'Checked Out'. "
                 "Examples: 'Confirmed' (single) or 'Confirmed,Cancelled' (multiple). "
                 "To omit this filter, simply don't include this parameter."
             ),
@@ -865,7 +885,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             description=(
                 "Elasticsearch scroll for large datasets. Use '1' to start a new "
                 "scroll, or provide the scroll ID from previous response to continue. "
-                "Disables sorting when active. Example: '1' to start or 'scroll_id_123' to continue"
+                "Disables sorting when active. Example: '1' to start or "
+                "'scroll_id_123' to continue"
             ),
         ),
     ) -> Dict[str, Any]:
@@ -874,7 +895,9 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         page_int = int(page) if isinstance(page, str) else page
         size_int = int(size) if isinstance(size, str) else size
         group_id_int = (
-            int(group_id) if isinstance(group_id, str) and group_id is not None else group_id
+            int(group_id)
+            if isinstance(group_id, str) and group_id is not None
+            else group_id
         )
         checkin_office_id_int = (
             int(checkin_office_id)
