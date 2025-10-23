@@ -23,6 +23,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Set up Python path
+      run: |
+        echo "PYTHONPATH=${{ github.workspace }}/src:$PYTHONPATH" >> $GITHUB_ENV
+
     - name: Validate FastMCP Configuration
       run: |
         python -c "
@@ -36,8 +40,20 @@ jobs:
 
     - name: Test MCP Server Startup
       run: |
+        # Configurar variables de entorno para validación
+        export TRACKHS_API_URL="https://api-test.trackhs.com/api"
+        export TRACKHS_USERNAME="test_user"
+        export TRACKHS_PASSWORD="test_password"
+        export TRACKHS_TIMEOUT="30"
+        export HOST="0.0.0.0"
+        export PORT="8080"
+        export CORS_ORIGINS="https://elevenlabs.io,https://app.elevenlabs.io"
+        export DEBUG="false"
+
         python -c "
-        from src.trackhs_mcp.server import mcp
+        import sys
+        sys.path.insert(0, 'src')
+        from trackhs_mcp.server import mcp
         print('MCP Server created successfully')
         print(f'Server name: {mcp.name if hasattr(mcp, \"name\") else \"TrackHS MCP Server\"}')
         "
