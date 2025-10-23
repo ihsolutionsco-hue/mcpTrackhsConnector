@@ -10,11 +10,13 @@ from typing import Any, Dict, List, Optional, Union
 
 class ValidationError(Exception):
     """Excepción personalizada para errores de validación"""
+
     pass
 
 
 class ReservationStatus(Enum):
     """Estados válidos para reservas"""
+
     HOLD = "Hold"
     CONFIRMED = "Confirmed"
     CANCELLED = "Cancelled"
@@ -24,6 +26,7 @@ class ReservationStatus(Enum):
 
 class SortColumn(Enum):
     """Columnas válidas para ordenamiento"""
+
     NAME = "name"
     STATUS = "status"
     ALT_CONF = "altConf"
@@ -40,6 +43,7 @@ class SortColumn(Enum):
 
 class SortDirection(Enum):
     """Direcciones válidas para ordenamiento"""
+
     ASC = "asc"
     DESC = "desc"
 
@@ -231,9 +235,7 @@ def validate_id_list_parameter(value: Any, param_name: str) -> Optional[str]:
     return str(value)
 
 
-def validate_search_reservations_parameters(
-    params: Dict[str, Any]
-) -> Dict[str, Any]:
+def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Validación completa y mejorada para parámetros de search_reservations
 
@@ -295,9 +297,7 @@ def validate_search_reservations_parameters(
         ]
         for param in date_params:
             if param in params:
-                validated_params[param] = validate_date_parameter(
-                    params[param], param
-                )
+                validated_params[param] = validate_date_parameter(params[param], param)
 
         # Validar parámetros de ID
         id_params = [

@@ -1,0 +1,31 @@
+{
+  "name": "mcp-server-feature-reference",
+  "version": "0.1.0",
+  "description": "Feature Reference MCP Server - Example with External OAuth",
+  "private": true,
+  "workspaces": [
+    "auth-server",
+    "mcp-server"
+  ],
+  "scripts": {
+    "dev:auth-server": "npm run dev --workspace=auth-server",
+    "dev:mcp-server": "npm run dev --workspace=mcp-server",
+    "dev": "concurrently -n \"AUTH,MCP\" -c \"yellow,cyan\" \"npm run dev:auth-server\" \"npm run dev:mcp-server\"",
+
+    "build": "npm run build --workspaces --if-present",
+
+    "start:auth-server": "npm run start --workspace=auth-server",
+    "start:mcp-server": "npm run start --workspace=mcp-server",
+    "start": "concurrently -n \"AUTH,MCP\" -c \"yellow,cyan\" \"npm run start:auth-server\" \"npm run start:mcp-server\"",
+
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "./scripts/test-e2e.sh",
+
+    "lint": "npm run lint --workspaces --if-present",
+
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
