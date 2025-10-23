@@ -520,25 +520,46 @@ class SearchReservationsParams(PaginationParams, SearchParams):
         default=None, description="ID(s) del tipo de tarifa específico"
     )
     booked_start: Optional[str] = Field(
-        default=None, description="Fecha de inicio de reserva (ISO 8601)"
+        default=None,
+        description="Fecha de inicio de reserva. Formato ISO 8601: 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SSZ'",
+        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        examples=["2025-01-15", "2025-01-15T10:00:00Z"],
     )
     booked_end: Optional[str] = Field(
-        default=None, description="Fecha de fin de reserva (ISO 8601)"
+        default=None,
+        description="Fecha de fin de reserva. Formato ISO 8601: 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SSZ'",
+        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        examples=["2025-01-15", "2025-01-15T10:00:00Z"],
     )
     arrival_start: Optional[str] = Field(
-        default=None, description="Fecha de inicio de llegada (ISO 8601)"
+        default=None,
+        description="Fecha de inicio de llegada. Formato ISO 8601: 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SSZ'",
+        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        examples=["2025-10-27", "2025-10-27T10:00:00Z"],
     )
     arrival_end: Optional[str] = Field(
-        default=None, description="Fecha de fin de llegada (ISO 8601)"
+        default=None,
+        description="Fecha de fin de llegada. Formato ISO 8601: 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SSZ'",
+        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        examples=["2025-10-27", "2025-10-27T10:00:00Z"],
     )
     departure_start: Optional[str] = Field(
-        default=None, description="Fecha de inicio de salida (ISO 8601)"
+        default=None,
+        description="Fecha de inicio de salida. Formato ISO 8601: 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SSZ'",
+        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        examples=["2025-10-27", "2025-10-27T10:00:00Z"],
     )
     departure_end: Optional[str] = Field(
-        default=None, description="Fecha de fin de salida (ISO 8601)"
+        default=None,
+        description="Fecha de fin de salida. Formato ISO 8601: 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SSZ'",
+        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        examples=["2025-10-27", "2025-10-27T10:00:00Z"],
     )
     updated_since: Optional[str] = Field(
-        default=None, description="Fecha de actualización desde (ISO 8601)"
+        default=None,
+        description="Fecha de actualización desde. Formato ISO 8601: 'YYYY-MM-DD' o 'YYYY-MM-DDTHH:MM:SSZ'",
+        pattern=r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$",
+        examples=["2025-01-15", "2025-01-15T10:00:00Z"],
     )
     scroll: Optional[Union[int, str]] = Field(
         default=None,
