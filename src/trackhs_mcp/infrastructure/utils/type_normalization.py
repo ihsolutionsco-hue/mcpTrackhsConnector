@@ -439,3 +439,63 @@ def normalize_string_to_bool(value: Union[bool, str]) -> bool:
             raise ValidationError(f"Invalid boolean value: {value}")
 
     raise ValidationError(f"Expected bool or str, got: {type(value).__name__}")
+
+
+def normalize_optional_string(value: Optional[str], param_name: str) -> Optional[str]:
+    """
+    Normaliza un parámetro string opcional, convirtiendo valores inválidos a None.
+
+    Esta función es especialmente útil para manejar casos donde LLMs pasan
+    el string literal "null" en lugar de omitir el parámetro.
+
+    Convierte a None:
+    - None (ya es None)
+    - "null" (string literal)
+    - "None" (string literal)
+    - "" (string vacío)
+    - "  " (solo espacios)
+    - FieldInfo objects (para tests directos)
+
+    Args:
+        value: Valor a normalizar
+        param_name: Nombre del parámetro (para mensajes de error)
+
+    Returns:
+        String limpio o None si el valor debe ser omitido
+
+    Examples:
+        >>> normalize_optional_string("2024-01-15", "arrival_start")
+        "2024-01-15"
+        >>> normalize_optional_string("null", "arrival_start")
+        None
+        >>> normalize_optional_string("None", "arrival_start")
+        None
+        >>> normalize_optional_string("", "arrival_start")
+        None
+        >>> normalize_optional_string(None, "arrival_start")
+        None
+    """
+    # Detectar FieldInfo objects (cuando tests invocan funciones directamente)
+    if _is_field_info(value):
+        return None
+
+    # Si ya es None, retornar None
+    if value is None:
+        return None
+
+    # Si no es string, esto es un error de tipo
+    if not isinstance(value, str):
+        raise ValidationError(
+            f"{param_name} must be a string or None, got: {type(value).__name__}",
+            param_name,
+        )
+
+    # Limpiar espacios
+    value = value.strip()
+
+    # Convertir strings vacíos o "null"/"None" a None
+    if not value or value.lower() in ["null", "none"]:
+        return None
+
+    # Retornar el valor limpio
+    return value

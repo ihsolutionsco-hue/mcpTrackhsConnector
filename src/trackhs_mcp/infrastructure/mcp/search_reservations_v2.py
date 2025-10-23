@@ -15,7 +15,11 @@ from ...domain.entities.reservations import SearchReservationsParams
 from ...domain.exceptions.api_exceptions import ValidationError
 from ..utils.date_validation import is_valid_iso8601_date
 from ..utils.error_handling import error_handler
-from ..utils.type_normalization import normalize_binary_int, normalize_int
+from ..utils.type_normalization import (
+    normalize_binary_int,
+    normalize_int,
+    normalize_optional_string,
+)
 from ..utils.user_friendly_messages import format_date_error
 from ..utils.validation_decorator import validate_search_reservations_params
 from ..validation.date_validators import DateValidator
@@ -427,8 +431,37 @@ async def search_reservations_v2(
             f"Size must be <= 100. Received: {size_normalized}", "size"
         )
 
-    # Validar fechas opcionales con validación personalizada
-    # (No usar DateValidator que permite "null")
+    # Normalizar todos los parámetros string opcionales
+    # Esto convierte "null", "None", "", etc. a None real ANTES de validar
+    # Esto es especialmente importante para LLMs que pueden pasar "null" como string
+
+    # Parámetros de fecha
+    arrival_start = normalize_optional_string(arrival_start, "arrival_start")
+    arrival_end = normalize_optional_string(arrival_end, "arrival_end")
+    departure_start = normalize_optional_string(departure_start, "departure_start")
+    departure_end = normalize_optional_string(departure_end, "departure_end")
+    updated_since = normalize_optional_string(updated_since, "updated_since")
+    booked_start = normalize_optional_string(booked_start, "booked_start")
+    booked_end = normalize_optional_string(booked_end, "booked_end")
+
+    # Parámetros de búsqueda y filtros de texto
+    search = normalize_optional_string(search, "search")
+    tags = normalize_optional_string(tags, "tags")
+    node_id = normalize_optional_string(node_id, "node_id")
+    unit_id = normalize_optional_string(unit_id, "unit_id")
+    contact_id = normalize_optional_string(contact_id, "contact_id")
+    travel_agent_id = normalize_optional_string(travel_agent_id, "travel_agent_id")
+    campaign_id = normalize_optional_string(campaign_id, "campaign_id")
+    user_id = normalize_optional_string(user_id, "user_id")
+    unit_type_id = normalize_optional_string(unit_type_id, "unit_type_id")
+    rate_type_id = normalize_optional_string(rate_type_id, "rate_type_id")
+    reservation_type_id = normalize_optional_string(
+        reservation_type_id, "reservation_type_id"
+    )
+    status = normalize_optional_string(status, "status")
+    scroll = normalize_optional_string(scroll, "scroll")
+
+    # Validar fechas opcionales después de normalizar
     date_params = {
         "arrival_start": arrival_start,
         "arrival_end": arrival_end,
@@ -440,22 +473,9 @@ async def search_reservations_v2(
     }
 
     for param_name, param_value in date_params.items():
-        # Verificar si el parámetro está presente (no None)
+        # Después de normalizar, si el parámetro no es None, validar formato
         if param_value is not None:
-            # Detectar uso incorrecto de "null", "none", o string vacío
-            if (
-                param_value.lower() in ["null", "none"]
-                or param_value == "null"
-                or param_value.strip() == ""
-            ):
-                raise ValidationError(
-                    f"❌ Invalid date parameter '{param_name}': '{param_value}' is not a valid date. "
-                    f"✅ Use ISO 8601 format like '2024-03-01' or omit the parameter entirely. "
-                    f"💡 Example: {param_name}='2024-03-01' (not 'null' or empty string)",
-                    param_name,
-                )
-
-            # Validar formato de fecha
+            # Validar formato de fecha ISO 8601
             if not is_valid_iso8601_date(param_value):
                 raise ValidationError(
                     format_date_error(param_name),
