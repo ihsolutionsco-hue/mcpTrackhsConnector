@@ -174,7 +174,8 @@ async def search_reservations_v2(
     travel_agent_id: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by travel agent IDs. Use comma-separated values for multiple agents. "
+            "Filter by travel agent IDs. Use comma-separated values "
+            "for multiple agents. "
             "Examples: '5' (single agent) or '5,10,15' (multiple agents). "
             "To omit this filter, simply don't include this parameter."
         ),
@@ -182,7 +183,8 @@ async def search_reservations_v2(
     campaign_id: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by campaign IDs. Use comma-separated values for multiple campaigns. "
+            "Filter by campaign IDs. Use comma-separated values "
+            "for multiple campaigns. "
             "Examples: '1' (single campaign) or '1,2,3' (multiple campaigns). "
             "To omit this filter, simply don't include this parameter."
         ),
@@ -206,7 +208,8 @@ async def search_reservations_v2(
     rate_type_id: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by rate type IDs. Use comma-separated values for multiple rate types. "
+            "Filter by rate type IDs. Use comma-separated values "
+            "for multiple rate types. "
             "Examples: '1' (single rate type) or '1,2,3' (multiple rate types). "
             "To omit this filter, simply don't include this parameter."
         ),
@@ -214,7 +217,8 @@ async def search_reservations_v2(
     reservation_type_id: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by reservation type IDs. Use comma-separated values for multiple types. "
+            "Filter by reservation type IDs. Use comma-separated values "
+            "for multiple types. "
             "Examples: '1' (single type) or '1,2,3' (multiple types). "
             "To omit this filter, simply don't include this parameter."
         ),
@@ -223,7 +227,8 @@ async def search_reservations_v2(
     booked_start: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by booking date start. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            "Filter by booking date start. Use ISO 8601 format: YYYY-MM-DD "
+            "(e.g., '2024-01-15'). "
             "To omit this filter, simply don't include this parameter. "
             "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
         ),
@@ -231,7 +236,8 @@ async def search_reservations_v2(
     booked_end: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by booking date end. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-12-31'). "
+            "Filter by booking date end. Use ISO 8601 format: YYYY-MM-DD "
+            "(e.g., '2024-12-31'). "
             "To omit this filter, simply don't include this parameter. "
             "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
         ),
@@ -239,7 +245,8 @@ async def search_reservations_v2(
     arrival_start: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by arrival date start. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            "Filter by arrival date start. Use ISO 8601 format: YYYY-MM-DD "
+            "(e.g., '2024-01-15'). "
             "To omit this filter, simply don't include this parameter. "
             "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
         ),
@@ -247,7 +254,8 @@ async def search_reservations_v2(
     arrival_end: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by arrival date end. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-12-31'). "
+            "Filter by arrival date end. Use ISO 8601 format: YYYY-MM-DD "
+            "(e.g., '2024-12-31'). "
             "To omit this filter, simply don't include this parameter. "
             "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
         ),
@@ -255,7 +263,8 @@ async def search_reservations_v2(
     departure_start: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by departure date start. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            "Filter by departure date start. Use ISO 8601 format: YYYY-MM-DD "
+            "(e.g., '2024-01-15'). "
             "To omit this filter, simply don't include this parameter. "
             "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
         ),
@@ -263,7 +272,8 @@ async def search_reservations_v2(
     departure_end: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by departure date end. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-12-31'). "
+            "Filter by departure date end. Use ISO 8601 format: YYYY-MM-DD "
+            "(e.g., '2024-12-31'). "
             "To omit this filter, simply don't include this parameter. "
             "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
         ),
@@ -271,7 +281,8 @@ async def search_reservations_v2(
     updated_since: Optional[str] = Field(
         default=None,
         description=(
-            "Filter by last update date. Use ISO 8601 format: YYYY-MM-DD (e.g., '2024-01-15'). "
+            "Filter by last update date. Use ISO 8601 format: YYYY-MM-DD "
+            "(e.g., '2024-01-15'). "
             "To omit this filter, simply don't include this parameter. "
             "Examples: '2024-01-01', '2024-12-31'. Do NOT use 'null' or timestamps."
         ),
@@ -289,7 +300,8 @@ async def search_reservations_v2(
         default=None,
         description=(
             "Filter by in-house today status. Use 0 (not in house) or 1 (in house). "
-            "Accepts: 0, 1, '0', '1'. Examples: 1 (guests currently in house), 0 (not in house). "
+            "Accepts: 0, 1, '0', '1'. Examples: 1 (guests currently in house), "
+            "0 (not in house). "
             "To omit this filter, simply don't include this parameter."
         ),
     ),
@@ -313,7 +325,8 @@ async def search_reservations_v2(
         description=(
             "Elasticsearch scroll for large datasets. Use '1' to start a new "
             "scroll, or provide the scroll ID from previous response to continue. "
-            "Disables sorting when active. Example: '1' to start or 'scroll_id_123' to continue"
+            "Disables sorting when active. Example: '1' to start or "
+            "'scroll_id_123' to continue"
         ),
     ),
 ) -> Dict[str, Any]:
@@ -890,7 +903,9 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             ),
         ),
     ) -> Dict[str, Any]:
-        """Search reservations in Track HS API with advanced filtering and pagination."""
+        """
+        Search reservations in Track HS API with advanced filtering and pagination.
+        """
         # Convertir parámetros numéricos a enteros si vienen como strings
         page_int = int(page) if isinstance(page, str) else page
         size_int = int(size) if isinstance(size, str) else size
