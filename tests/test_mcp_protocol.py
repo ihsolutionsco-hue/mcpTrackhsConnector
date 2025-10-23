@@ -23,9 +23,9 @@ class TestMCPProtocol:
 
         # Assert
         assert mcp is not None
-        assert hasattr(mcp, 'tool')
-        assert hasattr(mcp, 'resource')
-        assert hasattr(mcp, 'prompt')
+        assert hasattr(mcp, "tool")
+        assert hasattr(mcp, "resource")
+        assert hasattr(mcp, "prompt")
 
     def test_mcp_tools_registration(self):
         """Test: Las 7 herramientas MCP se registran correctamente"""
@@ -35,6 +35,7 @@ class TestMCPProtocol:
 
         # Act
         from src.trackhs_mcp.infrastructure.tools.registry import register_all_tools
+
         register_all_tools(mcp, mock_api_client)
 
         # Assert - Verificar que se registraron las 7 herramientas
@@ -52,6 +53,7 @@ class TestMCPProtocol:
         from src.trackhs_mcp.infrastructure.tools.resources import (
             register_all_resources,
         )
+
         register_all_resources(mcp, mock_api_client)
 
         # Assert
@@ -67,6 +69,7 @@ class TestMCPProtocol:
         from src.trackhs_mcp.infrastructure.prompts.reservations import (
             register_all_prompts,
         )
+
         register_all_prompts(mcp, mock_api_client)
 
         # Assert
@@ -84,7 +87,7 @@ class TestMCPProtocol:
 
         # Assert
         assert mcp_server is not None
-        assert hasattr(mcp_server, '_schema_fixer_hook')
+        assert hasattr(mcp_server, "_schema_fixer_hook")
 
     def test_mcp_tool_search_reservations(self):
         """Test: La herramienta search_reservations funciona"""
@@ -96,13 +99,14 @@ class TestMCPProtocol:
             "data": [{"id": 1, "status": "Confirmed"}],
             "total": 1,
             "page": 0,
-            "size": 10
+            "size": 10,
         }
 
         # Act
         from src.trackhs_mcp.infrastructure.tools.search_reservations_v2 import (
             register_search_reservations_v2,
         )
+
         register_search_reservations_v2(mcp, mock_api_client)
 
         # Assert
@@ -117,13 +121,14 @@ class TestMCPProtocol:
         mock_api_client.get.return_value = {
             "id": 1,
             "status": "Confirmed",
-            "arrivalDate": "2024-01-15"
+            "arrivalDate": "2024-01-15",
         }
 
         # Act
         from src.trackhs_mcp.infrastructure.tools.get_reservation_v2 import (
             register_get_reservation_v2,
         )
+
         register_get_reservation_v2(mcp, mock_api_client)
 
         # Assert
@@ -138,11 +143,12 @@ class TestMCPProtocol:
         mock_api_client.get.return_value = {
             "id": 1,
             "status": "open",
-            "currentBalance": 100.0
+            "currentBalance": 100.0,
         }
 
         # Act
         from src.trackhs_mcp.infrastructure.tools.get_folio import register_get_folio
+
         register_get_folio(mcp, mock_api_client)
 
         # Assert
@@ -156,13 +162,14 @@ class TestMCPProtocol:
         mock_api_client.get = AsyncMock()
         mock_api_client.get.return_value = {
             "data": [{"id": 1, "name": "Villa Paradise"}],
-            "total": 1
+            "total": 1,
         }
 
         # Act
         from src.trackhs_mcp.infrastructure.tools.search_units import (
             register_search_units,
         )
+
         register_search_units(mcp, mock_api_client)
 
         # Assert
@@ -176,13 +183,14 @@ class TestMCPProtocol:
         mock_api_client.get = AsyncMock()
         mock_api_client.get.return_value = {
             "data": [{"id": 1, "name": "WiFi"}],
-            "total": 1
+            "total": 1,
         }
 
         # Act
         from src.trackhs_mcp.infrastructure.tools.search_amenities import (
             register_search_amenities,
         )
+
         register_search_amenities(mcp, mock_api_client)
 
         # Assert
@@ -197,13 +205,14 @@ class TestMCPProtocol:
         mock_api_client.post.return_value = {
             "id": 1,
             "status": "open",
-            "summary": "Test work order"
+            "summary": "Test work order",
         }
 
         # Act
         from src.trackhs_mcp.infrastructure.tools.create_maintenance_work_order import (
             register_create_maintenance_work_order,
         )
+
         register_create_maintenance_work_order(mcp, mock_api_client)
 
         # Assert
@@ -217,13 +226,14 @@ class TestMCPProtocol:
         mock_api_client.post = AsyncMock()
         mock_api_client.post.return_value = {
             "id": 1,
-            "scheduledAt": "2024-01-15T10:00:00Z"
+            "scheduledAt": "2024-01-15T10:00:00Z",
         }
 
         # Act
         from src.trackhs_mcp.infrastructure.tools.create_housekeeping_work_order import (
             register_create_housekeeping_work_order,
         )
+
         register_create_housekeeping_work_order(mcp, mock_api_client)
 
         # Assert
@@ -239,6 +249,7 @@ class TestMCPProtocol:
         from src.trackhs_mcp.infrastructure.prompts.reservations import (
             register_all_prompts,
         )
+
         register_all_prompts(mcp, mock_api_client)
 
         # Assert
@@ -257,7 +268,7 @@ class TestMCPProtocol:
             base_url="https://api-test.trackhs.com/api",
             username="test_user",
             password="test_password",
-            timeout=30
+            timeout=30,
         )
         api_client = TrackHSApiClient(config)
 

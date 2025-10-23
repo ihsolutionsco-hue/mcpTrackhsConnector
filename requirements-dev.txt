@@ -19,3 +19,4 @@ flake8>=6.0.0
 
 # Development tools (básicos)
 coverage>=7.0.0
+pre-commit>=3.6.0

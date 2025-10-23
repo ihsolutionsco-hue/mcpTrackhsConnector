@@ -1,5 +1,5 @@
-# Pre-commit hooks con tests optimizados para MVP
-# Enfoque: Calidad alta con tests rápidos e inteligentes
+# Pre-commit hooks optimizados para MCP Protocol MVP
+# Enfoque: Calidad alta con validación MCP específica
 
 repos:
   # 1. Hooks básicos esenciales
@@ -32,19 +32,29 @@ repos:
         name: Ordenar imports con isort
         args: [--profile=black]
 
-  # 4. Linting básico para errores críticos (deshabilitado temporalmente)
-  # - repo: https://github.com/pycqa/flake8
-  #   rev: 7.0.0
-  #   hooks:
-  #     - id: flake8
-  #       name: Validar errores críticos Python
-  #       args: [--select=E9,F63,F7,F82,--max-line-length=88]
-  #       files: ^src/.*\.py$
-  #       exclude: ^src/trackhs_mcp/domain/entities/base\.py$
+  # 4. Tests MCP optimizados (solo tests críticos)
+  - repo: local
+    hooks:
+      - id: pytest-mcp
+        name: Tests MCP Protocol
+        entry: pytest
+        args: [tests/test_mcp_protocol.py, tests/test_mcp_server.py, -v, --tb=short]
+        language: system
+        pass_filenames: false
+        always_run: false
 
-  # 5. Tests se ejecutan en CI, no en pre-commit para mayor velocidad
+  # 5. Validación de servidor MCP
+  - repo: local
+    hooks:
+      - id: mcp-server-check
+        name: Validar servidor MCP
+        entry: python
+        args: [-c, "from src.trackhs_mcp.server import mcp; print('MCP Server OK')"]
+        language: system
+        pass_filenames: false
+        always_run: false
 
-# Configuración
+# Configuración optimizada para MCP
 default_stages: [pre-commit]
 fail_fast: true
 minimum_pre_commit_version: 3.6.0

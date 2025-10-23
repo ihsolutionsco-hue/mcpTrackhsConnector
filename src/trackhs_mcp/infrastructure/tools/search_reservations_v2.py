@@ -657,8 +657,7 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         size: int = Field(
             default=10,
             description=(
-                "Number of results per page (1-100). "
-                "Maps to API parameter 'size'."
+                "Number of results per page (1-100). " "Maps to API parameter 'size'."
             ),
             ge=1,
             le=100,

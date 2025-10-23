@@ -17,6 +17,7 @@ class TestMCPServer:
         """Test: El servidor MCP se puede importar sin errores"""
         # Act & Assert
         from src.trackhs_mcp.server import mcp
+
         assert mcp is not None
 
     def test_server_has_required_attributes(self):
@@ -39,7 +40,7 @@ class TestMCPServer:
             "TRACKHS_API_URL": "https://api-test.trackhs.com/api",
             "TRACKHS_USERNAME": "test_user",
             "TRACKHS_PASSWORD": "test_password",
-            "TRACKHS_TIMEOUT": "30"
+            "TRACKHS_TIMEOUT": "30",
         }
 
         # Act & Assert
@@ -59,6 +60,7 @@ class TestMCPServer:
         """Test: El schema hook está activo para corrección automática"""
         # Act & Assert
         from src.trackhs_mcp.infrastructure.tools.schema_hook import SchemaFixerHook
+
         assert SchemaFixerHook is not None
 
     def test_cors_configuration(self):
@@ -90,7 +92,7 @@ class TestMCPServer:
             "register_resources",
             "register_prompts",
             "apply_middleware",
-            "start_server"
+            "start_server",
         ]
 
         # Act
@@ -111,5 +113,5 @@ class TestMCPServer:
 
         # Assert - Verificar que el servidor tiene los atributos necesarios para FastMCP Cloud
         assert mcp is not None
-        assert hasattr(mcp, 'run')  # Método para ejecutar el servidor
+        assert hasattr(mcp, "run")  # Método para ejecutar el servidor
         assert callable(mcp.run)
