@@ -3,9 +3,10 @@ Tests super simples para el servidor MCP
 Enfoque MVP: Validar que el servidor MCP funciona básicamente
 """
 
-import pytest
 import os
 from unittest.mock import Mock, patch
+
+import pytest
 from fastmcp import FastMCP
 
 

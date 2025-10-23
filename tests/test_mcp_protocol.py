@@ -3,8 +3,9 @@ Tests super simples para validar el protocolo MCP
 Enfoque MVP: 1 test = 1 componente MCP crítico
 """
 
+from unittest.mock import AsyncMock, Mock
+
 import pytest
-from unittest.mock import Mock, AsyncMock
 from fastmcp import FastMCP
 
 
@@ -48,7 +49,9 @@ class TestMCPProtocol:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.tools.resources import register_all_resources
+        from src.trackhs_mcp.infrastructure.tools.resources import (
+            register_all_resources,
+        )
         register_all_resources(mcp, mock_api_client)
 
         # Assert
@@ -61,7 +64,9 @@ class TestMCPProtocol:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.prompts.reservations import register_all_prompts
+        from src.trackhs_mcp.infrastructure.prompts.reservations import (
+            register_all_prompts,
+        )
         register_all_prompts(mcp, mock_api_client)
 
         # Assert
@@ -70,7 +75,9 @@ class TestMCPProtocol:
     def test_schema_hook_applies_correctly(self):
         """Test: El schema hook se aplica correctamente"""
         # Arrange
-        from src.trackhs_mcp.infrastructure.tools.schema_hook import create_schema_fixed_server
+        from src.trackhs_mcp.infrastructure.tools.schema_hook import (
+            create_schema_fixed_server,
+        )
 
         # Act
         mcp_server = create_schema_fixed_server("Test Server")
@@ -93,7 +100,9 @@ class TestMCPProtocol:
         }
 
         # Act
-        from src.trackhs_mcp.infrastructure.tools.search_reservations_v2 import register_search_reservations_v2
+        from src.trackhs_mcp.infrastructure.tools.search_reservations_v2 import (
+            register_search_reservations_v2,
+        )
         register_search_reservations_v2(mcp, mock_api_client)
 
         # Assert
@@ -112,7 +121,9 @@ class TestMCPProtocol:
         }
 
         # Act
-        from src.trackhs_mcp.infrastructure.tools.get_reservation_v2 import register_get_reservation_v2
+        from src.trackhs_mcp.infrastructure.tools.get_reservation_v2 import (
+            register_get_reservation_v2,
+        )
         register_get_reservation_v2(mcp, mock_api_client)
 
         # Assert
@@ -149,7 +160,9 @@ class TestMCPProtocol:
         }
 
         # Act
-        from src.trackhs_mcp.infrastructure.tools.search_units import register_search_units
+        from src.trackhs_mcp.infrastructure.tools.search_units import (
+            register_search_units,
+        )
         register_search_units(mcp, mock_api_client)
 
         # Assert
@@ -167,7 +180,9 @@ class TestMCPProtocol:
         }
 
         # Act
-        from src.trackhs_mcp.infrastructure.tools.search_amenities import register_search_amenities
+        from src.trackhs_mcp.infrastructure.tools.search_amenities import (
+            register_search_amenities,
+        )
         register_search_amenities(mcp, mock_api_client)
 
         # Assert
@@ -186,7 +201,9 @@ class TestMCPProtocol:
         }
 
         # Act
-        from src.trackhs_mcp.infrastructure.tools.create_maintenance_work_order import register_create_maintenance_work_order
+        from src.trackhs_mcp.infrastructure.tools.create_maintenance_work_order import (
+            register_create_maintenance_work_order,
+        )
         register_create_maintenance_work_order(mcp, mock_api_client)
 
         # Assert
@@ -204,7 +221,9 @@ class TestMCPProtocol:
         }
 
         # Act
-        from src.trackhs_mcp.infrastructure.tools.create_housekeeping_work_order import register_create_housekeeping_work_order
+        from src.trackhs_mcp.infrastructure.tools.create_housekeeping_work_order import (
+            register_create_housekeeping_work_order,
+        )
         register_create_housekeeping_work_order(mcp, mock_api_client)
 
         # Assert
@@ -217,7 +236,9 @@ class TestMCPProtocol:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.prompts.reservations import register_all_prompts
+        from src.trackhs_mcp.infrastructure.prompts.reservations import (
+            register_all_prompts,
+        )
         register_all_prompts(mcp, mock_api_client)
 
         # Assert
@@ -227,7 +248,9 @@ class TestMCPProtocol:
         """Test: El servidor MCP completo se integra correctamente"""
         # Arrange
         from src.trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
-        from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+        from src.trackhs_mcp.infrastructure.adapters.trackhs_api_client import (
+            TrackHSApiClient,
+        )
 
         # Act
         config = TrackHSConfig(
@@ -245,9 +268,13 @@ class TestMCPProtocol:
         )
 
         # Registrar todos los componentes
+        from src.trackhs_mcp.infrastructure.prompts.reservations import (
+            register_all_prompts,
+        )
         from src.trackhs_mcp.infrastructure.tools.registry import register_all_tools
-        from src.trackhs_mcp.infrastructure.tools.resources import register_all_resources
-        from src.trackhs_mcp.infrastructure.prompts.reservations import register_all_prompts
+        from src.trackhs_mcp.infrastructure.tools.resources import (
+            register_all_resources,
+        )
 
         register_all_tools(mcp, api_client)
         register_all_resources(mcp, api_client)

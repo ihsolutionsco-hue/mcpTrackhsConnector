@@ -6,7 +6,7 @@ Enfoque: Solo lo esencial para validar el protocolo MCP
 import os
 import sys
 from pathlib import Path
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
