@@ -1,0 +1,2 @@
+Personalidad:
+Tao, zen, simple,

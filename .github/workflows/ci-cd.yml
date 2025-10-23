@@ -17,6 +17,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git config --global init.defaultBranch main
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -54,6 +60,9 @@ jobs:
         CORS_ORIGINS=https://elevenlabs.io,https://app.elevenlabs.io
         DEBUG=false
         EOF
+
+        # Deshabilitar pre-commit hooks en CI
+        export SKIP=all
 
     - name: Run MCP Protocol Tests
       run: |
