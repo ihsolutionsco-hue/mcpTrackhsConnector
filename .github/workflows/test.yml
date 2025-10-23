@@ -37,6 +37,10 @@ jobs:
         pip install black isort flake8
         pip install coverage
 
+    - name: Set up Python path
+      run: |
+        echo "PYTHONPATH=${{ github.workspace }}/src:$PYTHONPATH" >> $GITHUB_ENV
+
     - name: Set up test environment
       run: |
         # Crear archivo .env desde cero para evitar problemas de codificación
@@ -57,14 +61,21 @@ jobs:
 
     - name: Validate MCP Server
       run: |
-        python -c "from src.trackhs_mcp.server import mcp; print('MCP Server imports successfully')"
+        python -c "
+        import sys
+        sys.path.insert(0, 'src')
+        from trackhs_mcp.server import mcp
+        print('MCP Server imports successfully')
+        "
 
     - name: Check MCP Tools Registration
       run: |
         python -c "
-        from src.trackhs_mcp.infrastructure.tools.registry import register_all_tools
-        from src.trackhs_mcp.infrastructure.tools.resources import register_all_resources
-        from src.trackhs_mcp.infrastructure.prompts.reservations import register_all_prompts
+        import sys
+        sys.path.insert(0, 'src')
+        from trackhs_mcp.infrastructure.tools.registry import register_all_tools
+        from trackhs_mcp.infrastructure.tools.resources import register_all_resources
+        from trackhs_mcp.infrastructure.prompts.reservations import register_all_prompts
         from fastmcp import FastMCP
         from unittest.mock import Mock
 
