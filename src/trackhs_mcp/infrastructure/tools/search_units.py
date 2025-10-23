@@ -80,9 +80,9 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
         # Parámetros de paginación
         page: int = Field(
             default=1,
-            description="Page number (1-based indexing). Max total results: 10,000.",
+            description="Page number (1-based indexing). Max total results: 10,000 (400 pages × 25 results max).",
             ge=1,
-            le=10000,
+            le=400,
         ),
         size: int = Field(
             default=3, description="Number of results per page (1-25)", ge=1, le=25

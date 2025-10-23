@@ -29,17 +29,18 @@ class UnitsAPIDocumentation:
             "pagination": {
                 "page": {
                     "type": "integer",
-                    "default": 0,
-                    "minimum": 0,
-                    "description": "Número de página (0-based)",
+                    "default": 1,
+                    "minimum": 1,
+                    "maximum": 400,
+                    "description": "Número de página (1-based). Max total results: 10,000 (400 pages × 25 results max)",
                     "max_total_results": 10000,
                 },
                 "size": {
                     "type": "integer",
                     "default": 3,
                     "minimum": 1,
-                    "maximum": 5,
-                    "description": "Tamaño de página",
+                    "maximum": 25,
+                    "description": "Tamaño de página (1-25)",
                 },
             },
             "sorting": {

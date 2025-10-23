@@ -25,7 +25,7 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
     async def search_amenities(
         page: int = Field(
             default=1,
-            description="Page number (1-based indexing). Max 10,000 total results.",
+            description="Page number (1-based indexing). Max 10,000 total results (10,000 pages max).",
             ge=1,
             le=10000,
         ),

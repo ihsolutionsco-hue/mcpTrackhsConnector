@@ -78,11 +78,11 @@ async def search_reservations_v2(
         default=0,
         description=(
             "Page number for pagination. Use 0-based indexing (0, 1, 2, ...). "
-            "Range: 0-9999. Examples: 0 (first page), 1 (second page). "
-            "Default: 0. Max total results: 10,000."
+            "Range: 0-99. Examples: 0 (first page), 1 (second page). "
+            "Default: 0. Max total results: 10,000 (100 pages × 100 results max)."
         ),
         ge=0,
-        le=9999,
+        le=99,
     ),
     size: int = Field(
         default=10,
@@ -369,9 +369,10 @@ async def search_reservations_v2(
     - Valid statuses: 'Hold', 'Confirmed', 'Cancelled', 'Checked In', 'Checked Out'
 
     📊 PAGINATION:
-    - page: 0-based indexing (0, 1, 2, ...)
+    - page: 0-based indexing (0, 1, 2, ..., 99)
     - size: 1-100 results per page
     - Default: page=0, size=10
+    - Max total results: 10,000 (100 pages × 100 results max)
 
     Returns:
         JSON string with reservation data including guest information, unit details,
