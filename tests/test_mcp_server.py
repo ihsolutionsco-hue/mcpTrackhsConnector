@@ -22,10 +22,10 @@ class TestMCPServer:
         """Test: El servidor MCP tiene los atributos requeridos del protocolo MCP"""
         # Arrange
         from src.trackhs_mcp.server import mcp
-        
+
         # Assert - Verificar atributos del protocolo MCP
         assert hasattr(mcp, "tool")
-        assert hasattr(mcp, "resource") 
+        assert hasattr(mcp, "resource")
         assert hasattr(mcp, "prompt")
         assert callable(mcp.tool)
         assert callable(mcp.resource)
@@ -36,11 +36,11 @@ class TestMCPServer:
         # Arrange
         test_config = {
             "TRACKHS_API_URL": "https://api-test.trackhs.com/api",
-            "TRACKHS_USERNAME": "test_user", 
+            "TRACKHS_USERNAME": "test_user",
             "TRACKHS_PASSWORD": "test_password",
             "TRACKHS_TIMEOUT": "30"
         }
-        
+
         # Act & Assert
         for key, value in test_config.items():
             assert value is not None
@@ -64,7 +64,7 @@ class TestMCPServer:
         """Test: Configuración CORS está presente para FastMCP Cloud"""
         # Act
         cors_origins = os.environ.get("CORS_ORIGINS", "")
-        
+
         # Assert
         assert "elevenlabs.io" in cors_origins or cors_origins == ""
 
@@ -72,7 +72,7 @@ class TestMCPServer:
         """Test: Transporte HTTP está configurado para FastMCP Cloud"""
         # Arrange
         from src.trackhs_mcp.server import mcp
-        
+
         # Assert
         assert mcp is not None
         # El transporte HTTP se maneja automáticamente por FastMCP Cloud
@@ -82,21 +82,21 @@ class TestMCPServer:
         # Arrange
         startup_steps = [
             "load_environment",
-            "create_config", 
+            "create_config",
             "create_api_client",
             "create_mcp_server",
             "register_tools",
-            "register_resources", 
+            "register_resources",
             "register_prompts",
             "apply_middleware",
             "start_server"
         ]
-        
+
         # Act
         completed_steps = []
         for step in startup_steps:
             completed_steps.append(step)
-        
+
         # Assert
         assert len(completed_steps) == len(startup_steps)
         assert "register_tools" in completed_steps
@@ -107,7 +107,7 @@ class TestMCPServer:
         """Test: El servidor es compatible con FastMCP Cloud"""
         # Arrange
         from src.trackhs_mcp.server import mcp
-        
+
         # Assert - Verificar que el servidor tiene los atributos necesarios para FastMCP Cloud
         assert mcp is not None
         assert hasattr(mcp, 'run')  # Método para ejecutar el servidor

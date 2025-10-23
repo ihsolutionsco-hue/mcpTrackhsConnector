@@ -5,7 +5,7 @@
 Esta estrategia de testing está diseñada específicamente para **proyectos MCP (Model Context Protocol)** con enfoque en:
 
 - ✅ **Validación del protocolo MCP** (tools, resources, prompts)
-- ✅ **Comportamiento, no implementación** 
+- ✅ **Comportamiento, no implementación**
 - ✅ **1 test = 1 funcionalidad crítica MCP**
 - ✅ **Feedback rápido para iteración ágil**
 - ✅ **Cobertura suficiente (35%) para MVP**
@@ -47,7 +47,7 @@ Verifican **comportamiento esencial** de cada componente MCP:
 
 #### **Herramientas MCP (7 tests)**
 - ✅ **search_reservations** - Búsqueda de reservas funciona
-- ✅ **get_reservation** - Obtención de reserva funciona  
+- ✅ **get_reservation** - Obtención de reserva funciona
 - ✅ **get_folio** - Obtención de folio funciona
 - ✅ **search_units** - Búsqueda de unidades funciona
 - ✅ **search_amenities** - Búsqueda de amenidades funciona

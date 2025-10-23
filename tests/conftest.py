@@ -160,7 +160,7 @@ def sample_mcp_prompt_data():
             "parameters": ["start_date", "end_date", "include_financials"],
         },
         "search-reservations-by-guest": {
-            "name": "search-reservations-by-guest", 
+            "name": "search-reservations-by-guest",
             "description": "Búsqueda por información del huésped",
             "parameters": ["guest_name", "contact_id", "include_financials"],
         },

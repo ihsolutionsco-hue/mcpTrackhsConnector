@@ -126,7 +126,7 @@ addopts = [
 ]
 markers = [
     "mcp_protocol: MCP Protocol tests",
-    "mcp_server: MCP Server tests", 
+    "mcp_server: MCP Server tests",
     "mcp_tools: MCP Tools tests",
     "mcp_resources: MCP Resources tests",
     "mcp_prompts: MCP Prompts tests"
