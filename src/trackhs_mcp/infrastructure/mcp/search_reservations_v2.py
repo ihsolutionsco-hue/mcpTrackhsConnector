@@ -21,7 +21,8 @@ from ..utils.type_normalization import (
     normalize_optional_string,
 )
 from ..utils.user_friendly_messages import format_date_error
-from ..utils.validation_decorator import validate_search_reservations_params
+
+# from ..utils.validation_decorator import validate_search_reservations_params  # Removed: causes *args issue with FastMCP
 from ..validation.date_validators import DateValidator
 
 
@@ -616,7 +617,6 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
     """Registra la herramienta search_reservations_v2 mejorada"""
 
     # Crear una función wrapper que capture api_client en el closure
-    @validate_search_reservations_params
     async def wrapped_search_reservations_v2(
         # ===========================================
         # PAGINATION PARAMETERS
