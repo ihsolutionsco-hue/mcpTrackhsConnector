@@ -328,16 +328,13 @@ def validate_search_reservations_parameters(params: Dict[str, Any]) -> Dict[str,
         if "in_house_today" in params:
             value = params["in_house_today"]
             if value is not None:
-                # Convertir string a int si es necesario
-                if isinstance(value, str):
-                    try:
-                        value = int(value)
-                    except ValueError:
-                        raise ValidationError(
-                            f"❌ Invalid in_house_today '{params['in_house_today']}'.\n"
-                            f"✅ Use integer values: 0 (not in house) or 1 (in house)\n"
-                            f"💡 Example: in_house_today=1"
-                        )
+                # Validar que sea integer
+                if not isinstance(value, int):
+                    raise ValidationError(
+                        f"❌ Invalid in_house_today '{value}'.\n"
+                        f"✅ Must be integer: 0 (not in house) or 1 (in house)\n"
+                        f"💡 Example: in_house_today=1"
+                    )
 
                 if value not in [0, 1]:
                     raise ValidationError(

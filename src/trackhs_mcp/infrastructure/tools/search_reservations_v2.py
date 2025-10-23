@@ -296,12 +296,11 @@ async def search_reservations_v2(
             "use comma-separated values like 'Confirmed,Hold'"
         ),
     ),
-    in_house_today: Optional[Union[int, str]] = Field(
+    in_house_today: Optional[int] = Field(
         default=None,
         description=(
             "Filter by in-house today status. Use 0 (not in house) or 1 (in house). "
-            "Accepts: 0, 1, '0', '1'. Examples: 1 (guests currently in house), "
-            "0 (not in house). "
+            "Examples: 1 (guests currently in house), 0 (not in house). "
             "To omit this filter, simply don't include this parameter."
         ),
     ),
@@ -432,7 +431,10 @@ async def search_reservations_v2(
     # (en caso de que vengan como string de otros sistemas)
     page_normalized = normalize_int(page, "page")
     size_normalized = normalize_int(size, "size")
-    in_house_today_normalized = normalize_binary_int(in_house_today, "in_house_today")
+    # in_house_today debe ser integer según documentación API
+    in_house_today_normalized = (
+        in_house_today if isinstance(in_house_today, int) else None
+    )
     group_id_normalized = normalize_int(group_id, "group_id")
     checkin_office_id_normalized = normalize_int(checkin_office_id, "checkin_office_id")
 
@@ -877,11 +879,11 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
                 "To omit this filter, simply don't include this parameter."
             ),
         ),
-        in_house_today: Optional[Union[int, str]] = Field(
+        in_house_today: Optional[int] = Field(
             default=None,
             description=(
                 "Filter by in-house today (0=not in house, 1=in house). "
-                "Accepts: 0, 1, '0', '1'. Maps to API parameter 'inHouseToday'."
+                "Maps to API parameter 'inHouseToday'."
             ),
         ),
         group_id: Optional[Union[int, str]] = Field(

@@ -544,9 +544,9 @@ class SearchReservationsParams(PaginationParams, SearchParams):
         default=None,
         description="Scroll de Elasticsearch (1 para empezar, string para continuar)",
     )
-    in_house_today: Optional[Union[int, str]] = Field(
+    in_house_today: Optional[int] = Field(
         default=None,
-        description="Filtrar por en casa hoy (0=no en casa, 1=en casa). Accepts: 0, 1, '0', '1'",
+        description="Filtrar por en casa hoy (0=no en casa, 1=en casa). Accepts: 0, 1",
     )
     status: Optional[
         Union[
