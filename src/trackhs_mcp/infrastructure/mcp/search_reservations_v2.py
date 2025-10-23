@@ -623,13 +623,19 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         # ===========================================
         page: int = Field(
             default=0,
-            description="Page number (0-based indexing). Max total results: 10,000. Maps to API parameter 'page'.",
+            description=(
+                "Page number (0-based indexing). Max total results: 10,000. "
+                "Maps to API parameter 'page'."
+            ),
             ge=0,
             le=10000,
         ),
         size: int = Field(
             default=10,
-            description="Number of results per page (1-100). Maps to API parameter 'size'.",
+            description=(
+                "Number of results per page (1-100). "
+                "Maps to API parameter 'size'."
+            ),
             ge=1,
             le=100,
         ),
@@ -659,14 +665,21 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         ),
         sort_direction: Literal["asc", "desc"] = Field(
             default="asc",
-            description="Sort direction: 'asc' or 'desc'. Disabled when using scroll. Maps to API parameter 'sortDirection'.",
+            description=(
+                "Sort direction: 'asc' or 'desc'. Disabled when using scroll. "
+                "Maps to API parameter 'sortDirection'."
+            ),
         ),
         # ===========================================
         # SEARCH PARAMETERS
         # ===========================================
         search: Optional[str] = Field(
             default=None,
-            description="Full-text search in reservation names, guest names, and descriptions. Example: 'John Smith' or 'Villa Paradise'. Maximum 200 characters. Maps to API parameter 'search'.",
+            description=(
+                "Full-text search in reservation names, guest names, and descriptions. "
+                "Example: 'John Smith' or 'Villa Paradise'. Maximum 200 characters. "
+                "Maps to API parameter 'search'."
+            ),
             max_length=200,
         ),
         # ===========================================
@@ -718,34 +731,67 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         # Booking date range
         booked_start: Optional[str] = Field(
             default=None,
-            description="Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'bookedStart'.",
+            description=(
+                "Filter by booking date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-01-15'. To omit this filter, simply don't include this parameter. "
+                "Do NOT use 'null'. Maps to API parameter 'bookedStart'."
+            ),
         ),
         booked_end: Optional[str] = Field(
             default=None,
-            description="Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-12-31'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'bookedEnd'.",
+            description=(
+                "Filter by booking date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-12-31'. To omit this filter, simply don't include this parameter. "
+                "Do NOT use 'null'. Maps to API parameter 'bookedEnd'."
+            ),
         ),
         # Arrival date range
         arrival_start: Optional[str] = Field(
             default=None,
-            description="Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'arrivalStart'.",
+            description=(
+                "Filter by arrival date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
+                "simply don't include this parameter. Do NOT use 'null'. "
+                "Maps to API parameter 'arrivalStart'."
+            ),
         ),
         arrival_end: Optional[str] = Field(
             default=None,
-            description="Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'arrivalEnd'.",
+            description=(
+                "Filter by arrival date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
+                "simply don't include this parameter. Do NOT use 'null'. "
+                "Maps to API parameter 'arrivalEnd'."
+            ),
         ),
         # Departure date range
         departure_start: Optional[str] = Field(
             default=None,
-            description="Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'departureStart'.",
+            description=(
+                "Filter by departure date start (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
+                "simply don't include this parameter. Do NOT use 'null'. "
+                "Maps to API parameter 'departureStart'."
+            ),
         ),
         departure_end: Optional[str] = Field(
             default=None,
-            description="Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'departureEnd'.",
+            description=(
+                "Filter by departure date end (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
+                "simply don't include this parameter. Do NOT use 'null'. "
+                "Maps to API parameter 'departureEnd'."
+            ),
         ),
         # Last update filter
         updated_since: Optional[str] = Field(
             default=None,
-            description="Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, simply don't include this parameter. Do NOT use 'null'. Maps to API parameter 'updatedSince'.",
+            description=(
+                "Filter by last update date (ISO 8601: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSZ). "
+                "Example: '2024-01-15' or '2024-01-15T10:00:00Z'. To omit this filter, "
+                "simply don't include this parameter. Do NOT use 'null'. "
+                "Maps to API parameter 'updatedSince'."
+            ),
         ),
         # Otros filtros
         status: Optional[str] = Field(
