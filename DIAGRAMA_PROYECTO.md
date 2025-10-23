@@ -199,7 +199,7 @@ MCPtrackhsConnector/
     Tests Críticos: 27/27 ✅
     Tests Totales:  299+ tests
     Cobertura:      95%+
-    
+
     ┌─────────────────────┐
     │  Pre-commit Hooks   │
     ├─────────────────────┤
@@ -209,7 +209,7 @@ MCPtrackhsConnector/
     │  • Pytest           │
     │  • YAML validation  │
     └─────────────────────┘
-    
+
     Tiempo: 20-40s
 
 
