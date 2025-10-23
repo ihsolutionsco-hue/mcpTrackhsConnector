@@ -621,15 +621,15 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         # ===========================================
         # PAGINATION PARAMETERS
         # ===========================================
-        page: Union[int, str] = Field(
+        page: int = Field(
             default=0,
-            description="Page number (0-based indexing). Max total results: 10,000. Accepts: integer or string. Maps to API parameter 'page'.",
+            description="Page number (0-based indexing). Max total results: 10,000. Maps to API parameter 'page'.",
             ge=0,
             le=10000,
         ),
-        size: Union[int, str] = Field(
+        size: int = Field(
             default=10,
-            description="Number of results per page (1-100). Accepts: integer or string. Maps to API parameter 'size'.",
+            description="Number of results per page (1-100). Maps to API parameter 'size'.",
             ge=1,
             le=100,
         ),
@@ -779,10 +779,16 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
         ),
     ) -> Dict[str, Any]:
         """Search reservations in Track HS API with advanced filtering and pagination."""
+        # Convertir parámetros numéricos a enteros si vienen como strings
+        page_int = int(page) if isinstance(page, str) else page
+        size_int = int(size) if isinstance(size, str) else size
+        group_id_int = int(group_id) if isinstance(group_id, str) and group_id is not None else group_id
+        checkin_office_id_int = int(checkin_office_id) if isinstance(checkin_office_id, str) and checkin_office_id is not None else checkin_office_id
+
         return await search_reservations_v2(
             api_client,
-            page=page,
-            size=size,
+            page=page_int,
+            size=size_int,
             sort_column=sort_column,
             sort_direction=sort_direction,
             search=search,
@@ -805,8 +811,8 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             updated_since=updated_since,
             status=status,
             in_house_today=in_house_today,
-            group_id=group_id,
-            checkin_office_id=checkin_office_id,
+            group_id=group_id_int,
+            checkin_office_id=checkin_office_id_int,
             scroll=scroll,
         )
 
