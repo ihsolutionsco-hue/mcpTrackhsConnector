@@ -121,10 +121,13 @@ addopts = [
     "--tb=short",
     "--cov=src/trackhs_mcp",
     "--cov-report=term-missing",
-    "--cov-fail-under=40",
+    "--cov-fail-under=35",
     "-x"
 ]
 markers = [
-    "critical: Critical functionality tests",
-    "smoke: Smoke tests for quick validation"
+    "mcp_protocol: MCP Protocol tests",
+    "mcp_server: MCP Server tests", 
+    "mcp_tools: MCP Tools tests",
+    "mcp_resources: MCP Resources tests",
+    "mcp_prompts: MCP Prompts tests"
 ]

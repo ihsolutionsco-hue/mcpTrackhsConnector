@@ -1,4 +1,4 @@
-# Testing Strategy - MCP Protocol Super Simple MVP
+# Estrategia de Testing MCP - Super Simple MVP
 
 ## 🎯 **Filosofía de Testing para Protocolo MCP**
 
@@ -31,7 +31,7 @@ tests/
 ├── test_mcp_protocol.py    # 14 tests - Validación del protocolo MCP
 ├── test_mcp_server.py     # 9 tests - Servidor MCP básico
 ├── conftest.py            # Fixtures básicas
-└── README.md              # Esta documentación
+└── README.md              # Documentación de tests
 ```
 
 **Total**: 23 tests (vs 121 anteriores) = **81% reducción**
