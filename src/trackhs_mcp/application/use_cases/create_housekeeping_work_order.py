@@ -7,14 +7,14 @@ de housekeeping en TrackHS.
 
 from typing import TYPE_CHECKING, Any, Dict
 
-from trackhs_mcp.domain.entities.housekeeping_work_orders import (
+from ...domain.entities.housekeeping_work_orders import (
     CreateHousekeepingWorkOrderParams,
     HousekeepingWorkOrder,
     HousekeepingWorkOrderResponse,
 )
 
 if TYPE_CHECKING:
-    from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+    from ...infrastructure.adapters.trackhs_api_client import TrackHSApiClient
 
 
 class CreateHousekeepingWorkOrderUseCase:

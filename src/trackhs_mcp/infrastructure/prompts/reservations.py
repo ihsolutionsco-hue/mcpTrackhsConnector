@@ -10,7 +10,18 @@ if TYPE_CHECKING:
 
 
 def register_all_prompts(mcp, api_client: "ApiClientPort"):
-    """Registra todos los prompts MCP para TrackHS"""
+    """
+    Registra todos los prompts MCP para TrackHS
+
+    Args:
+        mcp: Instancia del servidor FastMCP
+        api_client: Cliente API de Track HS
+
+    Raises:
+        TypeError: Si api_client es None
+    """
+    if api_client is None:
+        raise TypeError("api_client cannot be None")
 
     # Prompt para búsqueda por rango de fechas
     @mcp.prompt

@@ -33,7 +33,25 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     Args:
         mcp: Instancia del servidor FastMCP
         api_client: Cliente API de Track HS
+
+    Raises:
+        TypeError: Si api_client es None
+        AttributeError: Si api_client no tiene los métodos requeridos
     """
+    if api_client is None:
+        raise TypeError("api_client cannot be None")
+
+    # Verificar que api_client tiene los métodos requeridos
+    required_methods = ["get", "post"]
+    for method in required_methods:
+        if not hasattr(api_client, method):
+            raise AttributeError(f"api_client must have '{method}' method")
+
+    # Verificar que los métodos son callable
+    for method in required_methods:
+        if not callable(getattr(api_client, method)):
+            raise AttributeError(f"api_client.{method} must be callable")
+
     # Registrar herramientas
     register_search_reservations_v2(
         mcp, api_client

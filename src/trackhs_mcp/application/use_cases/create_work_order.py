@@ -8,13 +8,13 @@ siguiendo los principios de Clean Architecture.
 from datetime import datetime
 from typing import Any, Dict
 
-from trackhs_mcp.application.ports.api_client_port import ApiClientPort
-from trackhs_mcp.domain.entities.work_orders import (
+from ...application.ports.api_client_port import ApiClientPort
+from ...domain.entities.work_orders import (
     CreateWorkOrderParams,
     WorkOrder,
     WorkOrderResponse,
 )
-from trackhs_mcp.domain.exceptions import (
+from ...domain.exceptions import (
     ApiError,
     AuthenticationError,
     AuthorizationError,

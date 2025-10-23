@@ -225,7 +225,17 @@ def create_schema_fixed_server(name: str = "TrackHS MCP Server") -> FastMCP:
 
     Returns:
         Servidor FastMCP con hook aplicado
+
+    Raises:
+        TypeError: Si name no es un string
+        ValueError: Si name está vacío
     """
+    if not isinstance(name, str):
+        raise TypeError("name must be a string")
+
+    if not name.strip():
+        raise ValueError("name cannot be empty")
+
     # Crear servidor FastMCP con validación flexible para compatibilidad MCP
     # Usar try/except para compatibilidad con versiones anteriores de FastMCP
     try:

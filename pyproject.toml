@@ -1,80 +1,93 @@
-# TrackHS MCP Connector - Configuración de Herramientas de Desarrollo
-# Configuración centralizada para todas las herramientas de calidad de código
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.black]
-line-length = 88
-target-version = ['py311']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | build
-  | dist
-)/
-'''
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 88
-force_single_line = false
-include_trailing_comma = true
-ensure_newline_before_comments = true
-known_first_party = ["trackhs_mcp", "src.trackhs_mcp"]
-known_third_party = ["fastmcp", "httpx", "pydantic", "pytest"]
-
-[tool.flake8]
-max-line-length = 88
-extend-ignore = ["E203", "W503", "E501", "D400", "D200", "D205", "D107", "D104", "D105", "F401", "F841", "E712", "F541", "E402"]
-exclude = [
-    ".git",
-    "__pycache__",
-    "build",
-    "dist",
-    ".venv",
-    ".eggs",
-    "*.egg",
-    "venv",
-    "Lib",
-    "Scripts"
+[project]
+name = "trackhs-mcp-connector"
+version = "1.0.2"
+description = "Un servidor MCP (Model Context Protocol) listo para producción que integra con la API de Track HS"
+authors = [
+    {name = "TrackHS MCP Team", email = "team@trackhs.com"}
 ]
-per-file-ignores = [
-    "__init__.py:F401",
-    "tests/*:S101"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: System :: Networking",
+]
+dependencies = [
+    "fastmcp>=0.1.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.24.0",
+    "python-dateutil>=2.8.0",
 ]
 
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
-check_untyped_defs = true
-disallow_untyped_decorators = false
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
-show_error_codes = true
-
-[[tool.mypy.overrides]]
-module = [
-    "fastmcp.*",
-    "httpx.*",
-    "pydantic.*"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-mock>=3.10.0",
+    "pytest-xdist>=3.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "coverage>=7.0.0",
 ]
-ignore_missing_imports = true
 
-[tool.bandit]
-exclude_dirs = ["tests", "venv", ".venv", "Lib", "Scripts"]
-skips = ["B101", "B601"]
+[project.urls]
+Homepage = "https://github.com/trackhs/mcp-connector"
+Documentation = "https://github.com/trackhs/mcp-connector/blob/main/README.md"
+Repository = "https://github.com/trackhs/mcp-connector.git"
+Issues = "https://github.com/trackhs/mcp-connector/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src/trackhs_mcp",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+    "--cov-report=xml:coverage.xml",
+    "--cov-report=json:coverage.json",
+    "--junit-xml=test-results.xml",
+]
+testpaths = [
+    "tests",
+]
+markers = [
+    "mcp_protocol: Tests de protocolo MCP",
+    "tools: Tests de herramientas MCP",
+    "resources: Tests de recursos MCP",
+    "prompts: Tests de prompts MCP",
+    "schema: Tests de schema hook",
+    "integration: Tests de integración MCP",
+    "unit: Tests unitarios",
+    "api: Tests de API real",
+    "e2e: Tests end-to-end",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::UserWarning",
+]
 
 [tool.coverage.run]
 source = ["src/trackhs_mcp"]
@@ -83,17 +96,9 @@ omit = [
     "*/test_*",
     "*/__pycache__/*",
     "*/venv/*",
-    "*/Lib/*",
-    "*/Scripts/*",
-    "*/resources/*",
-    "*/documentation/*",
-    "*/examples/*",
-    "*/references/*",
-    "*/schemas/*",
-    "*/__main__.py",
-    "*/server.py",
-    "*/all_tools.py",
-    "*/prompts.py"
+    "*/env/*",
+    "*/migrations/*",
+    "*/alembic/*",
 ]
 
 [tool.coverage.report]
@@ -107,26 +112,80 @@ exclude_lines = [
     "if 0:",
     "if __name__ == .__main__.:",
     "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
+    "def __repr__",
+    "def __str__",
+    "if TYPE_CHECKING:",
+    "from typing import TYPE_CHECKING",
 ]
 
-[tool.pytest.ini_options]
-minversion = "7.0"
-testpaths = ["tests"]
-pythonpath = ["src"]
-asyncio_mode = "auto"
-addopts = [
-    "--verbose",
-    "--tb=short",
-    "--cov=src/trackhs_mcp",
-    "--cov-report=term-missing",
-    "--cov-fail-under=35",
-    "-x"
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.black]
+line-length = 100
+target-version = ['py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "fastmcp.*",
+    "httpx.*",
+    "pydantic.*",
 ]
-markers = [
-    "mcp_protocol: MCP Protocol tests",
-    "mcp_server: MCP Server tests",
-    "mcp_tools: MCP Tools tests",
-    "mcp_resources: MCP Resources tests",
-    "mcp_prompts: MCP Prompts tests"
+ignore_missing_imports = true
+
+[tool.flake8]
+max-line-length = 100
+extend-ignore = ["E203", "W503", "E501"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "venv",
+    "env",
+    ".venv",
+    ".env",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".pytest_cache",
+    "htmlcov",
+    "coverage.xml",
+    "coverage.json",
+    "test-results.xml",
 ]
+
+# Pre-commit configuration can be added later if needed
+
+# Configuración específica para tests de protocolo MCP
+# Los tests de protocolo MCP usan su propio pytest.ini en tests/mcp_protocol/

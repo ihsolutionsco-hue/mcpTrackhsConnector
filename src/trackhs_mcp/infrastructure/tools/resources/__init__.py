@@ -9,7 +9,19 @@ if TYPE_CHECKING:
 
 
 def register_all_resources(mcp, api_client: "ApiClientPort"):
-    """Registra todos los resources MCP organizados por categoría"""
+    """
+    Registra todos los resources MCP organizados por categoría
+
+    Args:
+        mcp: Instancia del servidor FastMCP
+        api_client: Cliente API de Track HS
+
+    Raises:
+        TypeError: Si api_client es None
+    """
+    if api_client is None:
+        raise TypeError("api_client cannot be None")
+
     from .documentation import register_documentation_resources
     from .examples import register_example_resources
     from .references import register_reference_resources
