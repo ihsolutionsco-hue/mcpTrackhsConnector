@@ -2,8 +2,9 @@
 
 Un servidor MCP (Model Context Protocol) listo para producción que integra con la API de Track HS, implementando principios de Clean Architecture y características completas del protocolo MCP.
 
-**Versión**: 1.0.1 (12 de Octubre, 2025)
+**Versión**: 1.0.2 (Diciembre 2024)
 **Estado**: ✅ **Producción Ready** - 100% funcional
+**Archivos**: 86 archivos Python | ~15,000 LOC
 
 ## 🎯 **¿Qué es esto?**
 
@@ -17,13 +18,14 @@ El [Model Context Protocol](https://modelcontextprotocol.io) es un estándar abi
 
 ## 🚀 **Características Principales**
 
-### **Herramientas MCP (6)**
-- **`search_reservations_v2`**: ✅ **100% funcional** - Búsqueda avanzada de reservas usando API V2
-- **`get_reservation_v2`**: ✅ **100% funcional** - Obtención de reserva específica por ID
+### **Herramientas MCP (7)**
+- **`search_reservations`**: ✅ **100% funcional** - Búsqueda avanzada de reservas usando API V2 (35+ filtros)
+- **`get_reservation`**: ✅ **100% funcional** - Obtención de reserva específica por ID
 - **`get_folio`**: ✅ **100% funcional** - Obtención de folio específico por ID
-- **`search_units`**: ✅ **100% funcional** - Búsqueda de unidades usando Channel API
+- **`search_units`**: ✅ **100% funcional** - Búsqueda de unidades usando Channel API (35+ filtros)
 - **`search_amenities`**: ✅ **100% funcional** - Búsqueda de amenidades usando Channel API
 - **`create_maintenance_work_order`**: ✅ **100% funcional** - Creación de órdenes de trabajo de mantenimiento
+- **`create_housekeeping_work_order`**: ✅ **100% funcional** - Creación de órdenes de trabajo de housekeeping
 
 ### **Recursos MCP (16)**
 **Schemas (6):**
@@ -56,12 +58,13 @@ El [Model Context Protocol](https://modelcontextprotocol.io) es un estándar abi
 - **`search-reservations-advanced`**: Búsqueda avanzada con múltiples filtros
 
 ### **Arquitectura Limpia**
-- **Capa de Dominio**: Lógica de negocio y entidades (53 archivos Python)
-- **Capa de Aplicación**: Casos de uso e interfaces
-- **Capa de Infraestructura**: Adaptadores externos y utilidades
+- **Capa de Dominio**: Lógica de negocio y entidades (86 archivos Python)
+- **Capa de Aplicación**: Casos de uso e interfaces (8 archivos)
+- **Capa de Infraestructura**: Adaptadores externos y utilidades (34 archivos)
 - **Inyección de Dependencias**: Fácil testing y mantenimiento
 - **Suite de Tests**: 299+ tests con 95%+ cobertura de código
 - **Validación Continua**: 27/27 tests pasando (100%)
+- **Pre-commit Hooks**: 8 hooks optimizados (20-40s)
 
 ## 🚀 **Inicio Rápido**
 
@@ -130,30 +133,31 @@ pytest tests/e2e/ -v                     # Tests end-to-end
 ## 🏗️ **Arquitectura del Proyecto**
 
 ```
-src/trackhs_mcp/              # Código principal (53 archivos Python)
-├── domain/                   # Lógica de negocio y entidades
-│   ├── entities/             # Entidades de negocio (Reservation, etc.)
-│   ├── value_objects/        # Objetos de valor (Config, Request, etc.)
-│   └── exceptions/           # Excepciones del dominio
-├── application/              # Casos de uso e interfaces
-│   ├── use_cases/           # Casos de uso de negocio
-│   └── ports/               # Interfaces (API Client Port)
-└── infrastructure/          # Adaptadores externos y utilidades
-    ├── adapters/            # Cliente API, configuración
-    ├── mcp/                 # Implementación del protocolo MCP
-    └── utils/               # Utilidades (auth, logging, etc.)
+src/trackhs_mcp/              # Código principal (86 archivos Python)
+├── domain/                   # Lógica de negocio y entidades (10 archivos)
+│   ├── entities/             # Entidades de negocio (7 archivos)
+│   ├── value_objects/        # Objetos de valor (2 archivos)
+│   └── exceptions/           # Excepciones del dominio (1 archivo)
+├── application/              # Casos de uso e interfaces (8 archivos)
+│   ├── use_cases/           # Casos de uso de negocio (7 archivos)
+│   └── ports/               # Interfaces (1 archivo)
+└── infrastructure/          # Adaptadores externos y utilidades (68 archivos)
+    ├── adapters/            # Cliente API, configuración (2 archivos)
+    ├── tools/               # Herramientas MCP (7 archivos)
+    │   └── resources/        # Recursos MCP (16 archivos)
+    ├── middleware/           # Middleware (3 archivos)
+    ├── utils/                # Utilidades (11 archivos)
+    └── validation/          # Validadores (3 archivos)
 
-docs/                         # Documentación organizada por tema
-├── api/                     # Documentación de API
-├── MCP/                     # Documentación del protocolo MCP
+docs/                         # Documentación organizada por tema (1,200+ archivos)
+├── archive/                  # Documentación archivada
 └── trackhsDoc/              # Documentación específica de Track HS
 
-scripts/                      # Scripts de desarrollo y testing
+scripts/                      # Scripts de desarrollo y testing (62 archivos)
 examples/                    # Código de ejemplo y patrones de uso
 tests/                       # Suite de tests comprehensiva (29 archivos)
-├── unit/                    # Tests unitarios
-├── integration/             # Tests de integración
-└── e2e/                     # Tests end-to-end
+├── critical/                # Tests críticos (9 archivos)
+└── smoke/                   # Tests de humo (4 archivos)
 ```
 
 ### **Beneficios de Clean Architecture**
@@ -235,7 +239,7 @@ pytest tests/ --lf --ff -x -n auto --no-cov
 
 ### **"Authentication failed"**
 - **Causa**: Credenciales inválidas o URL de API incorrecta
-- **Solución**: Verificar credenciales en archivo `.env`
+- **Solución**: Verificar credenciales en archivo `.env` o variables de entorno de FastMCP Cloud
 
 ### **"Cannot connect to MCP server"**
 - **Causa**: Servidor no corriendo o configuración incorrecta
@@ -249,24 +253,95 @@ pytest tests/ --lf --ff -x -n auto --no-cov
 - **Causa**: pytest-xdist no instalado
 - **Solución**: `pip install pytest-xdist`
 
+### **Pre-commit hooks fallan**
+- **Causa**: Dependencias de desarrollo faltantes
+- **Solución**: `pip install -r requirements-dev.txt`
+
+### **FastMCP Cloud deployment falla**
+- **Causa**: Variables de entorno no configuradas
+- **Solución**: Configurar `TRACKHS_USERNAME` y `TRACKHS_PASSWORD` en FastMCP Cloud
+
 ### **Saltar tests temporalmente**
 ```bash
 # Para desarrollo iterativo rápido
 git commit --no-verify -m "WIP"
 ```
 
+## 🔧 **Mejores Prácticas**
+
+### **Desarrollo**
+- ✅ **Usar pre-commit hooks** para mantener calidad de código
+- ✅ **Ejecutar tests antes de push** para evitar fallos en CI/CD
+- ✅ **Mantener cobertura > 40%** para MVP FastMCP
+- ✅ **Documentar cambios** en commits descriptivos
+- ✅ **Usar type hints** para mejor mantenibilidad
+
+### **Testing**
+- ✅ **Tests críticos primero** para validación rápida
+- ✅ **Smoke tests** para verificación básica
+- ✅ **Tests en paralelo** para velocidad
+- ✅ **Cobertura suficiente** (40% para MVP)
+
+### **Deployment**
+- ✅ **Variables de entorno** configuradas correctamente
+- ✅ **FastMCP Cloud** para deployment automático
+- ✅ **Health checks** para monitoreo
+- ✅ **Logs estructurados** para debugging
+
+### **MCP Protocol**
+- ✅ **Herramientas bien documentadas** con ejemplos
+- ✅ **Recursos completos** (schemas, docs, examples)
+- ✅ **Prompts útiles** para casos de uso comunes
+- ✅ **Validación estricta** de parámetros
+- ✅ **Manejo de errores** user-friendly
+
 ## 🚀 **Despliegue**
 
 ### **FastMCP Cloud (Recomendado)**
 
 1. **Conectar repositorio en FastMCP Cloud dashboard**
-2. **Hacer push a main**
+2. **Configurar variables de entorno en FastMCP Cloud:**
+   ```bash
+   TRACKHS_API_URL=https://api.trackhs.com/api
+   TRACKHS_USERNAME=tu_usuario
+   TRACKHS_PASSWORD=tu_contraseña
+   TRACKHS_TIMEOUT=30
+   ```
+3. **Hacer push a main**
    ```bash
    git add .
    git commit -m "feat: Nueva funcionalidad"
    git push origin main
    ```
-3. **FastMCP detecta automáticamente y despliega**
+4. **FastMCP detecta automáticamente y despliega**
+
+### **Configuración FastMCP**
+
+El proyecto incluye configuración optimizada para FastMCP Cloud:
+
+```json
+{
+  "source": {
+    "path": "src/trackhs_mcp/__main__.py",
+    "entrypoint": "mcp"
+  },
+  "environment": {
+    "type": "uv",
+    "python": ">=3.10",
+    "requirements": "requirements.txt"
+  },
+  "transport": {
+    "type": "http",
+    "port": 8080,
+    "host": "0.0.0.0"
+  },
+  "server": {
+    "name": "TrackHS MCP Server",
+    "description": "Conector MCP para TrackHS API - IHVM Vacations",
+    "version": "1.0.0"
+  }
+}
+```
 
 ### **Despliegue Local**
 
@@ -274,12 +349,35 @@ git commit --no-verify -m "WIP"
 # Instalar dependencias
 pip install -r requirements.txt
 
-# Ejecutar servidor (FastMCP Cloud maneja HTTP automáticamente)
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales
+
+# Ejecutar servidor
 python -m src.trackhs_mcp
 
-# En FastMCP Cloud, el servidor estará disponible en:
-# - HTTP: https://tu-servidor.fastmcp.cloud/mcp
-# - Health: https://tu-servidor.fastmcp.cloud/health
+# El servidor estará disponible en:
+# - HTTP: http://localhost:8080/mcp
+# - Health: http://localhost:8080/health
+```
+
+### **Integración con Claude Desktop**
+
+```json
+{
+  "mcpServers": {
+    "trackhs": {
+      "command": "python",
+      "args": ["-m", "src.trackhs_mcp"],
+      "cwd": "/path/to/MCPtrackhsConnector",
+      "env": {
+        "TRACKHS_API_URL": "https://api.trackhs.com/api",
+        "TRACKHS_USERNAME": "your_username",
+        "TRACKHS_PASSWORD": "your_password"
+      }
+    }
+  }
+}
 ```
 
 ## 📊 **Métricas de Éxito**
@@ -326,11 +424,24 @@ python -m src.trackhs_mcp
 
 ## 🔧 **Herramientas MCP Detalladas**
 
-### **`search_units` - Búsqueda de Unidades**
-Nueva herramienta MCP para obtener información completa de unidades desde la Channel API de Track HS.
+### **`search_reservations` - Búsqueda de Reservas**
+Herramienta MCP para búsqueda avanzada de reservas usando Track HS API V2.
 
 **Características:**
-- ✅ **29+ parámetros de filtrado** (paginación, búsqueda, filtros por características)
+- ✅ **35+ parámetros de filtrado** (fechas, estado, huésped, ubicación, paginación)
+- ✅ **Búsqueda por fechas** (llegada, salida, reserva, actualización)
+- ✅ **Filtros de estado** (confirmada, cancelada, en casa, etc.)
+- ✅ **Búsqueda por huésped** (nombre, contacto, agente de viajes)
+- ✅ **Filtros de ubicación** (nodos, unidades, tipos de unidad)
+- ✅ **Ordenamiento flexible** (por fecha, nombre, estado, etc.)
+- ✅ **Paginación robusta** (hasta 10,000 resultados)
+- ✅ **Validación estricta** (formatos ISO 8601, valores válidos)
+
+### **`search_units` - Búsqueda de Unidades**
+Herramienta MCP para obtener información completa de unidades desde la Channel API de Track HS.
+
+**Características:**
+- ✅ **35+ parámetros de filtrado** (paginación, búsqueda, filtros por características)
 - ✅ **Filtros avanzados** (habitaciones, baños, amenidades, políticas, disponibilidad)
 - ✅ **Búsqueda por texto** (nombre, descripción, código de unidad)
 - ✅ **Filtros de ubicación** (nodos, amenidades, tipos de unidad)
@@ -340,22 +451,74 @@ Nueva herramienta MCP para obtener información completa de unidades desde la Ch
 - ✅ **Paginación robusta** (limitado a 10k resultados totales)
 - ✅ **Validación estricta** (formatos de fecha ISO 8601, valores booleanos 0/1)
 
+### **`search_amenities` - Búsqueda de Amenidades**
+Herramienta MCP para buscar amenidades usando Channel API de Track HS.
+
+**Características:**
+- ✅ **Filtros por grupo** (ID de grupo de amenidades)
+- ✅ **Filtros de visibilidad** (público, privado, buscable)
+- ✅ **Búsqueda por texto** (ID y nombre de amenidades)
+- ✅ **Ordenamiento flexible** (por ID, orden, visibilidad, fecha)
+- ✅ **Paginación robusta** (hasta 10,000 resultados)
+- ✅ **Validación estricta** (valores booleanos 0/1)
+
+### **`create_maintenance_work_order` - Crear Orden de Mantenimiento**
+Herramienta MCP para crear órdenes de trabajo de mantenimiento en Track HS.
+
+**Características:**
+- ✅ **Parámetros obligatorios** (fecha recibida, prioridad, estado, resumen, costo, tiempo)
+- ✅ **Parámetros opcionales** (fecha programada, usuario, vendedor, unidad, reserva)
+- ✅ **Validación de fechas** (formato ISO 8601)
+- ✅ **Validación de prioridad** (1-5: Baja, Media, Alta)
+- ✅ **Estados válidos** (abierto, en progreso, completado, etc.)
+- ✅ **Manejo de errores** (validación, autenticación, autorización)
+
+### **`create_housekeeping_work_order` - Crear Orden de Housekeeping**
+Herramienta MCP para crear órdenes de trabajo de housekeeping en Track HS.
+
+**Características:**
+- ✅ **Parámetros obligatorios** (fecha programada)
+- ✅ **Parámetros opcionales** (unidad, tipo de limpieza, usuario, vendedor)
+- ✅ **Validación de fechas** (formato ISO 8601)
+- ✅ **Tipos de limpieza** (inspección, limpieza regular, etc.)
+- ✅ **Manejo de errores** (validación, autenticación, autorización)
+
 **Ejemplos de Uso:**
 ```python
-# Búsqueda básica
-search_units(page=0, size=25)
+# Búsqueda básica de reservas
+search_reservations(page=0, size=10, status="Confirmed")
 
-# Filtro por características
-search_units(bedrooms=2, bathrooms=2, pets_friendly=1, is_active=1)
+# Búsqueda por fechas
+search_reservations(
+    arrival_start="2024-01-01",
+    arrival_end="2024-01-31",
+    status="Confirmed"
+)
+
+# Búsqueda de unidades con características
+search_units(
+    bedrooms=2,
+    bathrooms=2,
+    pets_friendly=1,
+    is_active=1
+)
 
 # Búsqueda por disponibilidad
-search_units(arrival="2024-01-01", departure="2024-01-07", is_bookable=1)
+search_units(
+    arrival="2024-01-01",
+    departure="2024-01-07",
+    is_bookable=1
+)
 
-# Filtro por amenidades
-search_units(amenity_id="1,2,3", pets_friendly=1, events_allowed=1)
-
-# Búsqueda por ubicación
-search_units(node_id="1,2,3", is_active=1)
+# Crear orden de mantenimiento
+create_maintenance_work_order(
+    date_received="2024-01-15",
+    priority=3,
+    status="open",
+    summary="Reparar aire acondicionado",
+    estimated_cost=150.00,
+    estimated_time=120
+)
 ```
 
 ## 📚 **Documentación Adicional**
@@ -387,23 +550,25 @@ search_units(node_id="1,2,3", is_active=1)
 
 ## 📈 **Estado del Proyecto**
 
-### **Últimas Actualizaciones (v1.0.2 - 17 Oct 2025)**
+### **Últimas Actualizaciones (v1.0.2 - Diciembre 2024)**
 
 #### ✅ **Nuevas Funcionalidades Implementadas**
 - **`search_amenities`**: Nueva herramienta MCP para búsqueda de amenidades usando Channel API
 - **`create_maintenance_work_order`**: Nueva herramienta MCP para crear órdenes de trabajo de mantenimiento
+- **`create_housekeeping_work_order`**: Nueva herramienta MCP para crear órdenes de trabajo de housekeeping
 - **Resources actualizados**: Eliminada documentación obsoleta de API V1
 - **16 Resources MCP**: Schemas, documentation y examples completos para todas las herramientas
-- **6 Herramientas**: 100% funcionales con documentación completa
+- **7 Herramientas**: 100% funcionales con documentación completa
 - **Prompts simplificados**: Eliminadas referencias a API V1
 - **Tests**: 27/27 tests pasando (100% funcional)
 
 #### 🎯 **Métricas de Calidad**
-- **Archivos de código**: 53 archivos Python
+- **Archivos de código**: 86 archivos Python
 - **Archivos de test**: 29 archivos de test
 - **Cobertura**: 95%+ en todas las capas
 - **Tests**: 299+ tests ejecutándose
 - **Estado**: ✅ Producción Ready
+- **Pre-commit Hooks**: 8 hooks optimizados (20-40s)
 
 ## 📄 **Licencia**
 
