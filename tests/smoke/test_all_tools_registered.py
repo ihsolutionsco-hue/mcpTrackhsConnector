@@ -37,7 +37,7 @@ class TestAllToolsRegisteredSmoke:
 
         # Act
         with patch(
-            "src.trackhs_mcp.infrastructure.mcp.all_tools.register_all_tools"
+            "src.trackhs_mcp.infrastructure.tools.registry.register_all_tools"
         ) as mock_register:
             mock_register.return_value = None
 
@@ -54,7 +54,7 @@ class TestAllToolsRegisteredSmoke:
         """Test: search_reservations_v2 está registrada"""
         # Arrange
         with patch(
-            "src.trackhs_mcp.infrastructure.mcp.search_reservations_v2.register_search_reservations_v2"
+            "src.trackhs_mcp.infrastructure.tools.search_reservations_v2.register_search_reservations_v2"
         ) as mock_register:
             # Act
             mock_register(mock_mcp, mock_api_client)
@@ -67,7 +67,7 @@ class TestAllToolsRegisteredSmoke:
         """Test: get_reservation_v2 está registrada"""
         # Arrange
         with patch(
-            "src.trackhs_mcp.infrastructure.mcp.get_reservation_v2.register_get_reservation_v2"
+            "src.trackhs_mcp.infrastructure.tools.get_reservation_v2.register_get_reservation_v2"
         ) as mock_register:
             # Act
             mock_register(mock_mcp, mock_api_client)
@@ -80,7 +80,7 @@ class TestAllToolsRegisteredSmoke:
         """Test: get_folio está registrada"""
         # Arrange
         with patch(
-            "src.trackhs_mcp.infrastructure.mcp.get_folio.register_get_folio"
+            "src.trackhs_mcp.infrastructure.tools.get_folio.register_get_folio"
         ) as mock_register:
             # Act
             mock_register(mock_mcp, mock_api_client)
@@ -93,7 +93,7 @@ class TestAllToolsRegisteredSmoke:
         """Test: search_units está registrada"""
         # Arrange
         with patch(
-            "src.trackhs_mcp.infrastructure.mcp.search_units.register_search_units"
+            "src.trackhs_mcp.infrastructure.tools.search_units.register_search_units"
         ) as mock_register:
             # Act
             mock_register(mock_mcp, mock_api_client)
@@ -106,7 +106,7 @@ class TestAllToolsRegisteredSmoke:
         """Test: search_amenities está registrada"""
         # Arrange
         with patch(
-            "src.trackhs_mcp.infrastructure.mcp.search_amenities.register_search_amenities"
+            "src.trackhs_mcp.infrastructure.tools.search_amenities.register_search_amenities"
         ) as mock_register:
             # Act
             mock_register(mock_mcp, mock_api_client)
@@ -119,7 +119,7 @@ class TestAllToolsRegisteredSmoke:
         """Test: create_maintenance_work_order está registrada"""
         # Arrange
         with patch(
-            "src.trackhs_mcp.infrastructure.mcp.create_maintenance_work_order.register_create_maintenance_work_order"
+            "src.trackhs_mcp.infrastructure.tools.create_maintenance_work_order.register_create_maintenance_work_order"
         ) as mock_register:
             # Act
             mock_register(mock_mcp, mock_api_client)
@@ -144,7 +144,7 @@ class TestAllToolsRegisteredSmoke:
         # Verificar que los esquemas se pueden importar
         schema_modules = []
         try:
-            from src.trackhs_mcp.infrastructure.mcp.resources.schemas import (
+            from src.trackhs_mcp.infrastructure.tools.resources.schemas import (
                 reservations_v2,
             )
 
@@ -153,14 +153,14 @@ class TestAllToolsRegisteredSmoke:
             pass
 
         try:
-            from src.trackhs_mcp.infrastructure.mcp.resources.schemas import units
+            from src.trackhs_mcp.infrastructure.tools.resources.schemas import units
 
             schema_modules.append("units")
         except ImportError:
             pass
 
         try:
-            from src.trackhs_mcp.infrastructure.mcp.resources.schemas import amenities
+            from src.trackhs_mcp.infrastructure.tools.resources.schemas import amenities
 
             schema_modules.append("amenities")
         except ImportError:

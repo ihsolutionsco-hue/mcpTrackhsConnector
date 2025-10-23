@@ -1,3 +1,0 @@
-"""
-Adaptador MCP
-"""

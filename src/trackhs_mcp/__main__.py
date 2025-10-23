@@ -19,7 +19,9 @@ if str(src_dir) not in sys.path:
 
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from trackhs_mcp.infrastructure.mcp.server import register_all_components
+from trackhs_mcp.infrastructure.tools.registry import register_all_tools
+from trackhs_mcp.infrastructure.prompts import register_all_prompts
+from trackhs_mcp.infrastructure.tools.resources import register_all_resources
 from trackhs_mcp.infrastructure.middleware import (
     TrackHSErrorHandlingMiddleware,
     TrackHSLoggingMiddleware,
@@ -59,24 +61,17 @@ def main():
         # Create MCP server instance with flexible validation for MCP compatibility
         logger.info("Creando servidor MCP...")
         # Usar try/except para compatibilidad con versiones anteriores de FastMCP
-        try:
-            mcp = FastMCP(
-                name="TrackHS MCP Server",
-                strict_input_validation=False,  # Validación flexible para compatibilidad MCP
-                mask_error_details=False,  # Mostrar detalles de error en desarrollo
-                include_fastmcp_meta=True,  # Incluir metadatos FastMCP
-            )
-        except TypeError:
-            # Fallback para versiones anteriores que no soportan strict_input_validation
-            mcp = FastMCP(
-                name="TrackHS MCP Server",
-                mask_error_details=False,  # Mostrar detalles de error en desarrollo
-                include_fastmcp_meta=True,  # Incluir metadatos FastMCP
-            )
+        mcp = FastMCP(
+            name="TrackHS MCP Server",
+            mask_error_details=False,  # Mostrar detalles de error en desarrollo
+            include_fastmcp_meta=True,  # Incluir metadatos FastMCP
+        )
 
         # Register all components
         logger.info("Registrando componentes...")
-        register_all_components(mcp, api_client)
+        register_all_tools(mcp, api_client)
+        register_all_resources(mcp, api_client)
+        register_all_prompts(mcp, api_client)
 
         # Configure logging level from environment
         log_level = os.getenv("FASTMCP_LOG_LEVEL", "INFO").upper()

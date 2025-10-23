@@ -13,7 +13,7 @@ class TestSearchReservationsCritical:
     def test_search_reservations_tool_imports(self):
         """Test: La herramienta search_reservations se puede importar"""
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
+        from src.trackhs_mcp.infrastructure.tools.search_reservations_v2 import (
             register_search_reservations_v2,
         )
 
@@ -27,7 +27,7 @@ class TestSearchReservationsCritical:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.mcp.search_reservations_v2 import (
+        from src.trackhs_mcp.infrastructure.tools.search_reservations_v2 import (
             register_search_reservations_v2,
         )
 

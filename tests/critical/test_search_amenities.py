@@ -13,7 +13,7 @@ class TestSearchAmenitiesCritical:
     def test_search_amenities_tool_imports(self):
         """Test: La herramienta search_amenities se puede importar"""
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.mcp.search_amenities import (
+        from src.trackhs_mcp.infrastructure.tools.search_amenities import (
             register_search_amenities,
         )
 
@@ -27,7 +27,7 @@ class TestSearchAmenitiesCritical:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.mcp.search_amenities import (
+        from src.trackhs_mcp.infrastructure.tools.search_amenities import (
             register_search_amenities,
         )
 

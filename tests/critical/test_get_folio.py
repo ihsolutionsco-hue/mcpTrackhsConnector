@@ -13,7 +13,7 @@ class TestGetFolioCritical:
     def test_get_folio_tool_imports(self):
         """Test: La herramienta get_folio se puede importar"""
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.mcp.get_folio import register_get_folio
+        from src.trackhs_mcp.infrastructure.tools.get_folio import register_get_folio
 
         assert register_get_folio is not None
 
@@ -25,7 +25,7 @@ class TestGetFolioCritical:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.mcp.get_folio import register_get_folio
+        from src.trackhs_mcp.infrastructure.tools.get_folio import register_get_folio
 
         register_get_folio(mock_mcp, mock_api_client)
 

@@ -78,7 +78,7 @@ class TestMCPServerSmoke:
     def test_schema_hook_active(self):
         """Test: Schema hook está activo"""
         # Arrange
-        from src.trackhs_mcp.infrastructure.mcp.schema_hook import SchemaFixerHook
+        from src.trackhs_mcp.infrastructure.tools.schema_hook import SchemaFixerHook
 
         # Act & Assert
         # Verificar que el schema hook se puede importar y usar

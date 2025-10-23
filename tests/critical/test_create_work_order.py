@@ -13,7 +13,7 @@ class TestCreateWorkOrderCritical:
     def test_create_work_order_tool_imports(self):
         """Test: La herramienta create_work_order se puede importar"""
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.mcp.create_maintenance_work_order import (
+        from src.trackhs_mcp.infrastructure.tools.create_maintenance_work_order import (
             register_create_maintenance_work_order,
         )
 
@@ -27,7 +27,7 @@ class TestCreateWorkOrderCritical:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.mcp.create_maintenance_work_order import (
+        from src.trackhs_mcp.infrastructure.tools.create_maintenance_work_order import (
             register_create_maintenance_work_order,
         )
 

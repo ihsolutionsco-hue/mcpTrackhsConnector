@@ -13,7 +13,7 @@ class TestGetReservationCritical:
     def test_get_reservation_tool_imports(self):
         """Test: La herramienta get_reservation se puede importar"""
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.mcp.get_reservation_v2 import (
+        from src.trackhs_mcp.infrastructure.tools.get_reservation_v2 import (
             register_get_reservation_v2,
         )
 
@@ -27,7 +27,7 @@ class TestGetReservationCritical:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.mcp.get_reservation_v2 import (
+        from src.trackhs_mcp.infrastructure.tools.get_reservation_v2 import (
             register_get_reservation_v2,
         )
 

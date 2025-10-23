@@ -13,7 +13,7 @@ class TestSearchUnitsCritical:
     def test_search_units_tool_imports(self):
         """Test: La herramienta search_units se puede importar"""
         # Act & Assert
-        from src.trackhs_mcp.infrastructure.mcp.search_units import (
+        from src.trackhs_mcp.infrastructure.tools.search_units import (
             register_search_units,
         )
 
@@ -27,7 +27,7 @@ class TestSearchUnitsCritical:
         mock_api_client = Mock()
 
         # Act
-        from src.trackhs_mcp.infrastructure.mcp.search_units import (
+        from src.trackhs_mcp.infrastructure.tools.search_units import (
             register_search_units,
         )
 

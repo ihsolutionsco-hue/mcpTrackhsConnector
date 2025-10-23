@@ -21,8 +21,9 @@ if str(project_root) not in sys.path:
 
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from trackhs_mcp.infrastructure.mcp.schema_hook import create_schema_fixed_server
-from trackhs_mcp.infrastructure.mcp.server import register_all_components
+from trackhs_mcp.infrastructure.tools.registry import register_all_tools
+from trackhs_mcp.infrastructure.prompts import register_all_prompts
+from trackhs_mcp.infrastructure.tools.resources import register_all_resources
 
 # Load environment variables
 load_dotenv()
@@ -31,11 +32,19 @@ load_dotenv()
 config = TrackHSConfig.from_env()
 api_client = TrackHSApiClient(config)
 
-# Create MCP server instance with schema fixer hook
-mcp = create_schema_fixed_server("TrackHS MCP Server")
+# Create MCP server instance
+from fastmcp import FastMCP
+
+mcp = FastMCP(
+    name="TrackHS MCP Server",
+    mask_error_details=False,
+    include_fastmcp_meta=True,
+)
 
 # Register all components
-register_all_components(mcp, api_client)
+register_all_tools(mcp, api_client)
+register_all_resources(mcp, api_client)
+register_all_prompts(mcp, api_client)
 
 # Start the server
 if __name__ == "__main__":
