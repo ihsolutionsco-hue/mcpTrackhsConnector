@@ -45,9 +45,9 @@ jobs:
       - name: Code Quality (FastMCP MVP)
         run: |
           echo "🔍 Running essential quality checks for FastMCP..."
-          black --check src tests
-          isort --check-only src tests
-          flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
+          black --check src tests --config pyproject.toml
+          isort --check-only src tests --settings pyproject.toml
+          flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics --config pyproject.toml
 
       - name: Run FastMCP Tests
         env:
