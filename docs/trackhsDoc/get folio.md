@@ -1,4 +1,221 @@
-Get a Folio
+# Get a Folio - Documentación Técnica y Casos de Uso
+
+## Resumen
+El endpoint `get_folio` permite obtener información completa de un folio específico, incluyendo datos financieros, información del contacto, comisiones y reglas de folio maestro. Es fundamental para la gestión financiera y el seguimiento de clientes.
+
+## Casos de Uso Principales
+
+### 💰 **Gestión Financiera**
+- **Verificar estado de pagos**: Consultar balances actuales y realizados
+- **Análisis de comisiones**: Revisar comisiones de agentes y propietarios
+- **Seguimiento de ingresos**: Monitorear ingresos del propietario
+- **Detección de excepciones**: Identificar folios con problemas financieros
+
+### 👤 **Gestión de Clientes**
+- **Información de contacto**: Acceso completo a datos del cliente
+- **Historial de reservas**: Vinculación con reservas específicas
+- **Clasificación**: Identificación de clientes VIP o en lista negra
+- **Seguimiento comercial**: Análisis de patrones de comportamiento
+
+### 📊 **Reportes y Análisis**
+- **Estado de folios**: Seguimiento de folios abiertos vs cerrados
+- **Análisis temporal**: Fechas de inicio, fin y cierre
+- **Reglas de negocio**: Aplicación de reglas de folio maestro
+- **Auditoría**: Trazabilidad de creación y actualización
+
+## Validaciones y Manejo de Errores
+
+### ✅ **Casos Válidos**
+- **ID numérico positivo**: `1`, `123`, `999999`
+- **Folio existente**: Retorna datos completos con información financiera
+- **Folio cerrado**: Incluye fecha de cierre y estado final
+
+### ❌ **Casos Inválidos y Respuestas**
+- **ID no numérico**: `"abc123"` → `Input validation error: 'abc123' does not match '^\\d+$'`
+- **ID negativo**: `"-1"` → `Input validation error: '-1' does not match '^\\d+$'`
+- **ID vacío**: `""` → `Input validation error: '' should be non-empty`
+- **Caracteres especiales**: `"123@#$%"` → `Input validation error: '123@#$%' does not match '^\\d+$'`
+- **ID inexistente**: `"999999999999"` → `Error al obtener el folio: Folio no encontrado`
+
+## Estructura de Respuesta
+
+### 📋 **Campos Principales**
+```json
+{
+  "id": 1,
+  "status": "closed",
+  "type": "guest",
+  "currentBalance": 0.0,
+  "realizedBalance": 0.0,
+  "startDate": "2022-12-01",
+  "endDate": "2022-12-05",
+  "closedDate": "2022-11-29T14:05:55-05:00",
+  "contactId": 10,
+  "reservationId": 1,
+  "name": "Primary Folio",
+  "hasException": false
+}
+```
+
+### 💰 **Información Financiera**
+- `currentBalance`: Balance actual pendiente
+- `realizedBalance`: Balance ya realizado/cobrado
+- `agentCommission`: Comisión del agente de viajes
+- `ownerCommission`: Comisión del propietario
+- `ownerRevenue`: Ingresos del propietario
+- `hasException`: Indica si hay problemas financieros
+
+### 👤 **Datos del Contacto (Embedded)**
+```json
+"_embedded": {
+  "contact": {
+    "id": 10,
+    "firstName": "Fabio",
+    "lastName": "Hinestrosa Salazar",
+    "primaryEmail": "tatiana_issa@hotmail.com",
+    "streetAddress": "Calle 11 A # 116-40",
+    "country": "CO",
+    "region": "Valle",
+    "locality": "Cali",
+    "isVip": false,
+    "isBlacklist": false
+  }
+}
+```
+
+## Preguntas de Negocio Frecuentes
+
+### 💰 **Estado Financiero**
+- **¿Cuál es el balance actual?** → `currentBalance`
+- **¿Hay pagos pendientes?** → `currentBalance > 0`
+- **¿Cuándo se cerró el folio?** → `closedDate`
+- **¿Hay problemas de cobro?** → `hasException`
+
+### 👤 **Información del Cliente**
+- **¿Quién es el contacto?** → `_embedded.contact.firstName + lastName`
+- **¿Cómo contactarlo?** → `_embedded.contact.primaryEmail`
+- **¿Es cliente VIP?** → `_embedded.contact.isVip`
+- **¿Está en lista negra?** → `_embedded.contact.isBlacklist`
+
+### 📊 **Análisis Comercial**
+- **¿Es cliente frecuente?** → Buscar por `contactId` en otras reservas
+- **¿Hay comisiones pendientes?** → `agentCommission`, `ownerCommission`
+- **¿Cuál es el ingreso neto?** → `ownerRevenue`
+
+## Mejores Prácticas
+
+### 🔍 **Validación de Entrada**
+- Siempre validar que el ID sea numérico positivo
+- Manejar errores de validación con mensajes claros
+- Verificar existencia del folio antes de procesar
+
+### 📈 **Análisis de Datos**
+- Usar `contactId` para análisis de clientes frecuentes
+- Monitorear `hasException` para detectar problemas
+- Analizar fechas para patrones temporales
+
+### 🚨 **Manejo de Errores**
+- Implementar retry logic para errores temporales
+- Log de errores para debugging
+- Mensajes de error user-friendly
+
+## Ejemplos Prácticos de Uso
+
+### 🔍 **Caso 1: Verificación de Estado de Pago**
+```python
+# Pregunta: "¿Cuál es el estado de pago del folio 123?"
+folio = get_folio(folio_id="123")
+
+if folio.currentBalance == 0:
+    print("✅ Folio completamente pagado")
+else:
+    print(f"⚠️ Balance pendiente: ${folio.currentBalance}")
+
+if folio.hasException:
+    print("🚨 ATENCIÓN: Folio tiene excepciones financieras")
+```
+
+### 👤 **Caso 2: Información de Cliente para Seguimiento**
+```python
+# Pregunta: "¿Cómo contacto al cliente del folio 123?"
+folio = get_folio(folio_id="123")
+contact = folio._embedded.contact
+
+print(f"Cliente: {contact.firstName} {contact.lastName}")
+print(f"Email: {contact.primaryEmail}")
+print(f"Dirección: {contact.streetAddress}, {contact.locality}")
+
+if contact.isVip:
+    print("🌟 Cliente VIP - Prioridad alta")
+if contact.isBlacklist:
+    print("🚫 Cliente en lista negra - Revisar antes de contactar")
+```
+
+### 📊 **Caso 3: Análisis de Rentabilidad**
+```python
+# Pregunta: "¿Cuál es la rentabilidad del folio 123?"
+folio = get_folio(folio_id="123")
+
+print(f"Ingresos del propietario: ${folio.ownerRevenue}")
+print(f"Comisión del agente: ${folio.agentCommission}")
+print(f"Comisión del propietario: ${folio.ownerCommission}")
+
+# Calcular margen neto
+margen_neto = folio.ownerRevenue - folio.agentCommission - folio.ownerCommission
+print(f"Margen neto: ${margen_neto}")
+```
+
+### 🎯 **Caso 4: Seguimiento Comercial**
+```python
+# Pregunta: "¿Este cliente es frecuente?"
+folio = get_folio(folio_id="123")
+contact_id = folio.contactId
+
+# Buscar otras reservas del mismo contacto
+# (requiere llamada adicional a search_reservations)
+print(f"Contact ID: {contact_id}")
+print("💡 Usar este ID para buscar reservas previas del cliente")
+```
+
+## Casos de Error Comunes
+
+### ❌ **Error de Validación**
+```python
+# INCORRECTO
+folio = get_folio(folio_id="abc123")
+# Error: Input validation error: 'abc123' does not match '^\\d+$'
+
+# CORRECTO
+folio = get_folio(folio_id="123")
+```
+
+### ❌ **Folio No Encontrado**
+```python
+# INCORRECTO
+folio = get_folio(folio_id="999999999")
+# Error: Folio no encontrado: No existe un folio con ID 999999999
+
+# CORRECTO - Verificar existencia primero
+try:
+    folio = get_folio(folio_id="123")
+    print("✅ Folio encontrado")
+except Exception as e:
+    print(f"❌ Error: {e}")
+```
+
+## Integración con Otros Endpoints
+
+### 🔗 **Flujo Completo de Análisis de Cliente**
+1. **Obtener folio**: `get_folio(folio_id="123")`
+2. **Buscar reservas del cliente**: `search_reservations(contact_id=folio.contactId)`
+3. **Analizar historial**: Comparar fechas y patrones
+4. **Generar reporte**: Consolidar información financiera
+
+### 🔗 **Flujo de Gestión Financiera**
+1. **Verificar estado**: `get_folio(folio_id="123")`
+2. **Identificar problemas**: `hasException == true`
+3. **Contactar cliente**: Usar datos de `_embedded.contact`
+4. **Seguimiento**: Monitorear `currentBalance`
 
 # OpenAPI definition
 ```json
