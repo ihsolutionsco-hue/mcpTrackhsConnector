@@ -57,10 +57,10 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
         status: str = Field(
             description="Work order status. Valid: pending, not-started, in-progress, completed, processed, cancelled, exception",
         ),
-        unit_id: str = Field(
+        unit_id: Union[int, str] = Field(
             description="Unit ID (positive integer). Required. Example: 123. ⚠️ NOTE: Unit 1 has restrictions for inspections (is_inspection=true) - use clean_type_id instead.",
         ),
-        unit_block_id: Optional[str] = Field(
+        unit_block_id: Optional[Union[int, str]] = Field(
             default=None,
             description="Unit block ID (positive integer). Optional. Example: 456",
         ),
@@ -68,18 +68,18 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             default=None,
             description="Is inspection flag (true=yes, false=no). Required if clean_type_id not provided. ⚠️ RESTRICTION: Unit 1 does not support inspections - use clean_type_id instead.",
         ),
-        clean_type_id: Optional[str] = Field(
+        clean_type_id: Optional[Union[int, str]] = Field(
             default=None,
             description="Clean type ID (positive integer). Required if is_inspection not provided. ✅ RECOMMENDED for Unit 1 to avoid server errors. Available: 1=Carpet Cleaning, 2=Deep Clean, 3=Departure Clean, 4=Guest Request, 5=Pack and Play, 6=Pre-Arrival Inspection, 7=Refresh Clean",
         ),
-        user_id: Optional[str] = Field(
+        user_id: Optional[Union[int, str]] = Field(
             default=None,
             description="Assigned user ID (positive integer). Example: 789",
         ),
-        vendor_id: Optional[str] = Field(
+        vendor_id: Optional[Union[int, str]] = Field(
             default=None, description="Vendor ID (positive integer). Example: 321"
         ),
-        reservation_id: Optional[str] = Field(
+        reservation_id: Optional[Union[int, str]] = Field(
             default=None,
             description="Related reservation ID (positive integer). Example: 987654",
         ),
@@ -92,7 +92,7 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
         comments: Optional[str] = Field(
             default=None, description="Additional comments or notes", max_length=2000
         ),
-        cost: Optional[str] = Field(
+        cost: Optional[Union[float, str]] = Field(
             default=None,
             description="Cost of the work order (must be >= 0). Example: 125.50",
         ),
@@ -112,7 +112,9 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
                 )
 
             # ⚠️ VALIDACIÓN ESPECÍFICA: Restricción conocida de la unidad 1
-            if unit_id == 1 and is_inspection is True:
+            # Normalizar unit_id primero para la comparación
+            unit_id_for_validation = normalize_int(unit_id, "unit_id")
+            if unit_id_for_validation == 1 and is_inspection is True:
                 raise ValidationError(
                     "❌ RESTRICCIÓN CONOCIDA: La unidad 1 no permite inspecciones (is_inspection=true). "
                     "Esto causa un error 500 del servidor TrackHS. "
@@ -125,7 +127,8 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             scheduled_at_normalized = normalize_date_to_iso8601(scheduled_at)
 
             # unit_id es requerido según la documentación
-            unit_id_norm = normalize_int(unit_id, "unit_id")
+            # Ya normalizado arriba para la validación
+            unit_id_norm = unit_id_for_validation
             unit_block_id_norm = (
                 normalize_int(unit_block_id, "unit_block_id")
                 if unit_block_id is not None
