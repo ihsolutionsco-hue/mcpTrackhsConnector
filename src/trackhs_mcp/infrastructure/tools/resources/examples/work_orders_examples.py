@@ -26,60 +26,68 @@ def register_work_orders_examples(mcp, api_client: "ApiClientPort"):
 
 Las **órdenes de trabajo** son solicitudes de mantenimiento, reparación o servicios para propiedades. TrackHS las organiza por:
 
-- **Prioridad**: Urgencia del trabajo (1=Baja, 3=Media, 5=Alta)
+- **Prioridad**: Urgencia del trabajo usando prioridades textuales intuitivas (trivial, low, medium, high, critical)
 - **Estado**: Progreso del trabajo (open, in-progress, completed, etc.)
 - **Tipo**: Mantenimiento, housekeeping, emergencias
 - **Asignación**: Usuario interno o proveedor externo
+- **Servicio al Cliente**: Ideal para manejar llamadas de huéspedes, emergencias y mantenimiento
 
 ## Para Principiantes - Primeros Pasos
 
 ### 1. Mi Primera Orden (Más Simple)
 ```python
-# Crear una orden básica de mantenimiento
+# Crear una orden básica de mantenimiento usando prioridades textuales
 create_maintenance_work_order(
     date_received="2024-01-15",
-    priority=3,
+    priority="medium",
     status="open",
     summary="Reparar aire acondicionado",
     estimated_cost=150.00,
     estimated_time=120
 )
 ```
-**¿Qué hace?** Crea una orden de mantenimiento básica.
-**¿Cuándo usarlo?** Para solicitudes simples de mantenimiento.
+**¿Qué hace?** Crea una orden de mantenimiento básica usando prioridad textual intuitiva.
+**¿Cuándo usarlo?** Para solicitudes simples de mantenimiento reportadas por huéspedes.
 
 ### 2. Orden con Unidad Específica
 ```python
-# Orden relacionada con una unidad específica
+# Orden relacionada con una unidad específica - caso típico de servicio al cliente
 create_maintenance_work_order(
     date_received="2024-01-15",
-    priority=3,
+    priority="high",
     status="open",
     summary="Fuga de agua en baño",
     estimated_cost=100.00,
     estimated_time=60,
-    unit_id=101
+    unit_id=101,
+    source="Guest Request",
+    source_name="Maria Garcia",
+    source_phone="+1234567890"
 )
 ```
-**¿Qué hace?** Crea una orden para una unidad específica.
-**¿Cuándo usarlo?** Cuando el problema está en una unidad particular.
+**¿Qué hace?** Crea una orden para una unidad específica con información del huésped.
+**¿Cuándo usarlo?** Cuando un huésped reporta un problema en su unidad.
 
 ### 3. Orden de Emergencia
 ```python
-# Orden de emergencia que bloquea check-in
+# Orden de emergencia que bloquea check-in - caso crítico de servicio al cliente
 create_maintenance_work_order(
     date_received="2024-01-15T22:30:00Z",
-    priority=5,
+    priority="critical",
     status="in-progress",
     summary="Emergencia: Sin agua caliente",
     estimated_cost=300.00,
     estimated_time=120,
     unit_id=205,
-    block_checkin=True
+    block_checkin=1,
+    source="Guest Request",
+    source_name="John Smith",
+    source_phone="+1987654321",
+    description="Huésped reporta falta completa de agua caliente en toda la unidad"
 )
 ```
 **¿Qué hace?** Crea una orden de emergencia que impide nuevos check-ins.
-**¿Cuándo usarlo?** Para problemas críticos que afectan la habitabilidad.
+**¿Cuándo usarlo?** Para problemas críticos que afectan la habitabilidad y requieren atención inmediata.
 
 ## Tabla de Estados Válidos
 
@@ -96,13 +104,109 @@ create_maintenance_work_order(
 | `"vendor-completed"` | Proveedor completó el trabajo | Trabajo terminado por terceros |
 | `"cancelled"` | Orden cancelada | Trabajo ya no es necesario |
 
-## Tabla de Prioridades
+## Tabla de Prioridades Textuales
 
-| Prioridad | Valor | Descripción | Tiempo Esperado |
-|-----------|-------|-------------|-----------------|
-| **Baja** | 1 | Mantenimiento no urgente | 1-7 días |
-| **Media** | 3 | Mantenimiento estándar | 1-3 días |
-| **Alta** | 5 | Emergencia o problema crítico | Inmediato-24 horas |
+| Prioridad Textual | Valor API | Descripción | Tiempo Esperado | Casos de Uso |
+|-------------------|-----------|-------------|-----------------|--------------|
+| **trivial** | 1 | Problemas menores, cosméticos | 1-7 días | Cambio de bombillas, ajustes menores |
+| **low** | 1 | Mantenimiento rutinario | 1-7 días | Limpieza programada, mantenimiento preventivo |
+| **medium** | 3 | Reparaciones estándar | 1-3 días | WiFi lento, problemas de comodidad |
+| **high** | 5 | Problemas de comodidad del huésped | Inmediato-24 horas | AC no funciona, problemas de habitabilidad |
+| **critical** | 5 | Emergencias que afectan habitabilidad | Inmediato | Fugas de agua, problemas eléctricos, seguridad |
+
+## Casos de Servicio al Cliente
+
+### Llamadas Típicas de Huéspedes
+
+#### 1. Problema de Aire Acondicionado
+```python
+# Huésped reporta AC no funciona
+create_maintenance_work_order(
+    date_received="2024-01-15T14:00:00Z",
+    priority="high",
+    status="open",
+    summary="AC no funciona en habitación principal",
+    estimated_cost=200.00,
+    estimated_time=90,
+    unit_id=101,
+    reservation_id=37152796,
+    description="Huésped reporta que el aire acondicionado no enfría la habitación",
+    source="Guest Request",
+    source_name="Maria Garcia",
+    source_phone="+1234567890"
+)
+```
+
+#### 2. Fuga de Agua (Emergencia)
+```python
+# Emergencia de fuga de agua
+create_maintenance_work_order(
+    date_received="2024-01-15T20:30:00Z",
+    priority="critical",
+    status="in-progress",
+    summary="Fuga de agua en baño principal",
+    estimated_cost=150.00,
+    estimated_time=60,
+    unit_id=205,
+    block_checkin=1,
+    source="Guest Request",
+    source_name="John Smith",
+    source_phone="+1987654321",
+    description="Fuga importante que requiere atención inmediata"
+)
+```
+
+#### 3. Problemas de WiFi
+```python
+# WiFi lento reportado por huésped
+create_maintenance_work_order(
+    date_received="2024-01-15T10:00:00Z",
+    priority="medium",
+    status="open",
+    summary="WiFi lento en toda la unidad",
+    estimated_cost=50.00,
+    estimated_time=30,
+    unit_id=103,
+    source="Guest Request",
+    source_name="Ana Rodriguez",
+    source_phone="+34612345678"
+)
+```
+
+#### 4. Mantenimiento Preventivo
+```python
+# Limpieza programada
+create_maintenance_work_order(
+    date_received="2024-01-15",
+    priority="low",
+    status="not-started",
+    summary="Limpieza profunda programada",
+    estimated_cost=0.00,
+    estimated_time=120,
+    unit_id=102,
+    date_scheduled="2024-01-20T09:00:00Z",
+    source="Preventive Maintenance",
+    user_id=5
+)
+```
+
+#### 5. Trabajo con Proveedor
+```python
+# Reparación asignada a proveedor externo
+create_maintenance_work_order(
+    date_received="2024-01-15",
+    priority="medium",
+    status="vendor-assigned",
+    summary="Reemplazo de electrodoméstico",
+    estimated_cost=400.00,
+    estimated_time=180,
+    vendor_id=789,
+    unit_id=104,
+    date_scheduled="2024-01-18T10:00:00Z",
+    reference_number="VENDOR-2024-001",
+    source="Inspection"
+)
+```
 
 ## Flujo de Trabajo Típico
 

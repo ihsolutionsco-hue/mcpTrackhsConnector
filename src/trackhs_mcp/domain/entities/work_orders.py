@@ -28,12 +28,14 @@ class WorkOrderStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class WorkOrderPriority(int, Enum):
+class WorkOrderPriority(str, Enum):
     """Prioridades válidas para una orden de trabajo."""
 
-    LOW = 1
-    MEDIUM = 3
-    HIGH = 5
+    TRIVIAL = "trivial"
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 
 
 class WorkOrderProblem(BaseModel):
@@ -51,7 +53,7 @@ class CreateWorkOrderParams(BaseModel):
     date_received: str = Field(
         ..., alias="dateReceived", description="Fecha de recepción en formato ISO 8601"
     )
-    priority: int = Field(..., description="Prioridad: 5 (Alta), 3 (Media), 1 (Baja)")
+    priority: WorkOrderPriority = Field(..., description="Prioridad: critical, high, medium, low, trivial")
     status: WorkOrderStatus = Field(..., description="Estado de la orden de trabajo")
     summary: str = Field(
         ..., min_length=1, description="Resumen de la orden de trabajo"
@@ -106,8 +108,9 @@ class CreateWorkOrderParams(BaseModel):
     @classmethod
     def validate_priority(cls, v):
         """Validar que la prioridad sea válida."""
-        if v not in [1, 3, 5]:
-            raise ValueError("La prioridad debe ser 1 (Baja), 3 (Media) o 5 (Alta)")
+        valid_priorities = ["trivial", "low", "medium", "high", "critical"]
+        if v not in valid_priorities:
+            raise ValueError(f"La prioridad debe ser una de: {', '.join(valid_priorities)}. Valor recibido: {v}")
         return v
 
     @field_validator("date_received", "date_scheduled")
@@ -119,7 +122,7 @@ class CreateWorkOrderParams(BaseModel):
                 datetime.fromisoformat(v.replace("Z", "+00:00"))
             except ValueError:
                 raise ValueError(
-                    "La fecha debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ)"
+                    f"La fecha debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ). Valor recibido: {v}"
                 )
         return v
 

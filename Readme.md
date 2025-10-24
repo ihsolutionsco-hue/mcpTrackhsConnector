@@ -492,15 +492,19 @@ Herramienta MCP para buscar amenidades usando Channel API de Track HS.
 - ✅ **Validación estricta** (valores booleanos 0/1)
 
 ### **`create_maintenance_work_order` - Crear Orden de Mantenimiento**
-Herramienta MCP para crear órdenes de trabajo de mantenimiento en Track HS.
+Herramienta MCP para crear órdenes de trabajo de mantenimiento en Track HS, optimizada para servicio al cliente.
 
 **Características:**
+- ✅ **Prioridades textuales intuitivas** (trivial, low, medium, high, critical)
+- ✅ **Casos de servicio al cliente** (llamadas de huéspedes, emergencias, mantenimiento)
 - ✅ **Parámetros obligatorios** (fecha recibida, prioridad, estado, resumen, costo, tiempo)
 - ✅ **Parámetros opcionales** (fecha programada, usuario, vendedor, unidad, reserva)
 - ✅ **Validación de fechas** (formato ISO 8601)
-- ✅ **Validación de prioridad** (1-5: Baja, Media, Alta)
+- ✅ **Validación de prioridad** (textual con mapeo automático a API)
 - ✅ **Estados válidos** (abierto, en progreso, completado, etc.)
 - ✅ **Manejo de errores** (validación, autenticación, autorización)
+- ✅ **Tracking de cliente** (source, source_name, source_phone)
+- ✅ **Block check-in** (para emergencias que afectan habitabilidad)
 
 ### **`create_housekeeping_work_order` - Crear Orden de Housekeeping**
 Herramienta MCP para crear órdenes de trabajo de housekeeping en Track HS.

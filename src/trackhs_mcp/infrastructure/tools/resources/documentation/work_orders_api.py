@@ -29,6 +29,8 @@ def register_work_orders_api_documentation(mcp, api_client: "ApiClientPort"):
 
 ## Descripción
 Crea nuevas órdenes de trabajo de mantenimiento en TrackHS con campos requeridos y opcionales.
+Ideal para manejar llamadas de servicio al cliente, emergencias, mantenimiento preventivo y reparaciones.
+Soporta prioridades textuales intuitivas que se mapean automáticamente a valores numéricos de la API.
 
 ## Campos Requeridos
 
@@ -37,12 +39,14 @@ Crea nuevas órdenes de trabajo de mantenimiento en TrackHS con campos requerido
 - Formato: ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ)
 - Ejemplo: "2024-01-15" o "2024-01-15T10:30:00Z"
 
-### priority (integer, required)
-- Prioridad de la orden
+### priority (string, required)
+- Prioridad de la orden usando valores textuales intuitivos
 - Valores válidos:
-  - 1: Baja prioridad
-  - 3: Media prioridad
-  - 5: Alta prioridad
+  - "trivial": Problemas menores, cosméticos (mapea a 1)
+  - "low": Mantenimiento rutinario (mapea a 1)
+  - "medium": Reparaciones estándar (mapea a 3)
+  - "high": Problemas de comodidad del huésped (mapea a 5)
+  - "critical": Emergencias que afectan habitabilidad (mapea a 5)
 
 ### status (string, required)
 - Estado de la orden
@@ -108,16 +112,22 @@ Crea nuevas órdenes de trabajo de mantenimiento en TrackHS con campos requerido
 - Se usa cuando el status es "completed"
 
 ### source (string, optional)
-- Fuente de la orden
-- Ejemplo: "Guest Request", "Inspection", "Preventive Maintenance"
+- Fuente de la orden para tracking de servicio al cliente
+- Valores comunes:
+  - "Guest Request": Problema reportado por huésped
+  - "Inspection": Inspección de rutina
+  - "Preventive Maintenance": Mantenimiento programado
+  - "Emergency": Emergencia reportada
 
 ### sourceName (string, optional)
-- Nombre de la persona que reporta
-- Ejemplo: "Juan Pérez"
+- Nombre de la persona que reporta el problema
+- Ejemplo: "Maria Garcia" (para solicitudes de huéspedes)
+- Ejemplo: "Juan Pérez" (para personal interno)
 
 ### sourcePhone (string, optional)
-- Teléfono de contacto
-- Ejemplo: "+1234567890"
+- Teléfono de contacto de quien reporta
+- Incluir código de país
+- Ejemplo: "+1234567890" (US), "+34612345678" (España)
 
 ### actualTime (integer, optional)
 - Tiempo real utilizado en minutos
@@ -231,6 +241,60 @@ Crea nuevas órdenes de trabajo de mantenimiento en TrackHS con campos requerido
 6. **BlockCheckin**: Usar true solo cuando sea necesario
 7. **Estimaciones**: Proporcionar estimaciones realistas
 8. **Referencias**: Usar referenceNumber para tracking
+
+## Casos de Uso de Servicio al Cliente
+
+### Llamada de Huésped - AC No Funciona
+```json
+{
+  "dateReceived": "2024-01-15T14:00:00Z",
+  "priority": "high",
+  "status": "open",
+  "summary": "AC no funciona en habitación principal",
+  "estimatedCost": 200.00,
+  "estimatedTime": 90,
+  "unitId": 101,
+  "reservationId": 37152796,
+  "description": "Huésped reporta que el aire acondicionado no enfría la habitación",
+  "source": "Guest Request",
+  "sourceName": "Maria Garcia",
+  "sourcePhone": "+1234567890"
+}
+```
+
+### Emergencia - Fuga de Agua
+```json
+{
+  "dateReceived": "2024-01-15T20:30:00Z",
+  "priority": "critical",
+  "status": "in-progress",
+  "summary": "Fuga de agua en baño principal",
+  "estimatedCost": 150.00,
+  "estimatedTime": 60,
+  "unitId": 205,
+  "blockCheckin": true,
+  "source": "Guest Request",
+  "sourceName": "John Smith",
+  "sourcePhone": "+1987654321",
+  "description": "Fuga importante que requiere atención inmediata"
+}
+```
+
+### Problema de WiFi
+```json
+{
+  "dateReceived": "2024-01-15T10:00:00Z",
+  "priority": "medium",
+  "status": "open",
+  "summary": "WiFi lento en toda la unidad",
+  "estimatedCost": 50.00,
+  "estimatedTime": 30,
+  "unitId": 103,
+  "source": "Guest Request",
+  "sourceName": "Ana Rodriguez",
+  "sourcePhone": "+34612345678"
+}
+```
 
 ## Casos de Uso Comunes
 

@@ -42,7 +42,7 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
 
     @mcp.tool(
         name="create_maintenance_work_order",
-        description="Crear una nueva orden de trabajo de mantenimiento en TrackHS",
+        description="Crear una nueva orden de trabajo de mantenimiento en TrackHS. Ideal para llamadas de servicio al cliente, emergencias, mantenimiento preventivo y reparaciones. Soporta prioridades textuales intuitivas (trivial, low, medium, high, critical) y casos de uso reales de hospitalidad.",
     )
     async def create_maintenance_work_order(
         date_received: str = Field(
@@ -51,8 +51,9 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
             min_length=10,
             max_length=20,
         ),
-        priority: int = Field(
-            description="Priority level: 1=Low, 3=Medium, 5=High", ge=1, le=5
+        priority: str = Field(
+            description="Priority level for customer service calls: trivial (minor issues), low (routine maintenance), medium (standard repairs), high (guest comfort issues), critical (emergencies like water leaks, electrical problems). Maps to API values: trivial/low→1, medium→3, high/critical→5",
+            pattern="^(trivial|low|medium|high|critical)$"
         ),
         status: str = Field(
             description="Work order status. Valid: open, not-started, in-progress, completed, processed, vendor-assigned, vendor-accepted, vendor-rejected, vendor-completed, cancelled",
@@ -60,7 +61,7 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
             max_length=50,
         ),
         summary: str = Field(
-            description="Brief summary of the work order (required, non-empty)",
+            description="Brief summary of the work order for customer service. Use clear, descriptive language like 'AC not working in bedroom', 'Water leak in bathroom', 'WiFi connectivity issues'. Required, non-empty.",
             min_length=1,
             max_length=500,
         ),
@@ -89,8 +90,8 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
             ge=1,
         ),
         unit_id: Optional[int] = Field(
-            default=None,
-            description="ID of related unit (positive integer). Example: 789",
+            default=1,
+            description="ID of related unit (positive integer). REQUIRED by API. Example: 789. Default: 1",
             ge=1,
         ),
         reservation_id: Optional[int] = Field(
@@ -111,15 +112,15 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
         ),
         source: Optional[str] = Field(
             default=None,
-            description="Source of the work order (e.g., 'Guest Request', 'Inspection')",
+            description="Source of the work order for customer service tracking. Common values: 'Guest Request' (guest reported issue), 'Inspection' (routine inspection), 'Preventive Maintenance' (scheduled maintenance), 'Emergency' (urgent issues).",
             max_length=100,
         ),
         source_name: Optional[str] = Field(
-            default=None, description="Name of the source person", max_length=200
+            default=None, description="Name of the person who reported the issue (guest name, staff member, inspector). Example: 'Maria Garcia' for guest requests.", max_length=200
         ),
         source_phone: Optional[str] = Field(
             default=None,
-            description="Phone number of source person. Example: '+1234567890'",
+            description="Phone number of the person who reported the issue. Include country code. Example: '+1234567890' for US numbers, '+34612345678' for Spain.",
             max_length=50,
         ),
         actual_time: Optional[int] = Field(
@@ -132,11 +133,21 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
         ),
     ) -> Dict[str, Any]:
         """
-        Create a new maintenance work order in TrackHS.
+        Create a new maintenance work order in TrackHS for customer service scenarios.
 
-        Creates work orders with required fields (date, priority, status, summary, costs) and
-        optional fields (scheduling, assignments, descriptions). Validates all inputs according
-        to API requirements. Returns complete work order data with ID and metadata.
+        Perfect for handling guest requests, emergencies, preventive maintenance, and repairs.
+        Uses intuitive textual priorities (trivial, low, medium, high, critical) that automatically
+        map to API values. Supports complete customer service workflows including guest contact
+        information, source tracking, and emergency blocking.
+
+        Common use cases:
+        - Guest reports AC not working (priority: high)
+        - Water leak emergency (priority: critical, block_checkin: true)
+        - Routine maintenance (priority: low, source: 'Preventive Maintenance')
+        - WiFi connectivity issues (priority: medium)
+        - Vendor repairs (status: 'vendor-assigned')
+
+        Returns complete work order data with ID and metadata for tracking.
         """
         try:
             # Detectar y convertir FieldInfo objects a None (cuando se llama directamente sin FastMCP)
@@ -167,8 +178,18 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
             if type(block_checkin).__name__ == "FieldInfo":
                 block_checkin = None
 
-            # Normalizar tipos de entrada
-            priority = normalize_string_to_int(priority)
+            # Validar prioridad textual con mensaje mejorado
+            valid_priorities = ["trivial", "low", "medium", "high", "critical"]
+            if priority not in valid_priorities:
+                raise ValidationError(
+                    f"La prioridad debe ser una de: {', '.join(valid_priorities)}. "
+                    f"Valor recibido: '{priority}'. "
+                    f"Use prioridades textuales intuitivas: trivial (problemas menores), "
+                    f"low (mantenimiento rutinario), medium (reparaciones estándar), "
+                    f"high (problemas de comodidad), critical (emergencias)."
+                )
+            
+            # Normalizar tipos de entrada (priority ya es string, no necesita normalización)
             estimated_cost = normalize_string_to_float(estimated_cost)
             estimated_time = normalize_string_to_int(estimated_time)
 
@@ -192,12 +213,13 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
 
             if not is_valid_iso8601_date(date_received):
                 raise ValidationError(
-                    "La fecha de recepción debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ)"
+                    f"La fecha de recepción debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ). Valor recibido: {date_received}"
                 )
 
-            if priority not in [1, 3, 5]:
+            valid_priorities = ["trivial", "low", "medium", "high", "critical"]
+            if priority not in valid_priorities:
                 raise ValidationError(
-                    "La prioridad debe ser 1 (Baja), 3 (Media) o 5 (Alta)"
+                    f"La prioridad debe ser una de: {', '.join(valid_priorities)}. Valor recibido: {priority}"
                 )
 
             if not status or not status.strip():
@@ -239,27 +261,27 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
             if actual_time is not None and actual_time <= 0:
                 raise ValidationError("El tiempo real debe ser mayor a 0")
 
-            # Crear parámetros
+            # Crear parámetros usando los nombres correctos de la entidad
             params = CreateWorkOrderParams(
-                dateReceived=date_received,
+                date_received=date_received,
                 priority=priority,
                 status=WorkOrderStatus(status),
                 summary=summary.strip(),
-                estimatedCost=estimated_cost,
-                estimatedTime=estimated_time,
-                dateScheduled=date_scheduled,
-                userId=user_id,
-                vendorId=vendor_id,
-                unitId=unit_id,
-                reservationId=reservation_id,
-                referenceNumber=reference_number,
+                estimated_cost=estimated_cost,
+                estimated_time=estimated_time,
+                date_scheduled=date_scheduled,
+                user_id=user_id,
+                vendor_id=vendor_id,
+                unit_id=unit_id,
+                reservation_id=reservation_id,
+                reference_number=reference_number,
                 description=description,
-                workPerformed=work_performed,
+                work_performed=work_performed,
                 source=source,
-                sourceName=source_name,
-                sourcePhone=source_phone,
-                actualTime=actual_time,
-                blockCheckin=block_checkin,
+                source_name=source_name,
+                source_phone=source_phone,
+                actual_time=actual_time,
+                block_checkin=block_checkin,
             )
 
             # Ejecutar caso de uso

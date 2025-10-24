@@ -304,41 +304,52 @@ class TrackHSApiClient(ApiClientPort):
                                 response.status_code,
                                 endpoint,
                             )
-                    elif response.status_code == 400:
+                    elif response.status_code == 400 or response.status_code == 422:
                         # Agregar log detallado del body de error
                         error_body = response.text
                         logger = logging.getLogger(__name__)
-                        logger.error(f"400 Bad Request - URL: {endpoint}")
+                        status_label = "400 Bad Request" if response.status_code == 400 else "422 Unprocessable Entity"
+                        logger.error(f"{status_label} - URL: {endpoint}")
                         logger.error(
-                            f"400 Bad Request - Full URL: {self.client.base_url}{endpoint}"
+                            f"{status_label} - Full URL: {self.client.base_url}{endpoint}"
                         )
-                        logger.error(f"400 Bad Request - Method: {method}")
-                        logger.error(f"400 Bad Request - Headers: {headers}")
+                        logger.error(f"{status_label} - Method: {method}")
+                        logger.error(f"{status_label} - Headers: {headers}")
                         logger.error(
-                            f"400 Bad Request - Params: {request_kwargs.get('params')}"
-                        )
-                        logger.error(
-                            f"400 Bad Request - Response Status: {response.status_code}"
+                            f"{status_label} - Body: {request_kwargs.get('data')}"
                         )
                         logger.error(
-                            f"400 Bad Request - Response Headers: {dict(response.headers)}"
+                            f"{status_label} - Params: {request_kwargs.get('params')}"
                         )
-                        logger.error(f"400 Bad Request - Response Body: {error_body}")
+                        logger.error(
+                            f"{status_label} - Response Status: {response.status_code}"
+                        )
+                        logger.error(
+                            f"{status_label} - Response Headers: {dict(response.headers)}"
+                        )
+                        logger.error(f"{status_label} - Response Body: {error_body}")
 
                         # Intentar parsear el error como JSON si es posible
+                        error_message = error_body
                         try:
                             import json
 
                             error_json = response.json()
                             logger.error(
-                                f"400 Bad Request - Parsed Error: {error_json}"
+                                f"{status_label} - Parsed Error: {error_json}"
                             )
+                            # Extraer mensajes de validación si existen
+                            if isinstance(error_json, dict):
+                                if 'validation_messages' in error_json:
+                                    error_message = f"{error_json.get('detail', error_body)} - Validation: {error_json['validation_messages']}"
+                                elif 'detail' in error_json:
+                                    error_message = error_json['detail']
                         except Exception:
-                            logger.error(f"400 Bad Request - Raw Text: {error_body}")
+                            logger.error(f"{status_label} - Raw Text: {error_body}")
 
                         raise ApiError(
-                            f"Bad Request: {error_body}",
-                            400,
+                            error_message,
+                            response.status_code,
                             endpoint,
                         )
                     else:
@@ -475,6 +486,11 @@ class TrackHSApiClient(ApiClientPort):
             import json
 
             options.body = json.dumps(data)
+            
+            # Agregar Content-Type para JSON
+            if options.headers is None:
+                options.headers = {}
+            options.headers["Content-Type"] = "application/json"
 
         return await self.request(endpoint, options)
 
