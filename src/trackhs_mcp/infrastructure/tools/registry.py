@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...application.ports.api_client_port import ApiClientPort
 
-from .analyze_amenities_business import register_analyze_amenities_business
 from .create_housekeeping_work_order import register_create_housekeeping_work_order
 from .create_maintenance_work_order import register_create_maintenance_work_order
 from .get_folio import register_get_folio
@@ -28,7 +27,6 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     - get_folio (API - endpoint /pms/folios/{id})
     - search_units (Channel API - endpoint /pms/units)
     - search_amenities (Channel API - endpoint /pms/units/amenities)
-    - analyze_amenities_business (Business analysis tool for amenities)
     - create_maintenance_work_order (API - endpoint /pms/maintenance/work-orders)
     - create_housekeeping_work_order (API - endpoint /pms/housekeeping/work-orders)
 
@@ -62,9 +60,6 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     register_get_folio(mcp, api_client)  # Expone como "get_folio"
     register_search_units(mcp, api_client)  # Expone como "search_units"
     register_search_amenities(mcp, api_client)  # Expone como "search_amenities"
-    register_analyze_amenities_business(
-        mcp, api_client
-    )  # Expone como "analyze_amenities_business"
     register_create_maintenance_work_order(
         mcp, api_client
     )  # Expone como "create_maintenance_work_order"
