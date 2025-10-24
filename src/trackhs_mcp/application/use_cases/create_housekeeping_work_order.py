@@ -59,8 +59,23 @@ class CreateHousekeepingWorkOrderUseCase:
             return HousekeepingWorkOrderResponse.success_response(work_order)
 
         except Exception as e:
+            error_message = str(e)
+
+            # Manejo específico para error 500 con unidad 1 e inspección
+            if "500" in error_message and params.unit_id == 1 and params.is_inspection:
+                return HousekeepingWorkOrderResponse.error_response(
+                    "❌ RESTRICCIÓN CONOCIDA: La unidad 1 no permite inspecciones en TrackHS. "
+                    "Esto causa un error 500 del servidor. "
+                    "✅ SOLUCIÓN: Use clean_type_id en lugar de is_inspection para la unidad 1. "
+                    "Ejemplo: clean_type_id='5' para limpieza de salida.",
+                    errors=[
+                        "Unit 1 inspection restriction",
+                        "Use clean_type_id instead",
+                    ],
+                )
+
             return HousekeepingWorkOrderResponse.error_response(
-                f"Error al crear orden de trabajo de housekeeping: {str(e)}"
+                f"Error al crear orden de trabajo de housekeeping: {error_message}"
             )
 
     def _prepare_request_data(
@@ -88,23 +103,31 @@ class CreateHousekeepingWorkOrderUseCase:
             f"DEBUG: reservation_id tipo: {type(params.reservation_id)}, valor: {params.reservation_id}"
         )
 
+        # ⚠️ LOG ESPECÍFICO: Advertencia para unidad 1 con inspección
+        if params.unit_id == 1 and params.is_inspection:
+            logger.warning(
+                "⚠️ RESTRICCIÓN CONOCIDA: Intentando crear inspección para unidad 1. "
+                "Esto puede causar error 500 del servidor TrackHS. "
+                "Recomendación: Usar clean_type_id en lugar de is_inspection."
+            )
+
         request_data = {
             "scheduledAt": params.scheduled_at,
+            "status": params.status,
+            "unitId": params.unit_id,
         }
 
-        # Agregar campos de unidad (exactamente uno)
-        if params.unit_id:
-            request_data["unitId"] = params.unit_id
-        elif params.unit_block_id:
+        # unit_block_id es opcional - solo agregar si tiene valor
+        if params.unit_block_id is not None:
             request_data["unitBlockId"] = params.unit_block_id
 
         # Agregar campos de tipo de tarea (exactamente uno)
         if params.is_inspection is not None:
             request_data["isInspection"] = params.is_inspection
-        elif params.clean_type_id:
+        elif params.clean_type_id is not None:
             request_data["cleanTypeId"] = int(params.clean_type_id)
 
-        # Agregar campos opcionales
+        # Agregar campos opcionales - solo si tienen valor (no None)
         if params.user_id is not None:
             request_data["userId"] = params.user_id
         if params.vendor_id is not None:
@@ -115,7 +138,7 @@ class CreateHousekeepingWorkOrderUseCase:
             request_data["isTurn"] = params.is_turn
         if params.charge_owner is not None:
             request_data["chargeOwner"] = params.charge_owner
-        if params.comments:
+        if params.comments is not None and params.comments.strip():
             request_data["comments"] = params.comments
         if params.cost is not None:
             request_data["cost"] = params.cost

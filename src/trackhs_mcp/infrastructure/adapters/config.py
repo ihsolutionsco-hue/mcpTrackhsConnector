@@ -30,6 +30,22 @@ class TrackHSConfig(BaseTrackHSConfig):
         timeout = int(os.getenv("TRACKHS_TIMEOUT", "60"))
         search_timeout = int(os.getenv("TRACKHS_SEARCH_TIMEOUT", "120"))
 
+        # Normalizar base_url: eliminar /api del final si existe
+        # Los endpoints ya incluyen /api, así que el base_url NO debe tenerlo
+        if base_url.endswith("/api"):
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                f"base_url contiene '/api' al final ({base_url}). "
+                "Eliminándolo para evitar duplicación. "
+                "Configure TRACKHS_API_URL sin /api (ej: https://ihmvacations.trackhs.com)"
+            )
+            base_url = base_url.rstrip("/api")
+
+        # Asegurar que no termine con /
+        base_url = base_url.rstrip("/")
+
         # Validar que las credenciales estén configuradas
         if not username or not password:
             raise ValueError(

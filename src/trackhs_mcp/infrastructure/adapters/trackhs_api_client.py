@@ -178,9 +178,16 @@ class TrackHSApiClient(ApiClientPort):
                         response_text = response.text
                         json_data = json.loads(response_text)
                         return json_data
-                    except Exception:
-                        # Si no es JSON válido, devolver el texto
-                        return response.text
+                    except Exception as parse_error:
+                        # Si no es JSON válido, intentar parsear manualmente
+                        try:
+                            import json
+
+                            json_data = json.loads(response_text)
+                            return json_data
+                        except Exception:
+                            # Si todo falla, devolver el texto
+                            return response.text
 
             except httpx.TimeoutException as e:
                 last_error = TimeoutError(f"Request timeout: {str(e)}")
@@ -271,11 +278,16 @@ class TrackHSApiClient(ApiClientPort):
                 import logging
                 import os
 
+                logger = logging.getLogger(__name__)
+
+                # Siempre loguear la URL completa para detectar problemas de duplicación
+                full_url = f"{self.client.base_url}{endpoint}"
+                logger.debug(f"API Request: {method} {endpoint}")
+                logger.debug(f"Base URL: {self.client.base_url}")
+                logger.debug(f"Full URL: {full_url}")
+
                 if os.getenv("DEBUG", "false").lower() == "true":
-                    logger = logging.getLogger(__name__)
-                    logger.debug(f"API Request: {method} {endpoint}")
                     logger.debug(f"Params: {params}")
-                    logger.debug(f"Full URL: {self.client.base_url}{endpoint}")
 
                 # Realizar petición usando endpoint relativo
                 response = await self.client.request(method, endpoint, **request_kwargs)
@@ -411,9 +423,16 @@ class TrackHSApiClient(ApiClientPort):
                         response_text = response.text
                         json_data = json.loads(response_text)
                         return json_data
-                    except Exception:
-                        # Si no es JSON válido, devolver el texto
-                        return response.text
+                    except Exception as parse_error:
+                        # Si no es JSON válido, intentar parsear manualmente
+                        try:
+                            import json
+
+                            json_data = json.loads(response_text)
+                            return json_data
+                        except Exception:
+                            # Si todo falla, devolver el texto
+                            return response.text
 
             except httpx.TimeoutException as e:
                 last_error = TimeoutError(f"Request timeout: {str(e)}")

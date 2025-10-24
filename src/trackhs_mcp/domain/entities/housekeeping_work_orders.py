@@ -27,15 +27,18 @@ class HousekeepingWorkOrderStatus(str, Enum):
 class CreateHousekeepingWorkOrderParams(BaseModel):
     """Parámetros para crear una nueva orden de trabajo de housekeeping."""
 
-    # Campos requeridos
+    # Campos requeridos según la documentación
     scheduled_at: str = Field(
         ..., alias="scheduledAt", description="Fecha programada en formato ISO 8601"
     )
-
-    # Campos condicionales - exactamente uno de unit_id o unit_block_id
-    unit_id: Optional[int] = Field(
-        None, alias="unitId", gt=0, description="ID de la unidad"
+    status: HousekeepingWorkOrderStatus = Field(
+        ..., description="Estado de la orden de trabajo"
     )
+    unit_id: int = Field(
+        ..., alias="unitId", gt=0, description="ID de la unidad (requerido)"
+    )
+
+    # Campos opcionales
     unit_block_id: Optional[int] = Field(
         None, alias="unitBlockId", gt=0, description="ID del bloque de unidad"
     )
@@ -82,13 +85,10 @@ class CreateHousekeepingWorkOrderParams(BaseModel):
 
     def model_post_init(self, __context):
         """Validaciones a nivel de modelo después de la inicialización."""
-        # Validar campos de unidad
-        if not self.unit_id and not self.unit_block_id:
-            raise ValueError("Se requiere exactamente uno de unit_id o unit_block_id")
-        if self.unit_id and self.unit_block_id:
-            raise ValueError("No se pueden especificar ambos unit_id y unit_block_id")
+        # unit_id es requerido según la documentación
+        # unit_block_id es opcional
 
-        # Validar campos de tipo de tarea
+        # Validar campos de tipo de tarea (exactamente uno requerido)
         if not self.is_inspection and not self.clean_type_id:
             raise ValueError(
                 "Se requiere exactamente uno de is_inspection o clean_type_id"

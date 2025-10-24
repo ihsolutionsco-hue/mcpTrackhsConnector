@@ -162,6 +162,8 @@ TRACKHS_PASSWORD=tu_contraseña
 - **Herramienta MCP**: `create_housekeeping_work_order`
 - **Archivo**: `src/trackhs_mcp/infrastructure/adapters/trackhs_api_client.py` (línea 548)
 
+⚠️ **RESTRICCIÓN CONOCIDA**: La unidad 1 no permite inspecciones (`is_inspection: true`) - causa error 500. Use `clean_type_id` en su lugar.
+
 **Campos Requeridos**:
 - `scheduledAt` (ISO 8601: YYYY-MM-DD HH:MM:SS)
 - **Exactamente uno de**:

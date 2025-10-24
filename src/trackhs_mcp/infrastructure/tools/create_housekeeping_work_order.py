@@ -54,23 +54,25 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             min_length=10,
             max_length=20,
         ),
-        unit_id: Optional[int] = Field(
-            default=None,
-            description="Unit ID (positive integer). Required if unit_block_id not provided. Example: 123",
+        status: str = Field(
+            description="Work order status. Valid: pending, not-started, in-progress, completed, processed, cancelled, exception",
+        ),
+        unit_id: int = Field(
+            description="Unit ID (positive integer). Required. Example: 123. ⚠️ NOTE: Unit 1 has restrictions for inspections (is_inspection=true) - use clean_type_id instead.",
             ge=1,
         ),
         unit_block_id: Optional[int] = Field(
             default=None,
-            description="Unit block ID (positive integer). Required if unit_id not provided. Example: 456",
+            description="Unit block ID (positive integer). Optional. Example: 456",
             ge=1,
         ),
         is_inspection: Optional[bool] = Field(
             default=None,
-            description="Is inspection flag (true=yes, false=no). Required if clean_type_id not provided",
+            description="Is inspection flag (true=yes, false=no). Required if clean_type_id not provided. ⚠️ RESTRICTION: Unit 1 does not support inspections - use clean_type_id instead.",
         ),
         clean_type_id: Optional[str] = Field(
             default=None,
-            description="Clean type ID (positive integer). Required if is_inspection not provided. Example: 5",
+            description="Clean type ID (positive integer). Required if is_inspection not provided. Example: 5. ✅ RECOMMENDED for Unit 1 to avoid server errors.",
         ),
         user_id: Optional[int] = Field(
             default=None,
@@ -113,27 +115,25 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
                     "scheduled_at debe estar en formato ISO 8601 (YYYY-MM-DD o YYYY-MM-DDTHH:MM:SSZ o YYYY-MM-DD HH:MM:SS)"
                 )
 
+            # ⚠️ VALIDACIÓN ESPECÍFICA: Restricción conocida de la unidad 1
+            if unit_id == 1 and is_inspection is True:
+                raise ValidationError(
+                    "❌ RESTRICCIÓN CONOCIDA: La unidad 1 no permite inspecciones (is_inspection=true). "
+                    "Esto causa un error 500 del servidor TrackHS. "
+                    "✅ SOLUCIÓN: Use clean_type_id en lugar de is_inspection para la unidad 1. "
+                    "Ejemplo: clean_type_id='5' para limpieza de salida."
+                )
+
             # Normalizar fecha a formato ISO 8601 estándar
             scheduled_at_normalized = normalize_date_to_iso8601(scheduled_at)
 
-            # Validar campos de unidad (exactamente uno requerido)
-            unit_id_norm = (
-                normalize_string_to_int(unit_id) if unit_id is not None else None
-            )
+            # unit_id es requerido según la documentación
+            unit_id_norm = normalize_string_to_int(unit_id)
             unit_block_id_norm = (
                 normalize_string_to_int(unit_block_id)
                 if unit_block_id is not None
                 else None
             )
-
-            if not unit_id_norm and not unit_block_id_norm:
-                raise ValidationError(
-                    "Se requiere exactamente uno de unit_id o unit_block_id"
-                )
-            if unit_id_norm and unit_block_id_norm:
-                raise ValidationError(
-                    "No se pueden especificar ambos unit_id y unit_block_id"
-                )
 
             # Validar campos de tipo de tarea (exactamente uno requerido)
             is_inspection_norm = (
@@ -195,6 +195,7 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             # Crear parámetros del use case
             params = CreateHousekeepingWorkOrderParams(
                 scheduled_at=scheduled_at_normalized,
+                status=status,
                 unit_id=unit_id_norm,
                 unit_block_id=unit_block_id_norm,
                 is_inspection=is_inspection_norm,
