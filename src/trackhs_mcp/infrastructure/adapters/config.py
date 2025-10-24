@@ -12,7 +12,7 @@ class TrackHSConfig(BaseTrackHSConfig):
     """Configuración centralizada para TrackHS API"""
 
     # URL base oficial - IHVM Vacations
-    DEFAULT_URL: ClassVar[str] = "https://ihmvacations.trackhs.com/api"
+    DEFAULT_URL: ClassVar[str] = "https://ihmvacations.trackhs.com"
 
     # Configuración por defecto
     base_url: str

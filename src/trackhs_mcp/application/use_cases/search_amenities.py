@@ -57,7 +57,7 @@ class SearchAmenitiesUseCase:
 
         # Log técnico
         logger.info("🔧 AMENITIES API Request - Technical Details:")
-        logger.info(f"  📡 Endpoint: /pms/units/amenities")
+        logger.info(f"  📡 Endpoint: /api/pms/units/amenities")
         logger.info(f"  📋 Params: {request_params}")
         logger.info(f"  📊 Params count: {len(request_params)}")
         logger.info(f"  🔍 Search term: {params.search or 'None'}")
@@ -66,7 +66,7 @@ class SearchAmenitiesUseCase:
         logger.info(f"  🔎 Searchable filter: {params.public_searchable or 'None'}")
 
         response = await self.api_client.get(
-            "/pms/units/amenities", params=request_params
+            "/api/pms/units/amenities", params=request_params
         )
 
         # Procesar respuesta con análisis de negocio

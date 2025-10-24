@@ -21,7 +21,7 @@ def register_work_orders_schema(mcp, api_client: "ApiClientPort"):
     async def work_orders_schema() -> Dict[str, Any]:
         """Schema esencial para Work Orders API"""
         return {
-            "endpoint": "/pms/maintenance/work-orders",
+            "endpoint": "/api/pms/maintenance/work-orders",
             "method": "POST",
             "version": "1.0",
             "description": "Create maintenance work orders in TrackHS",

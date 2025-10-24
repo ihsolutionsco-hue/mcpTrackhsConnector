@@ -13,12 +13,12 @@ class UnitsAPIDocumentation:
     def get_endpoint_info() -> Dict[str, Any]:
         """Información del endpoint"""
         return {
-            "endpoint": "/pms/units",
+            "endpoint": "/api/pms/units",
             "method": "GET",
             "api": "Channel API",
             "authentication": "Basic Auth o HMAC",
             "description": "Obtiene la colección de unidades disponibles",
-            "base_url": "{customerDomain}/api",
+            "base_url": "{customerDomain}",
             "version": "1.0",
         }
 

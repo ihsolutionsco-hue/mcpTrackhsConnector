@@ -545,4 +545,4 @@ class TrackHSApiClient(ApiClientPort):
             AuthenticationError: Si las credenciales son inválidas
             NetworkError: Si hay problemas de red
         """
-        return await self.post("/pms/housekeeping/work-orders", data)
+        return await self.post("/api/pms/housekeeping/work-orders", data)

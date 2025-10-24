@@ -10,7 +10,7 @@ Copia `env.example` a `.env` y configura:
 # Credenciales TrackHS (requeridas)
 TRACKHS_USERNAME=tu_usuario
 TRACKHS_PASSWORD=tu_contraseña
-TRACKHS_API_URL=https://api.trackhs.com/api
+TRACKHS_API_URL=https://ihmvacations.trackhs.com
 
 # ⚠️ IMPORTANTE: Optimización para agentes de voz
 TRACKHS_COMPACT_RESPONSES=true

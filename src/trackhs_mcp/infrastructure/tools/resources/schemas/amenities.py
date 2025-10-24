@@ -21,7 +21,7 @@ def register_amenities_schema(mcp, api_client: "ApiClientPort"):
     async def amenities_schema() -> Dict[str, Any]:
         """Schema esencial para Amenities API"""
         return {
-            "endpoint": "/pms/units/amenities",
+            "endpoint": "/api/pms/units/amenities",
             "method": "GET",
             "api": "Channel API",
             "version": "1.0",

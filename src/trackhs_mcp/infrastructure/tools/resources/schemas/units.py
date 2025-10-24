@@ -143,7 +143,7 @@ def register_units_schema(mcp, api_client):
             "schema": "units",
             "version": "1.0",
             "api": "Channel API",
-            "endpoint": "/pms/units",
+            "endpoint": "/api/pms/units",
             "method": "GET",
             "authentication": ["Basic Auth", "HMAC"],
             "description": "Esquema completo de datos para Units API de Track HS",

@@ -21,7 +21,7 @@ def register_reservations_v2_schema(mcp, api_client: "ApiClientPort"):
     async def reservations_v2_schema() -> Dict[str, Any]:
         """Schema esencial para Search Reservations V2"""
         return {
-            "endpoint": "/v2/pms/reservations",
+            "endpoint": "/api/v2/pms/reservations",
             "method": "GET",
             "version": "2.0",
             "description": "Search reservations with API V2 (recommended)",

@@ -21,7 +21,7 @@ def register_folio_schema(mcp, api_client: "ApiClientPort"):
     async def folio_schema() -> Dict[str, Any]:
         """Schema esencial para Get Folio"""
         return {
-            "endpoint": "/pms/folios/{folioId}",
+            "endpoint": "/api/pms/folios/{folioId}",
             "method": "GET",
             "version": "1.0",
             "description": "Get individual folio with financial information",

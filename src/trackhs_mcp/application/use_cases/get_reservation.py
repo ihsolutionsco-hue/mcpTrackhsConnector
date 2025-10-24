@@ -51,7 +51,7 @@ class GetReservationUseCase:
 
         try:
             # Construir endpoint
-            endpoint = f"/v2/pms/reservations/{params.reservation_id}"
+            endpoint = f"/api/v2/pms/reservations/{params.reservation_id}"
 
             # Realizar petición GET a la API
             response_data = await self.api_client.get(endpoint)

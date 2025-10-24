@@ -101,7 +101,7 @@ def claude_desktop_config():
                 "args": ["-m", "src.trackhs_mcp"],
                 "cwd": "/path/to/MCPtrackhsConnector",
                 "env": {
-                    "TRACKHS_API_URL": "https://api.trackhs.com/api",
+                    "TRACKHS_API_URL": "https://ihmvacations.trackhs.com",
                     "TRACKHS_USERNAME": "tu_usuario",
                     "TRACKHS_PASSWORD": "tu_contraseña",
                 },

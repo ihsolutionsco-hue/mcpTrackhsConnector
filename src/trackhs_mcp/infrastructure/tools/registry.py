@@ -22,13 +22,13 @@ def register_all_tools(mcp, api_client: "ApiClientPort"):
     Registra las herramientas MCP esenciales para Track HS.
 
     **Herramientas Incluidas:**
-    - search_reservations (API V2 - endpoint /v2/pms/reservations)
-    - get_reservation (API V2 - endpoint /v2/pms/reservations/{id})
-    - get_folio (API - endpoint /pms/folios/{id})
-    - search_units (Channel API - endpoint /pms/units)
-    - search_amenities (Channel API - endpoint /pms/units/amenities)
-    - create_maintenance_work_order (API - endpoint /pms/maintenance/work-orders)
-    - create_housekeeping_work_order (API - endpoint /pms/housekeeping/work-orders)
+    - search_reservations (API V2 - endpoint /api/v2/pms/reservations)
+    - get_reservation (API V2 - endpoint /api/v2/pms/reservations/{id})
+    - get_folio (API - endpoint /api/pms/folios/{id})
+    - search_units (Channel API - endpoint /api/pms/units)
+    - search_amenities (Channel API - endpoint /api/pms/units/amenities)
+    - create_maintenance_work_order (API - endpoint /api/pms/maintenance/work-orders)
+    - create_housekeeping_work_order (API - endpoint /api/pms/housekeeping/work-orders)
 
     Args:
         mcp: Instancia del servidor FastMCP

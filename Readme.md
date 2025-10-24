@@ -120,7 +120,7 @@ npx -y @modelcontextprotocol/inspector
 
 ```bash
 # Archivo .env
-TRACKHS_API_URL=https://api.trackhs.com/api
+TRACKHS_API_URL=https://ihmvacations.trackhs.com
 TRACKHS_USERNAME=tu_usuario
 TRACKHS_PASSWORD=tu_contraseña
 TRACKHS_TIMEOUT=30
@@ -348,7 +348,7 @@ git commit --no-verify -m "WIP"
 1. **Conectar repositorio en FastMCP Cloud dashboard**
 2. **Configurar variables de entorno en FastMCP Cloud:**
    ```bash
-   TRACKHS_API_URL=https://api.trackhs.com/api
+   TRACKHS_API_URL=https://ihmvacations.trackhs.com
    TRACKHS_USERNAME=tu_usuario
    TRACKHS_PASSWORD=tu_contraseña
    TRACKHS_TIMEOUT=30

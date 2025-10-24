@@ -59,7 +59,7 @@ class GetFolioUseCase:
 
         try:
             # Construir endpoint
-            endpoint = f"/pms/folios/{folio_id_int}"
+            endpoint = f"/api/pms/folios/{folio_id_int}"
 
             # Realizar petición GET a la API
             response_data = await self.api_client.get(endpoint)

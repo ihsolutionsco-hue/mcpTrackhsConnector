@@ -21,7 +21,7 @@ def register_reservation_detail_v2_schema(mcp, api_client: "ApiClientPort"):
     async def reservation_detail_v2_schema() -> Dict[str, Any]:
         """Schema esencial para Get Reservation V2"""
         return {
-            "endpoint": "/v2/pms/reservations/{reservationId}",
+            "endpoint": "/api/v2/pms/reservations/{reservationId}",
             "method": "GET",
             "version": "2.0",
             "description": "Get individual reservation with enriched data",

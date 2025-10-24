@@ -23,7 +23,7 @@ def register_work_orders_api_documentation(mcp, api_client: "ApiClientPort"):
         return """# TrackHS Work Orders API - Create Maintenance Work Order
 
 ## Endpoint
-- **URL**: `POST /pms/maintenance/work-orders`
+- **URL**: `POST /api/pms/maintenance/work-orders`
 - **Versión**: 1.0
 - **Autenticación**: Basic Auth
 

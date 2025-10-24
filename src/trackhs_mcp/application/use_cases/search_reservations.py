@@ -41,7 +41,7 @@ class SearchReservationsUseCase:
 
         options = RequestOptions(method="GET")
         response = await self.api_client.search_request(
-            "/v2/pms/reservations", options=options, params=request_params
+            "/api/v2/pms/reservations", options=options, params=request_params
         )
 
         # Procesar respuesta
