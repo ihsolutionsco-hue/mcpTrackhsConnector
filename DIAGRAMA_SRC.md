@@ -225,7 +225,7 @@ class Unit:
 
 ```
 Domain Layer:        14 archivos
-Application Layer:   11 archivos  
+Application Layer:   11 archivos
 Infrastructure:      59 archivos
 ─────────────────────────────────
 Total:               84 archivos

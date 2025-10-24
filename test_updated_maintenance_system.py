@@ -4,11 +4,12 @@ Test del sistema actualizado de create_maintenance_work_order
 Demuestra todas las mejoras implementadas basadas en insights de testing
 """
 
+import json
 import os
 import sys
-import json
-import requests
 from datetime import datetime
+
+import requests
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -31,19 +32,14 @@ print(f"📅 Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 print("=" * 80)
 
 # Mapeo de prioridades textuales a numéricas
-PRIORITY_MAPPING = {
-    "trivial": 1,
-    "low": 1,
-    "medium": 3,
-    "high": 5,
-    "critical": 5
-}
+PRIORITY_MAPPING = {"trivial": 1, "low": 1, "medium": 3, "high": 5, "critical": 5}
+
 
 def test_customer_service_scenarios():
     """Test de escenarios de servicio al cliente con el sistema actualizado"""
     print("\n📞 TESTING ESCENARIOS DE SERVICIO AL CLIENTE")
     print("=" * 60)
-    
+
     # Escenarios basados en insights de testing
     scenarios = [
         {
@@ -55,7 +51,7 @@ def test_customer_service_scenarios():
             "source_name": "Maria Garcia",
             "source_phone": "+1234567890",
             "unit_id": 101,
-            "reservation_id": 37152796
+            "reservation_id": 37152796,
         },
         {
             "name": "Emergencia - Fuga de Agua",
@@ -67,7 +63,7 @@ def test_customer_service_scenarios():
             "source_phone": "+1987654321",
             "unit_id": 205,
             "block_checkin": 1,
-            "status": "in-progress"
+            "status": "in-progress",
         },
         {
             "name": "Problema de WiFi",
@@ -77,7 +73,7 @@ def test_customer_service_scenarios():
             "source": "Guest Request",
             "source_name": "Ana Rodriguez",
             "source_phone": "+34612345678",
-            "unit_id": 103
+            "unit_id": 103,
         },
         {
             "name": "Mantenimiento Preventivo",
@@ -87,7 +83,7 @@ def test_customer_service_scenarios():
             "source": "Preventive Maintenance",
             "unit_id": 102,
             "date_scheduled": "2024-01-20T09:00:00Z",
-            "user_id": 5
+            "user_id": 5,
         },
         {
             "name": "Trabajo con Proveedor",
@@ -98,94 +94,99 @@ def test_customer_service_scenarios():
             "vendor_id": 789,
             "unit_id": 104,
             "reference_number": "VENDOR-2024-001",
-            "status": "vendor-assigned"
-        }
+            "status": "vendor-assigned",
+        },
     ]
-    
+
     for i, scenario in enumerate(scenarios, 1):
         print(f"\n🔧 Escenario {i}: {scenario['name']}")
         print(f"📝 Resumen: {scenario['summary']}")
         print(f"⚡ Prioridad: {scenario['priority'].upper()}")
-        
+
         # Mapear prioridad textual a numérica
-        numeric_priority = PRIORITY_MAPPING[scenario['priority']]
-        
+        numeric_priority = PRIORITY_MAPPING[scenario["priority"]]
+
         # Construir payload
         payload = {
             "dateReceived": "2024-01-15",
             "priority": numeric_priority,
-            "status": scenario.get('status', 'open'),
-            "summary": scenario['summary'],
+            "status": scenario.get("status", "open"),
+            "summary": scenario["summary"],
             "estimatedCost": 150.0,
             "estimatedTime": 90,
-            "unitId": scenario['unit_id']
+            "unitId": scenario["unit_id"],
         }
-        
+
         # Agregar campos opcionales si están presentes
-        if 'description' in scenario:
-            payload['description'] = scenario['description']
-        if 'source' in scenario:
-            payload['source'] = scenario['source']
-        if 'source_name' in scenario:
-            payload['sourceName'] = scenario['source_name']
-        if 'source_phone' in scenario:
-            payload['sourcePhone'] = scenario['source_phone']
-        if 'reservation_id' in scenario:
-            payload['reservationId'] = scenario['reservation_id']
-        if 'block_checkin' in scenario:
-            payload['blockCheckin'] = scenario['block_checkin']
-        if 'date_scheduled' in scenario:
-            payload['dateScheduled'] = scenario['date_scheduled']
-        if 'user_id' in scenario:
-            payload['userId'] = scenario['user_id']
-        if 'vendor_id' in scenario:
-            payload['vendorId'] = scenario['vendor_id']
-        if 'reference_number' in scenario:
-            payload['referenceNumber'] = scenario['reference_number']
-        
+        if "description" in scenario:
+            payload["description"] = scenario["description"]
+        if "source" in scenario:
+            payload["source"] = scenario["source"]
+        if "source_name" in scenario:
+            payload["sourceName"] = scenario["source_name"]
+        if "source_phone" in scenario:
+            payload["sourcePhone"] = scenario["source_phone"]
+        if "reservation_id" in scenario:
+            payload["reservationId"] = scenario["reservation_id"]
+        if "block_checkin" in scenario:
+            payload["blockCheckin"] = scenario["block_checkin"]
+        if "date_scheduled" in scenario:
+            payload["dateScheduled"] = scenario["date_scheduled"]
+        if "user_id" in scenario:
+            payload["userId"] = scenario["user_id"]
+        if "vendor_id" in scenario:
+            payload["vendorId"] = scenario["vendor_id"]
+        if "reference_number" in scenario:
+            payload["referenceNumber"] = scenario["reference_number"]
+
         try:
             response = requests.post(
                 f"{BASE_URL}/pms/maintenance/work-orders",
                 json=payload,
                 auth=(USERNAME, PASSWORD),
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             )
-            
+
             if response.status_code == 201:
                 result = response.json()
                 work_order_id = result.get("id")
                 print(f"✅ ÉXITO - Work Order ID: {work_order_id}")
-                print(f"📊 Prioridad aplicada: {numeric_priority} (textual: {scenario['priority']})")
-                
+                print(
+                    f"📊 Prioridad aplicada: {numeric_priority} (textual: {scenario['priority']})"
+                )
+
                 # Mostrar información específica del escenario
-                if scenario['priority'] == 'critical':
-                    print(f"🚨 EMERGENCIA - Block check-in: {scenario.get('block_checkin', 'No')}")
-                elif scenario['priority'] == 'high':
+                if scenario["priority"] == "critical":
+                    print(
+                        f"🚨 EMERGENCIA - Block check-in: {scenario.get('block_checkin', 'No')}"
+                    )
+                elif scenario["priority"] == "high":
                     print(f"🔥 ALTA PRIORIDAD - Problema de comodidad del huésped")
-                elif scenario['priority'] == 'medium':
+                elif scenario["priority"] == "medium":
                     print(f"⚡ PRIORIDAD MEDIA - Reparación estándar")
-                elif scenario['priority'] == 'low':
+                elif scenario["priority"] == "low":
                     print(f"🔧 PRIORIDAD BAJA - Mantenimiento rutinario")
-                elif scenario['priority'] == 'trivial':
+                elif scenario["priority"] == "trivial":
                     print(f"🔨 PRIORIDAD TRIVIAL - Problema menor")
-                    
+
             else:
                 print(f"❌ ERROR - Status: {response.status_code}")
                 print(f"📄 Response: {response.text}")
-                
+
         except Exception as e:
             print(f"❌ EXCEPCIÓN: {e}")
+
 
 def test_priority_validation():
     """Test de validación de prioridades textuales"""
     print("\n🔍 TESTING VALIDACIÓN DE PRIORIDADES")
     print("=" * 50)
-    
+
     # Test prioridades válidas
     valid_priorities = ["trivial", "low", "medium", "high", "critical"]
     for priority in valid_priorities:
         print(f"\n📋 Test: Prioridad válida '{priority}'")
-        
+
         payload = {
             "dateReceived": "2024-01-15",
             "priority": PRIORITY_MAPPING[priority],
@@ -193,17 +194,17 @@ def test_priority_validation():
             "summary": f"Test de prioridad {priority}",
             "estimatedCost": 100.0,
             "estimatedTime": 60,
-            "unitId": 1
+            "unitId": 1,
         }
-        
+
         try:
             response = requests.post(
                 f"{BASE_URL}/pms/maintenance/work-orders",
                 json=payload,
                 auth=(USERNAME, PASSWORD),
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             )
-            
+
             if response.status_code == 201:
                 result = response.json()
                 work_order_id = result.get("id")
@@ -211,15 +212,16 @@ def test_priority_validation():
                 print(f"📊 Mapeo: {priority} → {PRIORITY_MAPPING[priority]}")
             else:
                 print(f"❌ ERROR - Status: {response.status_code}")
-                
+
         except Exception as e:
             print(f"❌ EXCEPCIÓN: {e}")
+
 
 def test_customer_tracking():
     """Test de tracking de información del cliente"""
     print("\n👥 TESTING TRACKING DE CLIENTE")
     print("=" * 40)
-    
+
     # Test con información completa del cliente
     payload = {
         "dateReceived": "2024-01-15T14:00:00Z",
@@ -233,17 +235,17 @@ def test_customer_tracking():
         "description": "Huésped reporta problema específico",
         "source": "Guest Request",
         "sourceName": "Maria Garcia",
-        "sourcePhone": "+1234567890"
+        "sourcePhone": "+1234567890",
     }
-    
+
     try:
         response = requests.post(
             f"{BASE_URL}/pms/maintenance/work-orders",
             json=payload,
             auth=(USERNAME, PASSWORD),
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
-        
+
         if response.status_code == 201:
             result = response.json()
             work_order_id = result.get("id")
@@ -255,15 +257,16 @@ def test_customer_tracking():
             print(f"📋 Reserva: {payload['reservationId']}")
         else:
             print(f"❌ ERROR - Status: {response.status_code}")
-            
+
     except Exception as e:
         print(f"❌ EXCEPCIÓN: {e}")
+
 
 def test_emergency_blocking():
     """Test de bloqueo de check-in para emergencias"""
     print("\n🚨 TESTING BLOQUEO DE CHECK-IN")
     print("=" * 40)
-    
+
     # Test de emergencia que bloquea check-in
     payload = {
         "dateReceived": "2024-01-15T20:30:00Z",
@@ -277,17 +280,17 @@ def test_emergency_blocking():
         "description": "Fuga importante que requiere atención inmediata",
         "source": "Guest Request",
         "sourceName": "John Smith",
-        "sourcePhone": "+1987654321"
+        "sourcePhone": "+1987654321",
     }
-    
+
     try:
         response = requests.post(
             f"{BASE_URL}/pms/maintenance/work-orders",
             json=payload,
             auth=(USERNAME, PASSWORD),
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
-        
+
         if response.status_code == 201:
             result = response.json()
             work_order_id = result.get("id")
@@ -297,16 +300,17 @@ def test_emergency_blocking():
             print(f"👤 Reportado por: {payload['sourceName']}")
         else:
             print(f"❌ ERROR - Status: {response.status_code}")
-            
+
     except Exception as e:
         print(f"❌ EXCEPCIÓN: {e}")
+
 
 def generate_improvement_summary():
     """Generar resumen de mejoras implementadas"""
     print("\n" + "=" * 80)
     print("📊 RESUMEN DE MEJORAS IMPLEMENTADAS")
     print("=" * 80)
-    
+
     improvements = [
         "✅ Prioridades textuales intuitivas (trivial, low, medium, high, critical)",
         "✅ Mapeo automático a valores numéricos de la API",
@@ -317,13 +321,13 @@ def generate_improvement_summary():
         "✅ Prompts optimizados para protocolo MCP",
         "✅ Manejo de emergencias con block check-in",
         "✅ Soporte para proveedores externos",
-        "✅ Flujos de trabajo completos"
+        "✅ Flujos de trabajo completos",
     ]
-    
+
     print("🎯 MEJORAS IMPLEMENTADAS:")
     for improvement in improvements:
         print(f"   {improvement}")
-    
+
     print(f"\n📈 BENEFICIOS:")
     print(f"   • Mejor experiencia de usuario con prioridades intuitivas")
     print(f"   • Casos de uso específicos para hospitalidad")
@@ -331,30 +335,31 @@ def generate_improvement_summary():
     print(f"   • Manejo robusto de emergencias")
     print(f"   • Documentación clara y ejemplos prácticos")
     print(f"   • Integración optimizada con protocolo MCP")
-    
+
     print(f"\n🏆 ESTADO FINAL:")
     print(f"   ✅ Sistema completamente funcional")
     print(f"   ✅ Optimizado para servicio al cliente")
     print(f"   ✅ Listo para producción")
     print(f"   ✅ Documentación completa")
 
+
 if __name__ == "__main__":
     try:
         # Test 1: Escenarios de servicio al cliente
         test_customer_service_scenarios()
-        
+
         # Test 2: Validación de prioridades
         test_priority_validation()
-        
+
         # Test 3: Tracking de cliente
         test_customer_tracking()
-        
+
         # Test 4: Bloqueo de emergencias
         test_emergency_blocking()
-        
+
         # Generar resumen
         generate_improvement_summary()
-        
+
     except KeyboardInterrupt:
         print("\n\n⏹️ Testing interrumpido por el usuario")
     except Exception as e:

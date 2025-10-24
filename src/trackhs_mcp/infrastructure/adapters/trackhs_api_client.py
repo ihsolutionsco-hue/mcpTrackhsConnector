@@ -308,7 +308,11 @@ class TrackHSApiClient(ApiClientPort):
                         # Agregar log detallado del body de error
                         error_body = response.text
                         logger = logging.getLogger(__name__)
-                        status_label = "400 Bad Request" if response.status_code == 400 else "422 Unprocessable Entity"
+                        status_label = (
+                            "400 Bad Request"
+                            if response.status_code == 400
+                            else "422 Unprocessable Entity"
+                        )
                         logger.error(f"{status_label} - URL: {endpoint}")
                         logger.error(
                             f"{status_label} - Full URL: {self.client.base_url}{endpoint}"
@@ -335,15 +339,13 @@ class TrackHSApiClient(ApiClientPort):
                             import json
 
                             error_json = response.json()
-                            logger.error(
-                                f"{status_label} - Parsed Error: {error_json}"
-                            )
+                            logger.error(f"{status_label} - Parsed Error: {error_json}")
                             # Extraer mensajes de validación si existen
                             if isinstance(error_json, dict):
-                                if 'validation_messages' in error_json:
+                                if "validation_messages" in error_json:
                                     error_message = f"{error_json.get('detail', error_body)} - Validation: {error_json['validation_messages']}"
-                                elif 'detail' in error_json:
-                                    error_message = error_json['detail']
+                                elif "detail" in error_json:
+                                    error_message = error_json["detail"]
                         except Exception:
                             logger.error(f"{status_label} - Raw Text: {error_body}")
 
@@ -486,7 +488,7 @@ class TrackHSApiClient(ApiClientPort):
             import json
 
             options.body = json.dumps(data)
-            
+
             # Agregar Content-Type para JSON
             if options.headers is None:
                 options.headers = {}

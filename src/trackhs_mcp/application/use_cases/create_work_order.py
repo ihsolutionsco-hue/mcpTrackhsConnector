@@ -52,9 +52,10 @@ class CreateWorkOrderUseCase:
 
             # Construir payload para la API
             payload = self._build_payload(params)
-            
+
             # Logging para debug
             import logging
+
             logger = logging.getLogger(__name__)
             logger.info(f"Payload being sent: {payload}")
 
@@ -85,13 +86,16 @@ class CreateWorkOrderUseCase:
             elif e.status_code == 422:
                 # Capturar más detalles del error 422
                 error_detail = f"Datos inválidos: {e.message}"
-                if hasattr(e, 'response_body'):
+                if hasattr(e, "response_body"):
                     try:
                         import json
+
                         error_json = json.loads(e.response_body)
-                        if 'validation_messages' in error_json:
-                            error_detail += f" | Validación: {error_json['validation_messages']}"
-                        elif 'detail' in error_json:
+                        if "validation_messages" in error_json:
+                            error_detail += (
+                                f" | Validación: {error_json['validation_messages']}"
+                            )
+                        elif "detail" in error_json:
                             error_detail += f" | Detalle: {error_json['detail']}"
                     except:
                         error_detail += f" | Response: {e.response_body}"
@@ -151,7 +155,9 @@ class CreateWorkOrderUseCase:
 
         # unitId es requerido por la API (aunque sea opcional en el parámetro)
         if params.unit_id is None or params.unit_id <= 0:
-            raise ValidationError("El ID de unidad es requerido por la API. Debe ser un entero positivo")
+            raise ValidationError(
+                "El ID de unidad es requerido por la API. Debe ser un entero positivo"
+            )
 
         if params.reservation_id is not None and params.reservation_id <= 0:
             raise ValidationError("El ID de reserva debe ser un entero positivo")
@@ -172,33 +178,34 @@ class CreateWorkOrderUseCase:
         """
         # Convertir fecha a formato ISO date (YYYY-MM-DD) si incluye timestamp
         date_received = params.date_received
-        if 'T' in date_received:
-            date_received = date_received.split('T')[0]
-        
+        if "T" in date_received:
+            date_received = date_received.split("T")[0]
+
         # Mapear prioridad textual a numérica para la API
         priority_mapping = {
             "trivial": 1,
             "low": 1,
             "medium": 3,
             "high": 5,
-            "critical": 5
+            "critical": 5,
         }
         numeric_priority = priority_mapping.get(params.priority, 3)  # Default a medium
-        
+
         payload = {
             "dateReceived": date_received,
             "priority": numeric_priority,
             "summary": params.summary,
             "estimatedCost": float(params.estimated_cost),
             "estimatedTime": int(params.estimated_time),
-            "unitId": params.unit_id or 1,  # Siempre incluir unitId, usar 1 como default
+            "unitId": params.unit_id
+            or 1,  # Siempre incluir unitId, usar 1 como default
         }
 
         # Agregar campos opcionales si están presentes
         if params.date_scheduled is not None:
             date_scheduled = params.date_scheduled
-            if 'T' in date_scheduled:
-                date_scheduled = date_scheduled.split('T')[0]
+            if "T" in date_scheduled:
+                date_scheduled = date_scheduled.split("T")[0]
             payload["dateScheduled"] = date_scheduled
 
         if params.user_id is not None:
@@ -238,7 +245,11 @@ class CreateWorkOrderUseCase:
 
         # Agregar status como campo opcional si está presente
         if params.status is not None:
-            payload["status"] = str(params.status.value) if hasattr(params.status, 'value') else str(params.status)
+            payload["status"] = (
+                str(params.status.value)
+                if hasattr(params.status, "value")
+                else str(params.status)
+            )
 
         return payload
 

@@ -53,7 +53,7 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
         ),
         priority: str = Field(
             description="Priority level for customer service calls: trivial (minor issues), low (routine maintenance), medium (standard repairs), high (guest comfort issues), critical (emergencies like water leaks, electrical problems). Maps to API values: trivial/low→1, medium→3, high/critical→5",
-            pattern="^(trivial|low|medium|high|critical)$"
+            pattern="^(trivial|low|medium|high|critical)$",
         ),
         status: str = Field(
             description="Work order status. Valid: open, not-started, in-progress, completed, processed, vendor-assigned, vendor-accepted, vendor-rejected, vendor-completed, cancelled",
@@ -116,7 +116,9 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
             max_length=100,
         ),
         source_name: Optional[str] = Field(
-            default=None, description="Name of the person who reported the issue (guest name, staff member, inspector). Example: 'Maria Garcia' for guest requests.", max_length=200
+            default=None,
+            description="Name of the person who reported the issue (guest name, staff member, inspector). Example: 'Maria Garcia' for guest requests.",
+            max_length=200,
         ),
         source_phone: Optional[str] = Field(
             default=None,
@@ -188,7 +190,7 @@ def register_create_maintenance_work_order(mcp, api_client: ApiClientPort):
                     f"low (mantenimiento rutinario), medium (reparaciones estándar), "
                     f"high (problemas de comodidad), critical (emergencias)."
                 )
-            
+
             # Normalizar tipos de entrada (priority ya es string, no necesita normalización)
             estimated_cost = normalize_string_to_float(estimated_cost)
             estimated_time = normalize_string_to_int(estimated_time)

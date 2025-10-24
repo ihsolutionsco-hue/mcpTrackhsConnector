@@ -207,21 +207,21 @@ create_maintenance_work_order(
 
 ### Para Llamada de Huésped
 ```
-"Un huésped llama reportando que el aire acondicionado no funciona en su habitación. 
-Crea una orden de trabajo con prioridad alta, incluyendo la información del huésped 
+"Un huésped llama reportando que el aire acondicionado no funciona en su habitación.
+Crea una orden de trabajo con prioridad alta, incluyendo la información del huésped
 y asegurándote de que se asigne a la unidad correcta."
 ```
 
 ### Para Emergencia
 ```
-"Hay una fuga de agua importante en la unidad 205. El huésped está muy preocupado 
-y necesita atención inmediata. Crea una orden de emergencia que bloquee el check-in 
+"Hay una fuga de agua importante en la unidad 205. El huésped está muy preocupado
+y necesita atención inmediata. Crea una orden de emergencia que bloquee el check-in
 hasta que se resuelva el problema."
 ```
 
 ### Para Mantenimiento Preventivo
 ```
-"Es hora de hacer la limpieza profunda programada de la unidad 102. Crea una orden 
+"Es hora de hacer la limpieza profunda programada de la unidad 102. Crea una orden
 de mantenimiento preventivo para la próxima semana."
 ```
 
