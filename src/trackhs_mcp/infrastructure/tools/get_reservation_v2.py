@@ -26,7 +26,8 @@ def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
         reservation_id: str = Field(
             description=(
                 "Unique reservation ID (positive integer as string). "
-                "Example: '12345' or '37152796'"
+                "Example: '12345' or '37152796'. "
+                "Must be a valid positive integer. Invalid formats like 'abc123', '-1', or empty strings will be rejected."
             ),
             pattern=r"^\d+$",
             min_length=1,
@@ -36,12 +37,32 @@ def register_get_reservation_v2(mcp, api_client: "ApiClientPort"):
         """
         Get complete reservation details by ID from TrackHS API V2.
 
-        Retrieves all information for a specific reservation including financial data,
-        embedded objects (unit, contact, policies), occupants, and metadata.
+        **CLIENT-FOCUSED FEATURES:**
+        - Complete guest information (contact details, preferences)
+        - Full stay details (dates, unit, occupancy, policies)
+        - Comprehensive financial breakdown (payments, balances, fees)
+        - Operational information (check-in/out times, special requests)
+        - Embedded objects (unit details, contact info, policies)
 
-        Returns:
-            Complete reservation object with guest information, unit details, pricing,
-            policies, payment breakdowns, and all embedded data.
+        **RETURNS:**
+        - Complete reservation object with guest information, unit details, pricing,
+          policies, payment breakdowns, and all embedded data
+        - Financial breakdowns (guest_breakdown, owner_breakdown, security_deposit)
+        - Operational details (arrival/departure times, check-in/out procedures)
+        - Contact information and special requirements
+        - Policy information (cancellation, guarantee, payment terms)
+
+        **VALIDATION:**
+        - reservation_id must be a positive integer (rejects 'abc123', '-1', empty)
+        - Returns 404 error for non-existent reservations
+        - Provides clear error messages for invalid inputs
+
+        **CLIENT USE CASES:**
+        - Guest check-in preparation and verification
+        - Financial reconciliation and payment tracking
+        - Operational planning and special request handling
+        - Customer service and guest communication
+        - Reservation status monitoring and updates
 
         Raises:
             ValidationError: If reservation_id is invalid or reservation not found

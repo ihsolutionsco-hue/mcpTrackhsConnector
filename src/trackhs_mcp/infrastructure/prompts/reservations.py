@@ -345,6 +345,8 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
         - Verificar estado de una reserva específica
         - Obtener información completa de reserva
         - Validar datos de reserva antes de procesamiento
+        - Preparación para check-in de huéspedes
+        - Análisis financiero y operacional
         """
         return {
             "messages": [
@@ -358,25 +360,44 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
 - ID de Reserva: {reservation_id}
 
 **Instrucciones:**
-1. Usa get_reservation_v2 con reservation_id={reservation_id}
+1. Usa get_reservation con reservation_id="{reservation_id}"
 2. Extrae toda la información disponible de la reserva
 3. Incluye datos embebidos (unit, contact, policies, user, etc.)
-4. Proporciona análisis completo de la información
+4. Proporciona análisis completo orientado al cliente
 
-**Información a Incluir:**
-- Datos básicos: ID, estado, fechas, huésped, unidad
-- Información financiera: guest_breakdown, owner_breakdown, security_deposit
-- Datos embebidos: unit, contact, guaranteePolicy, cancellationPolicy, user, type, rateType
-- Ocupantes y políticas
-- Estado de acuerdos y pagos
-- Enlaces y metadatos
+**INFORMACIÓN DEL HUÉSPED:**
+- Datos de contacto completos (nombre, email, teléfono, dirección)
+- Preferencias especiales y notas del huésped
+- Información de ocupantes (adultos, niños, mascotas)
+- Historial de reservas y referencias
+
+**DETALLES DE LA ESTANCIA:**
+- Fechas exactas de llegada y salida (con horarios)
+- Unidad asignada (dirección, características, amenidades)
+- Políticas de check-in/check-out
+- Servicios incluidos y adicionales
+- Instrucciones especiales de acceso
+
+**INFORMACIÓN FINANCIERA:**
+- Total de la reserva y desglose de costos
+- Estado de pagos (pagado, pendiente, balance)
+- Depósitos de seguridad y garantías
+- Tarifas por noche y servicios adicionales
+- Políticas de cancelación y reembolso
+
+**SEGUIMIENTO OPERATIVO:**
+- Estado actual de la reserva
+- Preparación necesaria para la unidad
+- Servicios adicionales contratados
+- Notas importantes para el personal
+- Próximos pasos y acciones requeridas
 
 **Formato de Respuesta:**
-- Resumen ejecutivo de la reserva
-- Información detallada por sección
-- Análisis de estado y políticas
-- Información de contacto y unidad
-- Desglose financiero completo""",
+- Resumen ejecutivo orientado al cliente
+- Información práctica para operaciones
+- Análisis de estado y recomendaciones
+- Datos de contacto y comunicación
+- Desglose financiero claro y accionable""",
                     },
                 }
             ]
@@ -451,7 +472,7 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
 - ID de Reserva: {reservation_id}
 
 **Instrucciones:**
-1. Usa get_reservation_v2 con reservation_id={reservation_id}
+1. Usa get_reservation con reservation_id="{reservation_id}"
 2. Crea un resumen ejecutivo conciso y claro
 3. Incluye solo la información más relevante
 4. Enfócate en métricas clave y estado actual
@@ -470,6 +491,197 @@ def register_all_prompts(mcp, api_client: "ApiClientPort"):
 - Métricas clave destacadas
 - Estado actual y próximos pasos
 - Alertas o recomendaciones importantes""",
+                    },
+                }
+            ]
+        }
+
+    # Prompt para preparación de check-in
+    @mcp.prompt
+    def create_checkin_preparation_prompt(reservation_id: int) -> Dict[str, Any]:
+        """
+        Crea un prompt para preparación de check-in de huéspedes.
+
+        **Casos de Uso:**
+        - Preparación operacional para llegada de huéspedes
+        - Verificación de servicios y amenidades
+        - Coordinación de servicios adicionales
+        - Preparación de documentación y acceso
+        """
+        return {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": {
+                        "type": "text",
+                        "text": f"""Preparación de check-in para reserva:
+
+**Parámetros:**
+- ID de Reserva: {reservation_id}
+
+**Instrucciones:**
+1. Usa get_reservation con reservation_id="{reservation_id}"
+2. Enfócate en información operacional para check-in
+3. Identifica servicios y preparaciones necesarias
+4. Proporciona checklist de preparación
+
+**INFORMACIÓN DEL HUÉSPED:**
+- Nombre completo y datos de contacto
+- Hora estimada de llegada
+- Número de ocupantes (adultos, niños, mascotas)
+- Preferencias especiales o solicitudes
+
+**DETALLES DE LA UNIDAD:**
+- Dirección exacta y código de acceso
+- Características especiales (piscina, spa, BBQ, etc.)
+- Servicios incluidos y adicionales
+- Instrucciones de WiFi y amenidades
+- Políticas de mascotas y reglas especiales
+
+**PREPARACIÓN OPERACIONAL:**
+- Servicios adicionales contratados (limpieza, calentamiento de piscina, etc.)
+- Verificaciones necesarias (piscina, spa, BBQ, WiFi)
+- Documentación requerida
+- Horarios de check-in/check-out
+- Contacto de emergencia
+
+**Formato de Respuesta:**
+- Checklist de preparación paso a paso
+- Información de contacto del huésped
+- Instrucciones específicas de la unidad
+- Servicios a verificar y preparar
+- Próximos pasos operacionales""",
+                    },
+                }
+            ]
+        }
+
+    # Prompt para análisis financiero detallado
+    @mcp.prompt
+    def create_financial_analysis_prompt(reservation_id: int) -> Dict[str, Any]:
+        """
+        Crea un prompt para análisis financiero detallado de una reserva.
+
+        **Casos de Uso:**
+        - Reconciliación financiera
+        - Análisis de rentabilidad
+        - Verificación de pagos y balances
+        - Auditoría financiera
+        """
+        return {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": {
+                        "type": "text",
+                        "text": f"""Análisis financiero detallado de reserva:
+
+**Parámetros:**
+- ID de Reserva: {reservation_id}
+
+**Instrucciones:**
+1. Usa get_reservation con reservation_id="{reservation_id}"
+2. Enfócate en información financiera completa
+3. Analiza rentabilidad y estado de pagos
+4. Proporciona recomendaciones financieras
+
+**DESGLOSE FINANCIERO DEL HUÉSPED:**
+- Renta bruta y neta
+- Tarifas por noche y total de noches
+- Servicios adicionales y tarifas
+- Descuentos y promociones aplicadas
+- Impuestos y cargos adicionales
+- Total pagado vs balance pendiente
+
+**DESGLOSE FINANCIERO DEL PROPIETARIO:**
+- Ingresos brutos y netos
+- Comisiones de gestión y agente
+- Tarifas del propietario
+- Ingresos netos reales
+
+**ESTADO DE PAGOS:**
+- Pagos realizados y fechas
+- Balance pendiente (si aplica)
+- Método de pago utilizado
+- Próximos pagos programados
+
+**ANÁLISIS DE RENTABILIDAD:**
+- Margen de ganancia
+- Comparación con tarifas estándar
+- Efectividad de servicios adicionales
+- Recomendaciones de optimización
+
+**Formato de Respuesta:**
+- Resumen financiero ejecutivo
+- Desglose detallado de costos
+- Estado de pagos y balances
+- Análisis de rentabilidad
+- Recomendaciones financieras""",
+                    },
+                }
+            ]
+        }
+
+    # Prompt para comunicación con huéspedes
+    @mcp.prompt
+    def create_guest_communication_prompt(reservation_id: int) -> Dict[str, Any]:
+        """
+        Crea un prompt para comunicación efectiva con huéspedes.
+
+        **Casos de Uso:**
+        - Preparación de comunicaciones con huéspedes
+        - Información de contacto y preferencias
+        - Coordinación de servicios especiales
+        - Gestión de solicitudes especiales
+        """
+        return {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": {
+                        "type": "text",
+                        "text": f"""Comunicación con huésped de reserva:
+
+**Parámetros:**
+- ID de Reserva: {reservation_id}
+
+**Instrucciones:**
+1. Usa get_reservation con reservation_id="{reservation_id}"
+2. Enfócate en información de comunicación
+3. Identifica preferencias y necesidades especiales
+4. Proporciona guía de comunicación efectiva
+
+**DATOS DE CONTACTO:**
+- Nombre completo del huésped principal
+- Email principal y secundario
+- Teléfonos (celular, trabajo, casa)
+- Dirección postal completa
+- Preferencias de comunicación
+
+**INFORMACIÓN DE LA ESTANCIA:**
+- Fechas y horarios de llegada/salida
+- Unidad asignada y características
+- Servicios contratados y adicionales
+- Políticas y reglas importantes
+
+**PREFERENCIAS ESPECIALES:**
+- Solicitudes especiales del huésped
+- Notas importantes de reservas anteriores
+- Preferencias de servicios
+- Restricciones o limitaciones
+
+**GUÍA DE COMUNICACIÓN:**
+- Mejor método de contacto
+- Horarios preferidos de comunicación
+- Información importante a comunicar
+- Servicios adicionales a ofrecer
+
+**Formato de Respuesta:**
+- Datos de contacto completos
+- Información clave para comunicar
+- Preferencias y necesidades especiales
+- Recomendaciones de comunicación
+- Servicios adicionales a ofrecer""",
                     },
                 }
             ]
