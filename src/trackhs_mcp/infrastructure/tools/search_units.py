@@ -85,7 +85,14 @@ def register_search_units(mcp, api_client: "ApiClientPort"):
             le=400,
         ),
         size: int = Field(
-            default=3, description="Number of results per page (1-25)", ge=1, le=25
+            default=2,
+            description=(
+                "Number of results per page (1-25). "
+                "⚠️ Para agentes de voz: usa 2-3 máximo. Las unidades tienen MUCHA información "
+                "(imágenes, amenidades, descripciones). Default: 2 (optimizado para conversaciones)."
+            ),
+            ge=1,
+            le=25,
         ),
         # Parámetros de ordenamiento
         sort_column: str = Field(

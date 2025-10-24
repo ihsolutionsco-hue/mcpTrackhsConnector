@@ -37,8 +37,13 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
             le=10000,
         ),
         size: int = Field(
-            default=25,
-            description="Items per page. Max 1,000 per page. Recommended: 25-100 for optimal performance. Example: 25 for standard pagination, 100 for bulk analysis.",
+            default=10,
+            description=(
+                "Items per page. Max 1,000 per page. "
+                "⚠️ Para agentes de voz: usa 5-10 máximo. "
+                "Recommended: 10 (conversaciones), 25-50 (análisis), 100 (bulk). "
+                "Default: 10 (optimizado para conversaciones)."
+            ),
             ge=1,
             le=1000,
         ),

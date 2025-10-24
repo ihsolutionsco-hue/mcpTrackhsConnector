@@ -58,8 +58,24 @@
       "TRACKHS_SEARCH_TIMEOUT",
       "FASTMCP_LOG_LEVEL",
       "FASTMCP_MASK_ERROR_DETAILS",
-      "FASTMCP_STRICT_INPUT_VALIDATION"
+      "FASTMCP_STRICT_INPUT_VALIDATION",
+      "TRACKHS_COMPACT_RESPONSES",
+      "TRACKHS_MAX_RESPONSE_ITEMS",
+      "TRACKHS_MAX_RESPONSE_TOKENS"
     ]
+  },
+  "response_optimization": {
+    "description": "Configuración para optimizar respuestas en agentes de voz (ElevenLabs, etc.)",
+    "compact_responses": true,
+    "max_items_per_response": 3,
+    "max_estimated_tokens": 2000,
+    "voice_agent_mode": {
+      "enabled": true,
+      "max_reservation_results": 3,
+      "max_unit_results": 2,
+      "max_amenity_results": 10,
+      "include_only_essential_fields": true
+    }
   }
 }
 

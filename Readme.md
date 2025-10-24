@@ -16,6 +16,31 @@ Este repositorio proporciona una implementación completa de un servidor MCP que
 
 El [Model Context Protocol](https://modelcontextprotocol.io) es un estándar abierto que permite la integración perfecta entre aplicaciones de IA y fuentes de datos externas, herramientas y servicios.
 
+## 🎙️ **Optimizado para Agentes de Voz**
+
+**⚠️ IMPORTANTE:** Este MCP está optimizado para uso con agentes de voz como **ElevenLabs + Gemini 2.5**.
+
+### **Optimizaciones Implementadas**
+
+- ✅ **Paginación reducida**: Defaults optimizados (3-5 resultados) para evitar respuestas largas
+- ✅ **Middleware de compactación**: Elimina campos innecesarios, mantiene solo info esencial
+- ✅ **Límites configurables**: Control fino mediante variables de entorno
+- ✅ **Advertencias en herramientas**: Cada tool tiene recomendaciones de uso
+- ✅ **Estimación de tokens**: Funciones para calcular y limitar tamaño de respuestas
+
+### **Configuración Recomendada para Agentes de Voz**
+
+```bash
+# .env
+TRACKHS_COMPACT_RESPONSES=true        # Activar compactación automática
+TRACKHS_MAX_RESPONSE_ITEMS=3          # Máximo 3 items por búsqueda
+TRACKHS_MAX_RESPONSE_TOKENS=2000      # Límite de tokens estimados
+```
+
+📖 **[Ver guía completa de mejores prácticas →](docs/VOICE_AGENT_BEST_PRACTICES.md)**
+
+---
+
 ## 🚀 **Características Principales**
 
 ### **Herramientas MCP (7)**

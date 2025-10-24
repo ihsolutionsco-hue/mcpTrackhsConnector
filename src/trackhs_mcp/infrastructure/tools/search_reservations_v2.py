@@ -85,11 +85,13 @@ async def search_reservations_v2(
         le=99,
     ),
     size: int = Field(
-        default=10,
+        default=3,
         description=(
             "Number of results per page. Range: 1-100. "
-            "Examples: 10 (default), 25, 50, 100. "
-            "Use smaller values for faster responses."
+            "⚠️ IMPORTANTE: Para agentes de voz/servicio al cliente, usa 3-5 resultados máximo. "
+            "Valores grandes afectan ventana de contexto y generan respuestas muy largas. "
+            "Examples: 3 (óptimo para voz), 5 (servicio al cliente), 10 (análisis). "
+            "Default: 3 (optimizado para conversaciones)."
         ),
         ge=1,
         le=100,
@@ -444,7 +446,7 @@ async def search_reservations_v2(
     if page_normalized is None:
         page_normalized = 0  # Default: 0 (0-based pagination)
     if size_normalized is None:
-        size_normalized = 10  # Default: 10
+        size_normalized = 3  # Default: 3 (optimizado para conversaciones de voz)
 
     # Validar parámetros de paginación según documentación API V2
     if page_normalized < 0:
@@ -658,9 +660,11 @@ def register_search_reservations_v2(mcp, api_client: "ApiClientPort"):
             le=10000,
         ),
         size: int = Field(
-            default=10,
+            default=3,
             description=(
-                "Number of results per page (1-100). " "Maps to API parameter 'size'."
+                "Number of results per page (1-100). "
+                "⚠️ Para agentes de voz: usa 3-5 máximo. "
+                "Maps to API parameter 'size'."
             ),
             ge=1,
             le=100,
