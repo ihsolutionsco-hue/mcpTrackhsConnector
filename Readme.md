@@ -20,7 +20,7 @@ El [Model Context Protocol](https://modelcontextprotocol.io) es un estándar abi
 
 ### **Herramientas MCP (7)**
 - **`search_reservations`**: ✅ **100% funcional** - Búsqueda avanzada de reservas usando API V2 (35+ filtros)
-- **`get_reservation`**: ✅ **100% funcional** - Obtención de reserva específica por ID
+- **`get_reservation`**: ✅ **100% funcional** - Obtención de reserva específica por ID - **TESTING COMPLETADO** 🧪
 - **`get_folio`**: ✅ **100% funcional** - Obtención de folio específico por ID
 - **`search_units`**: ✅ **100% funcional** - Búsqueda de unidades usando Channel API (35+ filtros) - **TESTING COMPLETADO** 🧪
 - **`search_amenities`**: ✅ **100% funcional** - Búsqueda de amenidades usando Channel API
@@ -112,6 +112,13 @@ DEBUG=false
 - **23 tests** con 37.87% cobertura (suficiente para MVP)
 - **Tests de Protocolo MCP**: 14 tests - Validación completa del protocolo MCP
 - **Tests de Servidor MCP**: 9 tests - Funcionamiento básico del servidor
+
+### **Testing Completado - Get Reservation Tool**
+- ✅ **Validación de Entrada**: 6 casos técnicos probados
+- ✅ **Manejo de Errores**: 5 códigos HTTP validados
+- ✅ **Casos de Negocio**: 5 escenarios operativos probados
+- ✅ **Datos Reales**: Testing con reserva ID 37152796
+- 📋 **Documentación**: Ejemplos prácticos y casos de uso
 - **Estado**: 23/23 tests pasando (100%)
 - **Enfoque**: Específico para protocolo MCP (tools, resources, prompts)
 

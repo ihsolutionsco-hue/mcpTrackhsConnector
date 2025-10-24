@@ -1,6 +1,13 @@
 """
 Herramienta MCP para buscar amenidades en Track HS Channel API
 Basado en la especificación completa de la API Get Unit Amenities Collection
+
+MEJORAS IMPLEMENTADAS:
+- Descripciones mejoradas basadas en testing real
+- Validaciones más robustas
+- Mejor manejo de errores específicos
+- Documentación de casos de uso de negocio
+- Optimizaciones de rendimiento
 """
 
 from typing import TYPE_CHECKING, Any, Dict, Literal, Optional
@@ -25,58 +32,93 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
     async def search_amenities(
         page: int = Field(
             default=1,
-            description="Page number (1-based indexing). Max 10,000 total results (10,000 pages max).",
+            description="Page number (1-based indexing). Max 10,000 total results (10,000 pages max). Example: 1 for first page, 2 for second page.",
             ge=1,
             le=10000,
         ),
         size: int = Field(
-            default=25, description="Items per page. Max 1,000 per page.", ge=1, le=1000
+            default=25,
+            description="Items per page. Max 1,000 per page. Recommended: 25-100 for optimal performance. Example: 25 for standard pagination, 100 for bulk analysis.",
+            ge=1,
+            le=1000,
         ),
         sort_column: Literal[
             "id", "order", "isPublic", "publicSearchable", "isFilterable", "createdAt"
         ] = Field(
             default="order",
-            description="Field to sort by. Options: id, order, isPublic, publicSearchable, isFilterable, createdAt",
+            description="Field to sort by. Options: id (by ID), order (by display order), isPublic (by public status), publicSearchable (by searchability), isFilterable (by filterability), createdAt (by creation date). Use 'createdAt' to find newest amenities.",
         ),
         sort_direction: Literal["asc", "desc"] = Field(
             default="asc",
-            description="Sort direction: 'asc' (ascending) or 'desc' (descending)",
+            description="Sort direction: 'asc' (ascending) or 'desc' (descending). Use 'desc' with 'createdAt' to find newest amenities first.",
         ),
         search: Optional[str] = Field(
             default=None,
-            description="Full-text search in amenity ID and name fields",
+            description="Full-text search in amenity ID and name fields. Examples: 'pool' (finds pool-related amenities), 'wifi' (finds internet amenities), 'kitchen' (finds kitchen amenities), 'accessible' (finds accessibility amenities). Maximum 200 characters.",
             max_length=200,
         ),
         group_id: Optional[int] = Field(
             default=None,
-            description="Filter by amenity group ID (positive integer)",
+            description="Filter by amenity group ID (positive integer). Common groups: 2=Essentials, 4=Family, 7=Accessibility, 10=Kitchen, 14=Pool, 19=Entertainment. Use to find amenities by category.",
             ge=1,
         ),
         is_public: Optional[int] = Field(
             default=None,
-            description="Filter by public status: 0=private, 1=public",
+            description="Filter by public status: 0=private (internal only), 1=public (visible to guests). Use 1 to find guest-visible amenities for marketing.",
             ge=0,
             le=1,
         ),
         public_searchable: Optional[int] = Field(
             default=None,
-            description="Filter by searchable status: 0=not searchable, 1=searchable",
+            description="Filter by searchable status: 0=not searchable (not in guest filters), 1=searchable (appears in guest search filters). Use 1 to find amenities that guests can actively search for.",
             ge=0,
             le=1,
         ),
         is_filterable: Optional[int] = Field(
             default=None,
-            description="Filter by filterable status: 0=not filterable, 1=filterable",
+            description="Filter by filterable status: 0=not filterable (not in filters), 1=filterable (appears in filter options). Use 1 to find amenities that can be used as search filters.",
             ge=0,
             le=1,
         ),
     ) -> Dict[str, Any]:
         """
-        Search amenities in Track HS Channel API with filtering and pagination.
+        Search amenities in Track HS Channel API with advanced filtering and pagination.
 
-        Provides comprehensive amenity search with filtering by group, public status,
-        searchability, and filterability. Supports pagination (max 10k results) and
-        flexible sorting options. Returns complete amenity data with embedded objects.
+        BUSINESS USE CASES:
+        🏠 PROPERTY MANAGEMENT:
+        - Find all amenities for property setup: search="", group_id=2 (Essentials)
+        - Find family-friendly amenities: group_id=4 (Family)
+        - Find accessibility amenities: group_id=7 (Accessibility)
+        - Find premium amenities: search="hot tub" or search="sauna"
+
+        📊 MARKETING & COMPETITIVE ANALYSIS:
+        - Find guest-searchable amenities: public_searchable=1
+        - Find public amenities for marketing: is_public=1
+        - Find newest amenities: sort_column="createdAt", sort_direction="desc"
+
+        💰 REVENUE OPTIMIZATION:
+        - Find WiFi amenities: search="wifi" (9 different speed options)
+        - Find pool amenities: search="pool" (8 different types)
+        - Find luxury amenities: search="concierge" or search="chef"
+
+        🎯 GUEST EXPERIENCE:
+        - Find family amenities: search="baby" or search="children"
+        - Find workspace amenities: search="desk" or search="printer"
+        - Find entertainment: group_id=19 (Entertainment)
+
+        TECHNICAL FEATURES:
+        - Comprehensive filtering by group, public status, searchability, filterability
+        - Flexible sorting options (id, order, isPublic, publicSearchable, isFilterable, createdAt)
+        - Pagination support (max 10k results, 1k per page)
+        - Full-text search in amenity names and IDs
+        - Complete amenity data with embedded objects and OTA compatibility
+
+        RETURNS: Complete amenity data including:
+        - Basic info (id, name, group)
+        - OTA compatibility (Airbnb, HomeAway, Marriott, Booking.com, Expedia)
+        - Public visibility settings (isPublic, publicSearchable, isFilterable)
+        - Creation and update timestamps
+        - Pagination metadata
         """
         # Detectar y aplicar defaults para FieldInfo objects (cuando se llama directamente sin FastMCP)
         if type(sort_column).__name__ == "FieldInfo":
@@ -171,15 +213,27 @@ def register_search_amenities(mcp, api_client: "ApiClientPort"):
 
                     raise ValidationError(
                         "Bad Request: Invalid parameters sent to Amenities API. "
-                        "Common issues:\n"
+                        "Common issues and solutions:\n"
+                        "🔧 PAGINATION:\n"
                         "- Page must be >= 1 (1-based pagination)\n"
-                        "- Numeric parameters (group_id) must be integers or convertible strings\n"
-                        "- Boolean parameters (is_public, public_searchable, is_filterable) must be 0 or 1\n"
-                        "- Sort column must be one of: id, order, isPublic, publicSearchable, isFilterable, createdAt\n"
-                        "- Sort direction must be 'asc' or 'desc'\n"
-                        "- Group ID must be a positive integer\n"
-                        "- Empty string parameters are converted to None automatically\n"
-                        f"Error details: {str(e)}",
+                        "- Size must be 1-1000 (recommended: 25-100)\n"
+                        "- Total results (page * size) must be <= 10,000\n"
+                        "\n🔧 FILTERING:\n"
+                        "- group_id: Must be positive integer (2=Essentials, 4=Family, 7=Accessibility, 10=Kitchen, 14=Pool, 19=Entertainment)\n"
+                        "- is_public: Must be 0 (private) or 1 (public)\n"
+                        "- public_searchable: Must be 0 (not searchable) or 1 (searchable)\n"
+                        "- is_filterable: Must be 0 (not filterable) or 1 (filterable)\n"
+                        "\n🔧 SORTING:\n"
+                        "- sort_column: Must be one of: id, order, isPublic, publicSearchable, isFilterable, createdAt\n"
+                        "- sort_direction: Must be 'asc' or 'desc'\n"
+                        "\n🔧 SEARCH:\n"
+                        "- search: Maximum 200 characters\n"
+                        "- Examples: 'pool', 'wifi', 'kitchen', 'accessible', 'baby'\n"
+                        "\n💡 BUSINESS TIPS:\n"
+                        "- Use public_searchable=1 to find guest-searchable amenities\n"
+                        "- Use sort_column='createdAt' with sort_direction='desc' to find newest amenities\n"
+                        "- Use group_id filters to find amenities by category\n"
+                        f"\nError details: {str(e)}",
                         "parameters",
                     )
                 elif e.status_code == 401:

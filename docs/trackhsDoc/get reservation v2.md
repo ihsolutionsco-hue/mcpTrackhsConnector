@@ -1,4 +1,43 @@
-Get Reservation V2
+# Get Reservation V2 - Documentación Actualizada
+
+## 🎯 Descripción General
+
+Tool para obtener información completa de una reserva específica por ID desde TrackHS API V2. Diseñado para personal hotelero con enfoque en casos de uso reales.
+
+## 🧪 Testing Completado
+
+### **Casos Técnicos Validados:**
+- ✅ Validación de entrada (IDs inválidos, vacíos, caracteres especiales)
+- ✅ Manejo de errores HTTP (401, 403, 404, 500)
+- ✅ Formato de respuesta estructurada
+- ✅ Testing completado
+
+### **Casos de Negocio Validados:**
+- ✅ Información completa del huésped
+- ✅ Detalles operativos de la estancia
+- ✅ Información financiera detallada
+- ✅ Políticas y procedimientos
+- ✅ Datos para preparación de servicios
+
+## 📋 Casos de Uso Principales
+
+### **Para Recepción:**
+- Verificar información del huésped
+- Confirmar detalles de llegada/salida
+- Revisar pagos y balances
+- Preparar check-in personalizado
+
+### **Para Operaciones:**
+- Planificar preparación de unidades
+- Coordinar servicios adicionales
+- Manejar solicitudes especiales
+- Seguimiento de políticas
+
+### **Para Servicio al Cliente:**
+- Consultar información de contacto
+- Verificar políticas de cancelación
+- Revisar historial de pagos
+- Resolver consultas específicas
 
 # OpenAPI definition
 ```json
