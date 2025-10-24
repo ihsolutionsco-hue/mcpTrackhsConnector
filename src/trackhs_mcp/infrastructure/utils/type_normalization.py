@@ -84,12 +84,25 @@ def normalize_int(
         return None
 
     if isinstance(value, int):
+        # Validar que sea positivo (para IDs)
+        if value < 0:
+            raise ValidationError(
+                f"{param_name} must be a positive integer, got: {value}",
+                param_name,
+            )
         return value
 
     if isinstance(value, float):
         # Validar que no tiene decimales significativos
         if value.is_integer():
-            return int(value)
+            int_value = int(value)
+            # Validar que sea positivo (para IDs)
+            if int_value < 0:
+                raise ValidationError(
+                    f"{param_name} must be a positive integer, got: {value}",
+                    param_name,
+                )
+            return int_value
         raise ValidationError(
             f"{param_name} must be an integer, got float with decimals: {value}",
             param_name,
@@ -102,8 +115,23 @@ def normalize_int(
             raise ValidationError(f"{param_name} cannot be empty string", param_name)
 
         try:
-            # Intentar parsear como int
-            return int(value)
+            # Intentar parsear como float primero (para manejar "123.0")
+            float_value = float(value)
+            # Verificar que no tenga decimales significativos
+            if float_value.is_integer():
+                int_value = int(float_value)
+                # Validar que sea positivo (para IDs)
+                if int_value < 0:
+                    raise ValidationError(
+                        f"{param_name} must be a positive integer, got: {value}",
+                        param_name,
+                    )
+                return int_value
+            else:
+                raise ValidationError(
+                    f"{param_name} must be an integer, got float with decimals: {value}",
+                    param_name,
+                )
         except ValueError:
             raise ValidationError(
                 f"{param_name} must be a valid integer string, got: {value}",

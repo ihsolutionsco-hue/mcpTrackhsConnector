@@ -5,7 +5,7 @@ Esta herramienta permite crear work orders de housekeeping en TrackHS siguiendo
 el patrón de herramientas MCP existentes.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from pydantic import Field
 
@@ -28,9 +28,9 @@ from ..utils.date_validation import (
     normalize_date_to_iso8601,
 )
 from ..utils.type_normalization import (
-    normalize_string_to_bool,
-    normalize_string_to_float,
-    normalize_string_to_int,
+    normalize_bool,
+    normalize_float,
+    normalize_int,
 )
 
 
@@ -57,14 +57,12 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
         status: str = Field(
             description="Work order status. Valid: pending, not-started, in-progress, completed, processed, cancelled, exception",
         ),
-        unit_id: int = Field(
+        unit_id: str = Field(
             description="Unit ID (positive integer). Required. Example: 123. ⚠️ NOTE: Unit 1 has restrictions for inspections (is_inspection=true) - use clean_type_id instead.",
-            ge=1,
         ),
-        unit_block_id: Optional[int] = Field(
+        unit_block_id: Optional[str] = Field(
             default=None,
             description="Unit block ID (positive integer). Optional. Example: 456",
-            ge=1,
         ),
         is_inspection: Optional[bool] = Field(
             default=None,
@@ -74,13 +72,12 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             default=None,
             description="Clean type ID (positive integer). Required if is_inspection not provided. ✅ RECOMMENDED for Unit 1 to avoid server errors. Available: 1=Carpet Cleaning, 2=Deep Clean, 3=Departure Clean, 4=Guest Request, 5=Pack and Play, 6=Pre-Arrival Inspection, 7=Refresh Clean",
         ),
-        user_id: Optional[int] = Field(
+        user_id: Optional[str] = Field(
             default=None,
             description="Assigned user ID (positive integer). Example: 789",
-            ge=1,
         ),
-        vendor_id: Optional[int] = Field(
-            default=None, description="Vendor ID (positive integer). Example: 321", ge=1
+        vendor_id: Optional[str] = Field(
+            default=None, description="Vendor ID (positive integer). Example: 321"
         ),
         reservation_id: Optional[str] = Field(
             default=None,
@@ -95,10 +92,9 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
         comments: Optional[str] = Field(
             default=None, description="Additional comments or notes", max_length=2000
         ),
-        cost: Optional[float] = Field(
+        cost: Optional[str] = Field(
             default=None,
             description="Cost of the work order (must be >= 0). Example: 125.50",
-            ge=0.0,
         ),
     ) -> Dict[str, Any]:
         """
@@ -129,21 +125,21 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
             scheduled_at_normalized = normalize_date_to_iso8601(scheduled_at)
 
             # unit_id es requerido según la documentación
-            unit_id_norm = normalize_string_to_int(unit_id)
+            unit_id_norm = normalize_int(unit_id, "unit_id")
             unit_block_id_norm = (
-                normalize_string_to_int(unit_block_id)
+                normalize_int(unit_block_id, "unit_block_id")
                 if unit_block_id is not None
                 else None
             )
 
             # Validar campos de tipo de tarea (exactamente uno requerido)
             is_inspection_norm = (
-                normalize_string_to_bool(is_inspection)
+                normalize_bool(is_inspection, "is_inspection")
                 if is_inspection is not None
                 else None
             )
             clean_type_id_norm = (
-                normalize_string_to_int(clean_type_id)
+                normalize_int(clean_type_id, "clean_type_id")
                 if clean_type_id is not None
                 else None
             )
@@ -159,25 +155,25 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
 
             # Normalizar campos opcionales
             user_id_norm = (
-                normalize_string_to_int(user_id) if user_id is not None else None
+                normalize_int(user_id, "user_id") if user_id is not None else None
             )
             vendor_id_norm = (
-                normalize_string_to_int(vendor_id) if vendor_id is not None else None
+                normalize_int(vendor_id, "vendor_id") if vendor_id is not None else None
             )
             reservation_id_norm = (
-                normalize_string_to_int(reservation_id)
+                normalize_int(reservation_id, "reservation_id")
                 if reservation_id is not None
                 else None
             )
             is_turn_norm = (
-                normalize_string_to_bool(is_turn) if is_turn is not None else None
+                normalize_bool(is_turn, "is_turn") if is_turn is not None else None
             )
             charge_owner_norm = (
-                normalize_string_to_bool(charge_owner)
+                normalize_bool(charge_owner, "charge_owner")
                 if charge_owner is not None
                 else None
             )
-            cost_norm = normalize_string_to_float(cost) if cost is not None else None
+            cost_norm = normalize_float(cost, "cost") if cost is not None else None
 
             # Validar valores numéricos
             if cost_norm is not None and cost_norm < 0:
