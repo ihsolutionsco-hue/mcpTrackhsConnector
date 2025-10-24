@@ -72,7 +72,7 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
         ),
         clean_type_id: Optional[str] = Field(
             default=None,
-            description="Clean type ID (positive integer). Required if is_inspection not provided. Example: 5. ✅ RECOMMENDED for Unit 1 to avoid server errors.",
+            description="Clean type ID (positive integer). Required if is_inspection not provided. ✅ RECOMMENDED for Unit 1 to avoid server errors. Available: 1=Carpet Cleaning, 2=Deep Clean, 3=Departure Clean, 4=Guest Request, 5=Pack and Play, 6=Pre-Arrival Inspection, 7=Refresh Clean",
         ),
         user_id: Optional[int] = Field(
             default=None,
@@ -121,7 +121,8 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
                     "❌ RESTRICCIÓN CONOCIDA: La unidad 1 no permite inspecciones (is_inspection=true). "
                     "Esto causa un error 500 del servidor TrackHS. "
                     "✅ SOLUCIÓN: Use clean_type_id en lugar de is_inspection para la unidad 1. "
-                    "Ejemplo: clean_type_id='5' para limpieza de salida."
+                    "Clean types disponibles: 1=Carpet Cleaning, 2=Deep Clean, 3=Departure Clean, "
+                    "4=Guest Request, 5=Pack and Play, 6=Pre-Arrival Inspection, 7=Refresh Clean"
                 )
 
             # Normalizar fecha a formato ISO 8601 estándar

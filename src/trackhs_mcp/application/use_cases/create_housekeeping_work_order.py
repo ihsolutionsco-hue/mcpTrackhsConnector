@@ -67,7 +67,8 @@ class CreateHousekeepingWorkOrderUseCase:
                     "❌ RESTRICCIÓN CONOCIDA: La unidad 1 no permite inspecciones en TrackHS. "
                     "Esto causa un error 500 del servidor. "
                     "✅ SOLUCIÓN: Use clean_type_id en lugar de is_inspection para la unidad 1. "
-                    "Ejemplo: clean_type_id='5' para limpieza de salida.",
+                    "Clean types disponibles: 1=Carpet Cleaning, 2=Deep Clean, 3=Departure Clean, "
+                    "4=Guest Request, 5=Pack and Play, 6=Pre-Arrival Inspection, 7=Refresh Clean",
                     errors=[
                         "Unit 1 inspection restriction",
                         "Use clean_type_id instead",

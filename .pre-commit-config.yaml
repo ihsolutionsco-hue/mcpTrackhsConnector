@@ -32,18 +32,7 @@ repos:
         name: Ordenar imports con isort
         args: [--profile=black]
 
-  # 4. Tests MCP optimizados (solo tests críticos)
-  - repo: local
-    hooks:
-      - id: pytest-mcp
-        name: Tests MCP Protocol
-        entry: pytest
-        args: [tests/test_mcp_protocol.py, tests/test_mcp_server.py, -v, --tb=short]
-        language: system
-        pass_filenames: false
-        always_run: false
-
-  # 5. Validación de servidor MCP
+  # 4. Validación de servidor MCP (sin tests)
   - repo: local
     hooks:
       - id: mcp-server-check

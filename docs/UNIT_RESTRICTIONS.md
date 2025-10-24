@@ -17,7 +17,14 @@
 
 #### **✅ Solución**
 - **Workaround**: Usar `clean_type_id` en lugar de `is_inspection`
-- **Ejemplo**: `clean_type_id: "5"` para limpieza de salida
+- **Clean Types disponibles**:
+  - `1` - Carpet Cleaning
+  - `2` - Deep Clean
+  - `3` - Departure Clean
+  - `4` - Guest Request
+  - `5` - Pack and Play
+  - `6` - Pre-Arrival Inspection
+  - `7` - Refresh Clean
 
 ---
 
@@ -28,7 +35,7 @@
 // ✅ Funciona: Unidad 1 con clean_type_id
 {
   "unitId": 1,
-  "cleanTypeId": "5",
+  "cleanTypeId": "3",  // Departure Clean
   "scheduledAt": "2025-01-15T10:00:00Z"
 }
 
@@ -102,7 +109,14 @@ if "500" in error_message and params.unit_id == 1 and params.is_inspection:
 
 ### **Para Usuarios**
 1. **Evitar is_inspection=true** para unidad 1
-2. **Usar clean_type_id** como alternativa
+2. **Usar clean_type_id** como alternativa con estos valores:
+   - `1` - Carpet Cleaning
+   - `2` - Deep Clean
+   - `3` - Departure Clean
+   - `4` - Guest Request
+   - `5` - Pack and Play
+   - `6` - Pre-Arrival Inspection
+   - `7` - Refresh Clean
 3. **Consultar documentación** antes de crear work orders
 
 ### **Para Soporte TrackHS**
