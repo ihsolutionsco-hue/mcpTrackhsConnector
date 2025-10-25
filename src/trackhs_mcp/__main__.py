@@ -198,6 +198,19 @@ def get_trackhs_client():
     return _trackhs_client
 
 # ============================================================================
+# SERVIDOR FASTMCP (DEBE SER ANTES DE LOS TOOLS)
+# ============================================================================
+
+# Crear servidor FastMCP
+mcp = FastMCP("TrackHS Hotel MCP")
+
+# Middleware mínimo
+mcp.add_middleware(LoggingMiddleware(include_payloads=True))
+mcp.add_middleware(ErrorHandlingMiddleware(transform_errors=True))
+
+logger.info("TrackHS MCP Server initialized successfully")
+
+# ============================================================================
 # SCHEMAS DE VALIDACIÓN
 # ============================================================================
 
@@ -453,17 +466,8 @@ async def search_units(request: SearchUnitsRequest) -> dict:
         raise
 
 # ============================================================================
-# SERVIDOR FASTMCP
+# ENTRY POINT
 # ============================================================================
-
-# Crear servidor FastMCP
-mcp = FastMCP("TrackHS Hotel MCP")
-
-# Middleware mínimo
-mcp.add_middleware(LoggingMiddleware(include_payloads=True))
-mcp.add_middleware(ErrorHandlingMiddleware(transform_errors=True))
-
-logger.info("TrackHS MCP Server initialized successfully")
 
 if __name__ == "__main__":
     mcp.run()
