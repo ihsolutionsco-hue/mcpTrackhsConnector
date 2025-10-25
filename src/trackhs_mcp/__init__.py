@@ -1,7 +1,7 @@
 """
-TrackHS MCP Server Module
+TrackHS MCP Server Package
 """
 
-from .server import mcp
-
-__all__ = ["mcp"]
+__version__ = "2.0.0"
+__author__ = "IHSolutions"
+__email__ = "ihsolutionsco@gmail.com"

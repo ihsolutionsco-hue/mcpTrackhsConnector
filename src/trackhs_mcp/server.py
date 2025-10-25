@@ -24,11 +24,11 @@ from .schemas import (
 # Cargar variables de entorno
 load_dotenv()
 
-# Configuración de logging
+# Configuración de logging para FastMCP Cloud
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler("trackhs_mcp.log")],
+    handlers=[logging.StreamHandler()],  # Solo stdout para FastMCP Cloud
 )
 logger = logging.getLogger(__name__)
 
@@ -91,22 +91,21 @@ class TrackHSClient:
             raise
 
 
-# Inicializar cliente API
-if not API_USERNAME or not API_PASSWORD:
-    logger.warning("TRACKHS_USERNAME y TRACKHS_PASSWORD no están configurados")
-    logger.warning(
-        "El servidor se iniciará pero las herramientas no funcionarán sin credenciales"
-    )
-    # Crear un cliente mock para evitar errores
-    api_client = None
-else:
-    try:
+# Inicializar cliente API con manejo robusto para FastMCP Cloud
+try:
+    if not API_USERNAME or not API_PASSWORD:
+        logger.warning("TRACKHS_USERNAME y TRACKHS_PASSWORD no están configurados")
+        logger.warning(
+            "El servidor se iniciará pero las herramientas no funcionarán sin credenciales"
+        )
+        api_client = None
+    else:
         api_client = TrackHSClient(API_BASE_URL, API_USERNAME, API_PASSWORD)
         logger.info("Cliente API TrackHS inicializado correctamente")
-    except Exception as e:
-        logger.error(f"Error inicializando cliente API: {e}")
-        logger.warning("Continuando sin cliente API funcional")
-        api_client = None
+except Exception as e:
+    logger.error(f"Error inicializando cliente API: {e}")
+    logger.warning("Continuando sin cliente API funcional")
+    api_client = None
 
 
 # Función helper para verificar cliente API
@@ -648,8 +647,8 @@ def health_check():
         }
 
 
-# Configuración HTTP explícita
+# Configuración HTTP manejada por FastMCP Cloud
 if __name__ == "__main__":
-    logger.info("Iniciando servidor TrackHS MCP en modo HTTP")
-    # HTTP transport según fastmcp.json
-    mcp.run(transport="http", host="0.0.0.0", port=8080)
+    logger.info("Iniciando servidor TrackHS MCP")
+    # FastMCP Cloud maneja automáticamente la configuración HTTP
+    mcp.run()

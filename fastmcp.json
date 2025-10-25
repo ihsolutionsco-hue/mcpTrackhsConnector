@@ -9,14 +9,9 @@
     "requirements": "requirements.txt",
     "fastmcp_version": "2.13.0"
   },
-  "transport": {
-    "type": "http",
-    "port": 8080,
-    "host": "0.0.0.0"
-  },
   "server": {
     "name": "TrackHS API",
-    "description": "Servidor MCP simple y robusto para TrackHS API con validación Pydantic",
+    "description": "Servidor MCP para TrackHS API con validación Pydantic",
     "version": "2.0.0",
     "website_url": "https://github.com/ihsolutionsco-hue/mcpTrackhsConnector"
   },
