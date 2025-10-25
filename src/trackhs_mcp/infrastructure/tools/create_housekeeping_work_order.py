@@ -45,7 +45,7 @@ def register_create_housekeeping_work_order(mcp, api_client: ApiClientPort):
 
     @mcp.tool(
         name="create_housekeeping_work_order",
-        description="Crear una nueva orden de trabajo de housekeeping en TrackHS. 🔧 IMPORTANTE PARA LLM: Todos los IDs deben ser números enteros (int), no strings. Booleanos deben ser true/false, no 'true'/'false'. Fechas en formato ISO 8601.",
+        description="Crear una nueva orden de trabajo de housekeeping en TrackHS. 🔧 IMPORTANTE PARA LLM: FastMCP convierte automáticamente strings a integers/booleans/floats. Puedes usar tanto integers (123) como strings ('123'), tanto booleans (true) como strings ('true'). Fechas en formato ISO 8601.",
     )
     async def create_housekeeping_work_order(
         scheduled_at: Annotated[
