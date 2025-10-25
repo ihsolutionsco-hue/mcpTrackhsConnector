@@ -3,7 +3,7 @@ TrackHS MCP Server - Entry Point
 Punto de entrada para FastMCP Cloud
 """
 
-from src.trackhs_mcp.server import mcp
+from trackhs_mcp.server import mcp
 
 if __name__ == "__main__":
     # HTTP transport según fastmcp.json

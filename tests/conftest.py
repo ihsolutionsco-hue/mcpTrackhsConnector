@@ -21,7 +21,7 @@ async def mcp_client():
     """Cliente MCP para tests"""
     from fastmcp.client.transports import FastMCPTransport
 
-    from src.trackhs_mcp.server import mcp
+    from trackhs_mcp.server import mcp
 
     async with Client(transport=FastMCPTransport(mcp)) as client:
         yield client

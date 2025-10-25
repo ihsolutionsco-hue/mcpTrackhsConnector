@@ -13,7 +13,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_server_startup(self):
         """Test de inicio del servidor"""
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         async with Client(transport=FastMCPTransport(mcp)) as client:
             # Test de inicialización
@@ -23,7 +23,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_server_tools(self):
         """Test de herramientas del servidor"""
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         async with Client(transport=FastMCPTransport(mcp)) as client:
             # Test de listado de herramientas
@@ -33,7 +33,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_server_resources(self):
         """Test de recursos del servidor"""
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         async with Client(transport=FastMCPTransport(mcp)) as client:
             # Test de listado de recursos

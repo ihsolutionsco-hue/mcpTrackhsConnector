@@ -5,7 +5,7 @@ Tests de validación de parámetros para TrackHS MCP Server
 import pytest
 from pydantic import ValidationError
 
-from src.trackhs_mcp.schemas import (
+from trackhs_mcp.schemas import (
     HousekeepingWorkOrderStatus,
     MaintenanceWorkOrderStatus,
     WorkOrderPriority,
@@ -72,7 +72,7 @@ class TestOutputSchemas:
 
     def test_reservation_search_output_schema(self):
         """Test del esquema de salida para búsqueda de reservas"""
-        from src.trackhs_mcp.schemas import RESERVATION_SEARCH_OUTPUT_SCHEMA
+        from trackhs_mcp.schemas import RESERVATION_SEARCH_OUTPUT_SCHEMA
 
         assert "type" in RESERVATION_SEARCH_OUTPUT_SCHEMA
         assert "properties" in RESERVATION_SEARCH_OUTPUT_SCHEMA
@@ -84,7 +84,7 @@ class TestOutputSchemas:
 
     def test_unit_search_output_schema(self):
         """Test del esquema de salida para búsqueda de unidades"""
-        from src.trackhs_mcp.schemas import UNIT_SEARCH_OUTPUT_SCHEMA
+        from trackhs_mcp.schemas import UNIT_SEARCH_OUTPUT_SCHEMA
 
         assert "type" in UNIT_SEARCH_OUTPUT_SCHEMA
         assert "properties" in UNIT_SEARCH_OUTPUT_SCHEMA
@@ -96,7 +96,7 @@ class TestOutputSchemas:
 
     def test_work_order_output_schema(self):
         """Test del esquema de salida para órdenes de trabajo"""
-        from src.trackhs_mcp.schemas import WORK_ORDER_OUTPUT_SCHEMA
+        from trackhs_mcp.schemas import WORK_ORDER_OUTPUT_SCHEMA
 
         assert "type" in WORK_ORDER_OUTPUT_SCHEMA
         assert "properties" in WORK_ORDER_OUTPUT_SCHEMA

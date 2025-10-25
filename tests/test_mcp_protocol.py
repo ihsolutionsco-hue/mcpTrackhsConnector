@@ -13,7 +13,7 @@ class TestMCPProtocol:
     @pytest.mark.asyncio
     async def test_mcp_protocol_compliance(self):
         """Test de cumplimiento del protocolo MCP"""
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         async with Client(transport=FastMCPTransport(mcp)) as client:
             # Test de listado de herramientas
@@ -31,7 +31,7 @@ class TestMCPProtocol:
     @pytest.mark.asyncio
     async def test_server_capabilities(self):
         """Test de capacidades del servidor"""
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         async with Client(transport=FastMCPTransport(mcp)) as client:
             # Verificar que el servidor tiene las herramientas esperadas
@@ -56,7 +56,7 @@ class TestMCPProtocol:
     @pytest.mark.asyncio
     async def test_health_check_resource(self):
         """Test del recurso de health check"""
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         async with Client(transport=FastMCPTransport(mcp)) as client:
             resources = await client.list_resources()

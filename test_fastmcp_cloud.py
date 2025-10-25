@@ -21,12 +21,12 @@ def test_imports():
         print("🔍 Probando importaciones...")
 
         # Test importación del servidor
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         print("✅ Servidor importado correctamente")
 
         # Test importación de esquemas
-        from src.trackhs_mcp.schemas import WorkOrderPriority
+        from trackhs_mcp.schemas import WorkOrderPriority
 
         print("✅ Esquemas importados correctamente")
 
@@ -48,7 +48,7 @@ async def test_server_startup():
     try:
         print("🚀 Probando inicio del servidor...")
 
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         # Verificar que el servidor tiene las herramientas esperadas
         tools = await mcp.get_tools()
@@ -72,7 +72,7 @@ async def test_health_check():
     try:
         print("🏥 Probando health check...")
 
-        from src.trackhs_mcp.server import mcp
+        from trackhs_mcp.server import mcp
 
         # Verificar que el health check está disponible
         resources = await mcp.get_resources()
