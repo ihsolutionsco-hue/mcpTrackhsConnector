@@ -15,6 +15,7 @@ sys.path.insert(0, str(src_dir))
 
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
+
 from trackhs_mcp.server import mcp
 
 

@@ -3,13 +3,14 @@ Tests End-to-End (E2E) para search_units
 Simula flujos completos de usuario y escenarios reales
 """
 
-import os
-import pytest
 import asyncio
-from pathlib import Path
-import sys
-from typing import Dict, Any, List
 import json
+import os
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
+
+import pytest
 
 # Agregar src al path
 src_dir = Path(__file__).parent.parent / "src"
@@ -17,6 +18,7 @@ sys.path.insert(0, str(src_dir))
 
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
+
 from trackhs_mcp.server import mcp
 
 
@@ -261,8 +263,9 @@ class TestSearchUnitsE2E:
 
         # 4. Test de memoria
         print("🔍 Paso 3: Test de memoria")
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss

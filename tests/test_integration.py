@@ -198,7 +198,7 @@ class TestTrackHSIntegration:
     @pytest.mark.asyncio
     async def test_error_handling_integration(self, mcp_client):
         """Test de manejo de errores en integración"""
-        from trackhs_mcp.exceptions import AuthenticationError, APIError
+        from trackhs_mcp.exceptions import APIError, AuthenticationError
 
         # Test de error de autenticación
         with patch("trackhs_mcp.server.api_client") as mock_client:

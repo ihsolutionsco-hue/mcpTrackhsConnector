@@ -3,11 +3,12 @@ Tests de integración para search_units
 Prueba la integración completa con el servidor MCP y middleware
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, patch, AsyncMock
-from pathlib import Path
 import sys
+from pathlib import Path
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Agregar src al path
 src_dir = Path(__file__).parent.parent / "src"
@@ -15,8 +16,9 @@ sys.path.insert(0, str(src_dir))
 
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
+
+from trackhs_mcp.exceptions import APIError, AuthenticationError, ConnectionError
 from trackhs_mcp.server import mcp
-from trackhs_mcp.exceptions import AuthenticationError, APIError, ConnectionError
 
 
 class TestSearchUnitsIntegration:
@@ -384,8 +386,9 @@ class TestSearchUnitsIntegration:
     @pytest.mark.asyncio
     async def test_search_units_memory_usage_integration(self, mcp_client):
         """Test de uso de memoria en integración"""
-        import psutil
         import os
+
+        import psutil
 
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss

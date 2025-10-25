@@ -3,25 +3,25 @@ Tests unitarios simplificados para search_units
 Enfocados en la lógica de negocio sin decoradores FastMCP
 """
 
-import pytest
-from unittest.mock import Mock, patch
-from pydantic import ValidationError
-
 # Importar las dependencias necesarias
 import sys
 from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
+from pydantic import ValidationError
 
 src_dir = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_dir))
 
 from trackhs_mcp.exceptions import (
-    AuthenticationError,
     APIError,
+    AuthenticationError,
     ConnectionError,
     NotFoundError,
-    ValidationError as TrackHSValidationError,
     TrackHSError,
 )
+from trackhs_mcp.exceptions import ValidationError as TrackHSValidationError
 
 
 class TestSearchUnitsUnitSimple:
@@ -83,8 +83,9 @@ class TestSearchUnitsUnitSimple:
 
     def test_parameter_validation(self):
         """Test de validación de parámetros usando Pydantic"""
-        from pydantic import BaseModel, Field
         from typing import Optional
+
+        from pydantic import BaseModel, Field
 
         # Crear modelo de validación similar al de search_units
         class SearchUnitsParams(BaseModel):
@@ -131,8 +132,9 @@ class TestSearchUnitsUnitSimple:
 
     def test_string_validation(self):
         """Test de validación de strings"""
-        from pydantic import BaseModel, Field
         from typing import Optional
+
+        from pydantic import BaseModel, Field
 
         class SearchUnitsParams(BaseModel):
             search: Optional[str] = Field(max_length=200, default=None)
@@ -288,8 +290,9 @@ class TestSearchUnitsUnitSimple:
 
     def test_parameter_combinations(self):
         """Test de combinaciones de parámetros"""
-        from pydantic import BaseModel, Field
         from typing import Optional
+
+        from pydantic import BaseModel, Field
 
         class SearchUnitsParams(BaseModel):
             page: int = Field(ge=1, le=400, default=1)

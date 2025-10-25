@@ -7,7 +7,7 @@ import logging
 import time
 from typing import Any, Dict
 
-from .exceptions import AuthenticationError, APIError, ConnectionError
+from .exceptions import APIError, AuthenticationError, ConnectionError
 
 logger = logging.getLogger(__name__)
 

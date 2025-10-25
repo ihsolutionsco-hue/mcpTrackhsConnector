@@ -3,12 +3,12 @@
 Script para ejecutar tests de search_units con diferentes configuraciones
 """
 
-import os
-import sys
-import subprocess
 import argparse
+import os
+import subprocess
+import sys
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 class TestRunner:

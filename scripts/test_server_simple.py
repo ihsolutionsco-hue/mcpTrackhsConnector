@@ -3,9 +3,9 @@
 Script simple para probar el servidor TrackHS MCP
 """
 
+import asyncio
 import os
 import sys
-import asyncio
 from pathlib import Path
 
 # Agregar el directorio raíz al path
@@ -21,9 +21,10 @@ os.environ["TRACKHS_BASE_URL"] = "https://api-test.trackhs.com/api"
 async def test_server():
     """Test básico del servidor"""
     try:
-        from trackhs_mcp.server import mcp
         from fastmcp.client import Client
         from fastmcp.client.transports import FastMCPTransport
+
+        from trackhs_mcp.server import mcp
 
         print("🚀 Iniciando test del servidor TrackHS MCP...")
 

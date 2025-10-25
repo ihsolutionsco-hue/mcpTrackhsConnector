@@ -3,12 +3,13 @@ Tests reales contra la API de TrackHS para search_units
 Requiere credenciales válidas y conexión a internet
 """
 
-import os
-import pytest
 import asyncio
-from pathlib import Path
+import os
 import sys
-from typing import Dict, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import pytest
 
 # Agregar src al path
 src_dir = Path(__file__).parent.parent / "src"
@@ -16,8 +17,9 @@ sys.path.insert(0, str(src_dir))
 
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
+
+from trackhs_mcp.exceptions import APIError, AuthenticationError, ConnectionError
 from trackhs_mcp.server import mcp
-from trackhs_mcp.exceptions import AuthenticationError, APIError, ConnectionError
 
 
 class TestSearchUnitsAPIReal:
