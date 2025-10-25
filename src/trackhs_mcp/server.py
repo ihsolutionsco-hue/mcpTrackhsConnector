@@ -93,15 +93,30 @@ class TrackHSClient:
 
 # Inicializar cliente API
 if not API_USERNAME or not API_PASSWORD:
-    logger.error("TRACKHS_USERNAME y TRACKHS_PASSWORD son requeridos")
-    raise ValueError("TRACKHS_USERNAME y TRACKHS_PASSWORD son requeridos")
+    logger.warning("TRACKHS_USERNAME y TRACKHS_PASSWORD no están configurados")
+    logger.warning(
+        "El servidor se iniciará pero las herramientas no funcionarán sin credenciales"
+    )
+    # Crear un cliente mock para evitar errores
+    api_client = None
+else:
+    try:
+        api_client = TrackHSClient(API_BASE_URL, API_USERNAME, API_PASSWORD)
+        logger.info("Cliente API TrackHS inicializado correctamente")
+    except Exception as e:
+        logger.error(f"Error inicializando cliente API: {e}")
+        logger.warning("Continuando sin cliente API funcional")
+        api_client = None
 
-try:
-    api_client = TrackHSClient(API_BASE_URL, API_USERNAME, API_PASSWORD)
-    logger.info("Cliente API TrackHS inicializado correctamente")
-except Exception as e:
-    logger.error(f"Error inicializando cliente API: {e}")
-    raise
+
+# Función helper para verificar cliente API
+def check_api_client():
+    """Verificar que el cliente API esté disponible"""
+    if api_client is None:
+        raise Exception(
+            "Cliente API no está disponible. Verifique las credenciales TRACKHS_USERNAME y TRACKHS_PASSWORD."
+        )
+
 
 # Crear servidor MCP
 mcp = FastMCP(
@@ -198,6 +213,7 @@ def search_reservations(
         params["status"] = status
 
     try:
+        check_api_client()
         result = api_client.get("reservations", params)
         logger.info(
             f"Búsqueda de reservas exitosa - {result.get('total_items', 0)} reservas encontradas"
@@ -239,6 +255,7 @@ def get_reservation(
     logger.info(f"Obteniendo detalles de reserva ID: {reservation_id}")
 
     try:
+        check_api_client()
         result = api_client.get(f"reservations/{reservation_id}")
         logger.info(f"Detalles de reserva {reservation_id} obtenidos exitosamente")
         return result
@@ -322,6 +339,7 @@ def search_units(
     if is_bookable is not None:
         params["is_bookable"] = is_bookable
 
+    check_api_client()
     return api_client.get("units", params)
 
 
@@ -363,6 +381,7 @@ def search_amenities(
     if search:
         params["search"] = search
 
+    check_api_client()
     return api_client.get("amenities", params)
 
 
@@ -398,6 +417,7 @@ def get_folio(
     Ejemplo de uso:
     - get_folio(reservation_id=12345) # Obtener folio financiero de reserva 12345
     """
+    check_api_client()
     return api_client.get(f"reservations/{reservation_id}/folio")
 
 
@@ -482,6 +502,7 @@ def create_maintenance_work_order(
     if estimated_time is not None:
         work_order_data["estimatedTime"] = estimated_time
 
+    check_api_client()
     return api_client.post("maintenance-work-orders", work_order_data)
 
 
@@ -568,6 +589,7 @@ def create_housekeeping_work_order(
     if cost is not None:
         work_order_data["cost"] = cost
 
+    check_api_client()
     return api_client.post("housekeeping-work-orders", work_order_data)
 
 
@@ -589,6 +611,7 @@ def health_check():
 
             start_time = time.time()
             # Hacer una petición simple para verificar conectividad
+            check_api_client()
             api_client.get("amenities", {"page": 1, "size": 1})
             api_response_time = round((time.time() - start_time) * 1000, 2)  # ms
         except Exception as e:
