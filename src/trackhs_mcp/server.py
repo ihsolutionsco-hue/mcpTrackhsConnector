@@ -5,6 +5,7 @@ Servidor MCP robusto con validación Pydantic y documentación completa para LLM
 
 import logging
 import os
+import time
 from datetime import datetime
 from typing import Any, Dict, Literal, Optional
 
@@ -14,7 +15,23 @@ from fastmcp import FastMCP
 from pydantic import Field
 from typing_extensions import Annotated
 
+from .exceptions import (
+    APIError,
+    AuthenticationError,
+    ConnectionError,
+    NotFoundError,
+    TrackHSError,
+    ValidationError,
+)
+from .middleware import (
+    AuthenticationMiddleware,
+    LoggingMiddleware,
+    MetricsMiddleware,
+)
 from .schemas import (
+    AMENITIES_OUTPUT_SCHEMA,
+    FOLIO_OUTPUT_SCHEMA,
+    RESERVATION_DETAIL_OUTPUT_SCHEMA,
     RESERVATION_SEARCH_OUTPUT_SCHEMA,
     UNIT_SEARCH_OUTPUT_SCHEMA,
     WORK_ORDER_OUTPUT_SCHEMA,
@@ -60,15 +77,26 @@ class TrackHSClient:
             return response.json()
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP Error {e.response.status_code}: {e.response.text}")
-            raise Exception(
-                f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
-            )
+            if e.response.status_code == 401:
+                raise AuthenticationError(f"Credenciales inválidas: {e.response.text}")
+            elif e.response.status_code == 403:
+                raise AuthenticationError(f"Acceso denegado: {e.response.text}")
+            elif e.response.status_code == 404:
+                raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
+            elif e.response.status_code == 422:
+                raise ValidationError(f"Error de validación: {e.response.text}")
+            elif e.response.status_code == 429:
+                raise APIError(f"Límite de velocidad excedido: {e.response.text}")
+            elif e.response.status_code >= 500:
+                raise APIError(f"Error interno del servidor TrackHS: {e.response.status_code} - {e.response.text}")
+            else:
+                raise APIError(f"Error de API TrackHS: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
             logger.error(f"Request Error: {str(e)}")
-            raise Exception(f"Error de conexión con TrackHS: {str(e)}")
+            raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
         except Exception as e:
             logger.error(f"Unexpected error in GET request: {str(e)}")
-            raise
+            raise TrackHSError(f"Error inesperado: {str(e)}")
 
     def post(self, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
         """POST request to TrackHS API with error handling"""
@@ -80,15 +108,20 @@ class TrackHSClient:
             return response.json()
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP Error {e.response.status_code}: {e.response.text}")
-            raise Exception(
-                f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
-            )
+            if e.response.status_code == 401:
+                raise AuthenticationError(f"Credenciales inválidas: {e.response.text}")
+            elif e.response.status_code == 404:
+                raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
+            elif e.response.status_code == 429:
+                raise APIError(f"Límite de velocidad excedido: {e.response.text}")
+            else:
+                raise APIError(f"Error de API TrackHS: {e.response.status_code} - {e.response.text}")
         except httpx.RequestError as e:
             logger.error(f"Request Error: {str(e)}")
-            raise Exception(f"Error de conexión con TrackHS: {str(e)}")
+            raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
         except Exception as e:
             logger.error(f"Unexpected error in POST request: {str(e)}")
-            raise
+            raise TrackHSError(f"Error inesperado: {str(e)}")
 
 
 # Inicializar cliente API con manejo robusto para FastMCP Cloud
@@ -112,7 +145,7 @@ except Exception as e:
 def check_api_client():
     """Verificar que el cliente API esté disponible"""
     if api_client is None:
-        raise Exception(
+        raise AuthenticationError(
             "Cliente API no está disponible. Verifique las credenciales TRACKHS_USERNAME y TRACKHS_PASSWORD."
         )
 
@@ -131,6 +164,14 @@ mcp = FastMCP(
 
     Todas las herramientas incluyen validación robusta y documentación completa.""",
 )
+
+# Inicializar middleware
+logging_middleware = LoggingMiddleware()
+auth_middleware = AuthenticationMiddleware(api_client)
+metrics_middleware = MetricsMiddleware()
+
+# Nota: FastMCP 2.13 no soporta middleware decorators como FastAPI
+# El middleware se implementa a nivel de aplicación en las funciones de herramientas
 
 
 @mcp.tool(output_schema=RESERVATION_SEARCH_OUTPUT_SCHEMA)
@@ -197,9 +238,19 @@ def search_reservations(
     - search_reservations(status="confirmed", size=50) # Reservas confirmadas, 50 por página
     - search_reservations(search="john@email.com") # Buscar por email del huésped
     """
+    # Aplicar middleware de logging
+    logging_middleware.request_count += 1
+    start_time = time.time()
+    
     logger.info(
         f"Buscando reservas con parámetros: page={page}, size={size}, search={search}, arrival_start={arrival_start}, arrival_end={arrival_end}, status={status}"
     )
+
+    # Aplicar middleware de autenticación
+    if api_client is None:
+        raise AuthenticationError(
+            "Cliente API no está disponible. Verifique las credenciales TRACKHS_USERNAME y TRACKHS_PASSWORD."
+        )
 
     params = {"page": page, "size": size}
     if search:
@@ -212,18 +263,28 @@ def search_reservations(
         params["status"] = status
 
     try:
-        check_api_client()
-        result = api_client.get("reservations", params)
+        result = api_client.get("pms/reservations", params)
+        
+        # Aplicar middleware de métricas
+        duration = time.time() - start_time
+        metrics_middleware.metrics["successful_requests"] += 1
+        metrics_middleware.response_times.append(duration)
+        metrics_middleware.metrics["average_response_time"] = sum(metrics_middleware.response_times) / len(metrics_middleware.response_times)
+        
         logger.info(
-            f"Búsqueda de reservas exitosa - {result.get('total_items', 0)} reservas encontradas"
+            f"Búsqueda de reservas exitosa - {result.get('total_items', 0)} reservas encontradas en {duration:.2f}s"
         )
         return result
     except Exception as e:
+        # Aplicar middleware de métricas para errores
+        metrics_middleware.metrics["failed_requests"] += 1
+        metrics_middleware.metrics["error_rate"] = (metrics_middleware.metrics["failed_requests"] / metrics_middleware.metrics["total_requests"]) * 100
+        
         logger.error(f"Error en búsqueda de reservas: {str(e)}")
         raise
 
 
-@mcp.tool
+@mcp.tool(output_schema=RESERVATION_DETAIL_OUTPUT_SCHEMA)
 def get_reservation(
     reservation_id: Annotated[
         int, Field(gt=0, description="ID único de la reserva en TrackHS")
@@ -255,7 +316,7 @@ def get_reservation(
 
     try:
         check_api_client()
-        result = api_client.get(f"reservations/{reservation_id}")
+        result = api_client.get(f"pms/reservations/{reservation_id}")
         logger.info(f"Detalles de reserva {reservation_id} obtenidos exitosamente")
         return result
     except Exception as e:
@@ -339,10 +400,10 @@ def search_units(
         params["is_bookable"] = is_bookable
 
     check_api_client()
-    return api_client.get("units", params)
+    return api_client.get("pms/units", params)
 
 
-@mcp.tool
+@mcp.tool(output_schema=AMENITIES_OUTPUT_SCHEMA)
 def search_amenities(
     page: Annotated[int, Field(ge=1, le=1000, description="Número de página")] = 1,
     size: Annotated[int, Field(ge=1, le=100, description="Tamaño de página")] = 10,
@@ -364,6 +425,7 @@ def search_amenities(
     - isPublic: Si es visible públicamente
     - isFilterable: Si se puede usar como filtro de búsqueda
     - description: Descripción detallada de la amenidad
+    - homeawayType, airbnbType, marriottType: Mapeos para plataformas OTA
 
     Útil para:
     - Conocer amenidades disponibles en unidades
@@ -371,20 +433,22 @@ def search_amenities(
     - Configuración de filtros de búsqueda
     - Catálogo de servicios disponibles
     - Verificar qué amenidades tiene una unidad
+    - Integración con plataformas OTA (Airbnb, HomeAway, Marriott)
 
     Ejemplos de uso:
     - search_amenities(search="wifi") # Buscar amenidades relacionadas con WiFi
     - search_amenities(size=50) # Obtener catálogo completo de amenidades
+    - search_amenities(search="pool") # Buscar amenidades de piscina
     """
     params = {"page": page, "size": size}
     if search:
         params["search"] = search
 
     check_api_client()
-    return api_client.get("amenities", params)
+    return api_client.get("pms/units/amenities", params)
 
 
-@mcp.tool
+@mcp.tool(output_schema=FOLIO_OUTPUT_SCHEMA)
 def get_folio(
     reservation_id: Annotated[
         int,
@@ -417,7 +481,7 @@ def get_folio(
     - get_folio(reservation_id=12345) # Obtener folio financiero de reserva 12345
     """
     check_api_client()
-    return api_client.get(f"reservations/{reservation_id}/folio")
+    return api_client.get(f"pms/reservations/{reservation_id}/folio")
 
 
 @mcp.tool(output_schema=WORK_ORDER_OUTPUT_SCHEMA)
@@ -502,7 +566,7 @@ def create_maintenance_work_order(
         work_order_data["estimatedTime"] = estimated_time
 
     check_api_client()
-    return api_client.post("maintenance-work-orders", work_order_data)
+    return api_client.post("pms/maintenance/work-orders", work_order_data)
 
 
 @mcp.tool(output_schema=WORK_ORDER_OUTPUT_SCHEMA)
@@ -589,7 +653,8 @@ def create_housekeeping_work_order(
         work_order_data["cost"] = cost
 
     check_api_client()
-    return api_client.post("housekeeping-work-orders", work_order_data)
+    return api_client.post("pms/housekeeping/work-orders", work_order_data)
+
 
 
 # Health check endpoint
@@ -611,7 +676,7 @@ def health_check():
             start_time = time.time()
             # Hacer una petición simple para verificar conectividad
             check_api_client()
-            api_client.get("amenities", {"page": 1, "size": 1})
+            api_client.get("pms/units/amenities", {"page": 1, "size": 1})
             api_response_time = round((time.time() - start_time) * 1000, 2)  # ms
         except Exception as e:
             api_status = "unhealthy"

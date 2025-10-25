@@ -91,42 +91,47 @@ RESERVATION_SEARCH_OUTPUT_SCHEMA = {
                                 "type": "integer",
                                 "description": "ID único de la reserva",
                             },
-                            "confirmation_number": {
+                            "confirmationNumber": {
                                 "type": "string",
                                 "description": "Número de confirmación",
                             },
-                            "guest_name": {
-                                "type": "string",
-                                "description": "Nombre del huésped",
+                            "guest": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string", "description": "Nombre del huésped"},
+                                    "email": {"type": "string", "description": "Email del huésped"},
+                                    "phone": {"type": "string", "description": "Teléfono del huésped"},
+                                }
                             },
-                            "guest_email": {
+                            "arrivalDate": {
                                 "type": "string",
-                                "description": "Email del huésped",
+                                "description": "Fecha de llegada (ISO 8601)",
                             },
-                            "arrival_date": {
+                            "departureDate": {
                                 "type": "string",
-                                "description": "Fecha de llegada",
-                            },
-                            "departure_date": {
-                                "type": "string",
-                                "description": "Fecha de salida",
+                                "description": "Fecha de salida (ISO 8601)",
                             },
                             "status": {
                                 "type": "string",
                                 "description": "Estado de la reserva",
                             },
-                            "unit_id": {
-                                "type": "integer",
-                                "description": "ID de la unidad asignada",
+                            "unit": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer", "description": "ID de la unidad"},
+                                    "name": {"type": "string", "description": "Nombre de la unidad"},
+                                    "code": {"type": "string", "description": "Código de la unidad"},
+                                }
                             },
-                            "total_amount": {
-                                "type": "number",
-                                "description": "Monto total de la reserva",
+                            "financial": {
+                                "type": "object",
+                                "properties": {
+                                    "totalAmount": {"type": "number", "description": "Monto total"},
+                                    "balance": {"type": "number", "description": "Balance pendiente"},
+                                    "deposit": {"type": "number", "description": "Depósito requerido"},
+                                }
                             },
-                            "balance": {
-                                "type": "number",
-                                "description": "Balance pendiente",
-                            },
+                            "_links": {"type": "object", "description": "Enlaces a recursos relacionados"},
                         },
                     },
                 }
@@ -230,5 +235,123 @@ WORK_ORDER_OUTPUT_SCHEMA = {
         "assigned_to": {"type": "string", "description": "Usuario asignado"},
         "vendor": {"type": "string", "description": "Proveedor asignado"},
         "_links": {"type": "object", "description": "Enlaces a recursos relacionados"},
+    },
+}
+
+# Esquemas adicionales para herramientas sin output schema
+RESERVATION_DETAIL_OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "id": {"type": "integer", "description": "ID único de la reserva"},
+        "confirmation_number": {"type": "string", "description": "Número de confirmación"},
+        "guest": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string", "description": "Nombre del huésped"},
+                "email": {"type": "string", "description": "Email del huésped"},
+                "phone": {"type": "string", "description": "Teléfono del huésped"},
+                "address": {"type": "string", "description": "Dirección del huésped"},
+            },
+        },
+        "dates": {
+            "type": "object",
+            "properties": {
+                "arrival": {"type": "string", "description": "Fecha de llegada"},
+                "departure": {"type": "string", "description": "Fecha de salida"},
+                "nights": {"type": "integer", "description": "Número de noches"},
+            },
+        },
+        "unit": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer", "description": "ID de la unidad"},
+                "name": {"type": "string", "description": "Nombre de la unidad"},
+                "code": {"type": "string", "description": "Código de la unidad"},
+                "bedrooms": {"type": "integer", "description": "Número de dormitorios"},
+                "bathrooms": {"type": "integer", "description": "Número de baños"},
+            },
+        },
+        "status": {"type": "string", "description": "Estado de la reserva"},
+        "financial": {
+            "type": "object",
+            "properties": {
+                "total_amount": {"type": "number", "description": "Monto total"},
+                "balance": {"type": "number", "description": "Balance pendiente"},
+                "deposit": {"type": "number", "description": "Depósito requerido"},
+            },
+        },
+        "_links": {"type": "object", "description": "Enlaces a recursos relacionados"},
+    },
+}
+
+FOLIO_OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "reservation_id": {"type": "integer", "description": "ID de la reserva"},
+        "balance": {"type": "number", "description": "Balance total"},
+        "charges": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer", "description": "ID del cargo"},
+                    "description": {"type": "string", "description": "Descripción del cargo"},
+                    "amount": {"type": "number", "description": "Monto del cargo"},
+                    "date": {"type": "string", "description": "Fecha del cargo"},
+                    "type": {"type": "string", "description": "Tipo de cargo"},
+                },
+            },
+        },
+        "payments": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer", "description": "ID del pago"},
+                    "amount": {"type": "number", "description": "Monto del pago"},
+                    "date": {"type": "string", "description": "Fecha del pago"},
+                    "method": {"type": "string", "description": "Método de pago"},
+                    "status": {"type": "string", "description": "Estado del pago"},
+                },
+            },
+        },
+        "summary": {
+            "type": "object",
+            "properties": {
+                "total_charges": {"type": "number", "description": "Total de cargos"},
+                "total_payments": {"type": "number", "description": "Total de pagos"},
+                "balance_due": {"type": "number", "description": "Balance pendiente"},
+            },
+        },
+    },
+}
+
+AMENITIES_OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "page": {"type": "integer", "description": "Página actual"},
+        "page_count": {"type": "integer", "description": "Total de páginas"},
+        "page_size": {"type": "integer", "description": "Tamaño de página"},
+        "total_items": {"type": "integer", "description": "Total de amenidades encontradas"},
+        "_embedded": {
+            "type": "object",
+            "properties": {
+                "amenities": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer", "description": "ID único de la amenidad"},
+                            "name": {"type": "string", "description": "Nombre de la amenidad"},
+                            "group": {"type": "string", "description": "Grupo de la amenidad"},
+                            "is_public": {"type": "boolean", "description": "Si es pública"},
+                            "is_filterable": {"type": "boolean", "description": "Si es filtrable"},
+                            "description": {"type": "string", "description": "Descripción de la amenidad"},
+                        },
+                    },
+                }
+            },
+        },
+        "_links": {"type": "object", "description": "Enlaces de navegación HATEOAS"},
     },
 }
