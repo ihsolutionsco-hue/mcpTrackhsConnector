@@ -17,21 +17,24 @@ src_dir = current_dir.parent
 if str(src_dir) not in sys.path:
     sys.path.insert(0, str(src_dir))
 
+# Usar middleware nativo de FastMCP
+from fastmcp.server.middleware.logging import (
+    LoggingMiddleware,
+    StructuredLoggingMiddleware,
+)
+from fastmcp.server.middleware.timing import TimingMiddleware
+
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
-from trackhs_mcp.infrastructure.middleware import (
-    TrackHSErrorHandlingMiddleware,
-    TrackHSLoggingMiddleware,
-)
+from trackhs_mcp.infrastructure.middleware import TrackHSErrorHandlingMiddleware
 from trackhs_mcp.infrastructure.prompts import register_all_prompts
 from trackhs_mcp.infrastructure.tools.registry import register_all_tools
 from trackhs_mcp.infrastructure.tools.resources import register_all_resources
 
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+# Configurar logging usando configuración centralizada
+from trackhs_mcp.infrastructure.utils.logging_config import setup_logging
+
+logger = setup_logging()
 
 
 def main():
@@ -58,13 +61,24 @@ def main():
         logger.info("Inicializando cliente API...")
         api_client = TrackHSApiClient(config)
 
-        # Create MCP server instance with flexible validation for MCP compatibility
+        # Create MCP server instance with FastMCP best practices
         logger.info("Creando servidor MCP...")
-        # Usar try/except para compatibilidad con versiones anteriores de FastMCP
+
+        # Usar variables de entorno estándar de FastMCP
+        mask_error_details = (
+            os.getenv("FASTMCP_MASK_ERROR_DETAILS", "false").lower() == "true"
+        )
+        include_fastmcp_meta = (
+            os.getenv("FASTMCP_INCLUDE_FASTMCP_META", "true").lower() == "true"
+        )
+        strict_input_validation = (
+            os.getenv("FASTMCP_STRICT_INPUT_VALIDATION", "true").lower() == "true"
+        )
+
         mcp = FastMCP(
             name="TrackHS MCP Server",
-            mask_error_details=False,  # Mostrar detalles de error en desarrollo
-            include_fastmcp_meta=True,  # Incluir metadatos FastMCP
+            mask_error_details=mask_error_details,
+            include_fastmcp_meta=include_fastmcp_meta,
         )
 
         # Register all components
@@ -75,18 +89,24 @@ def main():
 
         # Configure logging level from environment
         log_level = os.getenv("FASTMCP_LOG_LEVEL", "INFO").upper()
-        logging.getLogger().setLevel(getattr(logging, log_level, logging.INFO))
+        logger.info(f"Configurando logging con nivel: {log_level}")
 
         # Add middleware (order matters: logging first, then error handling)
         logger.info("Configurando middleware...")
 
-        # Logging middleware
-        logging_middleware = TrackHSLoggingMiddleware(
-            log_requests=True, log_responses=True, log_timing=True, log_level=log_level
-        )
-        mcp.add_middleware(logging_middleware)
+        # Usar middleware nativo de FastMCP para mejor compatibilidad
+        # Timing middleware para medir rendimiento
+        mcp.add_middleware(TimingMiddleware())
 
-        # Error handling middleware
+        # Logging middleware nativo con payloads
+        mcp.add_middleware(
+            LoggingMiddleware(include_payloads=True, max_payload_length=1000)
+        )
+
+        # Structured logging para agregación de logs
+        mcp.add_middleware(StructuredLoggingMiddleware(include_payloads=True))
+
+        # Error handling middleware personalizado
         error_middleware = TrackHSErrorHandlingMiddleware(
             include_traceback=os.getenv("FASTMCP_INCLUDE_TRACEBACK", "false").lower()
             == "true",

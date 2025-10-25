@@ -85,7 +85,13 @@ class TrackHSLoggingMiddleware(Middleware):
         if hasattr(context, "params") and context.params:
             request_data["params"] = self._sanitize_params(context.params)
 
-        logger.log(self.log_level, f"MCP Request: {context.method}", extra=request_data)
+        # Usar logger.info en lugar de logger.log para mejor compatibilidad
+        if self.log_level <= logging.INFO:
+            logger.info(f"MCP Request: {context.method}", extra=request_data)
+        else:
+            logger.log(
+                self.log_level, f"MCP Request: {context.method}", extra=request_data
+            )
 
     def _log_response(self, context: MiddlewareContext, result: Any, start_time: float):
         """
@@ -110,11 +116,18 @@ class TrackHSLoggingMiddleware(Middleware):
             response_data["result_type"] = "list"
             response_data["item_count"] = len(result)
 
-        logger.log(
-            self.log_level,
-            f"MCP Response: {context.method} ({execution_time:.3f}s)",
-            extra=response_data,
-        )
+        # Usar logger.info en lugar de logger.log para mejor compatibilidad
+        if self.log_level <= logging.INFO:
+            logger.info(
+                f"MCP Response: {context.method} ({execution_time:.3f}s)",
+                extra=response_data,
+            )
+        else:
+            logger.log(
+                self.log_level,
+                f"MCP Response: {context.method} ({execution_time:.3f}s)",
+                extra=response_data,
+            )
 
     def _log_error(
         self, context: MiddlewareContext, error: Exception, start_time: float

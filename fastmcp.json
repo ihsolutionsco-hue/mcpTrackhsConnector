@@ -29,7 +29,7 @@
   },
   "logging": {
     "level": "INFO",
-    "format": "json"
+    "format": "text"
   },
   "cors": {
     "origins": [
@@ -59,6 +59,8 @@
       "FASTMCP_LOG_LEVEL",
       "FASTMCP_MASK_ERROR_DETAILS",
       "FASTMCP_STRICT_INPUT_VALIDATION",
+      "FASTMCP_INCLUDE_FASTMCP_META",
+      "FASTMCP_RESOURCE_PREFIX_FORMAT",
       "TRACKHS_COMPACT_RESPONSES",
       "TRACKHS_MAX_RESPONSE_ITEMS",
       "TRACKHS_MAX_RESPONSE_TOKENS"
