@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "trackhs-mcp"
 version = "2.0.0"
-description = "Un servidor MCP (Model Context Protocol) listo para producción que integra con la API de Track HS"
+description = "Servidor MCP para Track HS API implementado con FastMCP"
 authors = [
     {name = "TrackHS MCP Team", email = "team@trackhs.com"}
 ]
@@ -180,6 +180,3 @@ exclude = [
 ]
 
 # Pre-commit configuration can be added later if needed
-
-# Configuración específica para tests de protocolo MCP
-# Los tests de protocolo MCP usan su propio pytest.ini en tests/mcp_protocol/

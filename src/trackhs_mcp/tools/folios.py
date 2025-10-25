@@ -1,12 +1,24 @@
 from fastmcp import FastMCP
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
 class GetFolioRequest(BaseModel):
     """Parámetros para obtener un folio específico"""
     folio_id: str = Field(..., pattern=r"^\d+$", description="ID del folio")
+    
+    @field_validator('folio_id')
+    @classmethod
+    def validate_folio_id(cls, v):
+        if not v.isdigit():
+            raise ValueError("ID de folio debe ser numérico")
+        if len(v) > 20:
+            raise ValueError("ID de folio demasiado largo")
+        if int(v) <= 0:
+            raise ValueError("ID de folio debe ser positivo")
+        return v
 
 def register_folio_tools(mcp: FastMCP, client):
     
@@ -19,12 +31,27 @@ def register_folio_tools(mcp: FastMCP, client):
         - Verificar información financiera de un folio
         - Consultar pagos y saldos
         """
+        start_time = time.time()
         logger.info("get_folio_called", folio_id=request.folio_id)
         
         try:
             result = await client.get(f"/api/pms/folios/{request.folio_id}")
-            logger.info("get_folio_success")
+            
+            duration = time.time() - start_time
+            logger.info(
+                "get_folio_success",
+                duration_ms=round(duration * 1000, 2),
+                folio_id=request.folio_id,
+                has_balance="balance" in result if isinstance(result, dict) else False
+            )
             return result
         except Exception as e:
-            logger.error("get_folio_error", error=str(e))
+            duration = time.time() - start_time
+            logger.error(
+                "get_folio_error",
+                error=str(e),
+                error_type=type(e).__name__,
+                duration_ms=round(duration * 1000, 2),
+                folio_id=request.folio_id
+            )
             raise

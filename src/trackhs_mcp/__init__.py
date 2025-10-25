@@ -1,16 +1,13 @@
 """
-TrackHS MCP Connector v2.0 - FastMCP Native
+TrackHS MCP Connector - Python Package
 
-Servidor MCP simplificado para Track HS API usando FastMCP nativo.
-Elimina Clean Architecture y usa estructura minimalista.
+Servidor MCP para Track HS API implementado con FastMCP.
+Proporciona herramientas para interactuar con la API de Track HS.
 """
 
 __version__ = "2.0.0"
 __author__ = "Track HS Team"
 __email__ = "team@trackhs.com"
 
-# FastMCP native imports
-from .config import settings
-from .client import trackhs_client
-
-__all__ = ["settings", "trackhs_client"]
+# No se exportan clases para uso externo en la arquitectura FastMCP nativa
+__all__ = []

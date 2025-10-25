@@ -1,0 +1,11 @@
+{
+  "name": "TrackHS Hotel MCP",
+  "version": "2.0.0",
+  "description": "Servidor MCP para Track HS API implementado con FastMCP",
+  "entrypoint": "src/trackhs_mcp/__main__.py",
+  "transport": "http",
+  "port": 8080,
+  "environment": {
+    "LOG_LEVEL": "INFO"
+  }
+}
