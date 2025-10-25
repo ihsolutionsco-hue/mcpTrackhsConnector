@@ -20,6 +20,9 @@ if str(src_dir) not in sys.path:
 # Configurar logging estándar para FastMCP Cloud
 import logging
 
+# Configurar logging específico para FastMCP Cloud
+import sys
+
 # Usar middleware nativo de FastMCP
 from fastmcp.server.middleware.logging import (
     LoggingMiddleware,
@@ -30,18 +33,35 @@ from fastmcp.server.middleware.timing import TimingMiddleware
 from trackhs_mcp.infrastructure.adapters.config import TrackHSConfig
 from trackhs_mcp.infrastructure.adapters.trackhs_api_client import TrackHSApiClient
 from trackhs_mcp.infrastructure.middleware import TrackHSErrorHandlingMiddleware
+from trackhs_mcp.infrastructure.middleware.fastmcp_cloud_logging import (
+    FastMCPCloudLoggingMiddleware,
+)
 from trackhs_mcp.infrastructure.prompts import register_all_prompts
 from trackhs_mcp.infrastructure.tools.registry import register_all_tools
 from trackhs_mcp.infrastructure.tools.resources import register_all_resources
 
-# Configurar logging básico para FastMCP Cloud
+# Configurar logging que funcione con FastMCP Cloud
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()],
+    handlers=[
+        logging.StreamHandler(sys.stdout),  # Asegurar que vaya a stdout
+        logging.StreamHandler(sys.stderr),  # También a stderr para captura
+    ],
+    force=True,  # Forzar reconfiguración
 )
 
-logger = logging.getLogger(__name__)
+# Configurar logger principal
+logger = logging.getLogger("trackhs_mcp")
+logger.setLevel(logging.DEBUG)
+
+# Configurar loggers específicos de FastMCP
+fastmcp_logger = logging.getLogger("fastmcp")
+fastmcp_logger.setLevel(logging.DEBUG)
+
+# Asegurar que los logs se propaguen
+logger.propagate = True
+fastmcp_logger.propagate = True
 
 
 def main():
@@ -101,7 +121,9 @@ def main():
         # Add middleware (order matters: logging first, then error handling)
         logger.info("Configurando middleware...")
 
-        # Usar solo middleware esencial para FastMCP Cloud
+        # Middleware específico para FastMCP Cloud logging
+        mcp.add_middleware(FastMCPCloudLoggingMiddleware())
+
         # Timing middleware para medir rendimiento
         mcp.add_middleware(TimingMiddleware())
 
@@ -130,6 +152,17 @@ def main():
         logger.info("- TrackHSErrorHandlingMiddleware: ✅")
         logger.info("=== SERVIDOR LISTO ===")
 
+        # Logging específico para FastMCP Cloud - usar print para asegurar visibilidad
+        print("🚀 FASTMCP CLOUD LOGGING ACTIVATED")
+        print(f"📊 Server: {mcp.name}")
+        print(f"🔧 Log Level: {log_level}")
+        print(f"⚙️ Middleware: 3 configured")
+        print("✅ Server ready for requests")
+
+        # También usar sys.stdout directamente
+        sys.stdout.write("FastMCP Cloud: Server initialization complete\n")
+        sys.stdout.flush()
+
         return mcp
 
     except Exception as e:
@@ -150,15 +183,26 @@ if __name__ == "__main__":
         logger.info(f"Puerto: 8080")
         logger.info("=== INICIANDO SERVIDOR ===")
 
+        # Logging directo para FastMCP Cloud
+        print("🚀 STARTING MCP SERVER")
+        print(f"📡 Server: {mcp.name}")
+        print(f"🌐 Transport: HTTP")
+        print(f"🔌 Port: 8080")
+        print("⚡ Server starting...")
+        sys.stdout.flush()
+
         # FastMCP Cloud maneja automáticamente el transporte HTTP
         # Especificamos transport="http" para compatibilidad con ElevenLabs y FastMCP Cloud
         # La configuración de host, puerto y CORS está en fastmcp.yaml
         mcp.run(transport="http")
     except KeyboardInterrupt:
         logger.info("🛑 Servidor detenido por el usuario")
+        print("🛑 Server stopped by user")
     except Exception as e:
         logger.error(f"❌ Error en el servidor: {e}")
+        print(f"❌ Server error: {e}")
         import traceback
 
         logger.error(f"Traceback: {traceback.format_exc()}")
+        print(f"Traceback: {traceback.format_exc()}")
         sys.exit(1)
