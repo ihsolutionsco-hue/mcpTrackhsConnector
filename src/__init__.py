@@ -1,1 +1,3 @@
-# TrackHS MCP Connector Package
+"""
+TrackHS MCP Server Package
+"""

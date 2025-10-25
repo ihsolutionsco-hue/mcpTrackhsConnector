@@ -3,6 +3,7 @@ TrackHS MCP Server - Mejores Prácticas FastMCP
 Servidor MCP robusto con validación Pydantic y documentación completa para LLM
 """
 
+import logging
 import os
 from datetime import datetime
 from typing import Any, Dict, Literal, Optional
@@ -13,7 +14,7 @@ from fastmcp import FastMCP
 from pydantic import Field
 from typing_extensions import Annotated
 
-from .schemas import (
+from src.trackhs_mcp.schemas import (
     RESERVATION_SEARCH_OUTPUT_SCHEMA,
     UNIT_SEARCH_OUTPUT_SCHEMA,
     WORK_ORDER_OUTPUT_SCHEMA,
@@ -23,10 +24,20 @@ from .schemas import (
 # Cargar variables de entorno
 load_dotenv()
 
+# Configuración de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(), logging.FileHandler("trackhs_mcp.log")],
+)
+logger = logging.getLogger(__name__)
+
 # Configuración de la API
 API_BASE_URL = os.getenv("TRACKHS_BASE_URL", "https://api.trackhs.com/api")
 API_USERNAME = os.getenv("TRACKHS_USERNAME")
 API_PASSWORD = os.getenv("TRACKHS_PASSWORD")
+
+logger.info(f"TrackHS MCP Server iniciando - Base URL: {API_BASE_URL}")
 
 
 # Cliente HTTP robusto
@@ -35,39 +46,56 @@ class TrackHSClient:
         self.base_url = base_url
         self.auth = (username, password)
         self.client = httpx.Client(auth=self.auth, timeout=30.0)
+        logger.info(f"TrackHSClient inicializado para {base_url}")
 
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         """GET request to TrackHS API with error handling"""
+        logger.info(f"GET request to {endpoint} with params: {params}")
         try:
             response = self.client.get(f"{self.base_url}/{endpoint}", params=params)
             response.raise_for_status()
+            logger.info(f"GET request successful - Status: {response.status_code}")
             return response.json()
         except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP Error {e.response.status_code}: {e.response.text}")
             raise Exception(
                 f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
             )
         except httpx.RequestError as e:
+            logger.error(f"Request Error: {str(e)}")
             raise Exception(f"Error de conexión con TrackHS: {str(e)}")
+        except Exception as e:
+            logger.error(f"Unexpected error in GET request: {str(e)}")
+            raise
 
     def post(self, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
         """POST request to TrackHS API with error handling"""
+        logger.info(f"POST request to {endpoint} with data: {data}")
         try:
             response = self.client.post(f"{self.base_url}/{endpoint}", json=data)
             response.raise_for_status()
+            logger.info(f"POST request successful - Status: {response.status_code}")
             return response.json()
         except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP Error {e.response.status_code}: {e.response.text}")
             raise Exception(
                 f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
             )
         except httpx.RequestError as e:
+            logger.error(f"Request Error: {str(e)}")
             raise Exception(f"Error de conexión con TrackHS: {str(e)}")
+        except Exception as e:
+            logger.error(f"Unexpected error in POST request: {str(e)}")
+            raise
 
 
 # Inicializar cliente API
 if not API_USERNAME or not API_PASSWORD:
+    logger.error("TRACKHS_USERNAME y TRACKHS_PASSWORD son requeridos")
     raise ValueError("TRACKHS_USERNAME y TRACKHS_PASSWORD son requeridos")
 
 api_client = TrackHSClient(API_BASE_URL, API_USERNAME, API_PASSWORD)
+logger.info("Cliente API TrackHS inicializado correctamente")
 
 # Crear servidor MCP
 mcp = FastMCP(
@@ -149,6 +177,10 @@ def search_reservations(
     - search_reservations(status="confirmed", size=50) # Reservas confirmadas, 50 por página
     - search_reservations(search="john@email.com") # Buscar por email del huésped
     """
+    logger.info(
+        f"Buscando reservas con parámetros: page={page}, size={size}, search={search}, arrival_start={arrival_start}, arrival_end={arrival_end}, status={status}"
+    )
+
     params = {"page": page, "size": size}
     if search:
         params["search"] = search
@@ -159,7 +191,15 @@ def search_reservations(
     if status:
         params["status"] = status
 
-    return api_client.get("reservations", params)
+    try:
+        result = api_client.get("reservations", params)
+        logger.info(
+            f"Búsqueda de reservas exitosa - {result.get('total_items', 0)} reservas encontradas"
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Error en búsqueda de reservas: {str(e)}")
+        raise
 
 
 @mcp.tool
@@ -190,7 +230,15 @@ def get_reservation(
     Ejemplo de uso:
     - get_reservation(reservation_id=12345) # Obtener detalles de reserva ID 12345
     """
-    return api_client.get(f"reservations/{reservation_id}")
+    logger.info(f"Obteniendo detalles de reserva ID: {reservation_id}")
+
+    try:
+        result = api_client.get(f"reservations/{reservation_id}")
+        logger.info(f"Detalles de reserva {reservation_id} obtenidos exitosamente")
+        return result
+    except Exception as e:
+        logger.error(f"Error obteniendo reserva {reservation_id}: {str(e)}")
+        raise
 
 
 @mcp.tool(output_schema=UNIT_SEARCH_OUTPUT_SCHEMA)
@@ -517,7 +565,62 @@ def create_housekeeping_work_order(
     return api_client.post("housekeeping-work-orders", work_order_data)
 
 
+# Health check endpoint
+@mcp.resource("https://trackhs-mcp.local/health")
+def health_check():
+    """
+    Health check endpoint para monitoreo del servidor.
+
+    Retorna el estado del servidor y sus dependencias.
+    """
+    try:
+        # Verificar conexión con API TrackHS
+        api_status = "healthy"
+        api_response_time = None
+
+        try:
+            import time
+
+            start_time = time.time()
+            # Hacer una petición simple para verificar conectividad
+            api_client.get("amenities", {"page": 1, "size": 1})
+            api_response_time = round((time.time() - start_time) * 1000, 2)  # ms
+        except Exception as e:
+            api_status = "unhealthy"
+            logger.warning(f"API TrackHS no disponible: {str(e)}")
+
+        health_data = {
+            "status": "healthy" if api_status == "healthy" else "degraded",
+            "timestamp": datetime.now().isoformat(),
+            "version": "2.0.0",
+            "dependencies": {
+                "trackhs_api": {
+                    "status": api_status,
+                    "response_time_ms": api_response_time,
+                    "base_url": API_BASE_URL,
+                }
+            },
+            "uptime": "N/A",  # Se puede implementar con time.time() al inicio
+            "environment": {
+                "python_version": os.sys.version,
+                "fastmcp_version": "2.12.5",
+            },
+        }
+
+        logger.info(f"Health check: {health_data['status']}")
+        return health_data
+
+    except Exception as e:
+        logger.error(f"Error en health check: {str(e)}")
+        return {
+            "status": "unhealthy",
+            "timestamp": datetime.now().isoformat(),
+            "error": str(e),
+        }
+
+
 # Configuración HTTP explícita
 if __name__ == "__main__":
+    logger.info("Iniciando servidor TrackHS MCP en modo HTTP")
     # HTTP transport según fastmcp.json
     mcp.run(transport="http", host="0.0.0.0", port=8080)
