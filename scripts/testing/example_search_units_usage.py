@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 # Agregar src al path
-src_dir = Path(__file__).parent.parent / "src"
+src_dir = Path(__file__).parent.parent.parent / "src"
 sys.path.insert(0, str(src_dir))
 
 from fastmcp.client import Client
