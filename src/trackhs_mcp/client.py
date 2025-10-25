@@ -1,9 +1,14 @@
 import httpx
-from trackhs_mcp.config import settings
 import logging
 import time
 import asyncio
 from typing import Optional, Dict, Any
+
+# Intentar importación absoluta primero, fallback a relativa
+try:
+    from trackhs_mcp.config import settings
+except ImportError:
+    from .config import settings
 
 logger = logging.getLogger(__name__)
 
