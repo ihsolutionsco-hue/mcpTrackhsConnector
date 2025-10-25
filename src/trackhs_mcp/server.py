@@ -50,7 +50,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuración de la API
-API_BASE_URL = os.getenv("TRACKHS_BASE_URL", "https://api.trackhs.com/api")
+API_BASE_URL = os.getenv("TRACKHS_API_URL", "https://api.trackhs.com/api")
 API_USERNAME = os.getenv("TRACKHS_USERNAME")
 API_PASSWORD = os.getenv("TRACKHS_PASSWORD")
 

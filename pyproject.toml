@@ -42,25 +42,20 @@ where = ["src"]
 [tool.setuptools.package-dir]
 "" = "src"
 
-[tool.pyright]
-pythonVersion = "3.13"
-pythonPlatform = "Windows"
-executionEnvironments = [
-    {
-        root = ".",
-        pythonVersion = "3.13",
-        pythonPlatform = "Windows",
-        pythonPath = "C:\\Python313\\python.exe",
-        extraPaths = [
-            "src",
-            "C:\\Users\\EQUIPO\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages"
-        ]
-    }
-]
-include = ["src/**/*.py"]
-exclude = ["**/node_modules", "**/__pycache__", "**/.git"]
-typeCheckingMode = "basic"
-useLibraryCodeForTypes = true
-autoImportCompletions = true
-reportMissingImports = "warning"
-reportMissingTypeStubs = "none"
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
