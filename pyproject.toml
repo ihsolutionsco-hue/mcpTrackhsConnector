@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "trackhs-mcp-connector"
-version = "1.0.2"
+name = "trackhs-mcp"
+version = "2.0.0"
 description = "Un servidor MCP (Model Context Protocol) listo para producción que integra con la API de Track HS"
 authors = [
     {name = "TrackHS MCP Team", email = "team@trackhs.com"}
@@ -24,24 +24,18 @@ classifiers = [
     "Topic :: System :: Networking",
 ]
 dependencies = [
-    "fastmcp>=0.1.0",
+    "fastmcp>=0.4.0",
     "pydantic>=2.0.0",
-    "httpx>=0.24.0",
-    "python-dateutil>=2.8.0",
+    "pydantic-settings>=2.0.0",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-asyncio>=0.21.0",
-    "pytest-mock>=3.10.0",
-    "pytest-xdist>=3.0.0",
-    "black>=23.0.0",
-    "flake8>=6.0.0",
-    "mypy>=1.0.0",
-    "pre-commit>=3.0.0",
-    "coverage>=7.0.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.3.0",
 ]
 
 [project.urls]

@@ -1,3 +1,0 @@
-"""
-Utilidades de infraestructura
-"""
