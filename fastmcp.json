@@ -28,7 +28,7 @@
     ]
   },
   "logging": {
-    "level": "INFO",
+    "level": "DEBUG",
     "format": "text"
   },
   "cors": {
