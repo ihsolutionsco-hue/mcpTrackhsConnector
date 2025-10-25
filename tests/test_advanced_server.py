@@ -94,9 +94,7 @@ class TestAdvancedServer:
         expected_valid,
     ):
         """Test parametrizado de búsqueda de reservas con diferentes parámetros"""
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_api_response
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_api_response):
             if expected_valid:
                 result = await mcp_client.call_tool(
                     "search_reservations", {"page": page, "size": size}
@@ -113,9 +111,7 @@ class TestAdvancedServer:
         self, mcp_client: Client[FastMCPTransport], mock_api_response
     ):
         """Test con validación dinámica usando dirty-equals"""
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_api_response
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_api_response):
             result = await mcp_client.call_tool(
                 "search_reservations", {"page": 0, "size": 10}
             )
@@ -143,9 +139,7 @@ class TestAdvancedServer:
             "balance": 0.0,
         }
 
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_reservation
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_reservation):
             result = await mcp_client.call_tool(
                 "get_reservation", {"reservation_id": 12345}
             )
@@ -161,7 +155,7 @@ class TestAdvancedServer:
     ):
         """Test de manejo de errores con validación de valores dinámicos"""
         with patch(
-            "src.trackhs_mcp.server.api_client.get", side_effect=Exception("API Error")
+            "trackhs_mcp.server.api_client.get", side_effect=Exception("API Error")
         ):
             with pytest.raises(Exception) as exc_info:
                 await mcp_client.call_tool(
@@ -188,9 +182,7 @@ class TestAdvancedServer:
             "date_received": "2024-01-15",
         }
 
-        with patch(
-            "src.trackhs_mcp.server.api_client.post", return_value=mock_work_order
-        ):
+        with patch("trackhs_mcp.server.api_client.post", return_value=mock_work_order):
             result = await mcp_client.call_tool(
                 "create_maintenance_work_order",
                 {

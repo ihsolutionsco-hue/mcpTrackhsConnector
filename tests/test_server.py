@@ -36,9 +36,7 @@ class TestTrackHSServer:
         self, mcp_client: Client[FastMCPTransport], mock_api_response
     ):
         """Test básico de búsqueda de reservas"""
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_api_response
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_api_response):
             result = await mcp_client.call_tool(
                 "search_reservations", {"page": 0, "size": 10}
             )
@@ -53,9 +51,7 @@ class TestTrackHSServer:
         self, mcp_client: Client[FastMCPTransport], mock_api_response
     ):
         """Test de búsqueda de reservas con filtros"""
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_api_response
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_api_response):
             result = await mcp_client.call_tool(
                 "search_reservations",
                 {
@@ -86,9 +82,7 @@ class TestTrackHSServer:
             "balance": 0.0,
         }
 
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_reservation
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_reservation):
             result = await mcp_client.call_tool(
                 "get_reservation", {"reservation_id": 12345}
             )
@@ -101,7 +95,7 @@ class TestTrackHSServer:
     ):
         """Test de búsqueda de unidades"""
         with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_unit_response
+            "trackhs_mcp.server.api_client.get", return_value=mock_unit_response
         ):
             result = await mcp_client.call_tool("search_units", {"page": 1, "size": 10})
 
@@ -113,7 +107,7 @@ class TestTrackHSServer:
     ):
         """Test de búsqueda de unidades con filtros"""
         with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_unit_response
+            "trackhs_mcp.server.api_client.get", return_value=mock_unit_response
         ):
             result = await mcp_client.call_tool(
                 "search_units",
@@ -152,9 +146,7 @@ class TestTrackHSServer:
             "_links": {"self": {"href": "https://api-test.trackhs.com/api/amenities"}},
         }
 
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_amenities
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_amenities):
             result = await mcp_client.call_tool(
                 "search_amenities", {"page": 1, "size": 10}
             )
@@ -180,7 +172,7 @@ class TestTrackHSServer:
             ],
         }
 
-        with patch("src.trackhs_mcp.server.api_client.get", return_value=mock_folio):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_folio):
             result = await mcp_client.call_tool("get_folio", {"reservation_id": 12345})
 
             assert result.content[0].text is not None
@@ -202,9 +194,7 @@ class TestTrackHSServer:
             "date_received": "2024-01-15",
         }
 
-        with patch(
-            "src.trackhs_mcp.server.api_client.post", return_value=mock_work_order
-        ):
+        with patch("trackhs_mcp.server.api_client.post", return_value=mock_work_order):
             result = await mcp_client.call_tool(
                 "create_maintenance_work_order",
                 {
@@ -235,9 +225,7 @@ class TestTrackHSServer:
             "cost": 75.0,
         }
 
-        with patch(
-            "src.trackhs_mcp.server.api_client.post", return_value=mock_work_order
-        ):
+        with patch("trackhs_mcp.server.api_client.post", return_value=mock_work_order):
             result = await mcp_client.call_tool(
                 "create_housekeeping_work_order",
                 {
@@ -265,7 +253,7 @@ class TestTrackHSServer:
     async def test_api_error_handling(self, mcp_client: Client[FastMCPTransport]):
         """Test de manejo de errores de API"""
         with patch(
-            "src.trackhs_mcp.server.api_client.get", side_effect=Exception("API Error")
+            "trackhs_mcp.server.api_client.get", side_effect=Exception("API Error")
         ):
             with pytest.raises(Exception):
                 await mcp_client.call_tool(

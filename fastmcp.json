@@ -6,7 +6,8 @@
   "environment": {
     "type": "uv",
     "python": ">=3.11",
-    "requirements": "requirements.txt"
+    "requirements": "requirements.txt",
+    "fastmcp_version": "2.13.0"
   },
   "transport": {
     "type": "http",

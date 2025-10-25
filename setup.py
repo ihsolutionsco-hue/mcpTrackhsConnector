@@ -14,10 +14,10 @@ setup(
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     install_requires=[
-        "fastmcp>=2.0.0",
-        "httpx>=0.25.0",
-        "python-dotenv>=1.0.0",
-        "pydantic>=2.0.0",
+        "fastmcp>=2.13.0",
+        "httpx>=0.27.0",
+        "python-dotenv>=1.0.1",
+        "pydantic>=2.12.3",
     ],
     python_requires=">=3.11",
     classifiers=[

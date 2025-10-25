@@ -3,13 +3,20 @@ Configuración de tests para TrackHS MCP Server
 """
 
 import os
+import sys
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+import pytest_asyncio
 from anyio.abc import TaskGroup
 from fastmcp import FastMCP
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
+
+# Agregar el directorio src al path para importaciones
+src_dir = Path(__file__).parent.parent / "src"
+sys.path.insert(0, str(src_dir))
 
 # Configurar variables de entorno para tests
 os.environ["TRACKHS_USERNAME"] = "test_user"
@@ -17,15 +24,20 @@ os.environ["TRACKHS_PASSWORD"] = "test_password"
 os.environ["TRACKHS_BASE_URL"] = "https://api-test.trackhs.com/api"
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def mcp_client():
     """Cliente MCP para tests in-memory"""
     from fastmcp.client.transports import FastMCPTransport
 
     from trackhs_mcp.server import mcp
 
-    async with Client(transport=FastMCPTransport(mcp)) as client:
+    transport = FastMCPTransport(mcp)
+    client = Client(transport=transport)
+    await client.__aenter__()
+    try:
         yield client
+    finally:
+        await client.__aexit__(None, None, None)
 
 
 @pytest.fixture

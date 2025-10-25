@@ -51,7 +51,7 @@ class TestTrackHSIntegration:
 
         # 1. Buscar reservas
         with patch(
-            "src.trackhs_mcp.server.api_client.get",
+            "trackhs_mcp.server.api_client.get",
             return_value={
                 "page": 1,
                 "total_items": 1,
@@ -65,9 +65,7 @@ class TestTrackHSIntegration:
             assert search_result.content[0].text is not None
 
         # 2. Obtener reserva específica
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_reservation
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_reservation):
             reservation_result = await mcp_client.call_tool(
                 "get_reservation", {"reservation_id": 12345}
             )
@@ -130,9 +128,7 @@ class TestTrackHSIntegration:
             assert units_result.content[0].text is not None
 
         # 2. Buscar amenidades
-        with patch(
-            "src.trackhs_mcp.server.api_client.get", return_value=mock_amenities
-        ):
+        with patch("trackhs_mcp.server.api_client.get", return_value=mock_amenities):
             amenities_result = await mcp_client.call_tool(
                 "search_amenities", {"page": 1, "size": 10}
             )
@@ -169,7 +165,7 @@ class TestTrackHSIntegration:
 
         # 1. Crear orden de mantenimiento
         with patch(
-            "src.trackhs_mcp.server.api_client.post", return_value=mock_maintenance_wo
+            "trackhs_mcp.server.api_client.post", return_value=mock_maintenance_wo
         ):
             maintenance_result = await mcp_client.call_tool(
                 "create_maintenance_work_order",
@@ -186,7 +182,7 @@ class TestTrackHSIntegration:
 
         # 2. Crear orden de housekeeping
         with patch(
-            "src.trackhs_mcp.server.api_client.post", return_value=mock_housekeeping_wo
+            "trackhs_mcp.server.api_client.post", return_value=mock_housekeeping_wo
         ):
             housekeeping_result = await mcp_client.call_tool(
                 "create_housekeeping_work_order",
@@ -207,7 +203,7 @@ class TestTrackHSIntegration:
         """Test de recuperación de errores en flujo completo"""
         # Simular error en primera llamada
         with patch(
-            "src.trackhs_mcp.server.api_client.get", side_effect=Exception("API Error")
+            "trackhs_mcp.server.api_client.get", side_effect=Exception("API Error")
         ):
             with pytest.raises(Exception):
                 await mcp_client.call_tool(
@@ -244,7 +240,7 @@ class TestTrackHSIntegration:
 
         async def search_reservation():
             with patch(
-                "src.trackhs_mcp.server.api_client.get",
+                "trackhs_mcp.server.api_client.get",
                 return_value={
                     "page": 1,
                     "total_items": 1,
@@ -257,7 +253,7 @@ class TestTrackHSIntegration:
 
         async def get_reservation():
             with patch(
-                "src.trackhs_mcp.server.api_client.get", return_value=mock_reservation
+                "trackhs_mcp.server.api_client.get", return_value=mock_reservation
             ):
                 return await mcp_client.call_tool(
                     "get_reservation", {"reservation_id": 12345}
@@ -286,9 +282,7 @@ class TestTrackHSIntegration:
         mock_response = {"page": 1, "total_items": 1, "_embedded": {"reservations": []}}
 
         async def make_request():
-            with patch(
-                "src.trackhs_mcp.server.api_client.get", return_value=mock_response
-            ):
+            with patch("trackhs_mcp.server.api_client.get", return_value=mock_response):
                 return await mcp_client.call_tool(
                     "search_reservations", {"page": 0, "size": 10}
                 )

@@ -38,6 +38,8 @@ API_USERNAME = os.getenv("TRACKHS_USERNAME")
 API_PASSWORD = os.getenv("TRACKHS_PASSWORD")
 
 logger.info(f"TrackHS MCP Server iniciando - Base URL: {API_BASE_URL}")
+logger.info(f"Username configurado: {'Sí' if API_USERNAME else 'No'}")
+logger.info(f"Password configurado: {'Sí' if API_PASSWORD else 'No'}")
 
 
 # Cliente HTTP robusto
@@ -94,8 +96,12 @@ if not API_USERNAME or not API_PASSWORD:
     logger.error("TRACKHS_USERNAME y TRACKHS_PASSWORD son requeridos")
     raise ValueError("TRACKHS_USERNAME y TRACKHS_PASSWORD son requeridos")
 
-api_client = TrackHSClient(API_BASE_URL, API_USERNAME, API_PASSWORD)
-logger.info("Cliente API TrackHS inicializado correctamente")
+try:
+    api_client = TrackHSClient(API_BASE_URL, API_USERNAME, API_PASSWORD)
+    logger.info("Cliente API TrackHS inicializado correctamente")
+except Exception as e:
+    logger.error(f"Error inicializando cliente API: {e}")
+    raise
 
 # Crear servidor MCP
 mcp = FastMCP(
