@@ -28,11 +28,19 @@ class Settings(BaseModel):
     trackhs_password: str
     log_level: str = "INFO"
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8"
+    }
 
-settings = Settings()
+# Lazy loading de settings - solo se carga cuando se necesita
+_settings = None
+
+def get_settings():
+    global _settings
+    if _settings is None:
+        _settings = Settings()
+    return _settings
 
 # ============================================================================
 # CLIENTE HTTP
@@ -47,6 +55,7 @@ class TrackHSAPIError(Exception):
 
 class TrackHSClient:
     def __init__(self):
+        settings = get_settings()
         self.base_url = settings.trackhs_api_url
         self.auth = (settings.trackhs_username, settings.trackhs_password)
         self.max_retries = 3
