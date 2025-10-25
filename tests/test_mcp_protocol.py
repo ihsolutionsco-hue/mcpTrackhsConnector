@@ -2,9 +2,16 @@
 Tests del protocolo MCP para TrackHS Server
 """
 
+import sys
+from pathlib import Path
+
 import pytest
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
+
+# Agregar src al path para importaciones
+src_dir = Path(__file__).parent.parent / "src"
+sys.path.insert(0, str(src_dir))
 
 
 class TestMCPProtocol:
@@ -24,9 +31,14 @@ class TestMCPProtocol:
             resources = await client.list_resources()
             assert len(resources) >= 0, "El servidor debe poder listar recursos"
 
-            # Test de inicialización
-            initialize_result = await client.initialize()
-            assert initialize_result is not None, "La inicialización debe ser exitosa"
+            # Test de ping (reemplaza initialize en FastMCP 2.0)
+            try:
+                ping_result = await client.ping()
+                assert ping_result is True, "El ping debe ser exitoso"
+            except AttributeError:
+                # Si no hay método ping, validamos que list_tools funciona
+                tools = await client.list_tools()
+                assert len(tools) > 0, "El servidor debe tener herramientas"
 
     @pytest.mark.asyncio
     async def test_server_capabilities(self):
@@ -64,6 +76,8 @@ class TestMCPProtocol:
 
             # Verificar que el health check está disponible
             health_check_uri = "https://trackhs-mcp.local/health"
+            # Convertir AnyUrl a string para comparación
+            resource_uri_strings = [str(uri) for uri in resource_uris]
             assert (
-                health_check_uri in resource_uris
-            ), f"Health check {health_check_uri} no encontrado"
+                health_check_uri in resource_uri_strings
+            ), f"Health check {health_check_uri} no encontrado en {resource_uri_strings}"

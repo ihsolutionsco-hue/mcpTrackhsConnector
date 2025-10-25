@@ -20,6 +20,13 @@ def test_imports():
     try:
         print("🔍 Probando importaciones...")
 
+        # Agregar src al path
+        import sys
+        from pathlib import Path
+
+        src_dir = Path(__file__).parent / "src"
+        sys.path.insert(0, str(src_dir))
+
         # Test importación del servidor
         from trackhs_mcp.server import mcp
 
@@ -48,6 +55,13 @@ async def test_server_startup():
     try:
         print("🚀 Probando inicio del servidor...")
 
+        # Agregar src al path
+        import sys
+        from pathlib import Path
+
+        src_dir = Path(__file__).parent / "src"
+        sys.path.insert(0, str(src_dir))
+
         from trackhs_mcp.server import mcp
 
         # Verificar que el servidor tiene las herramientas esperadas
@@ -71,6 +85,13 @@ async def test_health_check():
     """Test del health check"""
     try:
         print("🏥 Probando health check...")
+
+        # Agregar src al path
+        import sys
+        from pathlib import Path
+
+        src_dir = Path(__file__).parent / "src"
+        sys.path.insert(0, str(src_dir))
 
         from trackhs_mcp.server import mcp
 

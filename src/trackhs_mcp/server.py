@@ -14,7 +14,7 @@ from fastmcp import FastMCP
 from pydantic import Field
 from typing_extensions import Annotated
 
-from trackhs_mcp.schemas import (
+from .schemas import (
     RESERVATION_SEARCH_OUTPUT_SCHEMA,
     UNIT_SEARCH_OUTPUT_SCHEMA,
     WORK_ORDER_OUTPUT_SCHEMA,

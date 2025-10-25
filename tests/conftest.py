@@ -6,6 +6,7 @@ import os
 from unittest.mock import Mock, patch
 
 import pytest
+from anyio.abc import TaskGroup
 from fastmcp import FastMCP
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
@@ -18,13 +19,32 @@ os.environ["TRACKHS_BASE_URL"] = "https://api-test.trackhs.com/api"
 
 @pytest.fixture
 async def mcp_client():
-    """Cliente MCP para tests"""
+    """Cliente MCP para tests in-memory"""
     from fastmcp.client.transports import FastMCPTransport
 
     from trackhs_mcp.server import mcp
 
     async with Client(transport=FastMCPTransport(mcp)) as client:
         yield client
+
+
+@pytest.fixture
+def task_group():
+    """Task group para tests de red"""
+    import anyio
+
+    return anyio.create_task_group()
+
+
+@pytest.fixture
+async def http_server_fixture(task_group: TaskGroup):
+    """Servidor HTTP para tests de red"""
+    from fastmcp.utilities.tests import run_server_async
+
+    from trackhs_mcp.server import mcp
+
+    url = await run_server_async(task_group, mcp, transport="http")
+    yield url
 
 
 @pytest.fixture

@@ -2,9 +2,16 @@
 Tests del servidor MCP para TrackHS
 """
 
+import sys
+from pathlib import Path
+
 import pytest
 from fastmcp.client import Client
 from fastmcp.client.transports import FastMCPTransport
+
+# Agregar src al path para importaciones
+src_dir = Path(__file__).parent.parent / "src"
+sys.path.insert(0, str(src_dir))
 
 
 class TestMCPServer:
@@ -16,9 +23,14 @@ class TestMCPServer:
         from trackhs_mcp.server import mcp
 
         async with Client(transport=FastMCPTransport(mcp)) as client:
-            # Test de inicialización
-            initialize_result = await client.initialize()
-            assert initialize_result is not None, "La inicialización debe ser exitosa"
+            # Test de ping (reemplaza initialize en FastMCP 2.0)
+            try:
+                ping_result = await client.ping()
+                assert ping_result is True, "El ping debe ser exitoso"
+            except AttributeError:
+                # Si no hay método ping, validamos que list_tools funciona
+                tools = await client.list_tools()
+                assert len(tools) > 0, "El servidor debe tener herramientas"
 
     @pytest.mark.asyncio
     async def test_server_tools(self):

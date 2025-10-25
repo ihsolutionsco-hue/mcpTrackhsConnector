@@ -5,3 +5,6 @@ pydantic>=2.0.0
 pytest>=7.0.0
 pytest-asyncio>=0.21.0
 pytest-cov>=4.0.0
+inline-snapshot>=0.4.0
+dirty-equals>=0.5.0
+anyio>=4.0.0
