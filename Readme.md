@@ -176,39 +176,36 @@ pytest -m mcp_server -v                 # Solo servidor MCP
 ## 🏗️ **Arquitectura del Proyecto**
 
 ```
-src/trackhs_mcp/              # Código principal (86 archivos Python)
-├── domain/                   # Lógica de negocio y entidades (10 archivos)
-│   ├── entities/             # Entidades de negocio (7 archivos)
-│   ├── value_objects/        # Objetos de valor (2 archivos)
-│   └── exceptions/           # Excepciones del dominio (1 archivo)
-├── application/              # Casos de uso e interfaces (8 archivos)
-│   ├── use_cases/           # Casos de uso de negocio (7 archivos)
-│   └── ports/               # Interfaces (1 archivo)
-└── infrastructure/          # Adaptadores externos y utilidades (68 archivos)
-    ├── adapters/            # Cliente API, configuración (2 archivos)
-    ├── tools/               # Herramientas MCP (7 archivos)
-    │   └── resources/        # Recursos MCP (16 archivos)
-    ├── middleware/           # Middleware (3 archivos)
-    ├── utils/                # Utilidades (11 archivos)
-    └── validation/          # Validadores (3 archivos)
+src/trackhs_mcp/              # Código principal del servidor MCP
+├── __init__.py              # Inicialización del paquete
+├── __main__.py              # Punto de entrada para FastMCP Cloud
+├── server.py                # Servidor MCP principal con 7 herramientas
+└── schemas.py               # Esquemas Pydantic para validación
 
-docs/                         # Documentación organizada por tema (1,200+ archivos)
-├── archive/                  # Documentación archivada
-└── trackhsDoc/              # Documentación específica de Track HS
+tests/                       # Suite de tests optimizada
+├── __init__.py              # Inicialización de tests
+├── conftest.py              # Configuración de fixtures
+├── test_mcp_protocol.py     # Tests del protocolo MCP (14 tests)
+└── test_mcp_server.py       # Tests del servidor MCP (9 tests)
 
-scripts/                      # Scripts de desarrollo y testing (62 archivos)
-examples/                    # Código de ejemplo y patrones de uso
-tests/                       # Suite de tests comprehensiva (29 archivos)
-├── critical/                # Tests críticos (9 archivos)
-└── smoke/                   # Tests de humo (4 archivos)
+scripts/                     # Scripts de desarrollo
+└── test_server_simple.py    # Script simple de testing
+
+documentacion oficial trackhs/  # Documentación oficial de TrackHS API
+├── get reservation.md       # API de reservas
+├── get unit.md             # API de unidades
+├── get folio.md            # API de folios
+├── get ammenities.md       # API de amenidades
+├── wo housekeeping.md      # API de housekeeping
+└── wo maintanance.md       # API de mantenimiento
 ```
 
-### **Beneficios de Clean Architecture**
-- **Mantenibilidad**: Separación clara de responsabilidades
-- **Testabilidad**: 299+ tests con 95%+ cobertura
-- **Flexibilidad**: Fácil intercambio de implementaciones
-- **Escalabilidad**: Arquitectura preparada para crecimiento
-- **Calidad**: 27/27 tests pasando (100% funcional)
+### **Beneficios de la Arquitectura Limpia**
+- **Mantenibilidad**: Código organizado y fácil de mantener
+- **Testabilidad**: 23 tests MCP específicos con 37.87% cobertura
+- **Simplicidad**: Solo archivos esenciales, sin redundancias
+- **Escalabilidad**: Estructura preparada para crecimiento
+- **Calidad**: 23/23 tests pasando (100% funcional)
 
 ## 🔧 **Desarrollo**
 
@@ -436,13 +433,14 @@ python -m src.trackhs_mcp
 - ✅ **FastMCP Deploy**: Deploy automático en push a main
 - ✅ **Windows**: 100% compatible
 
-### **Antes vs Después**
-| Métrica | Antes | Después |
-|---------|-------|---------|
-| **Hooks** | 11 hooks pesados | 8 hooks optimizados |
-| **Tiempo** | 60-90 segundos | 20-40s primera, 5-15s siguientes |
-| **Compatibilidad** | Problemas Windows | 100% Windows |
-| **Probabilidad fallo CI** | 30-40% | 5-10% |
+### **Estado Actual - Proyecto Limpio**
+| Métrica | Estado |
+|---------|--------|
+| **Archivos de código** | 4 archivos Python esenciales |
+| **Archivos de test** | 2 archivos de test optimizados |
+| **Documentación** | README.md + documentación oficial TrackHS |
+| **Dependencias** | Solo dependencias esenciales |
+| **Estructura** | Lean y limpia, sin redundancias |
 
 ## 📋 **Checklist de Desarrollo**
 
