@@ -23,6 +23,7 @@ class TestTrackHSIntegration:
     async def mcp_client(self):
         """Fixture para cliente MCP"""
         from trackhs_mcp.server import mcp
+
         async with Client(transport=FastMCPTransport(mcp)) as client:
             yield client
 
@@ -222,9 +223,16 @@ class TestTrackHSIntegration:
         """Test de integración del middleware"""
         # Verificar que el middleware está funcionando
         # (esto se puede verificar a través de los logs)
-        
+
         with patch("trackhs_mcp.server.api_client") as mock_client:
-            mock_response = {"page": 0, "page_count": 1, "page_size": 10, "total_items": 0, "_embedded": {"reservations": []}, "_links": {}}
+            mock_response = {
+                "page": 0,
+                "page_count": 1,
+                "page_size": 10,
+                "total_items": 0,
+                "_embedded": {"reservations": []},
+                "_links": {},
+            }
             mock_client.get.return_value = mock_response
 
             # El middleware debería procesar este request
@@ -241,11 +249,13 @@ class TestTrackHSIntegration:
         # Test del recurso de health check
         resources = await mcp_client.list_resources()
         resource_uris = [str(resource.uri) for resource in resources]
-        
+
         assert "https://trackhs-mcp.local/health" in resource_uris
 
         # Test del contenido del health check
-        health_content = await mcp_client.read_resource("https://trackhs-mcp.local/health")
+        health_content = await mcp_client.read_resource(
+            "https://trackhs-mcp.local/health"
+        )
         assert health_content is not None
         assert "status" in health_content
         assert "timestamp" in health_content

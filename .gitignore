@@ -1,8 +1,12 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -16,6 +20,7 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -23,6 +28,8 @@ share/python-wheels/
 MANIFEST
 
 # PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -43,7 +50,6 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
-cover/
 
 # Translations
 *.mo
@@ -66,7 +72,6 @@ instance/
 docs/_build/
 
 # PyBuilder
-.pybuilder/
 target/
 
 # Jupyter Notebook
@@ -80,15 +85,13 @@ ipython_config.py
 .python-version
 
 # pipenv
-Pipfile.lock
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
 
-# poetry
-poetry.lock
-
-# pdm
-.pdm.toml
-
-# PEP 582
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
 
 # Celery stuff
@@ -125,86 +128,24 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-.idea/
-
-# VS Code
+# IDE
 .vscode/
-
-# Scripts directory (created by pip install)
-Scripts/
-Scripts/
-
-# Virtual environment directories
-Lib/
-Scripts/
-venv/
-.venv/
-ENV/
-env/
-env.bak/
-venv.bak/
+.idea/
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.temp
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
 
-# Logs
-logs/
+# MCP specific
 *.log
-
-# Build outputs
-dist/
-build/
-
-# Node.js (if any)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Vercel
-.vercel/
-.vercel
-
-# Scripts and examples logs
-scripts/*.log
-examples/*.log
-
-# Embedded repositories in docs
-docs/MCP/04-ejemplos/quickstart/
-docs/MCP/04-ejemplos/servidor-remoto-completo/
-docs/MCP/06-herramientas/inspector/
-docs/MCP/07-repositorios-originales/example-remote-server/
-docs/MCP/07-repositorios-originales/inspector/
-docs/MCP/07-repositorios-originales/modelcontextprotocol/
-docs/MCP/07-repositorios-originales/python-sdk/
-docs/MCP/07-repositorios-originales/servers/
-
-# Embedded repositories in reference
-reference/mcp/04-ejemplos/quickstart/
-reference/mcp/04-ejemplos/servidor-remoto-completo/
-reference/mcp/06-herramientas/inspector/
-reference/mcp/07-repositorios-originales/example-remote-server/
-reference/mcp/07-repositorios-originales/inspector/
-reference/mcp/07-repositorios-originales/modelcontextprotocol/
-reference/mcp/07-repositorios-originales/python-sdk/
-reference/mcp/07-repositorios-originales/servers/
-
-# IDE
-.cursor/
-
-# Temporary test files
-test_*.tmp
+logs/
+temp/

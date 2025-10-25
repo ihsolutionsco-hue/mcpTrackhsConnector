@@ -88,9 +88,13 @@ class TrackHSClient:
             elif e.response.status_code == 429:
                 raise APIError(f"Límite de velocidad excedido: {e.response.text}")
             elif e.response.status_code >= 500:
-                raise APIError(f"Error interno del servidor TrackHS: {e.response.status_code} - {e.response.text}")
+                raise APIError(
+                    f"Error interno del servidor TrackHS: {e.response.status_code} - {e.response.text}"
+                )
             else:
-                raise APIError(f"Error de API TrackHS: {e.response.status_code} - {e.response.text}")
+                raise APIError(
+                    f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
+                )
         except httpx.RequestError as e:
             logger.error(f"Request Error: {str(e)}")
             raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
@@ -115,7 +119,9 @@ class TrackHSClient:
             elif e.response.status_code == 429:
                 raise APIError(f"Límite de velocidad excedido: {e.response.text}")
             else:
-                raise APIError(f"Error de API TrackHS: {e.response.status_code} - {e.response.text}")
+                raise APIError(
+                    f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
+                )
         except httpx.RequestError as e:
             logger.error(f"Request Error: {str(e)}")
             raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
@@ -241,7 +247,7 @@ def search_reservations(
     # Aplicar middleware de logging
     logging_middleware.request_count += 1
     start_time = time.time()
-    
+
     logger.info(
         f"Buscando reservas con parámetros: page={page}, size={size}, search={search}, arrival_start={arrival_start}, arrival_end={arrival_end}, status={status}"
     )
@@ -264,13 +270,15 @@ def search_reservations(
 
     try:
         result = api_client.get("pms/reservations", params)
-        
+
         # Aplicar middleware de métricas
         duration = time.time() - start_time
         metrics_middleware.metrics["successful_requests"] += 1
         metrics_middleware.response_times.append(duration)
-        metrics_middleware.metrics["average_response_time"] = sum(metrics_middleware.response_times) / len(metrics_middleware.response_times)
-        
+        metrics_middleware.metrics["average_response_time"] = sum(
+            metrics_middleware.response_times
+        ) / len(metrics_middleware.response_times)
+
         logger.info(
             f"Búsqueda de reservas exitosa - {result.get('total_items', 0)} reservas encontradas en {duration:.2f}s"
         )
@@ -278,8 +286,11 @@ def search_reservations(
     except Exception as e:
         # Aplicar middleware de métricas para errores
         metrics_middleware.metrics["failed_requests"] += 1
-        metrics_middleware.metrics["error_rate"] = (metrics_middleware.metrics["failed_requests"] / metrics_middleware.metrics["total_requests"]) * 100
-        
+        metrics_middleware.metrics["error_rate"] = (
+            metrics_middleware.metrics["failed_requests"]
+            / metrics_middleware.metrics["total_requests"]
+        ) * 100
+
         logger.error(f"Error en búsqueda de reservas: {str(e)}")
         raise
 
@@ -654,7 +665,6 @@ def create_housekeeping_work_order(
 
     check_api_client()
     return api_client.post("pms/housekeeping/work-orders", work_order_data)
-
 
 
 # Health check endpoint
