@@ -1,0 +1,29 @@
+{
+    "pythonVersion": "3.13",
+    "pythonPlatform": "Windows",
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "pythonVersion": "3.13",
+            "pythonPlatform": "Windows",
+            "pythonPath": "C:\\Python313\\python.exe",
+            "extraPaths": [
+                "src",
+                "C:\\Users\\EQUIPO\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages"
+            ]
+        }
+    ],
+    "include": [
+        "src/**/*.py"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/.git"
+    ],
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true,
+    "autoImportCompletions": true,
+    "reportMissingImports": "warning",
+    "reportMissingTypeStubs": "none"
+}
