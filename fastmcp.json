@@ -6,7 +6,7 @@
   },
   "environment": {
     "type": "uv",
-    "python": ">=3.10",
+    "python": ">=3.11",
     "requirements": "requirements.txt"
   },
   "transport": {
@@ -15,17 +15,10 @@
     "host": "0.0.0.0"
   },
   "server": {
-    "name": "TrackHS MCP Server",
-    "description": "Conector MCP para TrackHS API - IHVM Vacations",
-    "version": "1.0.0",
-    "website_url": "https://github.com/ihsolutionsco-hue/mcpTrackhsConnector",
-    "icons": [
-      {
-        "src": "https://raw.githubusercontent.com/ihsolutionsco-hue/mcpTrackhsConnector/main/assets/logo.png",
-        "mimeType": "image/png",
-        "sizes": ["48x48", "96x96", "any"]
-      }
-    ]
+    "name": "TrackHS API",
+    "description": "Servidor MCP simple y robusto para TrackHS API con validación Pydantic",
+    "version": "2.0.0",
+    "website_url": "https://github.com/ihsolutionsco-hue/mcpTrackhsConnector"
   },
   "logging": {
     "level": "INFO",
@@ -53,29 +46,8 @@
       "TRACKHS_PASSWORD"
     ],
     "optional": [
-      "TRACKHS_API_URL",
-      "TRACKHS_TIMEOUT",
-      "TRACKHS_SEARCH_TIMEOUT",
-      "FASTMCP_LOG_LEVEL",
-      "FASTMCP_MASK_ERROR_DETAILS",
-      "FASTMCP_STRICT_INPUT_VALIDATION",
-      "TRACKHS_COMPACT_RESPONSES",
-      "TRACKHS_MAX_RESPONSE_ITEMS",
-      "TRACKHS_MAX_RESPONSE_TOKENS"
+      "TRACKHS_BASE_URL"
     ]
-  },
-  "response_optimization": {
-    "description": "Configuración para optimizar respuestas en agentes de voz (ElevenLabs, etc.)",
-    "compact_responses": true,
-    "max_items_per_response": 3,
-    "max_estimated_tokens": 2000,
-    "voice_agent_mode": {
-      "enabled": true,
-      "max_reservation_results": 3,
-      "max_unit_results": 2,
-      "max_amenity_results": 10,
-      "include_only_essential_fields": true
-    }
   }
 }
 

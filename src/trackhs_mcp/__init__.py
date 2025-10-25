@@ -1,16 +1,15 @@
 """
 TrackHS MCP Connector - Python Package
 
-Servidor MCP para Track HS API implementado con FastMCP.
-Proporciona herramientas, resources y prompts para interactuar con la API de Track HS.
+Servidor MCP simple para TrackHS API implementado con FastMCP.
+Proporciona herramientas para interactuar con la API de TrackHS.
 """
 
-__version__ = "1.0.2"
+__version__ = "2.0.0"
 __author__ = "Track HS Team"
 __email__ = "team@trackhs.com"
 
 # Imports para compatibilidad
-from .infrastructure.adapters.config import TrackHSConfig
-from .infrastructure.adapters.trackhs_api_client import TrackHSApiClient
+from .server import mcp
 
-__all__ = ["TrackHSConfig", "TrackHSApiClient"]
+__all__ = ["mcp"]

@@ -1,8 +1,4 @@
-# TrackHS MCP Connector - Python Dependencies
-# Para compatibilidad con herramientas que requieren requirements.txt
-
-fastmcp>=2.8.0
-httpx>=0.24.0
-pydantic>=2.0.0
+fastmcp>=2.0.0
+httpx>=0.25.0
 python-dotenv>=1.0.0
-# uvicorn no es necesario - FastMCP Cloud maneja el servidor HTTP automáticamente
+pydantic>=2.0.0
