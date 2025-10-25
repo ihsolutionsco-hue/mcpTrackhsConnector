@@ -39,7 +39,17 @@ _settings = None
 def get_settings():
     global _settings
     if _settings is None:
-        _settings = Settings()
+        try:
+            _settings = Settings()
+        except Exception as e:
+            # Durante fastmcp inspect, las variables de entorno no están disponibles
+            # Crear settings con valores por defecto para la inspección
+            logger.warning(f"Could not load settings from environment: {e}")
+            _settings = Settings(
+                trackhs_api_url="https://api.trackhs.com",
+                trackhs_username="inspect_user",
+                trackhs_password="inspect_pass"
+            )
     return _settings
 
 # ============================================================================
@@ -178,7 +188,14 @@ class TrackHSClient:
         """POST request a TrackHS API con retry automático"""
         return await self._make_request("POST", endpoint, json=json)
 
-trackhs_client = TrackHSClient()
+# Lazy loading del cliente - solo se crea cuando se necesita
+_trackhs_client = None
+
+def get_trackhs_client():
+    global _trackhs_client
+    if _trackhs_client is None:
+        _trackhs_client = TrackHSClient()
+    return _trackhs_client
 
 # ============================================================================
 # SCHEMAS DE VALIDACIÓN
@@ -284,7 +301,8 @@ async def search_reservations(request: SearchReservationsRequest) -> dict:
             params["status"] = request.status
         
         # Llamada a la API
-        result = await trackhs_client.get("/api/v2/reservations", params=params)
+        client = get_trackhs_client()
+        result = await client.get("/api/v2/reservations", params=params)
         
         duration = time.time() - start_time
         
@@ -333,7 +351,8 @@ async def get_reservation(request: GetReservationRequest) -> dict:
     start_time = time.time()
     
     try:
-        result = await trackhs_client.get(f"/api/v2/reservations/{request.reservation_id}")
+        client = get_trackhs_client()
+        result = await client.get(f"/api/v2/reservations/{request.reservation_id}")
         
         duration = time.time() - start_time
         
@@ -394,7 +413,8 @@ async def search_units(request: SearchUnitsRequest) -> dict:
             params["bathrooms"] = request.bathrooms
         
         # Llamada a la API
-        result = await trackhs_client.get("/api/v2/units", params=params)
+        client = get_trackhs_client()
+        result = await client.get("/api/v2/units", params=params)
         
         duration = time.time() - start_time
         
