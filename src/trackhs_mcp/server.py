@@ -133,6 +133,73 @@ def sanitize_for_log(data: Any, max_depth: int = 10) -> Any:
         return data
 
 
+# Configuración de reintentos
+MAX_RETRIES = 3
+RETRY_DELAY_BASE = 1.0  # segundos
+RETRY_BACKOFF_FACTOR = 2.0
+
+
+def retry_with_backoff(
+    func, max_retries: int = MAX_RETRIES, base_delay: float = RETRY_DELAY_BASE
+):
+    """
+    Ejecuta una función con reintentos automáticos y exponential backoff.
+
+    Reintenta automáticamente en caso de errores de red o errores temporales
+    del servidor (429, 500, 502, 503, 504).
+
+    Args:
+        func: Función a ejecutar
+        max_retries: Número máximo de reintentos
+        base_delay: Delay base en segundos (se duplica en cada reintento)
+
+    Returns:
+        Resultado de la función si tiene éxito
+
+    Raises:
+        La última excepción si todos los reintentos fallan
+    """
+    last_exception = None
+
+    for attempt in range(max_retries + 1):
+        try:
+            return func()
+        except httpx.RequestError as e:
+            # Errores de red (timeout, connection error, etc.)
+            last_exception = e
+            if attempt < max_retries:
+                delay = base_delay * (RETRY_BACKOFF_FACTOR**attempt)
+                logger.warning(
+                    f"Request error on attempt {attempt + 1}/{max_retries + 1}: {str(e)}"
+                )
+                logger.info(f"Retrying in {delay:.1f} seconds...")
+                time.sleep(delay)
+            else:
+                logger.error(f"All {max_retries + 1} attempts failed")
+                raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
+
+        except httpx.HTTPStatusError as e:
+            # Errores HTTP que ameritan reintento (temporales)
+            status_code = e.response.status_code
+            retryable_codes = {429, 500, 502, 503, 504}
+
+            if status_code in retryable_codes and attempt < max_retries:
+                last_exception = e
+                delay = base_delay * (RETRY_BACKOFF_FACTOR**attempt)
+                logger.warning(
+                    f"HTTP {status_code} on attempt {attempt + 1}/{max_retries + 1}"
+                )
+                logger.info(f"Retrying in {delay:.1f} seconds...")
+                time.sleep(delay)
+            else:
+                # Error no retryable o ya agotamos reintentos
+                raise
+
+    # Si llegamos aquí, todos los reintentos fallaron
+    if last_exception:
+        raise last_exception
+
+
 # Cliente HTTP robusto
 class TrackHSClient:
     def __init__(self, base_url: str, username: str, password: str):
@@ -142,132 +209,138 @@ class TrackHSClient:
         logger.info(f"TrackHSClient inicializado para {base_url}")
 
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
-        """GET request to TrackHS API with error handling"""
+        """GET request to TrackHS API with error handling and automatic retries"""
         full_url = f"{self.base_url}/{endpoint}"
         # Sanitizar params antes de loguear
         sanitized_params = sanitize_for_log(params)
         logger.info(f"GET request to {full_url} with params: {sanitized_params}")
-        logger.info(f"Base URL: {self.base_url}, Endpoint: {endpoint}")
-        logger.info(f"Auth configured: {self.auth[0] is not None}")
 
-        try:
-            response = self.client.get(full_url, params=params)
-            logger.info(f"Response status: {response.status_code}")
-            # No loguear headers completos (pueden contener tokens)
-            logger.info(
-                f"Response content-type: {response.headers.get('content-type', 'unknown')}"
-            )
-
-            response.raise_for_status()
-
-            # Parsear respuesta y sanitizar para log
-            response_data = response.json()
-            sanitized_response = sanitize_for_log(response_data)
-            logger.info(
-                f"Response preview (sanitized): {str(sanitized_response)[:500]}"
-            )
-
-            logger.info(f"GET request successful - Status: {response.status_code}")
-            return response_data
-        except httpx.HTTPStatusError as e:
-            # Sanitizar respuesta de error (puede contener datos sensibles)
-            logger.error(f"HTTP Error {e.response.status_code}")
-            logger.error(f"Request URL: {full_url}")
-            logger.error(f"Request params: {sanitized_params}")
-
-            # Check if response is HTML (indicating wrong endpoint)
-            if "text/html" in e.response.headers.get("content-type", ""):
-                logger.error(
-                    "Response is HTML instead of JSON - possible wrong endpoint or authentication issue"
-                )
-                raise NotFoundError(
-                    f"Endpoint no encontrado o problema de autenticación. URL: {full_url}. Respuesta HTML recibida."
+        def _execute_request():
+            """Función interna para ejecutar el request (usada por retry_with_backoff)"""
+            try:
+                response = self.client.get(full_url, params=params)
+                logger.info(f"Response status: {response.status_code}")
+                # No loguear headers completos (pueden contener tokens)
+                logger.info(
+                    f"Response content-type: {response.headers.get('content-type', 'unknown')}"
                 )
 
-            if e.response.status_code == 401:
-                raise AuthenticationError(f"Credenciales inválidas: {e.response.text}")
-            elif e.response.status_code == 403:
-                raise AuthenticationError(f"Acceso denegado: {e.response.text}")
-            elif e.response.status_code == 404:
-                raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
-            elif e.response.status_code == 422:
-                raise ValidationError(f"Error de validación: {e.response.text}")
-            elif e.response.status_code == 429:
-                raise APIError(f"Límite de velocidad excedido: {e.response.text}")
-            elif e.response.status_code >= 500:
-                raise APIError(
-                    f"Error interno del servidor TrackHS: {e.response.status_code} - {e.response.text}"
+                response.raise_for_status()
+
+                # Parsear respuesta y sanitizar para log
+                response_data = response.json()
+                sanitized_response = sanitize_for_log(response_data)
+                logger.info(
+                    f"Response preview (sanitized): {str(sanitized_response)[:500]}"
                 )
-            else:
-                raise APIError(
-                    f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
-                )
-        except httpx.RequestError as e:
-            logger.error(f"Request Error: {str(e)}")
-            raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
-        except Exception as e:
-            logger.error(f"Unexpected error in GET request: {str(e)}")
-            raise TrackHSError(f"Error inesperado: {str(e)}")
+
+                logger.info(f"GET request successful - Status: {response.status_code}")
+                return response_data
+
+            except httpx.HTTPStatusError as e:
+                # Sanitizar respuesta de error (puede contener datos sensibles)
+                logger.error(f"HTTP Error {e.response.status_code}")
+                logger.error(f"Request URL: {full_url}")
+
+                # Check if response is HTML (indicating wrong endpoint)
+                if "text/html" in e.response.headers.get("content-type", ""):
+                    logger.error(
+                        "Response is HTML instead of JSON - possible wrong endpoint or authentication issue"
+                    )
+                    raise NotFoundError(
+                        f"Endpoint no encontrado o problema de autenticación. URL: {full_url}. Respuesta HTML recibida."
+                    )
+
+                if e.response.status_code == 401:
+                    raise AuthenticationError(
+                        f"Credenciales inválidas: {e.response.text}"
+                    )
+                elif e.response.status_code == 403:
+                    raise AuthenticationError(f"Acceso denegado: {e.response.text}")
+                elif e.response.status_code == 404:
+                    raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
+                elif e.response.status_code == 422:
+                    raise ValidationError(f"Error de validación: {e.response.text}")
+                elif e.response.status_code == 429:
+                    raise APIError(f"Límite de velocidad excedido: {e.response.text}")
+                elif e.response.status_code >= 500:
+                    raise APIError(
+                        f"Error interno del servidor TrackHS: {e.response.status_code} - {e.response.text}"
+                    )
+                else:
+                    raise APIError(
+                        f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
+                    )
+
+            except Exception as e:
+                logger.error(f"Unexpected error in GET request: {str(e)}")
+                raise TrackHSError(f"Error inesperado: {str(e)}")
+
+        # Ejecutar con reintentos automáticos
+        return retry_with_backoff(_execute_request)
 
     def post(self, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
-        """POST request to TrackHS API with error handling"""
+        """POST request to TrackHS API with error handling and automatic retries"""
         full_url = f"{self.base_url}/{endpoint}"
         # Sanitizar data antes de loguear
         sanitized_data = sanitize_for_log(data)
         logger.info(f"POST request to {full_url} with data: {sanitized_data}")
-        logger.info(f"Base URL: {self.base_url}, Endpoint: {endpoint}")
-        logger.info(f"Auth configured: {self.auth[0] is not None}")
 
-        try:
-            response = self.client.post(full_url, json=data)
-            logger.info(f"Response status: {response.status_code}")
-            # No loguear headers completos (pueden contener tokens)
-            logger.info(
-                f"Response content-type: {response.headers.get('content-type', 'unknown')}"
-            )
-
-            response.raise_for_status()
-
-            # Parsear respuesta y sanitizar para log
-            response_data = response.json()
-            sanitized_response = sanitize_for_log(response_data)
-            logger.info(
-                f"Response preview (sanitized): {str(sanitized_response)[:500]}"
-            )
-
-            logger.info(f"POST request successful - Status: {response.status_code}")
-            return response_data
-        except httpx.HTTPStatusError as e:
-            # Sanitizar respuesta de error (puede contener datos sensibles)
-            logger.error(f"HTTP Error {e.response.status_code}")
-            logger.error(f"Request URL: {full_url}")
-            logger.error(f"Request data: {sanitized_data}")
-
-            # Check if response is HTML (indicating wrong endpoint)
-            if "text/html" in e.response.headers.get("content-type", ""):
-                logger.error(
-                    "Response is HTML instead of JSON - possible wrong endpoint or authentication issue"
-                )
-                raise NotFoundError(
-                    f"Endpoint no encontrado o problema de autenticación. URL: {full_url}. Respuesta HTML recibida."
+        def _execute_request():
+            """Función interna para ejecutar el request (usada por retry_with_backoff)"""
+            try:
+                response = self.client.post(full_url, json=data)
+                logger.info(f"Response status: {response.status_code}")
+                # No loguear headers completos (pueden contener tokens)
+                logger.info(
+                    f"Response content-type: {response.headers.get('content-type', 'unknown')}"
                 )
 
-            if e.response.status_code == 401:
-                raise AuthenticationError(f"Credenciales inválidas: {e.response.text}")
-            elif e.response.status_code == 404:
-                raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
-            elif e.response.status_code == 429:
-                raise APIError(f"Límite de velocidad excedido: {e.response.text}")
-            else:
-                raise APIError(
-                    f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
+                response.raise_for_status()
+
+                # Parsear respuesta y sanitizar para log
+                response_data = response.json()
+                sanitized_response = sanitize_for_log(response_data)
+                logger.info(
+                    f"Response preview (sanitized): {str(sanitized_response)[:500]}"
                 )
-        except httpx.RequestError as e:
-            logger.error(f"Request Error: {str(e)}")
-            raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
-        except Exception as e:
-            logger.error(f"Unexpected error in POST request: {str(e)}")
-            raise TrackHSError(f"Error inesperado: {str(e)}")
+
+                logger.info(f"POST request successful - Status: {response.status_code}")
+                return response_data
+
+            except httpx.HTTPStatusError as e:
+                # Sanitizar respuesta de error (puede contener datos sensibles)
+                logger.error(f"HTTP Error {e.response.status_code}")
+                logger.error(f"Request URL: {full_url}")
+
+                # Check if response is HTML (indicating wrong endpoint)
+                if "text/html" in e.response.headers.get("content-type", ""):
+                    logger.error(
+                        "Response is HTML instead of JSON - possible wrong endpoint or authentication issue"
+                    )
+                    raise NotFoundError(
+                        f"Endpoint no encontrado o problema de autenticación. URL: {full_url}. Respuesta HTML recibida."
+                    )
+
+                if e.response.status_code == 401:
+                    raise AuthenticationError(
+                        f"Credenciales inválidas: {e.response.text}"
+                    )
+                elif e.response.status_code == 404:
+                    raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
+                elif e.response.status_code == 429:
+                    raise APIError(f"Límite de velocidad excedido: {e.response.text}")
+                else:
+                    raise APIError(
+                        f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
+                    )
+
+            except Exception as e:
+                logger.error(f"Unexpected error in POST request: {str(e)}")
+                raise TrackHSError(f"Error inesperado: {str(e)}")
+
+        # Ejecutar con reintentos automáticos
+        return retry_with_backoff(_execute_request)
 
 
 # Inicializar cliente API con manejo robusto para FastMCP Cloud
