@@ -1,16 +1,16 @@
 # Auditoría de Cumplimiento del Protocolo MCP
 ## TrackHS MCP Server v2.0.0
 
-**Fecha de Auditoría:** 26 de Octubre, 2025  
-**Auditor:** Sistema de Análisis de Código  
-**Versión del Código:** 2.0.0  
+**Fecha de Auditoría:** 26 de Octubre, 2025
+**Auditor:** Sistema de Análisis de Código
+**Versión del Código:** 2.0.0
 **Framework:** FastMCP 2.13.0
 
 ---
 
 ## 📋 Resumen Ejecutivo
 
-El servidor TrackHS MCP ha sido auditado para verificar su cumplimiento con el protocolo Model Context Protocol (MCP) y las mejores prácticas de FastMCP. 
+El servidor TrackHS MCP ha sido auditado para verificar su cumplimiento con el protocolo Model Context Protocol (MCP) y las mejores prácticas de FastMCP.
 
 ### ✅ Resultado General: **APROBADO CON RECOMENDACIONES**
 
@@ -401,15 +401,15 @@ logger.info(f"Params: {sanitize_log_data(params)}")
 def search_reservations(...):
     """
     Buscar reservas en TrackHS con filtros avanzados.
-    
+
     Esta herramienta permite buscar reservas utilizando múltiples criterios...
-    
+
     Respuesta incluye:
     - _embedded.reservations: Array de objetos...
-    
+
     Casos de uso comunes:
     - Buscar reservas por fecha...
-    
+
     Ejemplos de uso:
     - search_reservations(arrival_start="2024-01-15", ...)
     """
@@ -726,7 +726,7 @@ class TrackHSClient:
             timeout=httpx.Timeout(30.0, connect=10.0),
             limits=httpx.Limits(max_keepalive_connections=5),
         )
-    
+
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10)
@@ -743,7 +743,7 @@ class TrackHSClient:
 def search_reservations_by_status(status: str = "confirmed"):
     """Plantilla para buscar reservas por estado"""
     return f"""Busca todas las reservas con estado '{status}' usando la herramienta search_reservations.
-    
+
     Parámetros sugeridos:
     - status: {status}
     - size: 50
@@ -756,7 +756,7 @@ def upcoming_checkins(days: int = 7):
     start = datetime.now().strftime("%Y-%m-%d")
     end = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
     return f"""Busca reservas con llegada entre {start} y {end}
-    
+
     Usa: search_reservations(arrival_start="{start}", arrival_end="{end}")
     """
 ```

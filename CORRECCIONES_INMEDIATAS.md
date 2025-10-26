@@ -83,17 +83,17 @@ SENSITIVE_KEYS = {
 def sanitize_for_log(data: Any, max_depth: int = 5) -> Any:
     """
     Oculta datos sensibles para logging seguro.
-    
+
     Args:
         data: Datos a sanitizar
         max_depth: Profundidad máxima para prevenir recursión infinita
-    
+
     Returns:
         Datos con información sensible oculta
     """
     if max_depth <= 0:
         return "..."
-    
+
     if isinstance(data, dict):
         return {
             k: '***REDACTED***' if any(sk in k.lower() for sk in SENSITIVE_KEYS)
@@ -186,7 +186,7 @@ class TrackHSClient:
     def __init__(self, base_url: str, username: str, password: str):
         self.base_url = base_url
         self.auth = (username, password)
-        
+
         # 🔧 Configuración mejorada del cliente
         self.client = httpx.Client(
             auth=self.auth,
@@ -213,7 +213,7 @@ class TrackHSClient:
     )
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         # ... código existente sin cambios
-        
+
     # 🔧 Agregar decorador de reintentos a post()
     @retry(
         stop=stop_after_attempt(3),
@@ -254,7 +254,7 @@ class ReservationItem(BaseModel):
     status: str
     arrivalDate: Optional[str] = Field(None, alias="arrivalDate")
     departureDate: Optional[str] = Field(None, alias="departureDate")
-    
+
     class Config:
         populate_by_name = True
         allow_population_by_field_name = True
@@ -267,7 +267,7 @@ class ReservationSearchResponse(BaseModel):
     total_items: int = Field(alias="total_items")
     _embedded: Dict[str, List[Dict[str, Any]]]
     _links: Optional[Dict[str, Any]] = None
-    
+
     class Config:
         populate_by_name = True
 
@@ -279,7 +279,7 @@ class UnitSearchResponse(BaseModel):
     total_items: int = Field(alias="total_items")
     _embedded: Dict[str, List[Dict[str, Any]]]
     _links: Optional[Dict[str, Any]] = None
-    
+
     class Config:
         populate_by_name = True
 
@@ -313,7 +313,7 @@ def search_reservations(...) -> Dict[str, Any]:
 def search_reservations(...) -> Dict[str, Any]:
     # ...
     result = api_client.get("pms/reservations", params)
-    
+
     # 🔧 Validar respuesta
     try:
         validated = ReservationSearchResponse(**result)
@@ -349,45 +349,45 @@ sys.path.insert(0, str(src_dir))
 
 class TestTools:
     """Tests de herramientas MCP"""
-    
+
     @pytest.mark.asyncio
     async def test_search_reservations_schema(self):
         """Test del schema de search_reservations"""
         from trackhs_mcp.server import mcp
-        
+
         async with Client(transport=FastMCPTransport(mcp)) as client:
             tools = await client.list_tools()
             search_res_tool = next(t for t in tools if t.name == "search_reservations")
-            
+
             # Verificar que tiene schema de entrada
             assert search_res_tool.inputSchema is not None
-            
+
             # Verificar parámetros esperados
             properties = search_res_tool.inputSchema.get("properties", {})
             assert "page" in properties
             assert "size" in properties
             assert "search" in properties
-    
+
     @pytest.mark.asyncio
     async def test_all_tools_have_descriptions(self):
         """Verificar que todas las herramientas tienen descripción"""
         from trackhs_mcp.server import mcp
-        
+
         async with Client(transport=FastMCPTransport(mcp)) as client:
             tools = await client.list_tools()
-            
+
             for tool in tools:
                 assert tool.description, f"Tool {tool.name} sin descripción"
                 assert len(tool.description) > 20, f"Descripción muy corta: {tool.name}"
-    
+
     @pytest.mark.asyncio
     async def test_tools_have_output_schemas(self):
         """Verificar que las herramientas críticas tienen output schema"""
         from trackhs_mcp.server import mcp
-        
+
         async with Client(transport=FastMCPTransport(mcp)) as client:
             tools = await client.list_tools()
-            
+
             # Herramientas que deben tener output schema
             critical_tools = [
                 "search_reservations",
@@ -395,7 +395,7 @@ class TestTools:
                 "search_units",
                 "search_amenities",
             ]
-            
+
             for tool_name in critical_tools:
                 tool = next(t for t in tools if t.name == tool_name)
                 # En MCP, output schemas están en annotations
@@ -423,19 +423,19 @@ sys.path.insert(0, str(src_dir))
 
 class TestErrorHandling:
     """Tests de manejo de errores"""
-    
+
     def test_authentication_error_hierarchy(self):
         """Verificar jerarquía de excepciones"""
         from trackhs_mcp.exceptions import TrackHSError
-        
+
         err = AuthenticationError("test")
         assert isinstance(err, TrackHSError)
         assert isinstance(err, Exception)
-    
+
     def test_all_custom_exceptions_exist(self):
         """Verificar que todas las excepciones personalizadas están definidas"""
         from trackhs_mcp import exceptions
-        
+
         required_exceptions = [
             'TrackHSError',
             'AuthenticationError',
@@ -445,7 +445,7 @@ class TestErrorHandling:
             'NotFoundError',
             'RateLimitError',
         ]
-        
+
         for exc_name in required_exceptions:
             assert hasattr(exceptions, exc_name), f"Falta excepción: {exc_name}"
 ```
@@ -469,7 +469,7 @@ def search_reservations_by_status(
 ):
     """
     Plantilla para buscar reservas por estado.
-    
+
     Genera una solicitud para buscar todas las reservas con un estado específico.
     Estados comunes: confirmed, cancelled, checked-in, checked-out, pending
     """
@@ -492,14 +492,14 @@ def upcoming_checkins(
 ):
     """
     Plantilla para ver check-ins próximos.
-    
+
     Genera una solicitud para ver todas las reservas con check-in en los próximos N días.
     """
     from datetime import datetime, timedelta
-    
+
     start_date = datetime.now().strftime("%Y-%m-%d")
     end_date = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
-    
+
     return f"""Busca todas las reservas con llegada entre {start_date} y {end_date}.
 
 Usa la herramienta search_reservations con:
@@ -522,11 +522,11 @@ def available_units_summary(
 ):
     """
     Plantilla para obtener resumen de unidades disponibles.
-    
+
     Genera una solicitud para ver todas las unidades disponibles para reservar.
     """
     bedroom_filter = f" con {bedrooms} dormitorios" if bedrooms else ""
-    
+
     return f"""Obtén un resumen de todas las unidades disponibles para reservar{bedroom_filter}.
 
 Usa la herramienta search_units con:
@@ -558,23 +558,23 @@ Proporciona un resumen con:
 def server_metrics():
     """
     Métricas en tiempo real del servidor MCP.
-    
+
     Proporciona estadísticas de uso y rendimiento del servidor.
     """
     if metrics_middleware is None:
         return {"error": "Metrics middleware not initialized"}
-    
+
     return {
         "total_requests": metrics_middleware.metrics.get("total_requests", 0),
         "successful_requests": metrics_middleware.metrics.get("successful_requests", 0),
         "failed_requests": metrics_middleware.metrics.get("failed_requests", 0),
         "success_rate": round(
-            (metrics_middleware.metrics.get("successful_requests", 0) / 
-             max(metrics_middleware.metrics.get("total_requests", 1), 1)) * 100, 
+            (metrics_middleware.metrics.get("successful_requests", 0) /
+             max(metrics_middleware.metrics.get("total_requests", 1), 1)) * 100,
             2
         ),
         "average_response_time_ms": round(
-            metrics_middleware.metrics.get("average_response_time", 0) * 1000, 
+            metrics_middleware.metrics.get("average_response_time", 0) * 1000,
             2
         ),
         "uptime_seconds": round(
@@ -588,7 +588,7 @@ def server_metrics():
 def api_information():
     """
     Información de la API TrackHS configurada.
-    
+
     Retorna información sobre la conexión a TrackHS sin exponer credenciales.
     """
     return {
@@ -611,7 +611,7 @@ def api_information():
 def quick_start_guide():
     """
     Guía rápida de uso del servidor MCP TrackHS.
-    
+
     Retorna información de cómo empezar a usar el servidor.
     """
     return """

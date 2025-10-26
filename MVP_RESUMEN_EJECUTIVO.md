@@ -5,8 +5,8 @@
 
 ## 🎯 VISIÓN DEL MVP
 
-**Objetivo:** Servidor MCP estable, seguro y profesional para TrackHS  
-**Filosofía:** Simple pero robusto  
+**Objetivo:** Servidor MCP estable, seguro y profesional para TrackHS
+**Filosofía:** Simple pero robusto
 **Timeline:** 5-6 semanas hasta v1.0 oficial
 
 ---
@@ -55,7 +55,7 @@ mcp.add_middleware(auth_middleware)
 mcp.add_middleware(metrics_middleware)
 ```
 
-**Impacto:** ✅ Métricas automáticas  
+**Impacto:** ✅ Métricas automáticas
 **Tiempo:** 2 horas
 
 ---
@@ -72,7 +72,7 @@ mcp = FastMCP(
 )
 ```
 
-**Impacto:** ✅ Validación automática robusta  
+**Impacto:** ✅ Validación automática robusta
 **Tiempo:** 30 minutos
 
 ---
@@ -88,7 +88,7 @@ def sanitize_for_log(data):
     """Oculta datos sensibles en logs"""
     if isinstance(data, dict):
         return {
-            k: '***REDACTED***' if any(sk in k.lower() for sk in SENSITIVE_KEYS) 
+            k: '***REDACTED***' if any(sk in k.lower() for sk in SENSITIVE_KEYS)
             else sanitize_for_log(v)
             for k, v in data.items()
         }
@@ -98,7 +98,7 @@ def sanitize_for_log(data):
 logger.info(f"Params: {sanitize_for_log(params)}")
 ```
 
-**Impacto:** 🔒 Protección de datos sensibles  
+**Impacto:** 🔒 Protección de datos sensibles
 **Tiempo:** 3-4 horas
 
 ---
@@ -140,20 +140,20 @@ logger.info(f"Params: {sanitize_for_log(params)}")
 ## 🔥 QUICK WINS (Bajo esfuerzo, Alto impacto)
 
 ### 1. Habilitar Middleware (2h)
-→ Métricas automáticas funcionando  
-→ Logging estructurado  
+→ Métricas automáticas funcionando
+→ Logging estructurado
 → Autenticación centralizada
 
 ### 2. Validación Estricta (30m)
-→ Errores de validación más claros  
+→ Errores de validación más claros
 → Prevención de datos inválidos
 
 ### 3. Sanitización Básica (3h)
-→ Seguridad de datos mejorada  
+→ Seguridad de datos mejorada
 → Cumplimiento GDPR/privacidad
 
 ### 4. README Actualizado (2h)
-→ Onboarding más rápido  
+→ Onboarding más rápido
 → Menos preguntas de soporte
 
 **Total:** ~8 horas para mejoras significativas
@@ -182,7 +182,7 @@ v2.0.0 (Actual)  →  v1.0-beta  →  v1.0.0  →  v1.1+
 | `create_maintenance_wo` | ✅ Funcional | ✅ + Tests |
 | `create_housekeeping_wo` | ✅ Funcional | ⭕ Opcional |
 
-**Core para v1.0:** 5 herramientas (marcadas con ✅)  
+**Core para v1.0:** 5 herramientas (marcadas con ✅)
 **Opcionales:** 2 herramientas (nice to have)
 
 ---
@@ -190,28 +190,28 @@ v2.0.0 (Actual)  →  v1.0-beta  →  v1.0.0  →  v1.1+
 ## 💰 ESFUERZO VS VALOR
 
 ### Fase 1: Core Funcional
-**Esfuerzo:** ⚡⚡ (40-50h)  
-**Valor:** 🌟🌟🌟🌟🌟  
+**Esfuerzo:** ⚡⚡ (40-50h)
+**Valor:** 🌟🌟🌟🌟🌟
 **ROI:** MUY ALTO
 
 ### Fase 2: Seguridad
-**Esfuerzo:** ⚡ (20-30h)  
-**Valor:** 🌟🌟🌟🌟🌟  
+**Esfuerzo:** ⚡ (20-30h)
+**Valor:** 🌟🌟🌟🌟🌟
 **ROI:** MUY ALTO
 
 ### Fase 3: Validación
-**Esfuerzo:** ⚡⚡⚡ (50-60h)  
-**Valor:** 🌟🌟🌟🌟  
+**Esfuerzo:** ⚡⚡⚡ (50-60h)
+**Valor:** 🌟🌟🌟🌟
 **ROI:** ALTO
 
 ### Fase 4: Documentación
-**Esfuerzo:** ⚡⚡ (30-40h)  
-**Valor:** 🌟🌟🌟🌟  
+**Esfuerzo:** ⚡⚡ (30-40h)
+**Valor:** 🌟🌟🌟🌟
 **ROI:** ALTO
 
 ### Fase 5: Optimización
-**Esfuerzo:** ⚡⚡⚡ (40-60h)  
-**Valor:** 🌟🌟🌟  
+**Esfuerzo:** ⚡⚡⚡ (40-60h)
+**Valor:** 🌟🌟🌟
 **ROI:** MEDIO
 
 ---
@@ -241,14 +241,14 @@ v2.0.0 (Actual)  →  v1.0-beta  →  v1.0.0  →  v1.1+
 ## 📅 CALENDARIO SUGERIDO
 
 ### Semana 1-2: Fase 1 (Core)
-**Sprint 1:** Middleware + Validación  
+**Sprint 1:** Middleware + Validación
 **Sprint 2:** Tests + Despliegue
 
 ### Semana 3: Fase 2 (Seguridad)
 **Sprint 3:** Sanitización + Reintentos
 
 ### Semana 4-5: Fase 3 (Validación)
-**Sprint 4:** Modelos Pydantic  
+**Sprint 4:** Modelos Pydantic
 **Sprint 5:** Tests completos
 
 ### Semana 6: Fase 4 (Docs)
@@ -355,21 +355,21 @@ scripts/deploy_prod.sh     # Deploy a producción
 ## ✅ RECOMENDACIÓN FINAL
 
 ### Para lanzar v1.0 AHORA (MVP Mínimo)
-**Completar:** Fases 1-2 únicamente  
-**Tiempo:** 2-3 semanas  
-**Riesgo:** Medio  
+**Completar:** Fases 1-2 únicamente
+**Tiempo:** 2-3 semanas
+**Riesgo:** Medio
 **Beneficio:** Time to market rápido
 
 ### Para lanzar v1.0 ROBUSTO (Recomendado)
-**Completar:** Fases 1-3  
-**Tiempo:** 4-5 semanas  
-**Riesgo:** Bajo  
+**Completar:** Fases 1-3
+**Tiempo:** 4-5 semanas
+**Riesgo:** Bajo
 **Beneficio:** Calidad profesional
 
 ### Para lanzar v1.0 COMPLETO (Ideal)
-**Completar:** Fases 1-4  
-**Tiempo:** 6 semanas  
-**Riesgo:** Muy bajo  
+**Completar:** Fases 1-4
+**Tiempo:** 6 semanas
+**Riesgo:** Muy bajo
 **Beneficio:** Producto terminado
 
 ---
@@ -400,8 +400,8 @@ pytest tests/ -v
 
 ---
 
-**Fecha de creación:** 26 de Octubre, 2025  
-**Próxima revisión:** Después de completar 3 quick wins  
-**Aprobación:** Pendiente  
+**Fecha de creación:** 26 de Octubre, 2025
+**Próxima revisión:** Después de completar 3 quick wins
+**Aprobación:** Pendiente
 **Status:** ✅ Listo para ejecutar
 

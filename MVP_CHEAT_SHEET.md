@@ -129,21 +129,21 @@ def test_health_check():
 ## 🚨 TOP 3 PROBLEMAS A RESOLVER
 
 ### 1. Middleware NO activado (CRÍTICO)
-**Líneas:** 213-218 en `server.py`  
-**Fix:** Agregar `mcp.add_middleware(...)` para cada uno  
-**Tiempo:** 2h  
+**Líneas:** 213-218 en `server.py`
+**Fix:** Agregar `mcp.add_middleware(...)` para cada uno
+**Tiempo:** 2h
 **Impacto:** ⭐⭐⭐⭐⭐
 
 ### 2. Logs sin sanitizar (ALTA SEGURIDAD)
-**Líneas:** 73-84, 127-138 en `server.py`  
-**Fix:** Implementar `sanitize_for_log()`  
-**Tiempo:** 3-4h  
+**Líneas:** 73-84, 127-138 en `server.py`
+**Fix:** Implementar `sanitize_for_log()`
+**Tiempo:** 3-4h
 **Impacto:** ⭐⭐⭐⭐⭐
 
 ### 3. Sin validación de respuestas (MEDIA)
-**Archivo:** `schemas.py`  
-**Fix:** Crear modelos Pydantic para respuestas  
-**Tiempo:** 1-2 días  
+**Archivo:** `schemas.py`
+**Fix:** Crear modelos Pydantic para respuestas
+**Tiempo:** 1-2 días
 **Impacto:** ⭐⭐⭐⭐
 
 ---
@@ -236,21 +236,21 @@ code src/trackhs_mcp/server.py
 
 ## 🎯 DEFINICIÓN DE "DONE" PARA v1.0
 
-✅ 5 herramientas core con tests  
-✅ Middleware activado  
-✅ Logs sanitizados  
-✅ Reintentos automáticos  
-✅ Tests >70% cobertura  
-✅ README completo  
-✅ Desplegado en producción  
-✅ Health check OK  
+✅ 5 herramientas core con tests
+✅ Middleware activado
+✅ Logs sanitizados
+✅ Reintentos automáticos
+✅ Tests >70% cobertura
+✅ README completo
+✅ Desplegado en producción
+✅ Health check OK
 ✅ Cero bugs críticos
 
 ---
 
-**Estado:** ✅ Plan aprobado  
-**Inicio:** Inmediato  
-**v1.0 Target:** 6 semanas  
+**Estado:** ✅ Plan aprobado
+**Inicio:** Inmediato
+**v1.0 Target:** 6 semanas
 **Riesgo:** Bajo
 
 _Última actualización: 26 Oct 2025_

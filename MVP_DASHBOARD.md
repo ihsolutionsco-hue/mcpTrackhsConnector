@@ -130,8 +130,8 @@ Estado: 🟡 EN PLANIFICACIÓN → 🟢 LISTO PARA INICIAR
 | 2 | Validación estricta | 30m | ⭐⭐⭐⭐ | ⏳ Pendiente |
 | 3 | Test health check | 1h | ⭐⭐⭐⭐ | ⏳ Pendiente |
 
-**Total tiempo:** 3.5 horas  
-**Impacto total:** Muy alto  
+**Total tiempo:** 3.5 horas
+**Impacto total:** Muy alto
 **Prioridad:** CRÍTICA
 
 ---
@@ -177,7 +177,7 @@ Semana 6:    Fase 4 completa
    Owner: Dev Team
    Tiempo: 2h
    Priority: P0
-   
+
 2. [CRÍTICO] Logs sin sanitizar
    Owner: Dev Team
    Tiempo: 3-4h
@@ -190,7 +190,7 @@ Semana 6:    Fase 4 completa
    Owner: Dev Team
    Tiempo: 1 día
    Priority: P1
-   
+
 4. [ALTA] Sin validación respuestas
    Owner: Dev Team
    Tiempo: 2 días
@@ -265,7 +265,7 @@ DevOps:       [██░░░░░░░░] 20% (Setup)
   0% │██░░░░
      └────────────────────────
       W1  W2  W3  W4  W5  W6
-      
+
 Ideal:  ─────
 Actual: ━━━━━
 ```
@@ -396,7 +396,7 @@ EQUIPO:       Listo para empezar
 
 ---
 
-_Dashboard actualizado: 26 Oct 2025, 16:00_  
-_Próxima actualización: Después de completar Quick Wins_  
+_Dashboard actualizado: 26 Oct 2025, 16:00_
+_Próxima actualización: Después de completar Quick Wins_
 _Frecuencia: Diaria durante Fase 1-2, Semanal después_
 

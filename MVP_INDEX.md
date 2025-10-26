@@ -6,50 +6,50 @@
 ## 🎯 ¿Qué documento necesitas?
 
 ### 🚀 **¿Quieres empezar YA?**
-→ Lee: **[MVP_CHEAT_SHEET.md](./MVP_CHEAT_SHEET.md)**  
-📄 1 página | ⏱️ 2 min lectura  
+→ Lee: **[MVP_CHEAT_SHEET.md](./MVP_CHEAT_SHEET.md)**
+📄 1 página | ⏱️ 2 min lectura
 ✅ Quick wins, comandos útiles, próxima acción
 
 ---
 
 ### 📊 **¿Necesitas ver el progreso?**
-→ Lee: **[MVP_ROADMAP.md](./MVP_ROADMAP.md)**  
-📄 Roadmap visual | ⏱️ 5 min lectura  
+→ Lee: **[MVP_ROADMAP.md](./MVP_ROADMAP.md)**
+📄 Roadmap visual | ⏱️ 5 min lectura
 ✅ Timeline, checklist detallado, tracking diario
 
 ---
 
 ### 📋 **¿Quieres entender el plan completo?**
-→ Lee: **[MVP_RESUMEN_EJECUTIVO.md](./MVP_RESUMEN_EJECUTIVO.md)**  
-📄 Resumen ejecutivo | ⏱️ 10 min lectura  
+→ Lee: **[MVP_RESUMEN_EJECUTIVO.md](./MVP_RESUMEN_EJECUTIVO.md)**
+📄 Resumen ejecutivo | ⏱️ 10 min lectura
 ✅ Visión general, ROI, estrategia de lanzamiento
 
 ---
 
 ### 📖 **¿Necesitas todos los detalles?**
-→ Lee: **[MVP_V1.0_PLAN.md](./MVP_V1.0_PLAN.md)**  
-📄 Plan detallado | ⏱️ 30 min lectura  
+→ Lee: **[MVP_V1.0_PLAN.md](./MVP_V1.0_PLAN.md)**
+📄 Plan detallado | ⏱️ 30 min lectura
 ✅ Especificaciones completas, criterios de éxito, riesgos
 
 ---
 
 ### 🔍 **¿Quieres auditoría del código actual?**
-→ Lee: **[AUDITORIA_MCP_PROTOCOLO.md](./AUDITORIA_MCP_PROTOCOLO.md)**  
-📄 Auditoría técnica | ⏱️ 20 min lectura  
+→ Lee: **[AUDITORIA_MCP_PROTOCOLO.md](./AUDITORIA_MCP_PROTOCOLO.md)**
+📄 Auditoría técnica | ⏱️ 20 min lectura
 ✅ Estado actual, problemas identificados, recomendaciones
 
 ---
 
 ### 📊 **¿Necesitas ver el dashboard del proyecto?**
-→ Lee: **[MVP_DASHBOARD.md](./MVP_DASHBOARD.md)**  
-📄 Dashboard visual | ⏱️ 3 min lectura  
+→ Lee: **[MVP_DASHBOARD.md](./MVP_DASHBOARD.md)**
+📄 Dashboard visual | ⏱️ 3 min lectura
 ✅ Métricas, progreso, alertas, KPIs
 
 ---
 
 ### ✅ **¿Quieres ver resumen de la planificación?**
-→ Lee: **[MVP_PLANIFICACION_COMPLETADA.md](./MVP_PLANIFICACION_COMPLETADA.md)**  
-📄 Resumen de planificación | ⏱️ 5 min lectura  
+→ Lee: **[MVP_PLANIFICACION_COMPLETADA.md](./MVP_PLANIFICACION_COMPLETADA.md)**
+📄 Resumen de planificación | ⏱️ 5 min lectura
 ✅ Documentos creados, logros, validación del plan
 
 ---
@@ -292,6 +292,6 @@ code src/trackhs_mcp/server.py
 
 ---
 
-_Última actualización: 26 de Octubre, 2025_  
+_Última actualización: 26 de Octubre, 2025_
 _Próxima revisión: Después de completar Fase 1_
 
