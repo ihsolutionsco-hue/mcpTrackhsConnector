@@ -59,6 +59,80 @@ logger.info(f"Username configurado: {'Sí' if API_USERNAME else 'No'}")
 logger.info(f"Password configurado: {'Sí' if API_PASSWORD else 'No'}")
 
 
+# Datos sensibles que deben ser sanitizados en logs
+SENSITIVE_KEYS = {
+    "email",
+    "phone",
+    "telephone",
+    "mobile",
+    "password",
+    "pwd",
+    "secret",
+    "token",
+    "api_key",
+    "apikey",
+    "authorization",
+    "card",
+    "credit",
+    "creditcard",
+    "ssn",
+    "social_security",
+    "address",
+    "street",
+    "postal",
+    "zip",
+    "payment",
+}
+
+
+def sanitize_for_log(data: Any, max_depth: int = 10) -> Any:
+    """
+    Sanitiza datos sensibles para logging seguro.
+
+    Oculta valores de campos que puedan contener información personal
+    o sensible como emails, teléfonos, direcciones, etc.
+
+    Args:
+        data: Datos a sanitizar (dict, list, str, etc.)
+        max_depth: Profundidad máxima de recursión
+
+    Returns:
+        Datos sanitizados con valores sensibles reemplazados por '***REDACTED***'
+    """
+    if max_depth <= 0:
+        return "***MAX_DEPTH***"
+
+    if data is None:
+        return None
+
+    if isinstance(data, dict):
+        sanitized = {}
+        for key, value in data.items():
+            key_lower = key.lower()
+            # Verificar si la clave contiene alguna palabra sensible
+            is_sensitive = any(sensitive in key_lower for sensitive in SENSITIVE_KEYS)
+
+            if is_sensitive:
+                sanitized[key] = "***REDACTED***"
+            else:
+                sanitized[key] = sanitize_for_log(value, max_depth - 1)
+        return sanitized
+
+    elif isinstance(data, (list, tuple)):
+        return [sanitize_for_log(item, max_depth - 1) for item in data]
+
+    elif isinstance(data, str):
+        # Detectar si parece un email o teléfono en el string
+        if "@" in data and "." in data:  # Posible email
+            return "***EMAIL_REDACTED***"
+        # No sanitizar otros strings por defecto
+        return data
+
+    else:
+        # Para otros tipos (int, float, bool, etc.) retornar tal cual
+        return data
+
+
 # Cliente HTTP robusto
 class TrackHSClient:
     def __init__(self, base_url: str, username: str, password: str):
@@ -70,26 +144,36 @@ class TrackHSClient:
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         """GET request to TrackHS API with error handling"""
         full_url = f"{self.base_url}/{endpoint}"
-        logger.info(f"GET request to {full_url} with params: {params}")
+        # Sanitizar params antes de loguear
+        sanitized_params = sanitize_for_log(params)
+        logger.info(f"GET request to {full_url} with params: {sanitized_params}")
         logger.info(f"Base URL: {self.base_url}, Endpoint: {endpoint}")
         logger.info(f"Auth configured: {self.auth[0] is not None}")
 
         try:
             response = self.client.get(full_url, params=params)
             logger.info(f"Response status: {response.status_code}")
-            logger.info(f"Response headers: {dict(response.headers)}")
-
-            # Log first 500 chars of response for debugging
-            response_text = response.text
-            logger.info(f"Response preview (first 500 chars): {response_text[:500]}")
+            # No loguear headers completos (pueden contener tokens)
+            logger.info(
+                f"Response content-type: {response.headers.get('content-type', 'unknown')}"
+            )
 
             response.raise_for_status()
+
+            # Parsear respuesta y sanitizar para log
+            response_data = response.json()
+            sanitized_response = sanitize_for_log(response_data)
+            logger.info(
+                f"Response preview (sanitized): {str(sanitized_response)[:500]}"
+            )
+
             logger.info(f"GET request successful - Status: {response.status_code}")
-            return response.json()
+            return response_data
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP Error {e.response.status_code}: {e.response.text}")
+            # Sanitizar respuesta de error (puede contener datos sensibles)
+            logger.error(f"HTTP Error {e.response.status_code}")
             logger.error(f"Request URL: {full_url}")
-            logger.error(f"Request params: {params}")
+            logger.error(f"Request params: {sanitized_params}")
 
             # Check if response is HTML (indicating wrong endpoint)
             if "text/html" in e.response.headers.get("content-type", ""):
@@ -128,26 +212,36 @@ class TrackHSClient:
     def post(self, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
         """POST request to TrackHS API with error handling"""
         full_url = f"{self.base_url}/{endpoint}"
-        logger.info(f"POST request to {full_url} with data: {data}")
+        # Sanitizar data antes de loguear
+        sanitized_data = sanitize_for_log(data)
+        logger.info(f"POST request to {full_url} with data: {sanitized_data}")
         logger.info(f"Base URL: {self.base_url}, Endpoint: {endpoint}")
         logger.info(f"Auth configured: {self.auth[0] is not None}")
 
         try:
             response = self.client.post(full_url, json=data)
             logger.info(f"Response status: {response.status_code}")
-            logger.info(f"Response headers: {dict(response.headers)}")
-
-            # Log first 500 chars of response for debugging
-            response_text = response.text
-            logger.info(f"Response preview (first 500 chars): {response_text[:500]}")
+            # No loguear headers completos (pueden contener tokens)
+            logger.info(
+                f"Response content-type: {response.headers.get('content-type', 'unknown')}"
+            )
 
             response.raise_for_status()
+
+            # Parsear respuesta y sanitizar para log
+            response_data = response.json()
+            sanitized_response = sanitize_for_log(response_data)
+            logger.info(
+                f"Response preview (sanitized): {str(sanitized_response)[:500]}"
+            )
+
             logger.info(f"POST request successful - Status: {response.status_code}")
-            return response.json()
+            return response_data
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP Error {e.response.status_code}: {e.response.text}")
+            # Sanitizar respuesta de error (puede contener datos sensibles)
+            logger.error(f"HTTP Error {e.response.status_code}")
             logger.error(f"Request URL: {full_url}")
-            logger.error(f"Request data: {data}")
+            logger.error(f"Request data: {sanitized_data}")
 
             # Check if response is HTML (indicating wrong endpoint)
             if "text/html" in e.response.headers.get("content-type", ""):
