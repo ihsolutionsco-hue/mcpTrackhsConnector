@@ -67,6 +67,56 @@ class CollectionResponse(BaseModel):
     embedded: Dict[str, Any] = Field(alias="_embedded", description="Datos embebidos")
     links: Dict[str, Any] = Field(alias="_links", description="Enlaces de navegación")
 
+    model_config = {"populate_by_name": True}
+
+
+class ReservationResponse(BaseModel):
+    """Modelo para validar respuesta de reserva individual"""
+
+    id: int = Field(description="ID de la reserva")
+    confirmation_number: Optional[str] = Field(
+        None, description="Número de confirmación"
+    )
+    status: Optional[str] = Field(None, description="Estado de la reserva")
+    arrival: Optional[str] = Field(None, description="Fecha de llegada (YYYY-MM-DD)")
+    departure: Optional[str] = Field(None, description="Fecha de salida (YYYY-MM-DD)")
+
+    model_config = {"extra": "allow"}  # Permitir campos adicionales
+
+
+class UnitResponse(BaseModel):
+    """Modelo para validar respuesta de unidad"""
+
+    id: int = Field(description="ID de la unidad")
+    name: Optional[str] = Field(None, description="Nombre de la unidad")
+    code: Optional[str] = Field(None, description="Código de la unidad")
+    bedrooms: Optional[int] = Field(None, description="Número de dormitorios")
+    bathrooms: Optional[int] = Field(None, description="Número de baños")
+
+    model_config = {"extra": "allow"}
+
+
+class FolioResponse(BaseModel):
+    """Modelo para validar respuesta de folio"""
+
+    id: int = Field(description="ID del folio")
+    reservation_id: Optional[int] = Field(None, description="ID de la reserva")
+    balance: Optional[float] = Field(None, description="Balance pendiente")
+    total: Optional[float] = Field(None, description="Total")
+
+    model_config = {"extra": "allow"}
+
+
+class WorkOrderResponse(BaseModel):
+    """Modelo para validar respuesta de work order"""
+
+    id: int = Field(description="ID de la orden de trabajo")
+    status: Optional[str] = Field(None, description="Estado de la orden")
+    unit_id: Optional[int] = Field(None, description="ID de la unidad")
+    priority: Optional[int] = Field(None, description="Prioridad")
+
+    model_config = {"extra": "allow"}
+
 
 # Esquemas de salida para tools
 RESERVATION_SEARCH_OUTPUT_SCHEMA = {
@@ -98,10 +148,19 @@ RESERVATION_SEARCH_OUTPUT_SCHEMA = {
                             "guest": {
                                 "type": "object",
                                 "properties": {
-                                    "name": {"type": "string", "description": "Nombre del huésped"},
-                                    "email": {"type": "string", "description": "Email del huésped"},
-                                    "phone": {"type": "string", "description": "Teléfono del huésped"},
-                                }
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Nombre del huésped",
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "description": "Email del huésped",
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "description": "Teléfono del huésped",
+                                    },
+                                },
                             },
                             "arrivalDate": {
                                 "type": "string",
@@ -118,20 +177,41 @@ RESERVATION_SEARCH_OUTPUT_SCHEMA = {
                             "unit": {
                                 "type": "object",
                                 "properties": {
-                                    "id": {"type": "integer", "description": "ID de la unidad"},
-                                    "name": {"type": "string", "description": "Nombre de la unidad"},
-                                    "code": {"type": "string", "description": "Código de la unidad"},
-                                }
+                                    "id": {
+                                        "type": "integer",
+                                        "description": "ID de la unidad",
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Nombre de la unidad",
+                                    },
+                                    "code": {
+                                        "type": "string",
+                                        "description": "Código de la unidad",
+                                    },
+                                },
                             },
                             "financial": {
                                 "type": "object",
                                 "properties": {
-                                    "totalAmount": {"type": "number", "description": "Monto total"},
-                                    "balance": {"type": "number", "description": "Balance pendiente"},
-                                    "deposit": {"type": "number", "description": "Depósito requerido"},
-                                }
+                                    "totalAmount": {
+                                        "type": "number",
+                                        "description": "Monto total",
+                                    },
+                                    "balance": {
+                                        "type": "number",
+                                        "description": "Balance pendiente",
+                                    },
+                                    "deposit": {
+                                        "type": "number",
+                                        "description": "Depósito requerido",
+                                    },
+                                },
                             },
-                            "_links": {"type": "object", "description": "Enlaces a recursos relacionados"},
+                            "_links": {
+                                "type": "object",
+                                "description": "Enlaces a recursos relacionados",
+                            },
                         },
                     },
                 }
@@ -243,7 +323,10 @@ RESERVATION_DETAIL_OUTPUT_SCHEMA = {
     "type": "object",
     "properties": {
         "id": {"type": "integer", "description": "ID único de la reserva"},
-        "confirmation_number": {"type": "string", "description": "Número de confirmación"},
+        "confirmation_number": {
+            "type": "string",
+            "description": "Número de confirmación",
+        },
         "guest": {
             "type": "object",
             "properties": {
@@ -295,7 +378,10 @@ FOLIO_OUTPUT_SCHEMA = {
                 "type": "object",
                 "properties": {
                     "id": {"type": "integer", "description": "ID del cargo"},
-                    "description": {"type": "string", "description": "Descripción del cargo"},
+                    "description": {
+                        "type": "string",
+                        "description": "Descripción del cargo",
+                    },
                     "amount": {"type": "number", "description": "Monto del cargo"},
                     "date": {"type": "string", "description": "Fecha del cargo"},
                     "type": {"type": "string", "description": "Tipo de cargo"},
@@ -332,7 +418,10 @@ AMENITIES_OUTPUT_SCHEMA = {
         "page": {"type": "integer", "description": "Página actual"},
         "page_count": {"type": "integer", "description": "Total de páginas"},
         "page_size": {"type": "integer", "description": "Tamaño de página"},
-        "total_items": {"type": "integer", "description": "Total de amenidades encontradas"},
+        "total_items": {
+            "type": "integer",
+            "description": "Total de amenidades encontradas",
+        },
         "_embedded": {
             "type": "object",
             "properties": {
@@ -341,12 +430,30 @@ AMENITIES_OUTPUT_SCHEMA = {
                     "items": {
                         "type": "object",
                         "properties": {
-                            "id": {"type": "integer", "description": "ID único de la amenidad"},
-                            "name": {"type": "string", "description": "Nombre de la amenidad"},
-                            "group": {"type": "string", "description": "Grupo de la amenidad"},
-                            "is_public": {"type": "boolean", "description": "Si es pública"},
-                            "is_filterable": {"type": "boolean", "description": "Si es filtrable"},
-                            "description": {"type": "string", "description": "Descripción de la amenidad"},
+                            "id": {
+                                "type": "integer",
+                                "description": "ID único de la amenidad",
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "Nombre de la amenidad",
+                            },
+                            "group": {
+                                "type": "string",
+                                "description": "Grupo de la amenidad",
+                            },
+                            "is_public": {
+                                "type": "boolean",
+                                "description": "Si es pública",
+                            },
+                            "is_filterable": {
+                                "type": "boolean",
+                                "description": "Si es filtrable",
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Descripción de la amenidad",
+                            },
                         },
                     },
                 }

@@ -35,7 +35,12 @@ from .schemas import (
     RESERVATION_SEARCH_OUTPUT_SCHEMA,
     UNIT_SEARCH_OUTPUT_SCHEMA,
     WORK_ORDER_OUTPUT_SCHEMA,
+    CollectionResponse,
+    FolioResponse,
+    ReservationResponse,
+    UnitResponse,
     WorkOrderPriority,
+    WorkOrderResponse,
 )
 
 # Cargar variables de entorno
@@ -198,6 +203,35 @@ def retry_with_backoff(
     # Si llegamos aquí, todos los reintentos fallaron
     if last_exception:
         raise last_exception
+
+
+# Función helper para validación de respuestas
+def validate_response(data: Dict[str, Any], model_class: type, strict: bool = False):
+    """
+    Valida datos de respuesta contra un modelo Pydantic.
+
+    Args:
+        data: Datos a validar
+        model_class: Clase del modelo Pydantic
+        strict: Si True, lanza excepción en caso de error. Si False, solo loguea.
+
+    Returns:
+        Datos validados (modelo Pydantic) si tiene éxito, o datos originales si falla en modo no-strict
+
+    Raises:
+        ValidationError: Si strict=True y la validación falla
+    """
+    try:
+        validated = model_class.model_validate(data)
+        logger.debug(f"Response validated successfully against {model_class.__name__}")
+        return validated.model_dump(by_alias=True)
+    except Exception as e:
+        if strict:
+            logger.error(f"Response validation failed: {str(e)}")
+            raise ValidationError(f"Respuesta de API no válida: {str(e)}")
+        else:
+            logger.warning(f"Response validation warning (non-strict): {str(e)}")
+            return data  # Retornar datos originales en modo no-strict
 
 
 # Cliente HTTP robusto
@@ -543,8 +577,12 @@ def get_reservation(
     try:
         check_api_client()
         result = api_client.get(f"pms/reservations/{reservation_id}")
+
+        # Validar respuesta (modo no-strict: loguea pero no falla)
+        validated_result = validate_response(result, ReservationResponse, strict=False)
+
         logger.info(f"Detalles de reserva {reservation_id} obtenidos exitosamente")
-        return result
+        return validated_result
     except Exception as e:
         logger.error(f"Error obteniendo reserva {reservation_id}: {str(e)}")
         raise
@@ -743,8 +781,20 @@ def get_folio(
     Ejemplo de uso:
     - get_folio(reservation_id=12345) # Obtener folio financiero de reserva 12345
     """
-    check_api_client()
-    return api_client.get(f"pms/reservations/{reservation_id}/folio")
+    logger.info(f"Obteniendo folio de reserva ID: {reservation_id}")
+
+    try:
+        check_api_client()
+        result = api_client.get(f"pms/reservations/{reservation_id}/folio")
+
+        # Validar respuesta (modo no-strict: loguea pero no falla)
+        validated_result = validate_response(result, FolioResponse, strict=False)
+
+        logger.info(f"Folio de reserva {reservation_id} obtenido exitosamente")
+        return validated_result
+    except Exception as e:
+        logger.error(f"Error obteniendo folio de reserva {reservation_id}: {str(e)}")
+        raise
 
 
 @mcp.tool(output_schema=WORK_ORDER_OUTPUT_SCHEMA)
@@ -814,6 +864,10 @@ def create_maintenance_work_order(
     - create_maintenance_work_order(unit_id=123, summary="Fuga en grifo", description="Grifo del baño principal gotea constantemente", priority=3)
     - create_maintenance_work_order(unit_id=456, summary="Aire acondicionado no funciona", description="AC no enfría, revisar termostato y compresor", priority=5, estimated_cost=150.0)
     """
+    logger.info(
+        f"Creando orden de mantenimiento para unidad {unit_id}, prioridad: {priority}"
+    )
+
     work_order_data = {
         "unitId": unit_id,
         "summary": summary,
@@ -828,8 +882,20 @@ def create_maintenance_work_order(
     if estimated_time is not None:
         work_order_data["estimatedTime"] = estimated_time
 
-    check_api_client()
-    return api_client.post("pms/maintenance/work-orders", work_order_data)
+    try:
+        check_api_client()
+        result = api_client.post("pms/maintenance/work-orders", work_order_data)
+
+        # Validar respuesta (modo no-strict: loguea pero no falla)
+        validated_result = validate_response(result, WorkOrderResponse, strict=False)
+
+        logger.info(
+            f"Orden de mantenimiento creada exitosamente. ID: {validated_result.get('id', 'N/A')}"
+        )
+        return validated_result
+    except Exception as e:
+        logger.error(f"Error creando orden de mantenimiento: {str(e)}")
+        raise
 
 
 @mcp.tool(output_schema=WORK_ORDER_OUTPUT_SCHEMA)
@@ -898,8 +964,14 @@ def create_housekeeping_work_order(
     - create_housekeeping_work_order(unit_id=123, scheduled_at="2024-01-15", is_inspection=False, clean_type_id=1)
     - create_housekeeping_work_order(unit_id=456, scheduled_at="2024-01-16", is_inspection=True, comments="Verificar estado post-evento")
     """
+    logger.info(
+        f"Creando orden de housekeeping para unidad {unit_id}, fecha: {scheduled_at}, inspección: {is_inspection}"
+    )
+
     if not is_inspection and clean_type_id is None:
-        raise ValueError("clean_type_id es requerido cuando is_inspection=False")
+        error_msg = "clean_type_id es requerido cuando is_inspection=False"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
 
     work_order_data = {
         "unitId": unit_id,
@@ -915,8 +987,23 @@ def create_housekeeping_work_order(
     if cost is not None:
         work_order_data["cost"] = cost
 
-    check_api_client()
-    return api_client.post("pms/housekeeping/work-orders", work_order_data)
+    try:
+        check_api_client()
+        result = api_client.post("pms/housekeeping/work-orders", work_order_data)
+
+        # Validar respuesta (modo no-strict: loguea pero no falla)
+        validated_result = validate_response(result, WorkOrderResponse, strict=False)
+
+        logger.info(
+            f"Orden de housekeeping creada exitosamente. ID: {validated_result.get('id', 'N/A')}"
+        )
+        return validated_result
+    except ValueError:
+        # Re-raise validation errors
+        raise
+    except Exception as e:
+        logger.error(f"Error creando orden de housekeeping: {str(e)}")
+        raise
 
 
 # Health check endpoint
