@@ -4,37 +4,38 @@ Script maestro para ejecutar todos los tests locales
 Prueba la API real de TrackHS en local antes de desplegar en FastMCP Cloud
 """
 
-import os
-import sys
-import subprocess
 import json
+import os
+import subprocess
+import sys
 from datetime import datetime
+
 
 def run_local_test(script_name: str, description: str):
     """Ejecutar un test local específico"""
     print(f"\n{'='*80}")
     print(f"🔍 {description}")
     print(f"{'='*80}")
-    
+
     if not os.path.exists(script_name):
         print(f"❌ Script no encontrado: {script_name}")
         return {"success": False, "error": "Script not found"}
-    
+
     try:
-        result = subprocess.run([
-            sys.executable, script_name
-        ], capture_output=True, text=True, timeout=120)
-        
+        result = subprocess.run(
+            [sys.executable, script_name], capture_output=True, text=True, timeout=120
+        )
+
         print(result.stdout)
         if result.stderr:
             print("STDERR:")
             print(result.stderr)
-        
+
         return {
             "success": result.returncode == 0,
             "stdout": result.stdout,
             "stderr": result.stderr,
-            "returncode": result.returncode
+            "returncode": result.returncode,
         }
     except subprocess.TimeoutExpired:
         print("❌ Script timeout (120s)")
@@ -43,13 +44,14 @@ def run_local_test(script_name: str, description: str):
         print(f"❌ Error ejecutando script: {str(e)}")
         return {"success": False, "error": str(e)}
 
+
 def check_credentials():
     """Verificar que las credenciales estén configuradas"""
     print("🔍 Verificando credenciales...")
-    
+
     username = os.getenv("TRACKHS_USERNAME")
     password = os.getenv("TRACKHS_PASSWORD")
-    
+
     if not username or not password:
         print("❌ Error: Credenciales no configuradas")
         print("\n💡 Configure las variables de entorno:")
@@ -59,11 +61,12 @@ def check_credentials():
         print("   TRACKHS_USERNAME=tu_usuario")
         print("   TRACKHS_PASSWORD=tu_password")
         return False
-    
+
     print(f"✅ Credenciales encontradas:")
     print(f"   Username: {username[:3]}***")
     print(f"   Password: {'***' if password else 'None'}")
     return True
+
 
 def main():
     """Función principal"""
@@ -75,11 +78,11 @@ def main():
     print("que la API real de TrackHS funcione correctamente antes")
     print("de desplegar en FastMCP Cloud")
     print("=" * 100)
-    
+
     # Verificar credenciales
     if not check_credentials():
         return
-    
+
     # Scripts de test local en orden de prioridad
     local_tests = [
         ("scripts/test_basic_connectivity.py", "Test de Conectividad Básica"),
@@ -87,17 +90,17 @@ def main():
         ("scripts/test_local_api_real.py", "Test de Múltiples Configuraciones"),
         ("scripts/test_auth_methods_local.py", "Test de Métodos de Autenticación"),
     ]
-    
+
     results = {}
     successful_tests = 0
-    
+
     print("🎯 Ejecutando tests locales en secuencia...")
-    
+
     for script_path, description in local_tests:
         print(f"\n⏳ Ejecutando: {description}")
         result = run_local_test(script_path, description)
         results[description] = result
-        
+
         if result["success"]:
             successful_tests += 1
             print(f"✅ {description} - EXITOSO")
@@ -105,28 +108,28 @@ def main():
             print(f"❌ {description} - FALLÓ")
             if "error" in result:
                 print(f"   Error: {result['error']}")
-    
+
     # Resumen final
     print("\n" + "=" * 100)
     print("📊 RESUMEN FINAL DE TESTS LOCALES")
     print("=" * 100)
-    
+
     total_tests = len(local_tests)
     print(f"Tests ejecutados: {total_tests}")
     print(f"Tests exitosos: {successful_tests}")
     print(f"Tests fallidos: {total_tests - successful_tests}")
-    
+
     print(f"\n📋 DETALLE DE RESULTADOS:")
     for description, result in results.items():
         status = "✅" if result["success"] else "❌"
         print(f"   {status} {description}")
         if not result["success"] and "error" in result:
             print(f"      Error: {result['error']}")
-    
+
     # Análisis y recomendaciones
     print(f"\n💡 ANÁLISIS Y RECOMENDACIONES:")
     print("=" * 100)
-    
+
     if successful_tests == 0:
         print("❌ NINGÚN TEST LOCAL FUE EXITOSO")
         print("\n🔍 Posibles causas:")
@@ -138,7 +141,7 @@ def main():
         print("   1. Verificar credenciales con TrackHS")
         print("   2. Contactar soporte técnico de TrackHS")
         print("   3. Verificar conectividad de red")
-        
+
     elif successful_tests < total_tests:
         print(f"⚠️  {successful_tests}/{total_tests} TESTS LOCALES EXITOSOS")
         print("\n🔍 Algunos tests fallaron, pero otros funcionaron")
@@ -146,7 +149,7 @@ def main():
         print("   1. Usar la configuración que funcionó")
         print("   2. Revisar los logs de los tests fallidos")
         print("   3. Implementar la solución exitosa en FastMCP Cloud")
-        
+
     else:
         print("🎉 TODOS LOS TESTS LOCALES FUERON EXITOSOS")
         print("\n✅ La configuración funciona correctamente con la API real")
@@ -154,29 +157,29 @@ def main():
         print("   1. La configuración está lista para FastMCP Cloud")
         print("   2. Desplegar en FastMCP Cloud con la misma configuración")
         print("   3. Monitorear el funcionamiento")
-    
+
     # Configuración recomendada para FastMCP Cloud
     if successful_tests > 0:
         print(f"\n🔧 CONFIGURACIÓN RECOMENDADA PARA FASTMCP CLOUD:")
         print("=" * 100)
-        
+
         base_url = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api")
         username = os.getenv("TRACKHS_USERNAME")
         password = os.getenv("TRACKHS_PASSWORD")
-        
+
         print(f"Variables de entorno:")
         print(f"   TRACKHS_API_URL={base_url}")
         print(f"   TRACKHS_USERNAME={username}")
         print(f"   TRACKHS_PASSWORD={password}")
-        
+
         print(f"\n📝 NOTAS:")
         print(f"   - Esta configuración funciona en local")
         print(f"   - Debería funcionar en FastMCP Cloud")
         print(f"   - Si hay problemas en FastMCP Cloud, revisar variables de entorno")
-    
+
     # Guardar reporte completo
     report_file = f"local_tests_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    
+
     report_data = {
         "timestamp": datetime.now().isoformat(),
         "total_tests": total_tests,
@@ -192,22 +195,24 @@ def main():
         },
         "recommendations": {
             "fastmcp_cloud_config": {
-                "TRACKHS_API_URL": os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api"),
+                "TRACKHS_API_URL": os.getenv(
+                    "TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api"
+                ),
                 "TRACKHS_USERNAME": os.getenv("TRACKHS_USERNAME"),
-                "TRACKHS_PASSWORD": "***"
+                "TRACKHS_PASSWORD": "***",
             }
-        }
+        },
     }
-    
+
     with open(report_file, "w", encoding="utf-8") as f:
         json.dump(report_data, f, indent=2, ensure_ascii=False)
-    
+
     print(f"\n📄 Reporte completo guardado en: {report_file}")
-    
+
     # Instrucciones finales
     print(f"\n🎯 INSTRUCCIONES FINALES:")
     print("=" * 100)
-    
+
     if successful_tests > 0:
         print("✅ Al menos un test local fue exitoso")
         print("   - Usa la configuración que funcionó")
@@ -219,11 +224,12 @@ def main():
         print("   - Revisa las credenciales")
         print("   - Verifica la URL base")
         print("   - Contacta soporte técnico de TrackHS")
-    
+
     print(f"\n📞 Para soporte adicional:")
     print("   - Incluye el archivo de reporte: {report_file}")
     print("   - Incluye los logs del servidor")
     print("   - Incluye la configuración de variables (sin credenciales)")
+
 
 if __name__ == "__main__":
     main()
