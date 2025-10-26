@@ -1,6 +1,6 @@
-# Solución Completa - TrackHS API
+# Diagnóstico Completo - TrackHS API
 
-Esta es la solución completa para diagnosticar y resolver problemas con el servidor MCP de TrackHS en FastMCP Cloud.
+Este documento describe el proceso completo de diagnóstico para resolver problemas con el servidor MCP de TrackHS en FastMCP Cloud.
 
 ## 🎯 Problema Identificado
 
@@ -10,74 +10,41 @@ Esta es la solución completa para diagnosticar y resolver problemas con el serv
 
 ## 🚀 Solución Completa
 
-### Paso 1: Prueba Rápida (Recomendado)
+### Paso 1: Diagnóstico Local (Recomendado)
 
 ```bash
-python scripts/run_quick_test.py
+python scripts/run_complete_local_diagnosis.py
 ```
 
 **¿Qué hace?**
-- Ejecuta un test rápido de la configuración actual
-- Verifica que las credenciales funcionen
-- Confirma que el endpoint responda correctamente
-- Identifica si el problema se reproduce en local
-
-**Ventajas:**
-- Test rápido y simple
-- Identifica problemas inmediatamente
-- Proporciona diagnóstico básico
-- Recomienda próximos pasos
-
-### Paso 2: Diagnóstico Final Completo (Si es necesario)
-
-```bash
-python scripts/run_final_diagnosis.py
-```
-
-**¿Qué hace?**
-- Verifica la configuración del servidor
-- Verifica la preparación para FastMCP Cloud
-- Prueba la conectividad básica
-- Prueba la configuración actual
-- Prueba múltiples configuraciones
-- Prueba diferentes métodos de autenticación
+- Ejecuta todos los diagnósticos locales en secuencia
+- Prueba la API real de TrackHS
 - Identifica la configuración correcta
 - Genera un reporte completo
 
-### Paso 3: Configurar FastMCP Cloud
+**Ventajas:**
+- Prueba la API real antes de desplegar
+- Identifica problemas de configuración
+- Ahorra tiempo en FastMCP Cloud
+- Proporciona diagnóstico detallado
 
-Usar la configuración que funcionó en local:
+### Paso 2: Diagnóstico en FastMCP Cloud
 
 ```bash
-# Variables de entorno en FastMCP Cloud
-TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
-TRACKHS_USERNAME=tu_usuario
-TRACKHS_PASSWORD=tu_password
+python scripts/complete_diagnosis.py
 ```
 
-### Paso 4: Desplegar en FastMCP Cloud
-
-1. Configurar variables de entorno
-2. Desplegar el servidor
-3. Probar la herramienta `search_units`
+**¿Qué hace?**
+- Ejecuta diagnósticos en el entorno de FastMCP Cloud
+- Prueba diferentes configuraciones
+- Identifica problemas específicos del entorno
+- Genera reporte para soporte técnico
 
 ## 🔍 Scripts de Diagnóstico Disponibles
 
-### Scripts Rápidos (Recomendados)
+### Scripts Locales (Recomendados)
 
-#### 1. Prueba Rápida
-```bash
-python scripts/run_quick_test.py
-```
-
-#### 2. Diagnóstico Final Completo
-```bash
-python scripts/run_final_diagnosis.py
-```
-
-### Scripts Locales
-
-#### 1. Diagnóstico Local Completo
+#### 1. Diagnóstico Completo Local
 ```bash
 python scripts/run_complete_local_diagnosis.py
 ```
@@ -89,8 +56,6 @@ python scripts/run_local_tests.py
 
 #### 3. Tests Individuales
 ```bash
-python scripts/verify_server_config.py
-python scripts/check_fastmcp_cloud_ready.py
 python scripts/test_basic_connectivity.py
 python scripts/test_current_config_local.py
 python scripts/test_local_api_real.py
@@ -131,19 +96,10 @@ TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
 
 ## 🔍 Flujo de Diagnóstico Recomendado
 
-### 1. Prueba Rápida (Primero)
+### 1. Diagnóstico Local (Primero)
 ```bash
-# Ejecutar prueba rápida
-python scripts/run_quick_test.py
-
-# Si funciona, configurar FastMCP Cloud
-# Si no funciona, ejecutar diagnóstico completo
-```
-
-### 2. Diagnóstico Final Completo (Si es necesario)
-```bash
-# Ejecutar diagnóstico final completo
-python scripts/run_final_diagnosis.py
+# Ejecutar diagnóstico completo local
+python scripts/run_complete_local_diagnosis.py
 
 # Si hay problemas específicos
 python scripts/test_current_config_local.py
@@ -151,20 +107,14 @@ python scripts/test_local_api_real.py
 python scripts/test_auth_methods_local.py
 ```
 
-### 3. Configurar FastMCP Cloud
+### 2. Configurar FastMCP Cloud
 ```bash
 # Usar la configuración que funcionó en local
 # Configurar variables de entorno en FastMCP Cloud
 # Desplegar el servidor
 ```
 
-### 4. Probar en FastMCP Cloud
-```bash
-# Probar la herramienta search_units
-# Verificar que funcione correctamente
-```
-
-### 5. Diagnóstico en FastMCP Cloud (Si es necesario)
+### 3. Diagnóstico en FastMCP Cloud (Si es necesario)
 ```bash
 # Si el problema persiste en FastMCP Cloud
 python scripts/complete_diagnosis.py
@@ -210,14 +160,11 @@ API Key
 
 Los scripts generan archivos de reporte con timestamp:
 
-- `final_diagnosis_report_YYYYMMDD_HHMMSS.json`
 - `complete_local_diagnosis_report_YYYYMMDD_HHMMSS.json`
 - `complete_diagnosis_report_YYYYMMDD_HHMMSS.json`
 - `local_tests_report_YYYYMMDD_HHMMSS.json`
 - `local_api_test_results.json`
 - `auth_methods_test_results.json`
-- `server_config_verification.json`
-- `fastmcp_cloud_readiness.json`
 
 **Incluye estos archivos cuando contactes soporte técnico.**
 
@@ -236,15 +183,10 @@ TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
 
 ### Estructura de Archivos Requerida
 ```
-src/trackhs_mcp/__init__.py
 src/trackhs_mcp/__main__.py
 src/trackhs_mcp/server.py
-src/trackhs_mcp/schemas.py
-src/trackhs_mcp/exceptions.py
-src/trackhs_mcp/middleware.py
 fastmcp.json
 requirements.txt
-pyproject.toml
 ```
 
 ## 📞 Soporte Técnico
@@ -270,37 +212,32 @@ Con esta información, puedes configurar FastMCP Cloud correctamente y resolver 
 
 ## 🚀 Próximos Pasos
 
-### 1. Ejecutar Prueba Rápida
+### 1. Ejecutar Diagnóstico Local
 ```bash
-python scripts/run_quick_test.py
+python scripts/run_complete_local_diagnosis.py
 ```
 
-### 2. Si funciona, configurar FastMCP Cloud
-- Configurar variables de entorno en FastMCP Cloud
-- Usar la configuración que funcionó en local
-- Desplegar el servidor
-
-### 3. Si no funciona, ejecutar diagnóstico completo
-```bash
-python scripts/run_final_diagnosis.py
-```
-
-### 4. Identificar configuración correcta
+### 2. Identificar Configuración Correcta
 - Revisar los resultados del diagnóstico
 - Identificar la configuración que funcionó
 - Anotar las variables de entorno correctas
 
-### 5. Configurar FastMCP Cloud
+### 3. Configurar FastMCP Cloud
 - Configurar variables de entorno en FastMCP Cloud
 - Usar la configuración que funcionó en local
 - Desplegar el servidor
 
-### 6. Probar en FastMCP Cloud
+### 4. Probar en FastMCP Cloud
 - Probar la herramienta `search_units`
 - Verificar que funcione correctamente
 - Monitorear el funcionamiento
 
-## 🔍 Ventajas del Diagnóstico
+### 5. Si hay Problemas en FastMCP Cloud
+- Ejecutar diagnósticos específicos de FastMCP Cloud
+- Revisar variables de entorno
+- Contactar soporte técnico si es necesario
+
+## 🔍 Ventajas del Diagnóstico Local
 
 ### ✅ Ventajas
 - Prueba la API real de TrackHS
@@ -308,9 +245,6 @@ python scripts/run_final_diagnosis.py
 - Ahorra tiempo en FastMCP Cloud
 - Proporciona diagnóstico detallado
 - Permite probar múltiples configuraciones
-- Verifica la configuración del servidor
-- Verifica la preparación para FastMCP Cloud
-- Ejecuta todos los diagnósticos en secuencia
 
 ### ⚠️ Consideraciones
 - Requiere credenciales reales
@@ -337,39 +271,3 @@ El diagnóstico completo te ayudará a:
 4. **Tener un servidor MCP funcional** en FastMCP Cloud
 
 Sigue el flujo de diagnóstico recomendado y deberías poder resolver el problema exitosamente.
-
-## 📚 Documentación Adicional
-
-- `docs/FASTMCP_CLOUD_DIAGNOSIS.md` - Diagnóstico específico de FastMCP Cloud
-- `docs/LOCAL_TESTS_README.md` - Tests locales
-- `docs/DIAGNOSIS_SCRIPTS_README.md` - Guía de scripts de diagnóstico
-- `docs/COMPLETE_DIAGNOSIS_README.md` - Diagnóstico completo
-- `docs/FINAL_DIAGNOSIS_GUIDE.md` - Guía final de diagnóstico
-- `README_DIAGNOSIS.md` - README de diagnóstico
-- `README_FINAL.md` - README final
-
-## 🔧 Scripts de Diagnóstico
-
-- `scripts/run_quick_test.py` - Prueba rápida
-- `scripts/run_final_diagnosis.py` - Diagnóstico final completo
-- `scripts/run_complete_local_diagnosis.py` - Diagnóstico completo local
-- `scripts/run_local_tests.py` - Tests locales básicos
-- `scripts/complete_diagnosis.py` - Diagnóstico completo
-- `scripts/verify_server_config.py` - Verificación de configuración
-- `scripts/check_fastmcp_cloud_ready.py` - Verificación de preparación para FastMCP Cloud
-- `scripts/test_basic_connectivity.py` - Test de conectividad básica
-- `scripts/test_current_config_local.py` - Test de configuración actual
-- `scripts/test_local_api_real.py` - Test de múltiples configuraciones
-- `scripts/test_auth_methods_local.py` - Test de métodos de autenticación
-- `scripts/test_specific_issue.py` - Test del problema específico
-
-## 🎯 Resultado Final
-
-Después de seguir esta guía, deberías tener:
-
-1. **Un servidor MCP funcional** en FastMCP Cloud
-2. **La herramienta `search_units` funcionando** correctamente
-3. **Un diagnóstico completo** de la configuración
-4. **Documentación** para futuros problemas
-
-¡El problema debería estar resuelto!

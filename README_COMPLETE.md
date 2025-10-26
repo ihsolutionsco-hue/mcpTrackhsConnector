@@ -44,7 +44,19 @@ python scripts/run_final_diagnosis.py
 - Identifica la configuración correcta
 - Genera un reporte completo
 
-### Paso 3: Configurar FastMCP Cloud
+### Paso 3: Todos los Tests (Si es necesario)
+
+```bash
+python scripts/run_all_tests.py
+```
+
+**¿Qué hace?**
+- Ejecuta todos los tests disponibles
+- Proporciona diagnóstico completo
+- Identifica la configuración correcta
+- Genera reporte exhaustivo
+
+### Paso 4: Configurar FastMCP Cloud
 
 Usar la configuración que funcionó en local:
 
@@ -55,7 +67,7 @@ TRACKHS_USERNAME=tu_usuario
 TRACKHS_PASSWORD=tu_password
 ```
 
-### Paso 4: Desplegar en FastMCP Cloud
+### Paso 5: Desplegar en FastMCP Cloud
 
 1. Configurar variables de entorno
 2. Desplegar el servidor
@@ -73,6 +85,11 @@ python scripts/run_quick_test.py
 #### 2. Diagnóstico Final Completo
 ```bash
 python scripts/run_final_diagnosis.py
+```
+
+#### 3. Todos los Tests
+```bash
+python scripts/run_all_tests.py
 ```
 
 ### Scripts Locales
@@ -151,20 +168,28 @@ python scripts/test_local_api_real.py
 python scripts/test_auth_methods_local.py
 ```
 
-### 3. Configurar FastMCP Cloud
+### 3. Todos los Tests (Si es necesario)
+```bash
+# Ejecutar todos los tests
+python scripts/run_all_tests.py
+
+# Proporciona diagnóstico exhaustivo
+```
+
+### 4. Configurar FastMCP Cloud
 ```bash
 # Usar la configuración que funcionó en local
 # Configurar variables de entorno en FastMCP Cloud
 # Desplegar el servidor
 ```
 
-### 4. Probar en FastMCP Cloud
+### 5. Probar en FastMCP Cloud
 ```bash
 # Probar la herramienta search_units
 # Verificar que funcione correctamente
 ```
 
-### 5. Diagnóstico en FastMCP Cloud (Si es necesario)
+### 6. Diagnóstico en FastMCP Cloud (Si es necesario)
 ```bash
 # Si el problema persiste en FastMCP Cloud
 python scripts/complete_diagnosis.py
@@ -210,6 +235,7 @@ API Key
 
 Los scripts generan archivos de reporte con timestamp:
 
+- `all_tests_report_YYYYMMDD_HHMMSS.json`
 - `final_diagnosis_report_YYYYMMDD_HHMMSS.json`
 - `complete_local_diagnosis_report_YYYYMMDD_HHMMSS.json`
 - `complete_diagnosis_report_YYYYMMDD_HHMMSS.json`
@@ -285,17 +311,22 @@ python scripts/run_quick_test.py
 python scripts/run_final_diagnosis.py
 ```
 
-### 4. Identificar configuración correcta
+### 4. Si es necesario, ejecutar todos los tests
+```bash
+python scripts/run_all_tests.py
+```
+
+### 5. Identificar configuración correcta
 - Revisar los resultados del diagnóstico
 - Identificar la configuración que funcionó
 - Anotar las variables de entorno correctas
 
-### 5. Configurar FastMCP Cloud
+### 6. Configurar FastMCP Cloud
 - Configurar variables de entorno en FastMCP Cloud
 - Usar la configuración que funcionó en local
 - Desplegar el servidor
 
-### 6. Probar en FastMCP Cloud
+### 7. Probar en FastMCP Cloud
 - Probar la herramienta `search_units`
 - Verificar que funcione correctamente
 - Monitorear el funcionamiento
@@ -311,6 +342,7 @@ python scripts/run_final_diagnosis.py
 - Verifica la configuración del servidor
 - Verifica la preparación para FastMCP Cloud
 - Ejecuta todos los diagnósticos en secuencia
+- Proporciona múltiples niveles de diagnóstico
 
 ### ⚠️ Consideraciones
 - Requiere credenciales reales
@@ -352,6 +384,7 @@ Sigue el flujo de diagnóstico recomendado y deberías poder resolver el problem
 
 - `scripts/run_quick_test.py` - Prueba rápida
 - `scripts/run_final_diagnosis.py` - Diagnóstico final completo
+- `scripts/run_all_tests.py` - Todos los tests
 - `scripts/run_complete_local_diagnosis.py` - Diagnóstico completo local
 - `scripts/run_local_tests.py` - Tests locales básicos
 - `scripts/complete_diagnosis.py` - Diagnóstico completo

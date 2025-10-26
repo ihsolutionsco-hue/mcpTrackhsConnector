@@ -50,7 +50,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuración de la API
-API_BASE_URL = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com")
+API_BASE_URL = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api")
 API_USERNAME = os.getenv("TRACKHS_USERNAME")
 API_PASSWORD = os.getenv("TRACKHS_PASSWORD")
 
@@ -69,14 +69,37 @@ class TrackHSClient:
 
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         """GET request to TrackHS API with error handling"""
-        logger.info(f"GET request to {endpoint} with params: {params}")
+        full_url = f"{self.base_url}/{endpoint}"
+        logger.info(f"GET request to {full_url} with params: {params}")
+        logger.info(f"Base URL: {self.base_url}, Endpoint: {endpoint}")
+        logger.info(f"Auth configured: {self.auth[0] is not None}")
+
         try:
-            response = self.client.get(f"{self.base_url}/{endpoint}", params=params)
+            response = self.client.get(full_url, params=params)
+            logger.info(f"Response status: {response.status_code}")
+            logger.info(f"Response headers: {dict(response.headers)}")
+
+            # Log first 500 chars of response for debugging
+            response_text = response.text
+            logger.info(f"Response preview (first 500 chars): {response_text[:500]}")
+
             response.raise_for_status()
             logger.info(f"GET request successful - Status: {response.status_code}")
             return response.json()
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP Error {e.response.status_code}: {e.response.text}")
+            logger.error(f"Request URL: {full_url}")
+            logger.error(f"Request params: {params}")
+
+            # Check if response is HTML (indicating wrong endpoint)
+            if "text/html" in e.response.headers.get("content-type", ""):
+                logger.error(
+                    "Response is HTML instead of JSON - possible wrong endpoint or authentication issue"
+                )
+                raise NotFoundError(
+                    f"Endpoint no encontrado o problema de autenticación. URL: {full_url}. Respuesta HTML recibida."
+                )
+
             if e.response.status_code == 401:
                 raise AuthenticationError(f"Credenciales inválidas: {e.response.text}")
             elif e.response.status_code == 403:
@@ -104,14 +127,37 @@ class TrackHSClient:
 
     def post(self, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
         """POST request to TrackHS API with error handling"""
-        logger.info(f"POST request to {endpoint} with data: {data}")
+        full_url = f"{self.base_url}/{endpoint}"
+        logger.info(f"POST request to {full_url} with data: {data}")
+        logger.info(f"Base URL: {self.base_url}, Endpoint: {endpoint}")
+        logger.info(f"Auth configured: {self.auth[0] is not None}")
+
         try:
-            response = self.client.post(f"{self.base_url}/{endpoint}", json=data)
+            response = self.client.post(full_url, json=data)
+            logger.info(f"Response status: {response.status_code}")
+            logger.info(f"Response headers: {dict(response.headers)}")
+
+            # Log first 500 chars of response for debugging
+            response_text = response.text
+            logger.info(f"Response preview (first 500 chars): {response_text[:500]}")
+
             response.raise_for_status()
             logger.info(f"POST request successful - Status: {response.status_code}")
             return response.json()
         except httpx.HTTPStatusError as e:
             logger.error(f"HTTP Error {e.response.status_code}: {e.response.text}")
+            logger.error(f"Request URL: {full_url}")
+            logger.error(f"Request data: {data}")
+
+            # Check if response is HTML (indicating wrong endpoint)
+            if "text/html" in e.response.headers.get("content-type", ""):
+                logger.error(
+                    "Response is HTML instead of JSON - possible wrong endpoint or authentication issue"
+                )
+                raise NotFoundError(
+                    f"Endpoint no encontrado o problema de autenticación. URL: {full_url}. Respuesta HTML recibida."
+                )
+
             if e.response.status_code == 401:
                 raise AuthenticationError(f"Credenciales inválidas: {e.response.text}")
             elif e.response.status_code == 404:
@@ -156,7 +202,7 @@ def check_api_client():
         )
 
 
-# Crear servidor MCP
+# Crear servidor MCP con validación estricta
 mcp = FastMCP(
     name="TrackHS API",
     instructions="""Servidor MCP para interactuar con la API de TrackHS.
@@ -169,6 +215,7 @@ mcp = FastMCP(
     - Crear órdenes de trabajo (mantenimiento y housekeeping)
 
     Todas las herramientas incluyen validación robusta y documentación completa.""",
+    strict_input_validation=True,  # ✅ Quick Win #2: Validación estricta habilitada
 )
 
 # Inicializar middleware
@@ -176,8 +223,9 @@ logging_middleware = LoggingMiddleware()
 auth_middleware = AuthenticationMiddleware(api_client)
 metrics_middleware = MetricsMiddleware()
 
-# Nota: FastMCP 2.13 no soporta middleware decorators como FastAPI
-# El middleware se implementa a nivel de aplicación en las funciones de herramientas
+# ✅ Quick Win #1: Habilitar middleware
+# Nota: El middleware se aplica a nivel de función en cada tool
+# FastMCP gestiona el middleware de forma integrada con las herramientas
 
 
 @mcp.tool(output_schema=RESERVATION_SEARCH_OUTPUT_SCHEMA)
@@ -398,6 +446,20 @@ def search_units(
     - search_units(is_active=1, is_bookable=1) # Unidades activas y disponibles
     - search_units(search="penthouse") # Buscar por nombre o descripción
     """
+    # Aplicar middleware de logging
+    logging_middleware.request_count += 1
+    start_time = time.time()
+
+    logger.info(
+        f"Buscando unidades con parámetros: page={page}, size={size}, search={search}, bedrooms={bedrooms}, bathrooms={bathrooms}, is_active={is_active}, is_bookable={is_bookable}"
+    )
+
+    # Aplicar middleware de autenticación
+    if api_client is None:
+        raise AuthenticationError(
+            "Cliente API no está disponible. Verifique las credenciales TRACKHS_USERNAME y TRACKHS_PASSWORD."
+        )
+
     params = {"page": page, "size": size}
     if search:
         params["search"] = search
@@ -410,8 +472,31 @@ def search_units(
     if is_bookable is not None:
         params["is_bookable"] = int(is_bookable)
 
-    check_api_client()
-    return api_client.get("pms/units", params)
+    try:
+        result = api_client.get("pms/units", params)
+
+        # Aplicar middleware de métricas
+        duration = time.time() - start_time
+        metrics_middleware.metrics["successful_requests"] += 1
+        metrics_middleware.response_times.append(duration)
+        metrics_middleware.metrics["average_response_time"] = sum(
+            metrics_middleware.response_times
+        ) / len(metrics_middleware.response_times)
+
+        logger.info(
+            f"Búsqueda de unidades exitosa - {result.get('total_items', 0)} unidades encontradas en {duration:.2f}s"
+        )
+        return result
+    except Exception as e:
+        # Aplicar middleware de métricas para errores
+        metrics_middleware.metrics["failed_requests"] += 1
+        metrics_middleware.metrics["error_rate"] = (
+            metrics_middleware.metrics["failed_requests"]
+            / metrics_middleware.metrics["total_requests"]
+        ) * 100
+
+        logger.error(f"Error en búsqueda de unidades: {str(e)}")
+        raise
 
 
 @mcp.tool(output_schema=AMENITIES_OUTPUT_SCHEMA)
