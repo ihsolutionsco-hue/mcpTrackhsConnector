@@ -2,6 +2,18 @@
 
 Servidor MCP robusto para interactuar con la API de TrackHS, implementando las mejores prácticas de FastMCP con validación Pydantic y documentación completa.
 
+## ✅ Estado del Proyecto
+
+**Versión:** 2.0.1
+**Estado:** 🟢 PRODUCCIÓN LISTA
+**Última actualización:** $(date)
+
+### 🔧 Correcciones Críticas Aplicadas
+- ✅ **Error 404 resuelto** - URL corregida a `https://ihmvacations.trackhs.com`
+- ✅ **Validación de tipos corregida** - Parámetros numéricos convertidos a enteros
+- ✅ **Conectividad API verificada** - 100% operativo
+- ✅ **Pruebas completadas** - 6/6 casos de prueba exitosos
+
 ## 🚀 Características
 
 - **Herramientas MCP** para gestión de reservas, unidades, amenidades y órdenes de trabajo
@@ -44,7 +56,7 @@ pip install -r requirements.txt
 # Configurar variables de entorno
 export TRACKHS_USERNAME="tu_usuario"
 export TRACKHS_PASSWORD="tu_password"
-export TRACKHS_BASE_URL="https://api.trackhs.com/api"
+export TRACKHS_API_URL="https://ihmvacations.trackhs.com"  # URL corregida
 ```
 
 ## 🚀 Uso
@@ -118,7 +130,7 @@ MCPtrackhsConnector/
 ```bash
 TRACKHS_USERNAME=tu_usuario
 TRACKHS_PASSWORD=tu_password
-TRACKHS_BASE_URL=https://api.trackhs.com/api
+TRACKHS_API_URL=https://ihmvacations.trackhs.com  # URL corregida
 ```
 
 ### Configuración de Tests

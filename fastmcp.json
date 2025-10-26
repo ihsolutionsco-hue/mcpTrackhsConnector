@@ -41,7 +41,7 @@
       "TRACKHS_PASSWORD"
     ],
     "optional": [
-      "TRACKHS_BASE_URL"
+      "TRACKHS_API_URL"
     ]
   }
 }

@@ -50,7 +50,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Configuración de la API
-API_BASE_URL = os.getenv("TRACKHS_API_URL", "https://api.trackhs.com/api")
+API_BASE_URL = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com")
 API_USERNAME = os.getenv("TRACKHS_USERNAME")
 API_PASSWORD = os.getenv("TRACKHS_PASSWORD")
 
@@ -402,13 +402,13 @@ def search_units(
     if search:
         params["search"] = search
     if bedrooms is not None:
-        params["bedrooms"] = bedrooms
+        params["bedrooms"] = int(bedrooms)
     if bathrooms is not None:
-        params["bathrooms"] = bathrooms
+        params["bathrooms"] = int(bathrooms)
     if is_active is not None:
-        params["is_active"] = is_active
+        params["is_active"] = int(is_active)
     if is_bookable is not None:
-        params["is_bookable"] = is_bookable
+        params["is_bookable"] = int(is_bookable)
 
     check_api_client()
     return api_client.get("pms/units", params)
