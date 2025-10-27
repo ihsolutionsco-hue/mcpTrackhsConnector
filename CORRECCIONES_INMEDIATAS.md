@@ -799,3 +799,5 @@ Solo si fallan. En caso de éxito, no hay diferencia. En caso de fallo transitor
 
 Para dudas o problemas durante la implementación, consulta la auditoría completa en `AUDITORIA_MCP_PROTOCOLO.md`.
 
+
+

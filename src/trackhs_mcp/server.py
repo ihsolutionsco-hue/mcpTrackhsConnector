@@ -3,15 +3,19 @@ TrackHS MCP Server - Mejores Prácticas FastMCP
 Servidor MCP robusto con validación Pydantic y documentación completa para LLM
 """
 
+import json
 import logging
 import os
+import sys
 import time
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, Dict, Literal, Optional
 
 import httpx
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+from fastmcp.exceptions import ToolError
 from pydantic import Field
 from typing_extensions import Annotated
 
@@ -23,11 +27,7 @@ from .exceptions import (
     TrackHSError,
     ValidationError,
 )
-from .middleware import (
-    AuthenticationMiddleware,
-    LoggingMiddleware,
-    MetricsMiddleware,
-)
+from .middleware import TrackHSMiddleware
 from .schemas import (
     AMENITIES_OUTPUT_SCHEMA,
     FOLIO_OUTPUT_SCHEMA,
@@ -138,71 +138,9 @@ def sanitize_for_log(data: Any, max_depth: int = 10) -> Any:
         return data
 
 
-# Configuración de reintentos
-MAX_RETRIES = 3
-RETRY_DELAY_BASE = 1.0  # segundos
-RETRY_BACKOFF_FACTOR = 2.0
-
-
-def retry_with_backoff(
-    func, max_retries: int = MAX_RETRIES, base_delay: float = RETRY_DELAY_BASE
-):
-    """
-    Ejecuta una función con reintentos automáticos y exponential backoff.
-
-    Reintenta automáticamente en caso de errores de red o errores temporales
-    del servidor (429, 500, 502, 503, 504).
-
-    Args:
-        func: Función a ejecutar
-        max_retries: Número máximo de reintentos
-        base_delay: Delay base en segundos (se duplica en cada reintento)
-
-    Returns:
-        Resultado de la función si tiene éxito
-
-    Raises:
-        La última excepción si todos los reintentos fallan
-    """
-    last_exception = None
-
-    for attempt in range(max_retries + 1):
-        try:
-            return func()
-        except httpx.RequestError as e:
-            # Errores de red (timeout, connection error, etc.)
-            last_exception = e
-            if attempt < max_retries:
-                delay = base_delay * (RETRY_BACKOFF_FACTOR**attempt)
-                logger.warning(
-                    f"Request error on attempt {attempt + 1}/{max_retries + 1}: {str(e)}"
-                )
-                logger.info(f"Retrying in {delay:.1f} seconds...")
-                time.sleep(delay)
-            else:
-                logger.error(f"All {max_retries + 1} attempts failed")
-                raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
-
-        except httpx.HTTPStatusError as e:
-            # Errores HTTP que ameritan reintento (temporales)
-            status_code = e.response.status_code
-            retryable_codes = {429, 500, 502, 503, 504}
-
-            if status_code in retryable_codes and attempt < max_retries:
-                last_exception = e
-                delay = base_delay * (RETRY_BACKOFF_FACTOR**attempt)
-                logger.warning(
-                    f"HTTP {status_code} on attempt {attempt + 1}/{max_retries + 1}"
-                )
-                logger.info(f"Retrying in {delay:.1f} seconds...")
-                time.sleep(delay)
-            else:
-                # Error no retryable o ya agotamos reintentos
-                raise
-
-    # Si llegamos aquí, todos los reintentos fallaron
-    if last_exception:
-        raise last_exception
+# ✅ ELIMINADO: retry_with_backoff()
+# FastMCP RetryMiddleware maneja reintentos automáticamente con backoff exponencial
+# No se necesita reimplementar esta funcionalidad
 
 
 # Función helper para validación de respuestas
@@ -243,138 +181,116 @@ class TrackHSClient:
         logger.info(f"TrackHSClient inicializado para {base_url}")
 
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
-        """GET request to TrackHS API with error handling and automatic retries"""
+        """
+        GET request to TrackHS API with error handling.
+
+        Reintentos automáticos manejados por FastMCP RetryMiddleware.
+        """
         full_url = f"{self.base_url}/{endpoint}"
-        # Sanitizar params antes de loguear
         sanitized_params = sanitize_for_log(params)
-        logger.info(f"GET request to {full_url} with params: {sanitized_params}")
+        logger.debug(f"GET request to {full_url} with params: {sanitized_params}")
 
-        def _execute_request():
-            """Función interna para ejecutar el request (usada por retry_with_backoff)"""
-            try:
-                response = self.client.get(full_url, params=params)
-                logger.info(f"Response status: {response.status_code}")
-                # No loguear headers completos (pueden contener tokens)
-                logger.info(
-                    f"Response content-type: {response.headers.get('content-type', 'unknown')}"
+        try:
+            response = self.client.get(full_url, params=params)
+            logger.debug(f"Response status: {response.status_code}")
+
+            response.raise_for_status()
+
+            # Parsear respuesta
+            response_data = response.json()
+            sanitized_response = sanitize_for_log(response_data)
+            logger.debug(f"Response preview: {str(sanitized_response)[:300]}")
+
+            return response_data
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP Error {e.response.status_code} - {full_url}")
+
+            # Check if response is HTML
+            if "text/html" in e.response.headers.get("content-type", ""):
+                raise NotFoundError(
+                    f"Endpoint no encontrado: {full_url} (respuesta HTML)"
                 )
 
-                response.raise_for_status()
-
-                # Parsear respuesta y sanitizar para log
-                response_data = response.json()
-                sanitized_response = sanitize_for_log(response_data)
-                logger.info(
-                    f"Response preview (sanitized): {str(sanitized_response)[:500]}"
+            # Mapear status codes a excepciones específicas
+            if e.response.status_code == 401:
+                raise AuthenticationError(f"Credenciales inválidas: {e.response.text}")
+            elif e.response.status_code == 403:
+                raise AuthenticationError(f"Acceso denegado: {e.response.text}")
+            elif e.response.status_code == 404:
+                raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
+            elif e.response.status_code == 422:
+                raise ValidationError(f"Error de validación: {e.response.text}")
+            elif e.response.status_code >= 500:
+                # RetryMiddleware reintentará estos errores automáticamente
+                raise APIError(f"Error del servidor TrackHS: {e.response.status_code}")
+            else:
+                raise APIError(
+                    f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
                 )
 
-                logger.info(f"GET request successful - Status: {response.status_code}")
-                return response_data
+        except httpx.RequestError as e:
+            # RetryMiddleware reintentará estos errores automáticamente
+            logger.error(f"Request error: {str(e)}")
+            raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
 
-            except httpx.HTTPStatusError as e:
-                # Sanitizar respuesta de error (puede contener datos sensibles)
-                logger.error(f"HTTP Error {e.response.status_code}")
-                logger.error(f"Request URL: {full_url}")
-
-                # Check if response is HTML (indicating wrong endpoint)
-                if "text/html" in e.response.headers.get("content-type", ""):
-                    logger.error(
-                        "Response is HTML instead of JSON - possible wrong endpoint or authentication issue"
-                    )
-                    raise NotFoundError(
-                        f"Endpoint no encontrado o problema de autenticación. URL: {full_url}. Respuesta HTML recibida."
-                    )
-
-                if e.response.status_code == 401:
-                    raise AuthenticationError(
-                        f"Credenciales inválidas: {e.response.text}"
-                    )
-                elif e.response.status_code == 403:
-                    raise AuthenticationError(f"Acceso denegado: {e.response.text}")
-                elif e.response.status_code == 404:
-                    raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
-                elif e.response.status_code == 422:
-                    raise ValidationError(f"Error de validación: {e.response.text}")
-                elif e.response.status_code == 429:
-                    raise APIError(f"Límite de velocidad excedido: {e.response.text}")
-                elif e.response.status_code >= 500:
-                    raise APIError(
-                        f"Error interno del servidor TrackHS: {e.response.status_code} - {e.response.text}"
-                    )
-                else:
-                    raise APIError(
-                        f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
-                    )
-
-            except Exception as e:
-                logger.error(f"Unexpected error in GET request: {str(e)}")
-                raise TrackHSError(f"Error inesperado: {str(e)}")
-
-        # Ejecutar con reintentos automáticos
-        return retry_with_backoff(_execute_request)
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            raise TrackHSError(f"Error inesperado: {str(e)}")
 
     def post(self, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
-        """POST request to TrackHS API with error handling and automatic retries"""
+        """
+        POST request to TrackHS API with error handling.
+
+        Reintentos automáticos manejados por FastMCP RetryMiddleware.
+        """
         full_url = f"{self.base_url}/{endpoint}"
-        # Sanitizar data antes de loguear
         sanitized_data = sanitize_for_log(data)
-        logger.info(f"POST request to {full_url} with data: {sanitized_data}")
+        logger.debug(f"POST request to {full_url} with data: {sanitized_data}")
 
-        def _execute_request():
-            """Función interna para ejecutar el request (usada por retry_with_backoff)"""
-            try:
-                response = self.client.post(full_url, json=data)
-                logger.info(f"Response status: {response.status_code}")
-                # No loguear headers completos (pueden contener tokens)
-                logger.info(
-                    f"Response content-type: {response.headers.get('content-type', 'unknown')}"
+        try:
+            response = self.client.post(full_url, json=data)
+            logger.debug(f"Response status: {response.status_code}")
+
+            response.raise_for_status()
+
+            # Parsear respuesta
+            response_data = response.json()
+            sanitized_response = sanitize_for_log(response_data)
+            logger.debug(f"Response preview: {str(sanitized_response)[:300]}")
+
+            return response_data
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"HTTP Error {e.response.status_code} - {full_url}")
+
+            # Check if response is HTML
+            if "text/html" in e.response.headers.get("content-type", ""):
+                raise NotFoundError(
+                    f"Endpoint no encontrado: {full_url} (respuesta HTML)"
                 )
 
-                response.raise_for_status()
-
-                # Parsear respuesta y sanitizar para log
-                response_data = response.json()
-                sanitized_response = sanitize_for_log(response_data)
-                logger.info(
-                    f"Response preview (sanitized): {str(sanitized_response)[:500]}"
+            # Mapear status codes a excepciones específicas
+            if e.response.status_code == 401:
+                raise AuthenticationError(f"Credenciales inválidas: {e.response.text}")
+            elif e.response.status_code == 404:
+                raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
+            elif e.response.status_code >= 500:
+                # RetryMiddleware reintentará estos errores automáticamente
+                raise APIError(f"Error del servidor TrackHS: {e.response.status_code}")
+            else:
+                raise APIError(
+                    f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
                 )
 
-                logger.info(f"POST request successful - Status: {response.status_code}")
-                return response_data
+        except httpx.RequestError as e:
+            # RetryMiddleware reintentará estos errores automáticamente
+            logger.error(f"Request error: {str(e)}")
+            raise ConnectionError(f"Error de conexión con TrackHS: {str(e)}")
 
-            except httpx.HTTPStatusError as e:
-                # Sanitizar respuesta de error (puede contener datos sensibles)
-                logger.error(f"HTTP Error {e.response.status_code}")
-                logger.error(f"Request URL: {full_url}")
-
-                # Check if response is HTML (indicating wrong endpoint)
-                if "text/html" in e.response.headers.get("content-type", ""):
-                    logger.error(
-                        "Response is HTML instead of JSON - possible wrong endpoint or authentication issue"
-                    )
-                    raise NotFoundError(
-                        f"Endpoint no encontrado o problema de autenticación. URL: {full_url}. Respuesta HTML recibida."
-                    )
-
-                if e.response.status_code == 401:
-                    raise AuthenticationError(
-                        f"Credenciales inválidas: {e.response.text}"
-                    )
-                elif e.response.status_code == 404:
-                    raise NotFoundError(f"Recurso no encontrado: {e.response.text}")
-                elif e.response.status_code == 429:
-                    raise APIError(f"Límite de velocidad excedido: {e.response.text}")
-                else:
-                    raise APIError(
-                        f"Error de API TrackHS: {e.response.status_code} - {e.response.text}"
-                    )
-
-            except Exception as e:
-                logger.error(f"Unexpected error in POST request: {str(e)}")
-                raise TrackHSError(f"Error inesperado: {str(e)}")
-
-        # Ejecutar con reintentos automáticos
-        return retry_with_backoff(_execute_request)
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            raise TrackHSError(f"Error inesperado: {str(e)}")
 
 
 # Inicializar cliente API con manejo robusto para FastMCP Cloud
@@ -403,7 +319,57 @@ def check_api_client():
         )
 
 
-# Crear servidor MCP con validación estricta
+# Server Lifespan para inicialización y limpieza ordenada
+@asynccontextmanager
+async def lifespan(server):
+    """
+    Maneja el ciclo de vida del servidor MCP.
+    Se ejecuta una vez al inicio y al final del servidor.
+
+    FastMCP 2.13+ feature: Server Lifespans
+    """
+    # ✅ INICIALIZACIÓN
+    logger.info("=" * 60)
+    logger.info("🚀 TrackHS MCP Server iniciando...")
+    logger.info("=" * 60)
+    logger.info(f"📍 Base URL: {API_BASE_URL}")
+    logger.info(f"👤 Username: {API_USERNAME if API_USERNAME else 'No configurado'}")
+
+    # Verificar conexión API al inicio
+    if api_client:
+        try:
+            start = time.time()
+            api_client.get("pms/units/amenities", {"page": 1, "size": 1})
+            duration = time.time() - start
+            logger.info(f"✅ API TrackHS conectada ({duration:.2f}s)")
+        except Exception as e:
+            logger.error(f"❌ API TrackHS no disponible: {e}")
+            logger.warning(
+                "⚠️  El servidor iniciará pero las herramientas fallarán sin conectividad"
+            )
+    else:
+        logger.warning("⚠️  Credenciales no configuradas")
+        logger.warning("   Configure TRACKHS_USERNAME y TRACKHS_PASSWORD")
+
+    logger.info("✅ Servidor listo para recibir requests")
+    logger.info("=" * 60)
+
+    yield  # ✅ Servidor corriendo
+
+    # ✅ LIMPIEZA
+    logger.info("=" * 60)
+    logger.info("🛑 TrackHS MCP Server cerrando...")
+    if api_client and hasattr(api_client, "client"):
+        try:
+            api_client.client.close()
+            logger.info("✅ Conexiones HTTP cerradas correctamente")
+        except Exception as e:
+            logger.warning(f"⚠️  Error cerrando conexiones: {e}")
+    logger.info("👋 Servidor cerrado")
+    logger.info("=" * 60)
+
+
+# Crear servidor MCP con validación estricta y características de FastMCP 2.13
 mcp = FastMCP(
     name="TrackHS API",
     instructions="""Servidor MCP para interactuar con la API de TrackHS.
@@ -416,17 +382,51 @@ mcp = FastMCP(
     - Crear órdenes de trabajo (mantenimiento y housekeeping)
 
     Todas las herramientas incluyen validación robusta y documentación completa.""",
-    strict_input_validation=True,  # ✅ Quick Win #2: Validación estricta habilitada
+    strict_input_validation=True,  # ✅ Validación estricta Pydantic
+    mask_error_details=True,  # ✅ Seguridad: ocultar errores internos en producción
+    lifespan=lifespan,  # ✅ FastMCP 2.13: Server Lifespan
 )
 
-# Inicializar middleware
-logging_middleware = LoggingMiddleware()
-auth_middleware = AuthenticationMiddleware(api_client)
-metrics_middleware = MetricsMiddleware()
+# ✅ Registrar middleware nativo de FastMCP 2.9+
+try:
+    from fastmcp.server.middleware.error_handling import (
+        ErrorHandlingMiddleware,
+        RetryMiddleware,
+    )
 
-# ✅ Quick Win #1: Habilitar middleware
-# Nota: El middleware se aplica a nivel de función en cada tool
-# FastMCP gestiona el middleware de forma integrada con las herramientas
+    # Error handling con traceback para debugging
+    mcp.add_middleware(
+        ErrorHandlingMiddleware(
+            include_traceback=True,
+            transform_errors=True,
+        )
+    )
+    logger.info("✅ ErrorHandlingMiddleware registrado")
+
+    # Reintentos automáticos con backoff exponencial (built-in)
+    mcp.add_middleware(
+        RetryMiddleware(
+            max_retries=3,
+            retry_exceptions=(httpx.RequestError, httpx.HTTPStatusError),
+        )
+    )
+    logger.info("✅ RetryMiddleware registrado (max_retries=3)")
+
+except ImportError as e:
+    logger.warning(f"⚠️  Middleware nativo de FastMCP no disponible: {e}")
+    logger.warning("   Continuando sin ErrorHandlingMiddleware y RetryMiddleware")
+
+# ✅ Middleware personalizado unificado (logging + auth + métricas)
+trackhs_middleware = TrackHSMiddleware(
+    api_client=api_client,
+    auth_cache_ttl=300,  # 5 minutos de cache para autenticación
+)
+mcp.add_middleware(trackhs_middleware)
+logger.info("✅ TrackHSMiddleware registrado (logging + auth + metrics)")
+
+logger.info("=" * 60)
+logger.info("✅ Todos los middleware registrados correctamente")
+logger.info("=" * 60)
 
 
 @mcp.tool(output_schema=RESERVATION_SEARCH_OUTPUT_SCHEMA)
@@ -493,20 +493,9 @@ def search_reservations(
     - search_reservations(status="confirmed", size=50) # Reservas confirmadas, 50 por página
     - search_reservations(search="john@email.com") # Buscar por email del huésped
     """
-    # Aplicar middleware de logging
-    logging_middleware.request_count += 1
-    start_time = time.time()
+    # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
 
-    logger.info(
-        f"Buscando reservas con parámetros: page={page}, size={size}, search={search}, arrival_start={arrival_start}, arrival_end={arrival_end}, status={status}"
-    )
-
-    # Aplicar middleware de autenticación
-    if api_client is None:
-        raise AuthenticationError(
-            "Cliente API no está disponible. Verifique las credenciales TRACKHS_USERNAME y TRACKHS_PASSWORD."
-        )
-
+    # Construir parámetros de búsqueda
     params = {"page": page, "size": size}
     if search:
         params["search"] = search
@@ -517,31 +506,10 @@ def search_reservations(
     if status:
         params["status"] = status
 
-    try:
-        result = api_client.get("pms/reservations", params)
+    # Llamar a la API - middleware maneja todo automáticamente
+    result = api_client.get("pms/reservations", params)
 
-        # Aplicar middleware de métricas
-        duration = time.time() - start_time
-        metrics_middleware.metrics["successful_requests"] += 1
-        metrics_middleware.response_times.append(duration)
-        metrics_middleware.metrics["average_response_time"] = sum(
-            metrics_middleware.response_times
-        ) / len(metrics_middleware.response_times)
-
-        logger.info(
-            f"Búsqueda de reservas exitosa - {result.get('total_items', 0)} reservas encontradas en {duration:.2f}s"
-        )
-        return result
-    except Exception as e:
-        # Aplicar middleware de métricas para errores
-        metrics_middleware.metrics["failed_requests"] += 1
-        metrics_middleware.metrics["error_rate"] = (
-            metrics_middleware.metrics["failed_requests"]
-            / metrics_middleware.metrics["total_requests"]
-        ) * 100
-
-        logger.error(f"Error en búsqueda de reservas: {str(e)}")
-        raise
+    return result
 
 
 @mcp.tool(output_schema=RESERVATION_DETAIL_OUTPUT_SCHEMA)
@@ -572,8 +540,6 @@ def get_reservation(
     Ejemplo de uso:
     - get_reservation(reservation_id=12345) # Obtener detalles de reserva ID 12345
     """
-    logger.info(f"Obteniendo detalles de reserva ID: {reservation_id}")
-
     try:
         check_api_client()
         result = api_client.get(f"pms/reservations/{reservation_id}")
@@ -581,9 +547,23 @@ def get_reservation(
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, ReservationResponse, strict=False)
 
-        logger.info(f"Detalles de reserva {reservation_id} obtenidos exitosamente")
         return validated_result
+
+    except NotFoundError:
+        # ✅ ToolError: Mensaje claro para el cliente (siempre se muestra)
+        raise ToolError(
+            f"Reserva {reservation_id} no encontrada en TrackHS. "
+            f"Verifique el ID e intente nuevamente."
+        )
+    except AuthenticationError as e:
+        # ✅ ToolError para errores resolubles por el usuario
+        raise ToolError(
+            f"Error de autenticación: {str(e)}. "
+            f"Contacte al administrador del sistema."
+        )
     except Exception as e:
+        # ⚠️ Exception genérica: detalles ocultos con mask_error_details=True
+        # El cliente solo verá: "Error interno del servidor"
         logger.error(f"Error obteniendo reserva {reservation_id}: {str(e)}")
         raise
 
@@ -651,20 +631,9 @@ def search_units(
     - search_units(is_active=1, is_bookable=1) # Unidades activas y disponibles
     - search_units(search="penthouse") # Buscar por nombre o descripción
     """
-    # Aplicar middleware de logging
-    logging_middleware.request_count += 1
-    start_time = time.time()
+    # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
 
-    logger.info(
-        f"Buscando unidades con parámetros: page={page}, size={size}, search={search}, bedrooms={bedrooms}, bathrooms={bathrooms}, is_active={is_active}, is_bookable={is_bookable}"
-    )
-
-    # Aplicar middleware de autenticación
-    if api_client is None:
-        raise AuthenticationError(
-            "Cliente API no está disponible. Verifique las credenciales TRACKHS_USERNAME y TRACKHS_PASSWORD."
-        )
-
+    # Construir parámetros de búsqueda
     params = {"page": page, "size": size}
     if search:
         params["search"] = search
@@ -677,31 +646,10 @@ def search_units(
     if is_bookable is not None:
         params["is_bookable"] = int(is_bookable)
 
-    try:
-        result = api_client.get("pms/units", params)
+    # Llamar a la API - middleware maneja todo automáticamente
+    result = api_client.get("pms/units", params)
 
-        # Aplicar middleware de métricas
-        duration = time.time() - start_time
-        metrics_middleware.metrics["successful_requests"] += 1
-        metrics_middleware.response_times.append(duration)
-        metrics_middleware.metrics["average_response_time"] = sum(
-            metrics_middleware.response_times
-        ) / len(metrics_middleware.response_times)
-
-        logger.info(
-            f"Búsqueda de unidades exitosa - {result.get('total_items', 0)} unidades encontradas en {duration:.2f}s"
-        )
-        return result
-    except Exception as e:
-        # Aplicar middleware de métricas para errores
-        metrics_middleware.metrics["failed_requests"] += 1
-        metrics_middleware.metrics["error_rate"] = (
-            metrics_middleware.metrics["failed_requests"]
-            / metrics_middleware.metrics["total_requests"]
-        ) * 100
-
-        logger.error(f"Error en búsqueda de unidades: {str(e)}")
-        raise
+    return result
 
 
 @mcp.tool(output_schema=AMENITIES_OUTPUT_SCHEMA)
@@ -781,8 +729,6 @@ def get_folio(
     Ejemplo de uso:
     - get_folio(reservation_id=12345) # Obtener folio financiero de reserva 12345
     """
-    logger.info(f"Obteniendo folio de reserva ID: {reservation_id}")
-
     try:
         check_api_client()
         result = api_client.get(f"pms/reservations/{reservation_id}/folio")
@@ -790,8 +736,16 @@ def get_folio(
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, FolioResponse, strict=False)
 
-        logger.info(f"Folio de reserva {reservation_id} obtenido exitosamente")
         return validated_result
+
+    except NotFoundError:
+        # ✅ ToolError: Mensaje claro para el cliente
+        raise ToolError(
+            f"Folio para reserva {reservation_id} no encontrado. "
+            f"Verifique que la reserva existe."
+        )
+    except AuthenticationError as e:
+        raise ToolError(f"Error de autenticación: {str(e)}")
     except Exception as e:
         logger.error(f"Error obteniendo folio de reserva {reservation_id}: {str(e)}")
         raise
@@ -1006,33 +960,52 @@ def create_housekeeping_work_order(
         raise
 
 
-# Health check endpoint
+# Health check endpoint con métricas dinámicas
 @mcp.resource("https://trackhs-mcp.local/health")
-def health_check():
+def health_check() -> str:
     """
     Health check endpoint para monitoreo del servidor.
 
-    Retorna el estado del servidor y sus dependencias.
+    Retorna estado del servidor, dependencias, métricas y versiones.
+
+    Returns:
+        JSON string con información completa del estado del servidor
     """
     try:
         # Verificar conexión con API TrackHS
         api_status = "healthy"
         api_response_time = None
 
-        try:
-            import time
+        if api_client:
+            try:
+                start_time = time.time()
+                api_client.get("pms/units/amenities", {"page": 1, "size": 1})
+                api_response_time = round((time.time() - start_time) * 1000, 2)
+            except Exception as e:
+                api_status = "unhealthy"
+                logger.warning(f"API TrackHS no disponible: {str(e)}")
+        else:
+            api_status = "not_configured"
 
-            start_time = time.time()
-            # Hacer una petición simple para verificar conectividad
-            check_api_client()
-            api_client.get("pms/units/amenities", {"page": 1, "size": 1})
-            api_response_time = round((time.time() - start_time) * 1000, 2)  # ms
-        except Exception as e:
-            api_status = "unhealthy"
-            logger.warning(f"API TrackHS no disponible: {str(e)}")
+        # Obtener métricas del middleware
+        middleware_metrics = (
+            trackhs_middleware.get_metrics()
+            if trackhs_middleware
+            else {"note": "Middleware metrics not available"}
+        )
+
+        # Obtener versión de FastMCP dinámicamente
+        try:
+            import fastmcp
+
+            fastmcp_version = fastmcp.__version__
+        except Exception:
+            fastmcp_version = "2.13.0"  # fallback
 
         health_data = {
-            "status": "healthy" if api_status == "healthy" else "degraded",
+            "status": (
+                "healthy" if api_status in ["healthy", "not_configured"] else "degraded"
+            ),
             "timestamp": datetime.now().isoformat(),
             "version": "2.0.0",
             "dependencies": {
@@ -1040,25 +1013,31 @@ def health_check():
                     "status": api_status,
                     "response_time_ms": api_response_time,
                     "base_url": API_BASE_URL,
+                    "credentials_configured": API_USERNAME is not None
+                    and API_PASSWORD is not None,
                 }
             },
-            "uptime": "N/A",  # Se puede implementar con time.time() al inicio
+            "metrics": middleware_metrics,
             "environment": {
-                "python_version": os.sys.version,
-                "fastmcp_version": "2.12.5",
+                "python_version": sys.version,
+                "fastmcp_version": fastmcp_version,
+                "platform": sys.platform,
             },
         }
 
-        logger.info(f"Health check: {health_data['status']}")
-        return health_data
+        logger.debug(f"Health check: {health_data['status']}")
+
+        # ✅ Retornar JSON string
+        return json.dumps(health_data, indent=2)
 
     except Exception as e:
         logger.error(f"Error en health check: {str(e)}")
-        return {
+        error_data = {
             "status": "unhealthy",
             "timestamp": datetime.now().isoformat(),
             "error": str(e),
         }
+        return json.dumps(error_data, indent=2)
 
 
 # Configuración HTTP manejada por FastMCP Cloud
