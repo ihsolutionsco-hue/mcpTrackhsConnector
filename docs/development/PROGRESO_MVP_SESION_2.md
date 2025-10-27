@@ -283,7 +283,7 @@ Total: ~617 líneas de tests
 
 ---
 
-_Completado: 26 de Octubre, 2025_  
-_Próxima sesión: Tests get_folio y create_maintenance_wo_  
+_Completado: 26 de Octubre, 2025_
+_Próxima sesión: Tests get_folio y create_maintenance_wo_
 _Status: ✅ Sprint 1 avanzando bien_
 

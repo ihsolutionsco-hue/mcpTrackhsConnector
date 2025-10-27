@@ -25,7 +25,7 @@ Crear tests unitarios para las **5 herramientas core** del servidor MCP TrackHS.
 | `create_maintenance_wo` | 8 | 2 | 10 | ✅ 100% |
 | **TOTAL** | **32** | **15** | **47** | **✅** |
 
-**Tests pasando:** 32/32 unitarios (100%)  
+**Tests pasando:** 32/32 unitarios (100%)
 **Tests skipped:** 15 integración (requieren API)
 
 ---
@@ -305,8 +305,8 @@ Total Fase 2: ~12-15 horas
 
 ---
 
-_Completado: 26 de Octubre, 2025_  
-_Duración Sprint 1: ~6 horas efectivas_  
-_Próximo Sprint: Fase 2 - Seguridad_  
+_Completado: 26 de Octubre, 2025_
+_Duración Sprint 1: ~6 horas efectivas_
+_Próximo Sprint: Fase 2 - Seguridad_
 _Status: ✅ COMPLETADO Y APROBADO_
 
