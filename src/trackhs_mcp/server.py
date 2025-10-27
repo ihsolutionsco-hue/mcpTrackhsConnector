@@ -18,6 +18,7 @@ from fastmcp.exceptions import ToolError
 from pydantic import Field
 from typing_extensions import Annotated
 
+from .cache import get_cache
 from .config import get_settings, validate_configuration
 from .exceptions import (
     APIError,
@@ -27,6 +28,7 @@ from .exceptions import (
     TrackHSError,
     ValidationError,
 )
+from .metrics import get_metrics
 from .middleware_native import (
     TrackHSAuthMiddleware,
     TrackHSLoggingMiddleware,
@@ -38,8 +40,6 @@ from .repositories import (
     UnitRepository,
     WorkOrderRepository,
 )
-from .cache import get_cache
-from .metrics import get_metrics
 from .schemas import (
     AMENITIES_OUTPUT_SCHEMA,
     FOLIO_OUTPUT_SCHEMA,
@@ -53,6 +53,11 @@ from .schemas import (
     UnitResponse,
     WorkOrderPriority,
     WorkOrderResponse,
+)
+from .services import (
+    ReservationService,
+    UnitService,
+    WorkOrderService,
 )
 
 # Obtener configuración centralizada
@@ -162,7 +167,9 @@ def sanitize_for_log(data: Any, max_depth: int = 10) -> Any:
 
 
 # Función helper para validación de respuestas
-def validate_response(data: Dict[str, Any], model_class: type, strict: Optional[bool] = None):
+def validate_response(
+    data: Dict[str, Any], model_class: type, strict: Optional[bool] = None
+):
     """
     Valida datos de respuesta contra un modelo Pydantic.
 
@@ -199,11 +206,10 @@ class TrackHSClient:
     def __init__(self, base_url: str, username: str, password: str):
         self.base_url = base_url
         self.auth = (username, password)
-        self.client = httpx.Client(
-            auth=self.auth,
-            timeout=settings.request_timeout
+        self.client = httpx.Client(auth=self.auth, timeout=settings.request_timeout)
+        logger.info(
+            f"TrackHSClient inicializado para {base_url} (timeout: {settings.request_timeout}s)"
         )
-        logger.info(f"TrackHSClient inicializado para {base_url} (timeout: {settings.request_timeout}s)")
 
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         """
@@ -335,10 +341,20 @@ try:
         logger.info("Cliente API TrackHS inicializado correctamente")
 
         # Inicializar repositories
-        reservation_repo = ReservationRepository(api_client, cache_ttl=settings.auth_cache_ttl)
+        reservation_repo = ReservationRepository(
+            api_client, cache_ttl=settings.auth_cache_ttl
+        )
         unit_repo = UnitRepository(api_client, cache_ttl=settings.auth_cache_ttl)
-        work_order_repo = WorkOrderRepository(api_client, cache_ttl=settings.auth_cache_ttl)
+        work_order_repo = WorkOrderRepository(
+            api_client, cache_ttl=settings.auth_cache_ttl
+        )
         logger.info("Repositories inicializados correctamente")
+
+        # Inicializar servicios de negocio
+        reservation_service = ReservationService(reservation_repo)
+        unit_service = UnitService(unit_repo)
+        work_order_service = WorkOrderService(work_order_repo)
+        logger.info("Servicios de negocio inicializados correctamente")
 
 except Exception as e:
     logger.error(f"Error inicializando cliente API: {e}")
@@ -347,6 +363,9 @@ except Exception as e:
     reservation_repo = None
     unit_repo = None
     work_order_repo = None
+    reservation_service = None
+    unit_service = None
+    work_order_service = None
 
 
 # Función helper para verificar cliente API
@@ -474,8 +493,7 @@ logger.info("✅ TrackHSMetricsMiddleware registrado")
 # 4. Rate limiting middleware (opcional)
 if settings.metrics_enabled:
     rate_limit_middleware = TrackHSRateLimitMiddleware(
-        requests_per_minute=60,
-        burst_size=10
+        requests_per_minute=60, burst_size=10
     )
     mcp.add_middleware(rate_limit_middleware)
     logger.info("✅ TrackHSRateLimitMiddleware registrado")
@@ -551,23 +569,21 @@ def search_reservations(
     """
     # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
 
-    # Verificar que el repository esté disponible
-    if reservation_repo is None:
-        raise AuthenticationError("Repository de reservas no disponible. Verifique las credenciales.")
+    # Verificar que el servicio esté disponible
+    if reservation_service is None:
+        raise AuthenticationError(
+            "Servicio de reservas no disponible. Verifique las credenciales."
+        )
 
-    # Construir parámetros de búsqueda
-    params = {"page": page, "size": size}
-    if search:
-        params["search"] = search
-    if arrival_start:
-        params["arrival_start"] = arrival_start
-    if arrival_end:
-        params["arrival_end"] = arrival_end
-    if status:
-        params["status"] = status
-
-    # Usar repository para búsqueda
-    result = reservation_repo.search(params)
+    # Usar servicio de negocio para búsqueda
+    result = reservation_service.search_reservations(
+        page=page,
+        size=size,
+        search=search,
+        arrival_start=arrival_start,
+        arrival_end=arrival_end,
+        status=status,
+    )
 
     return result
 
@@ -601,12 +617,14 @@ def get_reservation(
     - get_reservation(reservation_id=12345) # Obtener detalles de reserva ID 12345
     """
     try:
-        # Verificar que el repository esté disponible
-        if reservation_repo is None:
-            raise AuthenticationError("Repository de reservas no disponible. Verifique las credenciales.")
+        # Verificar que el servicio esté disponible
+        if reservation_service is None:
+            raise AuthenticationError(
+                "Servicio de reservas no disponible. Verifique las credenciales."
+            )
 
-        # Usar repository para obtener reserva
-        result = reservation_repo.get_by_id(reservation_id)
+        # Usar servicio de negocio para obtener reserva
+        result = reservation_service.get_reservation_by_id(reservation_id)
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, ReservationResponse, strict=False)
@@ -697,25 +715,22 @@ def search_units(
     """
     # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
 
-    # Verificar que el repository esté disponible
-    if unit_repo is None:
-        raise AuthenticationError("Repository de unidades no disponible. Verifique las credenciales.")
+    # Verificar que el servicio esté disponible
+    if unit_service is None:
+        raise AuthenticationError(
+            "Servicio de unidades no disponible. Verifique las credenciales."
+        )
 
-    # Construir parámetros de búsqueda
-    params = {"page": page, "size": size}
-    if search:
-        params["search"] = search
-    if bedrooms is not None:
-        params["bedrooms"] = int(bedrooms)
-    if bathrooms is not None:
-        params["bathrooms"] = int(bathrooms)
-    if is_active is not None:
-        params["is_active"] = int(is_active)
-    if is_bookable is not None:
-        params["is_bookable"] = int(is_bookable)
-
-    # Usar repository para búsqueda
-    result = unit_repo.search(params)
+    # Usar servicio de negocio para búsqueda
+    result = unit_service.search_units(
+        page=page,
+        size=size,
+        search=search,
+        bedrooms=bedrooms,
+        bathrooms=bathrooms,
+        is_active=is_active,
+        is_bookable=is_bookable,
+    )
 
     return result
 
@@ -757,16 +772,14 @@ def search_amenities(
     - search_amenities(size=50) # Obtener catálogo completo de amenidades
     - search_amenities(search="pool") # Buscar amenidades de piscina
     """
-    # Verificar que el repository esté disponible
-    if unit_repo is None:
-        raise AuthenticationError("Repository de unidades no disponible. Verifique las credenciales.")
+    # Verificar que el servicio esté disponible
+    if unit_service is None:
+        raise AuthenticationError(
+            "Servicio de unidades no disponible. Verifique las credenciales."
+        )
 
-    params = {"page": page, "size": size}
-    if search:
-        params["search"] = search
-
-    # Usar repository para búsqueda de amenidades
-    return unit_repo.search_amenities(params)
+    # Usar servicio de negocio para búsqueda de amenidades
+    return unit_service.search_amenities(page=page, size=size, search=search)
 
 
 @mcp.tool(output_schema=FOLIO_OUTPUT_SCHEMA)
@@ -802,12 +815,14 @@ def get_folio(
     - get_folio(reservation_id=12345) # Obtener folio financiero de reserva 12345
     """
     try:
-        # Verificar que el repository esté disponible
-        if reservation_repo is None:
-            raise AuthenticationError("Repository de reservas no disponible. Verifique las credenciales.")
+        # Verificar que el servicio esté disponible
+        if reservation_service is None:
+            raise AuthenticationError(
+                "Servicio de reservas no disponible. Verifique las credenciales."
+            )
 
-        # Usar repository para obtener folio
-        result = reservation_repo.get_folio(reservation_id)
+        # Usar servicio de negocio para obtener folio
+        result = reservation_service.get_folio(reservation_id)
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, FolioResponse, strict=False)
@@ -894,32 +909,27 @@ def create_maintenance_work_order(
     - create_maintenance_work_order(unit_id=123, summary="Fuga en grifo", description="Grifo del baño principal gotea constantemente", priority=3)
     - create_maintenance_work_order(unit_id=456, summary="Aire acondicionado no funciona", description="AC no enfría, revisar termostato y compresor", priority=5, estimated_cost=150.0)
     """
-    # Verificar que el repository esté disponible
-    if work_order_repo is None:
-        raise AuthenticationError("Repository de work orders no disponible. Verifique las credenciales.")
-
-    logger.info(
-        f"Creando orden de mantenimiento para unidad {unit_id}, prioridad: {priority}"
-    )
+    # Verificar que el servicio esté disponible
+    if work_order_service is None:
+        raise AuthenticationError(
+            "Servicio de work orders no disponible. Verifique las credenciales."
+        )
 
     try:
-        # Usar repository para crear work order
-        result = work_order_repo.create_maintenance_work_order(
+        # Usar servicio de negocio para crear work order
+        result = work_order_service.create_maintenance_work_order(
             unit_id=unit_id,
             summary=summary,
             description=description,
             priority=priority,
             estimated_cost=estimated_cost,
             estimated_time=estimated_time,
-            date_received=date_received
+            date_received=date_received,
         )
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, WorkOrderResponse, strict=False)
 
-        logger.info(
-            f"Orden de mantenimiento creada exitosamente. ID: {validated_result.get('id', 'N/A')}"
-        )
         return validated_result
     except Exception as e:
         logger.error(f"Error creando orden de mantenimiento: {str(e)}")
@@ -992,31 +1002,26 @@ def create_housekeeping_work_order(
     - create_housekeeping_work_order(unit_id=123, scheduled_at="2024-01-15", is_inspection=False, clean_type_id=1)
     - create_housekeeping_work_order(unit_id=456, scheduled_at="2024-01-16", is_inspection=True, comments="Verificar estado post-evento")
     """
-    # Verificar que el repository esté disponible
-    if work_order_repo is None:
-        raise AuthenticationError("Repository de work orders no disponible. Verifique las credenciales.")
-
-    logger.info(
-        f"Creando orden de housekeeping para unidad {unit_id}, fecha: {scheduled_at}, inspección: {is_inspection}"
-    )
+    # Verificar que el servicio esté disponible
+    if work_order_service is None:
+        raise AuthenticationError(
+            "Servicio de work orders no disponible. Verifique las credenciales."
+        )
 
     try:
-        # Usar repository para crear work order
-        result = work_order_repo.create_housekeeping_work_order(
+        # Usar servicio de negocio para crear work order
+        result = work_order_service.create_housekeeping_work_order(
             unit_id=unit_id,
             scheduled_at=scheduled_at,
             is_inspection=is_inspection,
             clean_type_id=clean_type_id,
             comments=comments,
-            cost=cost
+            cost=cost,
         )
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, WorkOrderResponse, strict=False)
 
-        logger.info(
-            f"Orden de housekeeping creada exitosamente. ID: {validated_result.get('id', 'N/A')}"
-        )
         return validated_result
     except ValueError:
         # Re-raise validation errors
@@ -1076,7 +1081,7 @@ def health_check() -> str:
         # Obtener métricas del middleware
         middleware_metrics = (
             metrics_middleware.get_metrics()
-            if 'metrics_middleware' in locals()
+            if "metrics_middleware" in locals()
             else {"note": "Middleware metrics not available"}
         )
 

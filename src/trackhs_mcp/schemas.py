@@ -131,6 +131,7 @@ RESERVATION_SEARCH_OUTPUT_SCHEMA = {
         },
         "_embedded": {
             "type": "object",
+            "description": "Datos embebidos de la respuesta",
             "properties": {
                 "reservations": {
                     "type": "array",
@@ -233,6 +234,7 @@ UNIT_SEARCH_OUTPUT_SCHEMA = {
         },
         "_embedded": {
             "type": "object",
+            "description": "Datos embebidos de la respuesta",
             "properties": {
                 "units": {
                     "type": "array",
@@ -344,6 +346,7 @@ RESERVATION_DETAIL_OUTPUT_SCHEMA = {
         },
         "guest": {
             "type": ["object", "null"],
+            "description": "Información del huésped",
             "properties": {
                 "name": {
                     "type": ["string", "null"],
@@ -365,6 +368,7 @@ RESERVATION_DETAIL_OUTPUT_SCHEMA = {
         },
         "dates": {
             "type": ["object", "null"],
+            "description": "Fechas de la reserva",
             "properties": {
                 "arrival": {
                     "type": ["string", "null"],
@@ -382,6 +386,7 @@ RESERVATION_DETAIL_OUTPUT_SCHEMA = {
         },
         "unit": {
             "type": ["object", "null"],
+            "description": "Información de la unidad reservada",
             "properties": {
                 "id": {"type": ["integer", "null"], "description": "ID de la unidad"},
                 "name": {
@@ -405,6 +410,7 @@ RESERVATION_DETAIL_OUTPUT_SCHEMA = {
         "status": {"type": ["string", "null"], "description": "Estado de la reserva"},
         "financial": {
             "type": ["object", "null"],
+            "description": "Información financiera de la reserva",
             "properties": {
                 "total_amount": {
                     "type": ["number", "null"],
@@ -434,6 +440,7 @@ FOLIO_OUTPUT_SCHEMA = {
         "balance": {"type": ["number", "null"], "description": "Balance total"},
         "charges": {
             "type": ["array", "null"],
+            "description": "Lista de cargos aplicados a la reserva",
             "items": {
                 "type": "object",
                 "properties": {
@@ -459,6 +466,7 @@ FOLIO_OUTPUT_SCHEMA = {
         },
         "payments": {
             "type": ["array", "null"],
+            "description": "Lista de pagos recibidos",
             "items": {
                 "type": "object",
                 "properties": {
@@ -484,6 +492,7 @@ FOLIO_OUTPUT_SCHEMA = {
         },
         "summary": {
             "type": ["object", "null"],
+            "description": "Resumen financiero de la reserva",
             "properties": {
                 "total_charges": {
                     "type": ["number", "null"],
@@ -514,6 +523,7 @@ AMENITIES_OUTPUT_SCHEMA = {
         },
         "_embedded": {
             "type": "object",
+            "description": "Datos embebidos de la respuesta",
             "properties": {
                 "amenities": {
                     "type": "array",
