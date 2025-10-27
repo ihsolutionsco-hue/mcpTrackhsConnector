@@ -1,0 +1,67 @@
+{
+  "summary": {
+    "total_tests": 8,
+    "passed_tests": 0,
+    "failed_tests": 8,
+    "success_rate": 0.0
+  },
+  "results": [
+    {
+      "test_name": "search_reservations",
+      "success": false,
+      "message": "Error: 'FunctionTool' object is not callable",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:41.153680"
+    },
+    {
+      "test_name": "get_reservation",
+      "success": false,
+      "message": "Error: 'FunctionTool' object is not callable",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:41.154284"
+    },
+    {
+      "test_name": "search_units_string_params",
+      "success": false,
+      "message": "Error: 'FunctionTool' object is not callable",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:41.154753"
+    },
+    {
+      "test_name": "search_units_int_params",
+      "success": false,
+      "message": "Error: 'FunctionTool' object is not callable",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:41.155181"
+    },
+    {
+      "test_name": "search_amenities",
+      "success": false,
+      "message": "Error: 'FunctionTool' object is not callable",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:41.156153"
+    },
+    {
+      "test_name": "get_folio",
+      "success": false,
+      "message": "Error: 'FunctionTool' object is not callable",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:41.156774"
+    },
+    {
+      "test_name": "create_maintenance_work_order_strings",
+      "success": false,
+      "message": "Error: 'FunctionTool' object is not callable",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:41.157189"
+    },
+    {
+      "test_name": "create_housekeeping_work_order_strings",
+      "success": false,
+      "message": "Error: 'FunctionTool' object is not callable",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:41.157855"
+    }
+  ],
+  "timestamp": "2025-10-27T18:11:41.166733"
+}

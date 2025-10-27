@@ -1,0 +1,67 @@
+{
+  "summary": {
+    "total_tests": 8,
+    "passed_tests": 0,
+    "failed_tests": 8,
+    "success_rate": 0.0
+  },
+  "results": [
+    {
+      "test_name": "search_reservations",
+      "success": false,
+      "message": "Error: 'FastMCP' object has no attribute 'call_tool'",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:00.024772"
+    },
+    {
+      "test_name": "get_reservation",
+      "success": false,
+      "message": "Error: 'FastMCP' object has no attribute 'call_tool'",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:00.029429"
+    },
+    {
+      "test_name": "search_units_string_params",
+      "success": false,
+      "message": "Error: 'FastMCP' object has no attribute 'call_tool'",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:00.031056"
+    },
+    {
+      "test_name": "search_units_int_params",
+      "success": false,
+      "message": "Error: 'FastMCP' object has no attribute 'call_tool'",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:00.031407"
+    },
+    {
+      "test_name": "search_amenities",
+      "success": false,
+      "message": "Error: 'FastMCP' object has no attribute 'call_tool'",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:00.031782"
+    },
+    {
+      "test_name": "get_folio",
+      "success": false,
+      "message": "Error: 'FastMCP' object has no attribute 'call_tool'",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:00.034830"
+    },
+    {
+      "test_name": "create_maintenance_work_order_strings",
+      "success": false,
+      "message": "Error: 'FastMCP' object has no attribute 'call_tool'",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:00.035409"
+    },
+    {
+      "test_name": "create_housekeeping_work_order_strings",
+      "success": false,
+      "message": "Error: 'FastMCP' object has no attribute 'call_tool'",
+      "data": null,
+      "timestamp": "2025-10-27T18:11:00.035772"
+    }
+  ],
+  "timestamp": "2025-10-27T18:11:00.051146"
+}

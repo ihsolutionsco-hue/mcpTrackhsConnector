@@ -105,7 +105,9 @@ class ReservationRepository(BaseRepository):
 
         try:
             logger.info(f"Fetching folio for reservation {reservation_id}")
-            result = self.api_client.get(f"{self.base_endpoint}/{reservation_id}/folio")
+            result = self.api_client.get(
+                f"{self.base_endpoint}/{reservation_id}/folios"
+            )
 
             # Guardar en cache
             self._set_cached(cache_key, result)

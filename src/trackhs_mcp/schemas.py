@@ -334,11 +334,11 @@ AMENITIES_OUTPUT_SCHEMA = {
                                 "description": "ID único de la amenidad",
                             },
                             "name": {
-                                "type": "string",
+                                "type": ["string", "object"],
                                 "description": "Nombre de la amenidad",
                             },
                             "group": {
-                                "type": "string",
+                                "type": ["string", "object"],
                                 "description": "Grupo de la amenidad",
                             },
                             "is_public": {

@@ -10,7 +10,7 @@ import sys
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Dict, Literal, Optional, Union
 
 import httpx
 from fastmcp import FastMCP
@@ -705,17 +705,21 @@ def search_units(
         ),
     ] = None,
     bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número exacto de dormitorios")
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número exacto de dormitorios"),
     ] = None,
     bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número exacto de baños"),
     ] = None,
     is_active: Annotated[
-        Optional[bool],
-        Field(description="Filtrar por unidades activas (true) o inactivas (false)"),
+        Optional[Union[bool, int, str]],
+        Field(
+            description="Filtrar por unidades activas (true/1) o inactivas (false/0)"
+        ),
     ] = None,
     is_bookable: Annotated[
-        Optional[bool],
+        Optional[Union[bool, int, str]],
         Field(
             description="Filtrar por unidades disponibles para reservar (true) o no (false)"
         ),
@@ -749,6 +753,38 @@ def search_units(
     - search_units(search="penthouse") # Buscar por nombre o descripción
     """
     # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
+
+    # Convertir tipos de datos para compatibilidad
+    def safe_int(value):
+        """Convertir valor a entero de forma segura"""
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            try:
+                return int(value)
+            except ValueError:
+                return None
+        return None
+
+    def safe_bool(value):
+        """Convertir valor a booleano de forma segura"""
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, int):
+            return bool(value)
+        if isinstance(value, str):
+            return value.lower() in ("true", "1", "yes", "on")
+        return None
+
+    # Convertir parámetros
+    bedrooms = safe_int(bedrooms)
+    bathrooms = safe_int(bathrooms)
+    is_active = safe_bool(is_active)
+    is_bookable = safe_bool(is_bookable)
 
     # Verificar que el servicio esté disponible
     if unit_service is None:
@@ -902,10 +938,11 @@ def create_maintenance_work_order(
         Literal[1, 3, 5], Field(description="Prioridad: 1=Baja, 3=Media, 5=Alta")
     ] = 3,
     estimated_cost: Annotated[
-        Optional[float], Field(ge=0, description="Costo estimado en moneda local")
+        Optional[Union[float, int, str]],
+        Field(ge=0, description="Costo estimado en moneda local"),
     ] = None,
     estimated_time: Annotated[
-        Optional[int], Field(ge=0, description="Tiempo estimado en minutos")
+        Optional[Union[int, str]], Field(ge=0, description="Tiempo estimado en minutos")
     ] = None,
     date_received: Annotated[
         Optional[str],
@@ -944,6 +981,38 @@ def create_maintenance_work_order(
     - create_maintenance_work_order(unit_id=123, summary="Fuga en grifo", description="Grifo del baño principal gotea constantemente", priority=3)
     - create_maintenance_work_order(unit_id=456, summary="Aire acondicionado no funciona", description="AC no enfría, revisar termostato y compresor", priority=5, estimated_cost=150.0)
     """
+
+    # Convertir tipos de datos para compatibilidad
+    def safe_float(value):
+        """Convertir valor a float de forma segura"""
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+        if isinstance(value, str):
+            try:
+                return float(value)
+            except ValueError:
+                return None
+        return None
+
+    def safe_int(value):
+        """Convertir valor a entero de forma segura"""
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            try:
+                return int(value)
+            except ValueError:
+                return None
+        return None
+
+    # Convertir parámetros
+    estimated_cost = safe_float(estimated_cost)
+    estimated_time = safe_int(estimated_time)
+
     # Verificar que el servicio esté disponible
     if work_order_service is None:
         raise AuthenticationError(
@@ -987,7 +1056,7 @@ def create_housekeeping_work_order(
         bool, Field(description="True si es inspección, False si es limpieza")
     ] = False,
     clean_type_id: Annotated[
-        Optional[int],
+        Optional[Union[int, str]],
         Field(
             gt=0,
             description="ID del tipo de limpieza (requerido si no es inspección). Tipos disponibles: 3=Inspection, 4=Departure Clean, 5=Deep Clean, 6=Pre-Arrival Inspection, 7=Refresh Clean, 8=Carpet Cleaning, 9=Guest Request, 10=Pack and Play",
@@ -998,7 +1067,7 @@ def create_housekeeping_work_order(
         Field(max_length=2000, description="Comentarios o instrucciones especiales"),
     ] = None,
     cost: Annotated[
-        Optional[float], Field(ge=0, description="Costo del servicio")
+        Optional[Union[float, int, str]], Field(ge=0, description="Costo del servicio")
     ] = None,
 ) -> Dict[str, Any]:
     """
@@ -1038,6 +1107,38 @@ def create_housekeeping_work_order(
     - create_housekeeping_work_order(unit_id=123, scheduled_at="2024-01-15", is_inspection=False, clean_type_id=1)
     - create_housekeeping_work_order(unit_id=456, scheduled_at="2024-01-16", is_inspection=True, comments="Verificar estado post-evento")
     """
+
+    # Convertir tipos de datos para compatibilidad
+    def safe_int(value):
+        """Convertir valor a entero de forma segura"""
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            try:
+                return int(value)
+            except ValueError:
+                return None
+        return None
+
+    def safe_float(value):
+        """Convertir valor a float de forma segura"""
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+        if isinstance(value, str):
+            try:
+                return float(value)
+            except ValueError:
+                return None
+        return None
+
+    # Convertir parámetros
+    clean_type_id = safe_int(clean_type_id)
+    cost = safe_float(cost)
+
     # Verificar que el servicio esté disponible
     if work_order_service is None:
         raise AuthenticationError(
