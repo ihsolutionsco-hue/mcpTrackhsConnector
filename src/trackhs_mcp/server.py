@@ -13,12 +13,12 @@ from datetime import datetime
 from typing import Any, Dict, Literal, Optional
 
 import httpx
-from dotenv import load_dotenv
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from pydantic import Field
 from typing_extensions import Annotated
 
+from .config import get_settings, validate_configuration
 from .exceptions import (
     APIError,
     AuthenticationError,
@@ -27,7 +27,19 @@ from .exceptions import (
     TrackHSError,
     ValidationError,
 )
-from .middleware import TrackHSMiddleware
+from .middleware_native import (
+    TrackHSAuthMiddleware,
+    TrackHSLoggingMiddleware,
+    TrackHSMetricsMiddleware,
+    TrackHSRateLimitMiddleware,
+)
+from .repositories import (
+    ReservationRepository,
+    UnitRepository,
+    WorkOrderRepository,
+)
+from .cache import get_cache
+from .metrics import get_metrics
 from .schemas import (
     AMENITIES_OUTPUT_SCHEMA,
     FOLIO_OUTPUT_SCHEMA,
@@ -43,25 +55,31 @@ from .schemas import (
     WorkOrderResponse,
 )
 
-# Cargar variables de entorno
-load_dotenv()
+# Obtener configuración centralizada
+settings = get_settings()
 
-# Configuración de logging para FastMCP Cloud
+# Validar configuración al inicio
+if not validate_configuration():
+    sys.exit(1)
+
+# Configuración de logging estructurado
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, settings.log_level),
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler()],  # Solo stdout para FastMCP Cloud
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
-# Configuración de la API
-API_BASE_URL = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api")
-API_USERNAME = os.getenv("TRACKHS_USERNAME")
-API_PASSWORD = os.getenv("TRACKHS_PASSWORD")
+# Configuración de la API desde settings
+API_BASE_URL = settings.trackhs_api_url
+API_USERNAME = settings.trackhs_username
+API_PASSWORD = settings.trackhs_password
 
 logger.info(f"TrackHS MCP Server iniciando - Base URL: {API_BASE_URL}")
 logger.info(f"Username configurado: {'Sí' if API_USERNAME else 'No'}")
 logger.info(f"Password configurado: {'Sí' if API_PASSWORD else 'No'}")
+logger.info(f"Log Level: {settings.log_level}")
+logger.info(f"Strict Validation: {settings.strict_validation}")
 
 
 # Datos sensibles que deben ser sanitizados en logs
@@ -144,14 +162,14 @@ def sanitize_for_log(data: Any, max_depth: int = 10) -> Any:
 
 
 # Función helper para validación de respuestas
-def validate_response(data: Dict[str, Any], model_class: type, strict: bool = False):
+def validate_response(data: Dict[str, Any], model_class: type, strict: Optional[bool] = None):
     """
     Valida datos de respuesta contra un modelo Pydantic.
 
     Args:
         data: Datos a validar
         model_class: Clase del modelo Pydantic
-        strict: Si True, lanza excepción en caso de error. Si False, solo loguea.
+        strict: Si True, lanza excepción en caso de error. Si None, usa configuración global.
 
     Returns:
         Datos validados (modelo Pydantic) si tiene éxito, o datos originales si falla en modo no-strict
@@ -159,6 +177,10 @@ def validate_response(data: Dict[str, Any], model_class: type, strict: bool = Fa
     Raises:
         ValidationError: Si strict=True y la validación falla
     """
+    # Usar configuración global si no se especifica strict
+    if strict is None:
+        strict = settings.strict_validation
+    
     try:
         validated = model_class.model_validate(data)
         logger.debug(f"Response validated successfully against {model_class.__name__}")
@@ -177,8 +199,11 @@ class TrackHSClient:
     def __init__(self, base_url: str, username: str, password: str):
         self.base_url = base_url
         self.auth = (username, password)
-        self.client = httpx.Client(auth=self.auth, timeout=30.0)
-        logger.info(f"TrackHSClient inicializado para {base_url}")
+        self.client = httpx.Client(
+            auth=self.auth, 
+            timeout=settings.request_timeout
+        )
+        logger.info(f"TrackHSClient inicializado para {base_url} (timeout: {settings.request_timeout}s)")
 
     def get(self, endpoint: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         """
@@ -301,13 +326,27 @@ try:
             "El servidor se iniciará pero las herramientas no funcionarán sin credenciales"
         )
         api_client = None
+        # Inicializar repositories sin cliente API
+        reservation_repo = None
+        unit_repo = None
+        work_order_repo = None
     else:
         api_client = TrackHSClient(API_BASE_URL, API_USERNAME, API_PASSWORD)
         logger.info("Cliente API TrackHS inicializado correctamente")
+        
+        # Inicializar repositories
+        reservation_repo = ReservationRepository(api_client, cache_ttl=settings.auth_cache_ttl)
+        unit_repo = UnitRepository(api_client, cache_ttl=settings.auth_cache_ttl)
+        work_order_repo = WorkOrderRepository(api_client, cache_ttl=settings.auth_cache_ttl)
+        logger.info("Repositories inicializados correctamente")
+        
 except Exception as e:
     logger.error(f"Error inicializando cliente API: {e}")
     logger.warning("Continuando sin cliente API funcional")
     api_client = None
+    reservation_repo = None
+    unit_repo = None
+    work_order_repo = None
 
 
 # Función helper para verificar cliente API
@@ -406,26 +445,43 @@ try:
     # Reintentos automáticos con backoff exponencial (built-in)
     mcp.add_middleware(
         RetryMiddleware(
-            max_retries=3,
+            max_retries=settings.max_retries,
             retry_exceptions=(httpx.RequestError, httpx.HTTPStatusError),
         )
     )
-    logger.info("✅ RetryMiddleware registrado (max_retries=3)")
+    logger.info(f"✅ RetryMiddleware registrado (max_retries={settings.max_retries})")
 
 except ImportError as e:
     logger.warning(f"⚠️  Middleware nativo de FastMCP no disponible: {e}")
     logger.warning("   Continuando sin ErrorHandlingMiddleware y RetryMiddleware")
 
-# ✅ Middleware personalizado unificado (logging + auth + métricas)
-trackhs_middleware = TrackHSMiddleware(
-    api_client=api_client,
-    auth_cache_ttl=300,  # 5 minutos de cache para autenticación
-)
-mcp.add_middleware(trackhs_middleware)
-logger.info("✅ TrackHSMiddleware registrado (logging + auth + metrics)")
+# ✅ Middleware personalizado nativo FastMCP
+# 1. Logging middleware
+logging_middleware = TrackHSLoggingMiddleware()
+mcp.add_middleware(logging_middleware)
+logger.info("✅ TrackHSLoggingMiddleware registrado")
+
+# 2. Auth middleware
+auth_middleware = TrackHSAuthMiddleware(api_client=api_client)
+mcp.add_middleware(auth_middleware)
+logger.info("✅ TrackHSAuthMiddleware registrado")
+
+# 3. Metrics middleware
+metrics_middleware = TrackHSMetricsMiddleware()
+mcp.add_middleware(metrics_middleware)
+logger.info("✅ TrackHSMetricsMiddleware registrado")
+
+# 4. Rate limiting middleware (opcional)
+if settings.metrics_enabled:
+    rate_limit_middleware = TrackHSRateLimitMiddleware(
+        requests_per_minute=60,
+        burst_size=10
+    )
+    mcp.add_middleware(rate_limit_middleware)
+    logger.info("✅ TrackHSRateLimitMiddleware registrado")
 
 logger.info("=" * 60)
-logger.info("✅ Todos los middleware registrados correctamente")
+logger.info("✅ Todos los middleware nativos registrados correctamente")
 logger.info("=" * 60)
 
 
@@ -495,6 +551,10 @@ def search_reservations(
     """
     # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
 
+    # Verificar que el repository esté disponible
+    if reservation_repo is None:
+        raise AuthenticationError("Repository de reservas no disponible. Verifique las credenciales.")
+
     # Construir parámetros de búsqueda
     params = {"page": page, "size": size}
     if search:
@@ -506,8 +566,8 @@ def search_reservations(
     if status:
         params["status"] = status
 
-    # Llamar a la API - middleware maneja todo automáticamente
-    result = api_client.get("pms/reservations", params)
+    # Usar repository para búsqueda
+    result = reservation_repo.search(params)
 
     return result
 
@@ -541,8 +601,12 @@ def get_reservation(
     - get_reservation(reservation_id=12345) # Obtener detalles de reserva ID 12345
     """
     try:
-        check_api_client()
-        result = api_client.get(f"pms/reservations/{reservation_id}")
+        # Verificar que el repository esté disponible
+        if reservation_repo is None:
+            raise AuthenticationError("Repository de reservas no disponible. Verifique las credenciales.")
+
+        # Usar repository para obtener reserva
+        result = reservation_repo.get_by_id(reservation_id)
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, ReservationResponse, strict=False)
@@ -633,6 +697,10 @@ def search_units(
     """
     # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
 
+    # Verificar que el repository esté disponible
+    if unit_repo is None:
+        raise AuthenticationError("Repository de unidades no disponible. Verifique las credenciales.")
+
     # Construir parámetros de búsqueda
     params = {"page": page, "size": size}
     if search:
@@ -646,8 +714,8 @@ def search_units(
     if is_bookable is not None:
         params["is_bookable"] = int(is_bookable)
 
-    # Llamar a la API - middleware maneja todo automáticamente
-    result = api_client.get("pms/units", params)
+    # Usar repository para búsqueda
+    result = unit_repo.search(params)
 
     return result
 
@@ -689,12 +757,16 @@ def search_amenities(
     - search_amenities(size=50) # Obtener catálogo completo de amenidades
     - search_amenities(search="pool") # Buscar amenidades de piscina
     """
+    # Verificar que el repository esté disponible
+    if unit_repo is None:
+        raise AuthenticationError("Repository de unidades no disponible. Verifique las credenciales.")
+
     params = {"page": page, "size": size}
     if search:
         params["search"] = search
 
-    check_api_client()
-    return api_client.get("pms/units/amenities", params)
+    # Usar repository para búsqueda de amenidades
+    return unit_repo.search_amenities(params)
 
 
 @mcp.tool(output_schema=FOLIO_OUTPUT_SCHEMA)
@@ -730,8 +802,12 @@ def get_folio(
     - get_folio(reservation_id=12345) # Obtener folio financiero de reserva 12345
     """
     try:
-        check_api_client()
-        result = api_client.get(f"pms/reservations/{reservation_id}/folio")
+        # Verificar que el repository esté disponible
+        if reservation_repo is None:
+            raise AuthenticationError("Repository de reservas no disponible. Verifique las credenciales.")
+
+        # Usar repository para obtener folio
+        result = reservation_repo.get_folio(reservation_id)
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, FolioResponse, strict=False)
@@ -818,27 +894,25 @@ def create_maintenance_work_order(
     - create_maintenance_work_order(unit_id=123, summary="Fuga en grifo", description="Grifo del baño principal gotea constantemente", priority=3)
     - create_maintenance_work_order(unit_id=456, summary="Aire acondicionado no funciona", description="AC no enfría, revisar termostato y compresor", priority=5, estimated_cost=150.0)
     """
+    # Verificar que el repository esté disponible
+    if work_order_repo is None:
+        raise AuthenticationError("Repository de work orders no disponible. Verifique las credenciales.")
+
     logger.info(
         f"Creando orden de mantenimiento para unidad {unit_id}, prioridad: {priority}"
     )
 
-    work_order_data = {
-        "unitId": unit_id,
-        "summary": summary,
-        "description": description,
-        "priority": priority,
-        "status": "pending",
-        "dateReceived": date_received or datetime.now().strftime("%Y-%m-%d"),
-    }
-
-    if estimated_cost is not None:
-        work_order_data["estimatedCost"] = estimated_cost
-    if estimated_time is not None:
-        work_order_data["estimatedTime"] = estimated_time
-
     try:
-        check_api_client()
-        result = api_client.post("pms/maintenance/work-orders", work_order_data)
+        # Usar repository para crear work order
+        result = work_order_repo.create_maintenance_work_order(
+            unit_id=unit_id,
+            summary=summary,
+            description=description,
+            priority=priority,
+            estimated_cost=estimated_cost,
+            estimated_time=estimated_time,
+            date_received=date_received
+        )
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, WorkOrderResponse, strict=False)
@@ -918,32 +992,24 @@ def create_housekeeping_work_order(
     - create_housekeeping_work_order(unit_id=123, scheduled_at="2024-01-15", is_inspection=False, clean_type_id=1)
     - create_housekeeping_work_order(unit_id=456, scheduled_at="2024-01-16", is_inspection=True, comments="Verificar estado post-evento")
     """
+    # Verificar que el repository esté disponible
+    if work_order_repo is None:
+        raise AuthenticationError("Repository de work orders no disponible. Verifique las credenciales.")
+
     logger.info(
         f"Creando orden de housekeeping para unidad {unit_id}, fecha: {scheduled_at}, inspección: {is_inspection}"
     )
 
-    if not is_inspection and clean_type_id is None:
-        error_msg = "clean_type_id es requerido cuando is_inspection=False"
-        logger.error(error_msg)
-        raise ValueError(error_msg)
-
-    work_order_data = {
-        "unitId": unit_id,
-        "scheduledAt": scheduled_at,
-        "status": "pending",
-        "isInspection": is_inspection,
-    }
-
-    if clean_type_id is not None:
-        work_order_data["cleanTypeId"] = clean_type_id
-    if comments:
-        work_order_data["comments"] = comments
-    if cost is not None:
-        work_order_data["cost"] = cost
-
     try:
-        check_api_client()
-        result = api_client.post("pms/housekeeping/work-orders", work_order_data)
+        # Usar repository para crear work order
+        result = work_order_repo.create_housekeeping_work_order(
+            unit_id=unit_id,
+            scheduled_at=scheduled_at,
+            is_inspection=is_inspection,
+            clean_type_id=clean_type_id,
+            comments=comments,
+            cost=cost
+        )
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
         validated_result = validate_response(result, WorkOrderResponse, strict=False)
@@ -958,6 +1024,26 @@ def create_housekeeping_work_order(
     except Exception as e:
         logger.error(f"Error creando orden de housekeeping: {str(e)}")
         raise
+
+
+# Endpoint de métricas Prometheus
+@mcp.resource("https://trackhs-mcp.local/metrics")
+def prometheus_metrics() -> str:
+    """
+    Endpoint de métricas en formato Prometheus.
+    
+    Retorna métricas del servidor en formato compatible con Prometheus
+    para monitoreo y alertas.
+    
+    Returns:
+        Métricas en formato Prometheus
+    """
+    try:
+        metrics = get_metrics()
+        return metrics.export_prometheus_format()
+    except Exception as e:
+        logger.error(f"Error generando métricas Prometheus: {str(e)}")
+        return f"# ERROR: {str(e)}"
 
 
 # Health check endpoint con métricas dinámicas
@@ -989,10 +1075,16 @@ def health_check() -> str:
 
         # Obtener métricas del middleware
         middleware_metrics = (
-            trackhs_middleware.get_metrics()
-            if trackhs_middleware
+            metrics_middleware.get_metrics()
+            if 'metrics_middleware' in locals()
             else {"note": "Middleware metrics not available"}
         )
+        
+        # Obtener métricas del cache
+        cache_metrics = get_cache().get_metrics()
+        
+        # Obtener métricas avanzadas
+        advanced_metrics = get_metrics().get_metrics_summary()
 
         # Obtener versión de FastMCP dinámicamente
         try:
@@ -1017,7 +1109,11 @@ def health_check() -> str:
                     and API_PASSWORD is not None,
                 }
             },
-            "metrics": middleware_metrics,
+            "metrics": {
+                "middleware": middleware_metrics,
+                "cache": cache_metrics,
+                "advanced": advanced_metrics,
+            },
             "environment": {
                 "python_version": sys.version,
                 "fastmcp_version": fastmcp_version,
@@ -1027,8 +1123,8 @@ def health_check() -> str:
 
         logger.debug(f"Health check: {health_data['status']}")
 
-        # ✅ Retornar JSON string
-        return json.dumps(health_data, indent=2)
+        # ✅ Retornar diccionario (FastMCP maneja la serialización)
+        return health_data
 
     except Exception as e:
         logger.error(f"Error en health check: {str(e)}")
@@ -1037,7 +1133,7 @@ def health_check() -> str:
             "timestamp": datetime.now().isoformat(),
             "error": str(e),
         }
-        return json.dumps(error_data, indent=2)
+        return error_data
 
 
 # Configuración HTTP manejada por FastMCP Cloud

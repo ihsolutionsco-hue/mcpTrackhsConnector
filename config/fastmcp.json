@@ -11,8 +11,8 @@
   },
   "server": {
     "name": "TrackHS API",
-    "description": "Servidor MCP para TrackHS API con validación Pydantic",
-    "version": "2.0.0",
+    "description": "Servidor MCP para TrackHS API con validación Pydantic y middleware nativo",
+    "version": "2.1.0",
     "website_url": "https://github.com/ihsolutionsco-hue/mcpTrackhsConnector"
   },
   "logging": {
@@ -35,13 +35,22 @@
     "endpoint": "/health",
     "timeout": 30
   },
+  "metrics": {
+    "enabled": true,
+    "port": 9090
+  },
   "environment_variables": {
     "required": [
       "TRACKHS_USERNAME",
       "TRACKHS_PASSWORD"
     ],
     "optional": [
-      "TRACKHS_API_URL"
+      "TRACKHS_API_URL",
+      "LOG_LEVEL",
+      "STRICT_VALIDATION",
+      "AUTH_CACHE_TTL",
+      "MAX_RETRIES",
+      "REQUEST_TIMEOUT"
     ]
   }
 }

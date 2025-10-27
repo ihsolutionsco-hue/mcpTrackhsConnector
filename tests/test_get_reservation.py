@@ -110,7 +110,10 @@ def test_get_reservation_with_invalid_id():
         # Se espera que lance excepción
         error_msg = str(e).lower()
         assert (
-            "404" in str(e) or "not found" in error_msg or "no encontrado" in error_msg
+            "404" in str(e) or 
+            "not found" in error_msg or 
+            "no encontrado" in error_msg or
+            "reserva" in error_msg and "no encontrada" in error_msg
         )
 
 
