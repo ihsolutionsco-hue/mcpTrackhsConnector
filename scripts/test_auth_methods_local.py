@@ -171,7 +171,7 @@ def main():
         return
 
     # URL base a probar
-    base_url = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api")
+    base_url = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com")
     endpoint = "pms/units"
 
     print(f"Base URL: {base_url}")

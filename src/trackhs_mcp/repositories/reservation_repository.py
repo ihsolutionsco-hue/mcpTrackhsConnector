@@ -6,8 +6,8 @@ Maneja todas las operaciones relacionadas con reservas
 import logging
 from typing import Any, Dict, List, Optional
 
+from ..exceptions import APIError, NotFoundError
 from .base import BaseRepository
-from ..exceptions import NotFoundError, APIError
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class ReservationRepository(BaseRepository):
 
     def __init__(self, api_client, cache_ttl: int = 300):
         super().__init__(api_client, cache_ttl)
-        self.base_endpoint = "pms/reservations"
+        self.base_endpoint = "api/pms/reservations"
 
     def get_by_id(self, reservation_id: int) -> Dict[str, Any]:
         """
@@ -115,7 +115,9 @@ class ReservationRepository(BaseRepository):
         except Exception as e:
             self._handle_api_error(e, f"get_folio_{reservation_id}")
 
-    def search_by_date_range(self, start_date: str, end_date: str, **kwargs) -> Dict[str, Any]:
+    def search_by_date_range(
+        self, start_date: str, end_date: str, **kwargs
+    ) -> Dict[str, Any]:
         """
         Buscar reservas por rango de fechas.
 
@@ -127,11 +129,7 @@ class ReservationRepository(BaseRepository):
         Returns:
             Resultados de búsqueda
         """
-        filters = {
-            "arrival_start": start_date,
-            "arrival_end": end_date,
-            **kwargs
-        }
+        filters = {"arrival_start": start_date, "arrival_end": end_date, **kwargs}
         return self.search(filters)
 
     def search_by_status(self, status: str, **kwargs) -> Dict[str, Any]:
@@ -145,10 +143,7 @@ class ReservationRepository(BaseRepository):
         Returns:
             Resultados de búsqueda
         """
-        filters = {
-            "status": status,
-            **kwargs
-        }
+        filters = {"status": status, **kwargs}
         return self.search(filters)
 
     def search_by_guest(self, search_term: str, **kwargs) -> Dict[str, Any]:
@@ -162,10 +157,7 @@ class ReservationRepository(BaseRepository):
         Returns:
             Resultados de búsqueda
         """
-        filters = {
-            "search": search_term,
-            **kwargs
-        }
+        filters = {"search": search_term, **kwargs}
         return self.search(filters)
 
     def _test_connection(self) -> None:

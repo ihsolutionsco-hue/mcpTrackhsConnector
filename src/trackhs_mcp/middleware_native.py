@@ -13,9 +13,9 @@ from .config import get_settings
 from .exceptions import AuthenticationError
 from .metrics import (
     get_metrics,
-    record_request_metrics,
+    record_cache_metrics,
     record_mcp_tool_metrics,
-    record_cache_metrics
+    record_request_metrics,
 )
 
 logger = logging.getLogger(__name__)
@@ -43,8 +43,8 @@ class TrackHSLoggingMiddleware(Middleware):
             extra={
                 "method": context.method,
                 "request_id": self.request_count,
-                "timestamp": start_time
-            }
+                "timestamp": start_time,
+            },
         )
 
         try:
@@ -59,8 +59,8 @@ class TrackHSLoggingMiddleware(Middleware):
                     "method": context.method,
                     "duration": duration,
                     "request_id": self.request_count,
-                    "status": "success"
-                }
+                    "status": "success",
+                },
             )
 
             # Registrar métricas
@@ -80,8 +80,8 @@ class TrackHSLoggingMiddleware(Middleware):
                     "request_id": self.request_count,
                     "status": "error",
                     "error_type": type(e).__name__,
-                    "error_message": str(e)
-                }
+                    "error_message": str(e),
+                },
             )
 
             # Registrar métricas de error
@@ -120,17 +120,19 @@ class TrackHSAuthMiddleware(Middleware):
 
         # Verificar si necesitamos refrescar el cache
         needs_refresh = (
-            self.last_auth_check is None or
-            (now - self.last_auth_check) > self.auth_cache_ttl
+            self.last_auth_check is None
+            or (now - self.last_auth_check) > self.auth_cache_ttl
         )
 
         if needs_refresh:
             try:
                 # Verificación ligera de conectividad
-                self.api_client.get("pms/units/amenities", {"page": 1, "size": 1})
+                self.api_client.get("api/pms/units/amenities", {"page": 1, "size": 1})
                 self.is_authenticated = True
                 self.last_auth_check = now
-                logger.debug(f"Authentication cache refreshed (TTL: {self.auth_cache_ttl}s)")
+                logger.debug(
+                    f"Authentication cache refreshed (TTL: {self.auth_cache_ttl}s)"
+                )
             except Exception as e:
                 self.is_authenticated = False
                 logger.error(f"Authentication failed: {str(e)}")
@@ -178,7 +180,7 @@ class TrackHSMetricsMiddleware(Middleware):
             "successful_requests": 0,
             "failed_requests": 0,
             "total_duration": 0.0,
-            "start_time": time.time()
+            "start_time": time.time(),
         }
         self.response_times: list[float] = []
 
@@ -213,12 +215,14 @@ class TrackHSMetricsMiddleware(Middleware):
         uptime = time.time() - self.metrics["start_time"]
         avg_response_time = (
             sum(self.response_times) / len(self.response_times)
-            if self.response_times else 0
+            if self.response_times
+            else 0
         )
 
         error_rate = (
             (self.metrics["failed_requests"] / self.metrics["total_requests"]) * 100
-            if self.metrics["total_requests"] > 0 else 0
+            if self.metrics["total_requests"] > 0
+            else 0
         )
 
         return {
@@ -226,9 +230,11 @@ class TrackHSMetricsMiddleware(Middleware):
             "uptime_seconds": round(uptime, 2),
             "average_response_time": round(avg_response_time, 3),
             "error_rate_percentage": round(error_rate, 2),
-            "requests_per_minute": round(
-                (self.metrics["total_requests"] / uptime) * 60, 2
-            ) if uptime > 0 else 0
+            "requests_per_minute": (
+                round((self.metrics["total_requests"] / uptime) * 60, 2)
+                if uptime > 0
+                else 0
+            ),
         }
 
     def reset_metrics(self):
@@ -238,7 +244,7 @@ class TrackHSMetricsMiddleware(Middleware):
             "successful_requests": 0,
             "failed_requests": 0,
             "total_duration": 0.0,
-            "start_time": time.time()
+            "start_time": time.time(),
         }
         self.response_times = []
 
@@ -266,7 +272,8 @@ class TrackHSRateLimitMiddleware(Middleware):
 
         # Filtrar requests del último minuto
         self.request_counts[client_id] = [
-            req_time for req_time in self.request_counts[client_id]
+            req_time
+            for req_time in self.request_counts[client_id]
             if req_time > minute_ago
         ]
 
@@ -279,10 +286,11 @@ class TrackHSRateLimitMiddleware(Middleware):
     async def on_message(self, context: MiddlewareContext, call_next):
         """Intercepta mensajes para aplicar rate limiting"""
         # Obtener identificador del cliente (simplificado)
-        client_id = getattr(context, 'client_id', 'default')
+        client_id = getattr(context, "client_id", "default")
 
         if self._is_rate_limited(client_id):
             from fastmcp.exceptions import ToolError
+
             raise ToolError(
                 f"Rate limit exceeded. Máximo {self.requests_per_minute} requests por minuto."
             )

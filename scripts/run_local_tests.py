@@ -163,7 +163,7 @@ def main():
         print(f"\n🔧 CONFIGURACIÓN RECOMENDADA PARA FASTMCP CLOUD:")
         print("=" * 100)
 
-        base_url = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api")
+        base_url = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com")
         username = os.getenv("TRACKHS_USERNAME")
         password = os.getenv("TRACKHS_PASSWORD")
 
@@ -196,7 +196,7 @@ def main():
         "recommendations": {
             "fastmcp_cloud_config": {
                 "TRACKHS_API_URL": os.getenv(
-                    "TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api"
+                    "TRACKHS_API_URL", "https://ihmvacations.trackhs.com"
                 ),
                 "TRACKHS_USERNAME": os.getenv("TRACKHS_USERNAME"),
                 "TRACKHS_PASSWORD": "***",

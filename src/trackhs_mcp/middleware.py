@@ -84,7 +84,7 @@ class TrackHSMiddleware(Middleware):
         if needs_refresh:
             try:
                 # Verificación ligera de conectividad y autenticación
-                self.api_client.get("pms/units/amenities", {"page": 1, "size": 1})
+                self.api_client.get("api/pms/units/amenities", {"page": 1, "size": 1})
                 self.is_authenticated = True
                 self.last_auth_check = now
                 logger.debug(

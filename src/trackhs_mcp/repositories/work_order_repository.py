@@ -4,11 +4,11 @@ Maneja todas las operaciones relacionadas con work orders
 """
 
 import logging
-from typing import Any, Dict, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
+from ..exceptions import APIError, NotFoundError, ValidationError
 from .base import BaseRepository
-from ..exceptions import NotFoundError, APIError, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,8 @@ class WorkOrderRepository(BaseRepository):
 
     def __init__(self, api_client, cache_ttl: int = 300):
         super().__init__(api_client, cache_ttl)
-        self.maintenance_endpoint = "pms/maintenance/work-orders"
-        self.housekeeping_endpoint = "pms/housekeeping/work-orders"
+        self.maintenance_endpoint = "api/pms/maintenance/work-orders"
+        self.housekeeping_endpoint = "api/pms/housekeeping/work-orders"
 
     def get_by_id(self, work_order_id: int) -> Dict[str, Any]:
         """
@@ -46,9 +46,13 @@ class WorkOrderRepository(BaseRepository):
             logger.info(f"Fetching work order {work_order_id} from API")
             # Intentar primero en mantenimiento, luego en housekeeping
             try:
-                result = self.api_client.get(f"{self.maintenance_endpoint}/{work_order_id}")
+                result = self.api_client.get(
+                    f"{self.maintenance_endpoint}/{work_order_id}"
+                )
             except NotFoundError:
-                result = self.api_client.get(f"{self.housekeeping_endpoint}/{work_order_id}")
+                result = self.api_client.get(
+                    f"{self.housekeeping_endpoint}/{work_order_id}"
+                )
 
             # Guardar en cache
             self._set_cached(cache_key, result)
@@ -79,21 +83,29 @@ class WorkOrderRepository(BaseRepository):
         try:
             logger.info(f"Searching work orders with filters: {filters}")
             # Buscar en ambos endpoints y combinar resultados
-            maintenance_result = self.api_client.get(self.maintenance_endpoint, params=filters)
-            housekeeping_result = self.api_client.get(self.housekeeping_endpoint, params=filters)
+            maintenance_result = self.api_client.get(
+                self.maintenance_endpoint, params=filters
+            )
+            housekeeping_result = self.api_client.get(
+                self.housekeeping_endpoint, params=filters
+            )
 
             # Combinar resultados (simplificado)
             combined_result = {
                 "page": filters.get("page", 1),
                 "page_size": filters.get("size", 10),
                 "total_items": (
-                    maintenance_result.get("total_items", 0) +
-                    housekeeping_result.get("total_items", 0)
+                    maintenance_result.get("total_items", 0)
+                    + housekeeping_result.get("total_items", 0)
                 ),
                 "_embedded": {
-                    "maintenance_work_orders": maintenance_result.get("_embedded", {}).get("work_orders", []),
-                    "housekeeping_work_orders": housekeeping_result.get("_embedded", {}).get("work_orders", [])
-                }
+                    "maintenance_work_orders": maintenance_result.get(
+                        "_embedded", {}
+                    ).get("work_orders", []),
+                    "housekeeping_work_orders": housekeeping_result.get(
+                        "_embedded", {}
+                    ).get("work_orders", []),
+                },
             }
 
             # Guardar en cache
@@ -112,7 +124,7 @@ class WorkOrderRepository(BaseRepository):
         priority: int = 3,
         estimated_cost: Optional[float] = None,
         estimated_time: Optional[int] = None,
-        date_received: Optional[str] = None
+        date_received: Optional[str] = None,
     ) -> Dict[str, Any]:
         """
         Crear orden de trabajo de mantenimiento.
@@ -171,7 +183,7 @@ class WorkOrderRepository(BaseRepository):
         is_inspection: bool = False,
         clean_type_id: Optional[int] = None,
         comments: Optional[str] = None,
-        cost: Optional[float] = None
+        cost: Optional[float] = None,
     ) -> Dict[str, Any]:
         """
         Crear orden de trabajo de housekeeping.
@@ -229,7 +241,7 @@ class WorkOrderRepository(BaseRepository):
         description: str,
         priority: int,
         estimated_cost: Optional[float],
-        estimated_time: Optional[int]
+        estimated_time: Optional[int],
     ) -> None:
         """Validar datos de orden de mantenimiento"""
         if unit_id <= 0:
@@ -255,7 +267,7 @@ class WorkOrderRepository(BaseRepository):
         unit_id: int,
         scheduled_at: str,
         is_inspection: bool,
-        clean_type_id: Optional[int]
+        clean_type_id: Optional[int],
     ) -> None:
         """Validar datos de orden de housekeeping"""
         if unit_id <= 0:
@@ -268,7 +280,9 @@ class WorkOrderRepository(BaseRepository):
             raise ValidationError("scheduled_at debe tener formato YYYY-MM-DD")
 
         if not is_inspection and clean_type_id is None:
-            raise ValidationError("clean_type_id es requerido cuando is_inspection=False")
+            raise ValidationError(
+                "clean_type_id es requerido cuando is_inspection=False"
+            )
 
         if clean_type_id is not None and clean_type_id <= 0:
             raise ValidationError("clean_type_id debe ser mayor que 0")
@@ -302,7 +316,8 @@ class WorkOrderRepository(BaseRepository):
             "priority": work_order.get("priority"),
             "summary": work_order.get("summary"),
             "unit_id": work_order.get("unitId"),
-            "created_at": work_order.get("dateReceived") or work_order.get("scheduledAt"),
+            "created_at": work_order.get("dateReceived")
+            or work_order.get("scheduledAt"),
             "estimated_cost": work_order.get("estimatedCost"),
             "estimated_time": work_order.get("estimatedTime"),
         }

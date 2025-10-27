@@ -21,6 +21,9 @@ class WorkOrderService:
     permitiendo testing y reutilización.
     """
 
+    # Clean types válidos obtenidos de la API
+    VALID_CLEAN_TYPES = {3, 4, 5, 6, 7, 8, 9, 10}
+
     def __init__(self, work_order_repo: WorkOrderRepository):
         self.work_order_repo = work_order_repo
 
@@ -124,6 +127,12 @@ class WorkOrderService:
         # Validaciones de negocio
         if not is_inspection and clean_type_id is None:
             raise ValidationError("clean_type_id es requerido para órdenes de limpieza")
+
+        if clean_type_id is not None and clean_type_id not in self.VALID_CLEAN_TYPES:
+            valid_types_str = ", ".join(map(str, sorted(self.VALID_CLEAN_TYPES)))
+            raise ValidationError(
+                f"clean_type_id inválido: {clean_type_id}. Tipos válidos: {valid_types_str}"
+            )
 
         if cost is not None and cost < 0:
             raise ValidationError("El costo no puede ser negativo")

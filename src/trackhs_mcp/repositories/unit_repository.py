@@ -6,8 +6,8 @@ Maneja todas las operaciones relacionadas con unidades
 import logging
 from typing import Any, Dict, List, Optional
 
+from ..exceptions import APIError, NotFoundError
 from .base import BaseRepository
-from ..exceptions import NotFoundError, APIError
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +17,8 @@ class UnitRepository(BaseRepository):
 
     def __init__(self, api_client, cache_ttl: int = 300):
         super().__init__(api_client, cache_ttl)
-        self.base_endpoint = "pms/units"
-        self.amenities_endpoint = "pms/units/amenities"
+        self.base_endpoint = "api/pms/units"
+        self.amenities_endpoint = "api/pms/units/amenities"
 
     def get_by_id(self, unit_id: int) -> Dict[str, Any]:
         """
@@ -112,7 +112,9 @@ class UnitRepository(BaseRepository):
         except Exception as e:
             self._handle_api_error(e, f"search_amenities_{filters}")
 
-    def search_by_capacity(self, bedrooms: Optional[int] = None, bathrooms: Optional[int] = None, **kwargs) -> Dict[str, Any]:
+    def search_by_capacity(
+        self, bedrooms: Optional[int] = None, bathrooms: Optional[int] = None, **kwargs
+    ) -> Dict[str, Any]:
         """
         Buscar unidades por capacidad.
 
@@ -133,7 +135,9 @@ class UnitRepository(BaseRepository):
 
         return self.search(filters)
 
-    def search_by_availability(self, is_active: bool = True, is_bookable: bool = True, **kwargs) -> Dict[str, Any]:
+    def search_by_availability(
+        self, is_active: bool = True, is_bookable: bool = True, **kwargs
+    ) -> Dict[str, Any]:
         """
         Buscar unidades por disponibilidad.
 
@@ -148,7 +152,7 @@ class UnitRepository(BaseRepository):
         filters = {
             "is_active": 1 if is_active else 0,
             "is_bookable": 1 if is_bookable else 0,
-            **kwargs
+            **kwargs,
         }
         return self.search(filters)
 
@@ -163,10 +167,7 @@ class UnitRepository(BaseRepository):
         Returns:
             Resultados de búsqueda
         """
-        filters = {
-            "search": search_term,
-            **kwargs
-        }
+        filters = {"search": search_term, **kwargs}
         return self.search(filters)
 
     def get_unit_amenities(self, unit_id: int) -> List[Dict[str, Any]]:

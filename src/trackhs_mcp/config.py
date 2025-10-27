@@ -19,8 +19,8 @@ class TrackHSSettings(BaseSettings):
 
     # URL de API (opcional, con default)
     trackhs_api_url: str = Field(
-        default="https://ihmvacations.trackhs.com/api",
-        description="URL base de la API TrackHS"
+        default="https://ihmvacations.trackhs.com",
+        description="URL base de la API TrackHS",
     )
 
     # Configuración de logging
@@ -29,22 +29,24 @@ class TrackHSSettings(BaseSettings):
 
     # Configuración de autenticación
     auth_cache_ttl: int = Field(
-        default=300,
-        description="TTL del cache de autenticación en segundos"
+        default=300, description="TTL del cache de autenticación en segundos"
     )
 
     # Configuración de validación
     strict_validation: bool = Field(
-        default=True,
-        description="Habilitar validación estricta de respuestas"
+        default=True, description="Habilitar validación estricta de respuestas"
     )
 
     # Configuración de reintentos
     max_retries: int = Field(default=3, description="Máximo número de reintentos")
-    retry_delay: float = Field(default=1.0, description="Delay inicial entre reintentos")
+    retry_delay: float = Field(
+        default=1.0, description="Delay inicial entre reintentos"
+    )
 
     # Configuración de timeouts
-    request_timeout: float = Field(default=30.0, description="Timeout de requests en segundos")
+    request_timeout: float = Field(
+        default=30.0, description="Timeout de requests en segundos"
+    )
 
     # Configuración de CORS
     cors_origins: List[str] = Field(
@@ -53,19 +55,27 @@ class TrackHSSettings(BaseSettings):
             "https://api.elevenlabs.io",
             "https://app.elevenlabs.io",
             "https://claude.ai",
-            "https://app.claude.ai"
+            "https://app.claude.ai",
         ],
-        description="Orígenes permitidos para CORS"
+        description="Orígenes permitidos para CORS",
     )
-    cors_credentials: bool = Field(default=True, description="Permitir credenciales en CORS")
+    cors_credentials: bool = Field(
+        default=True, description="Permitir credenciales en CORS"
+    )
 
     # Configuración de health check
-    health_check_enabled: bool = Field(default=True, description="Habilitar health check")
-    health_check_timeout: int = Field(default=30, description="Timeout del health check")
+    health_check_enabled: bool = Field(
+        default=True, description="Habilitar health check"
+    )
+    health_check_timeout: int = Field(
+        default=30, description="Timeout del health check"
+    )
 
     # Configuración de métricas
     metrics_enabled: bool = Field(default=True, description="Habilitar métricas")
-    metrics_port: int = Field(default=9090, description="Puerto para métricas Prometheus")
+    metrics_port: int = Field(
+        default=9090, description="Puerto para métricas Prometheus"
+    )
 
     class Config:
         env_file = ".env"
@@ -114,6 +124,7 @@ class TrackHSSettings(BaseSettings):
 
 # Instancia global de configuración
 settings = TrackHSSettings()
+
 
 # Función helper para obtener configuración
 def get_settings() -> TrackHSSettings:

@@ -397,7 +397,7 @@ async def lifespan(server):
     if api_client:
         try:
             start = time.time()
-            api_client.get("pms/units/amenities", {"page": 1, "size": 1})
+            api_client.get("api/pms/units/amenities", {"page": 1, "size": 1})
             duration = time.time() - start
             logger.info(f"✅ API TrackHS conectada ({duration:.2f}s)")
         except Exception as e:
@@ -508,11 +508,11 @@ def search_reservations(
     page: Annotated[
         int,
         Field(
-            ge=0,
-            le=10000,
-            description="Número de página (0-based). Límite: page * size <= 10000",
+            ge=1,
+            le=500,
+            description="Número de página (1-based). Límite máximo: 500 páginas",
         ),
-    ] = 0,
+    ] = 1,
     size: Annotated[
         int, Field(ge=1, le=100, description="Tamaño de página (1-100)")
     ] = 10,
@@ -954,7 +954,8 @@ def create_housekeeping_work_order(
     clean_type_id: Annotated[
         Optional[int],
         Field(
-            gt=0, description="ID del tipo de limpieza (requerido si no es inspección)"
+            gt=0,
+            description="ID del tipo de limpieza (requerido si no es inspección). Tipos disponibles: 3=Inspection, 4=Departure Clean, 5=Deep Clean, 6=Pre-Arrival Inspection, 7=Refresh Clean, 8=Carpet Cleaning, 9=Guest Request, 10=Pack and Play",
         ),
     ] = None,
     comments: Annotated[
@@ -1070,7 +1071,7 @@ def health_check() -> str:
         if api_client:
             try:
                 start_time = time.time()
-                api_client.get("pms/units/amenities", {"page": 1, "size": 1})
+                api_client.get("api/pms/units/amenities", {"page": 1, "size": 1})
                 api_response_time = round((time.time() - start_time) * 1000, 2)
             except Exception as e:
                 api_status = "unhealthy"

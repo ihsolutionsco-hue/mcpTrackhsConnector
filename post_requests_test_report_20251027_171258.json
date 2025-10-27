@@ -1,0 +1,111 @@
+{
+  "timestamp": "2025-10-27T17:12:58.854730",
+  "base_url": "https://ihmvacations.trackhs.com",
+  "unit_id_used": 1,
+  "total_tests": 6,
+  "successful_tests": 4,
+  "failed_tests": 2,
+  "success_rate": 66.66666666666666,
+  "avg_response_time_ms": 2499.8295307159424,
+  "total_response_time_ms": 14998.977184295654,
+  "created_orders": [
+    {
+      "id": 10216,
+      "type": "maintenance",
+      "summary": "Prueba de mantenimiento - Grifo goteando"
+    },
+    {
+      "id": 10217,
+      "type": "maintenance",
+      "summary": "URGENTE - Aire acondicionado no funciona"
+    },
+    {
+      "id": 35956,
+      "type": "housekeeping",
+      "summary": "N/A"
+    },
+    {
+      "id": 10218,
+      "type": "maintenance",
+      "summary": "Mantenimiento preventivo - Revisión general"
+    }
+  ],
+  "scenarios": [
+    {
+      "endpoint": "api/pms/maintenance/work-orders",
+      "data": {
+        "unitId": 1,
+        "summary": "Prueba de mantenimiento - Grifo goteando",
+        "description": "El grifo del baño principal gotea constantemente. Necesita revisión y reparación del mecanismo interno.",
+        "priority": 3,
+        "status": "pending",
+        "dateReceived": "2025-10-27"
+      },
+      "description": "Orden de mantenimiento básica (prioridad media)"
+    },
+    {
+      "endpoint": "api/pms/maintenance/work-orders",
+      "data": {
+        "unitId": 1,
+        "summary": "URGENTE - Aire acondicionado no funciona",
+        "description": "El sistema de aire acondicionado no está funcionando. Temperatura muy alta en la unidad. Requiere atención inmediata.",
+        "priority": 5,
+        "status": "pending",
+        "dateReceived": "2025-10-27",
+        "estimatedCost": 150.0,
+        "estimatedTime": 120
+      },
+      "description": "Orden de mantenimiento urgente (prioridad alta)"
+    },
+    {
+      "endpoint": "api/pms/housekeeping/work-orders",
+      "data": {
+        "unitId": 1,
+        "scheduledAt": "2025-10-28",
+        "status": "pending",
+        "isInspection": false,
+        "cleanTypeId": 1,
+        "comments": "Limpieza de rutina post-reserva. Verificar estado general de la unidad."
+      },
+      "description": "Orden de housekeeping básica (limpieza)"
+    },
+    {
+      "endpoint": "api/pms/housekeeping/work-orders",
+      "data": {
+        "unitId": 1,
+        "scheduledAt": "2025-10-27",
+        "status": "pending",
+        "isInspection": true,
+        "comments": "Inspección de calidad post-limpieza. Verificar estándares de limpieza y estado de amenidades."
+      },
+      "description": "Inspección de housekeeping (sin limpieza)"
+    },
+    {
+      "endpoint": "api/pms/maintenance/work-orders",
+      "data": {
+        "unitId": 1,
+        "summary": "Mantenimiento preventivo - Revisión general",
+        "description": "Revisión preventiva de sistemas eléctricos y plomería. Programar para horario de menor ocupación.",
+        "priority": 1,
+        "status": "pending",
+        "dateReceived": "2025-10-27",
+        "estimatedCost": 75.0,
+        "estimatedTime": 60
+      },
+      "description": "Orden de mantenimiento preventivo (prioridad baja)"
+    },
+    {
+      "endpoint": "api/pms/housekeeping/work-orders",
+      "data": {
+        "unitId": 1,
+        "scheduledAt": "2025-10-29",
+        "status": "pending",
+        "isInspection": false,
+        "cleanTypeId": 2,
+        "comments": "Limpieza profunda con productos especiales. Incluye desinfección completa.",
+        "cost": 120.0
+      },
+      "description": "Orden de housekeeping con costo específico"
+    }
+  ]
+}

@@ -120,12 +120,12 @@ def main():
 
     # URLs base a probar
     base_urls = [
-        "https://ihmvacations.trackhs.com/api",
         "https://ihmvacations.trackhs.com",
-        "https://api.trackhs.com/api",
+        "https://ihmvacations.trackhs.com/api",
         "https://api.trackhs.com",
-        "https://trackhs.com/api",
+        "https://api.trackhs.com/api",
         "https://trackhs.com",
+        "https://trackhs.com/api",
     ]
 
     results = {}

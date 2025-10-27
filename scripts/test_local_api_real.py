@@ -136,13 +136,15 @@ def test_multiple_configurations():
 
     # Diferentes configuraciones a probar
     configurations = [
-        # Configuración actual
-        ("https://ihmvacations.trackhs.com/api", "pms/units"),
-        # Variaciones de URL base
+        # Configuración recomendada (URL sin /api)
         ("https://ihmvacations.trackhs.com", "api/pms/units"),
+        # Configuración anterior
+        ("https://ihmvacations.trackhs.com/api", "pms/units"),
+        # Otras variaciones de URL base
         ("https://api.trackhs.com", "pms/units"),
         ("https://api.trackhs.com/api", "pms/units"),
         # Variaciones de endpoint
+        ("https://ihmvacations.trackhs.com", "pms/units"),
         ("https://ihmvacations.trackhs.com/api", "units"),
         ("https://ihmvacations.trackhs.com/api", "pms/units/"),
         ("https://ihmvacations.trackhs.com/api", "api/pms/units"),

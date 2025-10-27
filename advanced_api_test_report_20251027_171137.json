@@ -1,0 +1,184 @@
+{
+  "timestamp": "2025-10-27T17:11:37.921068",
+  "base_url": "https://ihmvacations.trackhs.com",
+  "total_tests": 15,
+  "successful_tests": 13,
+  "failed_tests": 2,
+  "success_rate": 86.66666666666667,
+  "performance": {
+    "avg_response_time_ms": 1552.282190322876,
+    "min_response_time_ms": 790.7111644744873,
+    "max_response_time_ms": 3106.0869693756104,
+    "total_response_time_ms": 23284.23285484314
+  },
+  "scenarios": [
+    {
+      "endpoint": "api/pms/units",
+      "params": {
+        "page": 1,
+        "size": 1
+      },
+      "description": "Límite mínimo de página (1 unidad)",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units",
+      "params": {
+        "page": 1000,
+        "size": 10
+      },
+      "description": "Página muy alta (1000) - debería devolver página vacía",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units",
+      "params": {
+        "page": 1,
+        "size": 5,
+        "bedrooms": 3,
+        "bathrooms": 2,
+        "is_active": 1,
+        "is_bookable": 1
+      },
+      "description": "Filtros múltiples: 3 dorm, 2 baños, activa y reservable",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units",
+      "params": {
+        "page": 1,
+        "size": 5,
+        "search": "luxury"
+      },
+      "description": "Búsqueda con caracteres especiales: 'luxury'",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/reservations",
+      "params": {
+        "page": 1,
+        "size": 3,
+        "arrival_start": "2024-01-01",
+        "arrival_end": "2024-01-31"
+      },
+      "description": "Reservas de enero 2024",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/reservations",
+      "params": {
+        "page": 1,
+        "size": 3,
+        "status": "cancelled"
+      },
+      "description": "Reservas canceladas",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units/amenities",
+      "params": {
+        "page": 1,
+        "size": 20,
+        "search": "pool"
+      },
+      "description": "Amenidades relacionadas con 'pool'",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/maintenance/work-orders",
+      "params": {
+        "page": 1,
+        "size": 5,
+        "priority": 5
+      },
+      "description": "Órdenes de mantenimiento de alta prioridad",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/housekeeping/work-orders",
+      "params": {
+        "page": 1,
+        "size": 5,
+        "status": "completed"
+      },
+      "description": "Órdenes de housekeeping completadas",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/reservations",
+      "params": {
+        "page": 1,
+        "size": 3,
+        "search": "@"
+      },
+      "description": "Búsqueda de reservas por email (contiene @)",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units",
+      "params": {
+        "page": 1,
+        "size": 5,
+        "bedrooms": 1,
+        "bathrooms": 1
+      },
+      "description": "Unidades 1 dormitorio, 1 baño",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units/amenities",
+      "params": {
+        "page": 1,
+        "size": 10,
+        "search": "kitchen"
+      },
+      "description": "Amenidades de cocina",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units",
+      "params": {
+        "page": 1,
+        "size": 25
+      },
+      "description": "Prueba de rendimiento (25 unidades)",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units",
+      "params": {
+        "page": 1,
+        "size": 5,
+        "search": "xyz123nonexistent"
+      },
+      "description": "Búsqueda que no debería devolver resultados",
+      "expected_status": 200
+    },
+    {
+      "endpoint": "api/pms/units",
+      "params": {
+        "page": 0,
+        "size": -1
+      },
+      "description": "Parámetros inválidos (página 0, tamaño -1)",
+      "expected_status": 200
+    }
+  ],
+  "response_times": [
+    1892.2491073608398,
+    2042.4439907073975,
+    2537.037134170532,
+    2143.2998180389404,
+    1676.344871520996,
+    3106.0869693756104,
+    1543.5941219329834,
+    1386.9681358337402,
+    847.5954532623291,
+    936.9783401489258,
+    1085.348129272461,
+    802.891731262207,
+    1682.6817989349365,
+    790.7111644744873,
+    810.0020885467529
+  ]
+}

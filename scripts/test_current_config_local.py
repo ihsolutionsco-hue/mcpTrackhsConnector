@@ -17,7 +17,7 @@ def test_current_config_local():
     print("=" * 60)
 
     # Obtener configuración actual
-    base_url = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api")
+    base_url = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com")
     username = os.getenv("TRACKHS_USERNAME")
     password = os.getenv("TRACKHS_PASSWORD")
 
@@ -33,7 +33,7 @@ def test_current_config_local():
         return False
 
     # Probar endpoint de unidades
-    endpoint = "pms/units"
+    endpoint = "api/pms/units"
     full_url = f"{base_url}/{endpoint}"
     print(f"\nURL completa: {full_url}")
 
