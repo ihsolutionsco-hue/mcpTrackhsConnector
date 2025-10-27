@@ -142,74 +142,74 @@ RESERVATION_SEARCH_OUTPUT_SCHEMA = {
                                 "description": "ID único de la reserva",
                             },
                             "confirmationNumber": {
-                                "type": "string",
+                                "type": ["string", "null"],
                                 "description": "Número de confirmación",
                             },
                             "guest": {
-                                "type": "object",
+                                "type": ["object", "null"],
                                 "properties": {
                                     "name": {
-                                        "type": "string",
+                                        "type": ["string", "null"],
                                         "description": "Nombre del huésped",
                                     },
                                     "email": {
-                                        "type": "string",
+                                        "type": ["string", "null"],
                                         "description": "Email del huésped",
                                     },
                                     "phone": {
-                                        "type": "string",
+                                        "type": ["string", "null"],
                                         "description": "Teléfono del huésped",
                                     },
                                 },
                             },
                             "arrivalDate": {
-                                "type": "string",
+                                "type": ["string", "null"],
                                 "description": "Fecha de llegada (ISO 8601)",
                             },
                             "departureDate": {
-                                "type": "string",
+                                "type": ["string", "null"],
                                 "description": "Fecha de salida (ISO 8601)",
                             },
                             "status": {
-                                "type": "string",
+                                "type": ["string", "null"],
                                 "description": "Estado de la reserva",
                             },
                             "unit": {
-                                "type": "object",
+                                "type": ["object", "null"],
                                 "properties": {
                                     "id": {
-                                        "type": "integer",
+                                        "type": ["integer", "null"],
                                         "description": "ID de la unidad",
                                     },
                                     "name": {
-                                        "type": "string",
+                                        "type": ["string", "null"],
                                         "description": "Nombre de la unidad",
                                     },
                                     "code": {
-                                        "type": "string",
+                                        "type": ["string", "null"],
                                         "description": "Código de la unidad",
                                     },
                                 },
                             },
                             "financial": {
-                                "type": "object",
+                                "type": ["object", "null"],
                                 "properties": {
                                     "totalAmount": {
-                                        "type": "number",
+                                        "type": ["number", "null"],
                                         "description": "Monto total",
                                     },
                                     "balance": {
-                                        "type": "number",
+                                        "type": ["number", "null"],
                                         "description": "Balance pendiente",
                                     },
                                     "deposit": {
-                                        "type": "number",
+                                        "type": ["number", "null"],
                                         "description": "Depósito requerido",
                                     },
                                 },
                             },
                             "_links": {
-                                "type": "object",
+                                "type": ["object", "null"],
                                 "description": "Enlaces a recursos relacionados",
                             },
                         },
@@ -244,35 +244,35 @@ UNIT_SEARCH_OUTPUT_SCHEMA = {
                                 "description": "ID único de la unidad",
                             },
                             "name": {
-                                "type": "string",
+                                "type": ["string", "null"],
                                 "description": "Nombre de la unidad",
                             },
                             "code": {
-                                "type": "string",
+                                "type": ["string", "null"],
                                 "description": "Código de la unidad",
                             },
                             "bedrooms": {
-                                "type": "integer",
+                                "type": ["integer", "null"],
                                 "description": "Número de dormitorios",
                             },
                             "bathrooms": {
-                                "type": "integer",
+                                "type": ["integer", "null"],
                                 "description": "Número de baños",
                             },
                             "max_occupancy": {
-                                "type": "integer",
+                                "type": ["integer", "null"],
                                 "description": "Capacidad máxima",
                             },
                             "area": {
-                                "type": "number",
+                                "type": ["number", "null"],
                                 "description": "Área en metros cuadrados",
                             },
                             "address": {
-                                "type": "string",
+                                "type": ["string", "null"],
                                 "description": "Dirección de la unidad",
                             },
                             "amenities": {
-                                "type": "array",
+                                "type": ["array", "null"],
                                 "items": {"type": "string"},
                                 "description": "Amenidades disponibles",
                             },
@@ -297,24 +297,39 @@ WORK_ORDER_OUTPUT_SCHEMA = {
     "type": "object",
     "properties": {
         "id": {"type": "integer", "description": "ID único de la orden de trabajo"},
-        "status": {"type": "string", "description": "Estado actual de la orden"},
+        "status": {
+            "type": ["string", "null"],
+            "description": "Estado actual de la orden",
+        },
         "priority": {
-            "type": "integer",
+            "type": ["integer", "null"],
             "description": "Prioridad (1=Baja, 3=Media, 5=Alta)",
         },
-        "summary": {"type": "string", "description": "Resumen del trabajo"},
-        "description": {"type": "string", "description": "Descripción detallada"},
-        "unit_id": {"type": "integer", "description": "ID de la unidad"},
-        "estimated_cost": {"type": "number", "description": "Costo estimado"},
+        "summary": {"type": ["string", "null"], "description": "Resumen del trabajo"},
+        "description": {
+            "type": ["string", "null"],
+            "description": "Descripción detallada",
+        },
+        "unit_id": {"type": ["integer", "null"], "description": "ID de la unidad"},
+        "estimated_cost": {"type": ["number", "null"], "description": "Costo estimado"},
         "estimated_time": {
-            "type": "integer",
+            "type": ["integer", "null"],
             "description": "Tiempo estimado en minutos",
         },
-        "date_received": {"type": "string", "description": "Fecha de recepción"},
-        "date_completed": {"type": "string", "description": "Fecha de finalización"},
-        "assigned_to": {"type": "string", "description": "Usuario asignado"},
-        "vendor": {"type": "string", "description": "Proveedor asignado"},
-        "_links": {"type": "object", "description": "Enlaces a recursos relacionados"},
+        "date_received": {
+            "type": ["string", "null"],
+            "description": "Fecha de recepción",
+        },
+        "date_completed": {
+            "type": ["string", "null"],
+            "description": "Fecha de finalización",
+        },
+        "assigned_to": {"type": ["string", "null"], "description": "Usuario asignado"},
+        "vendor": {"type": ["string", "null"], "description": "Proveedor asignado"},
+        "_links": {
+            "type": ["object", "null"],
+            "description": "Enlaces a recursos relacionados",
+        },
     },
 }
 
@@ -324,46 +339,91 @@ RESERVATION_DETAIL_OUTPUT_SCHEMA = {
     "properties": {
         "id": {"type": "integer", "description": "ID único de la reserva"},
         "confirmation_number": {
-            "type": "string",
+            "type": ["string", "null"],
             "description": "Número de confirmación",
         },
         "guest": {
-            "type": "object",
+            "type": ["object", "null"],
             "properties": {
-                "name": {"type": "string", "description": "Nombre del huésped"},
-                "email": {"type": "string", "description": "Email del huésped"},
-                "phone": {"type": "string", "description": "Teléfono del huésped"},
-                "address": {"type": "string", "description": "Dirección del huésped"},
+                "name": {
+                    "type": ["string", "null"],
+                    "description": "Nombre del huésped",
+                },
+                "email": {
+                    "type": ["string", "null"],
+                    "description": "Email del huésped",
+                },
+                "phone": {
+                    "type": ["string", "null"],
+                    "description": "Teléfono del huésped",
+                },
+                "address": {
+                    "type": ["string", "null"],
+                    "description": "Dirección del huésped",
+                },
             },
         },
         "dates": {
-            "type": "object",
+            "type": ["object", "null"],
             "properties": {
-                "arrival": {"type": "string", "description": "Fecha de llegada"},
-                "departure": {"type": "string", "description": "Fecha de salida"},
-                "nights": {"type": "integer", "description": "Número de noches"},
+                "arrival": {
+                    "type": ["string", "null"],
+                    "description": "Fecha de llegada",
+                },
+                "departure": {
+                    "type": ["string", "null"],
+                    "description": "Fecha de salida",
+                },
+                "nights": {
+                    "type": ["integer", "null"],
+                    "description": "Número de noches",
+                },
             },
         },
         "unit": {
-            "type": "object",
+            "type": ["object", "null"],
             "properties": {
-                "id": {"type": "integer", "description": "ID de la unidad"},
-                "name": {"type": "string", "description": "Nombre de la unidad"},
-                "code": {"type": "string", "description": "Código de la unidad"},
-                "bedrooms": {"type": "integer", "description": "Número de dormitorios"},
-                "bathrooms": {"type": "integer", "description": "Número de baños"},
+                "id": {"type": ["integer", "null"], "description": "ID de la unidad"},
+                "name": {
+                    "type": ["string", "null"],
+                    "description": "Nombre de la unidad",
+                },
+                "code": {
+                    "type": ["string", "null"],
+                    "description": "Código de la unidad",
+                },
+                "bedrooms": {
+                    "type": ["integer", "null"],
+                    "description": "Número de dormitorios",
+                },
+                "bathrooms": {
+                    "type": ["integer", "null"],
+                    "description": "Número de baños",
+                },
             },
         },
-        "status": {"type": "string", "description": "Estado de la reserva"},
+        "status": {"type": ["string", "null"], "description": "Estado de la reserva"},
         "financial": {
-            "type": "object",
+            "type": ["object", "null"],
             "properties": {
-                "total_amount": {"type": "number", "description": "Monto total"},
-                "balance": {"type": "number", "description": "Balance pendiente"},
-                "deposit": {"type": "number", "description": "Depósito requerido"},
+                "total_amount": {
+                    "type": ["number", "null"],
+                    "description": "Monto total",
+                },
+                "balance": {
+                    "type": ["number", "null"],
+                    "description": "Balance pendiente",
+                },
+                "deposit": {
+                    "type": ["number", "null"],
+                    "description": "Depósito requerido",
+                },
             },
         },
-        "_links": {"type": "object", "description": "Enlaces a recursos relacionados"},
+        "_links": {
+            "type": ["object", "null"],
+            "description": "Enlaces a recursos relacionados",
+        },
     },
 }
 
@@ -371,42 +431,72 @@ FOLIO_OUTPUT_SCHEMA = {
     "type": "object",
     "properties": {
         "reservation_id": {"type": "integer", "description": "ID de la reserva"},
-        "balance": {"type": "number", "description": "Balance total"},
+        "balance": {"type": ["number", "null"], "description": "Balance total"},
         "charges": {
-            "type": "array",
+            "type": ["array", "null"],
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": {"type": "integer", "description": "ID del cargo"},
+                    "id": {"type": ["integer", "null"], "description": "ID del cargo"},
                     "description": {
-                        "type": "string",
+                        "type": ["string", "null"],
                         "description": "Descripción del cargo",
                     },
-                    "amount": {"type": "number", "description": "Monto del cargo"},
-                    "date": {"type": "string", "description": "Fecha del cargo"},
-                    "type": {"type": "string", "description": "Tipo de cargo"},
+                    "amount": {
+                        "type": ["number", "null"],
+                        "description": "Monto del cargo",
+                    },
+                    "date": {
+                        "type": ["string", "null"],
+                        "description": "Fecha del cargo",
+                    },
+                    "type": {
+                        "type": ["string", "null"],
+                        "description": "Tipo de cargo",
+                    },
                 },
             },
         },
         "payments": {
-            "type": "array",
+            "type": ["array", "null"],
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": {"type": "integer", "description": "ID del pago"},
-                    "amount": {"type": "number", "description": "Monto del pago"},
-                    "date": {"type": "string", "description": "Fecha del pago"},
-                    "method": {"type": "string", "description": "Método de pago"},
-                    "status": {"type": "string", "description": "Estado del pago"},
+                    "id": {"type": ["integer", "null"], "description": "ID del pago"},
+                    "amount": {
+                        "type": ["number", "null"],
+                        "description": "Monto del pago",
+                    },
+                    "date": {
+                        "type": ["string", "null"],
+                        "description": "Fecha del pago",
+                    },
+                    "method": {
+                        "type": ["string", "null"],
+                        "description": "Método de pago",
+                    },
+                    "status": {
+                        "type": ["string", "null"],
+                        "description": "Estado del pago",
+                    },
                 },
             },
         },
         "summary": {
-            "type": "object",
+            "type": ["object", "null"],
             "properties": {
-                "total_charges": {"type": "number", "description": "Total de cargos"},
-                "total_payments": {"type": "number", "description": "Total de pagos"},
-                "balance_due": {"type": "number", "description": "Balance pendiente"},
+                "total_charges": {
+                    "type": ["number", "null"],
+                    "description": "Total de cargos",
+                },
+                "total_payments": {
+                    "type": ["number", "null"],
+                    "description": "Total de pagos",
+                },
+                "balance_due": {
+                    "type": ["number", "null"],
+                    "description": "Balance pendiente",
+                },
             },
         },
     },
