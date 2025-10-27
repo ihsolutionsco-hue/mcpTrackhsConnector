@@ -306,8 +306,65 @@ FOLIO_DETAIL_OUTPUT_SCHEMA = generate_json_schema(FolioResponse)
 WORK_ORDER_DETAIL_OUTPUT_SCHEMA = generate_json_schema(WorkOrderResponse)
 
 # Schemas de colecciones
-RESERVATION_SEARCH_OUTPUT_SCHEMA = generate_collection_schema(ReservationResponse)
-UNIT_SEARCH_OUTPUT_SCHEMA = generate_collection_schema(UnitResponse)
+RESERVATION_SEARCH_OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "page": {"type": "integer", "description": "Página actual"},
+        "page_count": {"type": "integer", "description": "Total de páginas"},
+        "page_size": {"type": "integer", "description": "Tamaño de página"},
+        "total_items": {"type": "integer", "description": "Total de elementos"},
+        "_embedded": {
+            "type": "object",
+            "description": "Datos embebidos de la respuesta",
+            "properties": {
+                "reservations": {
+                    "type": "array",
+                    "items": generate_json_schema(ReservationResponse),
+                    "description": "Lista de reservas",
+                }
+            },
+        },
+        "_links": {"type": "object", "description": "Enlaces de navegación HATEOAS"},
+    },
+    "required": [
+        "page",
+        "page_count",
+        "page_size",
+        "total_items",
+        "_embedded",
+        "_links",
+    ],
+}
+
+UNIT_SEARCH_OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "page": {"type": "integer", "description": "Página actual"},
+        "page_count": {"type": "integer", "description": "Total de páginas"},
+        "page_size": {"type": "integer", "description": "Tamaño de página"},
+        "total_items": {"type": "integer", "description": "Total de elementos"},
+        "_embedded": {
+            "type": "object",
+            "description": "Datos embebidos de la respuesta",
+            "properties": {
+                "units": {
+                    "type": "array",
+                    "items": generate_json_schema(UnitResponse),
+                    "description": "Lista de unidades",
+                }
+            },
+        },
+        "_links": {"type": "object", "description": "Enlaces de navegación HATEOAS"},
+    },
+    "required": [
+        "page",
+        "page_count",
+        "page_size",
+        "total_items",
+        "_embedded",
+        "_links",
+    ],
+}
 
 # Schema para amenidades (caso especial - mantener estructura específica)
 AMENITIES_OUTPUT_SCHEMA = {
@@ -334,11 +391,11 @@ AMENITIES_OUTPUT_SCHEMA = {
                                 "description": "ID único de la amenidad",
                             },
                             "name": {
-                                "type": ["string", "object"],
+                                "type": "string",
                                 "description": "Nombre de la amenidad",
                             },
                             "group": {
-                                "type": ["string", "object"],
+                                "type": "string",
                                 "description": "Grupo de la amenidad",
                             },
                             "is_public": {
