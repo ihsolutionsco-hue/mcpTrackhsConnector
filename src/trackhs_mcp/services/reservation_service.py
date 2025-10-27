@@ -80,18 +80,27 @@ class ReservationService:
         logger.info(f"Buscando reservas: página {page}, tamaño {size}")
 
         try:
-            # Construir parámetros
+            # Construir parámetros usando nombres correctos según documentación API
             params = {"page": page, "size": size}
             if search:
                 params["search"] = search
             if arrival_start:
-                params["arrival_start"] = arrival_start
+                # Convertir formato YYYY-MM-DD a ISO 8601 para API
+                params["arrivalStart"] = self._convert_to_iso8601(arrival_start)
             if arrival_end:
-                params["arrival_end"] = arrival_end
+                # Convertir formato YYYY-MM-DD a ISO 8601 para API
+                params["arrivalEnd"] = self._convert_to_iso8601(arrival_end)
             if status:
                 params["status"] = status
 
             result = self.reservation_repo.search(params)
+
+            # WORKAROUND: Filtro del lado del cliente para compensar bug de API TrackHS
+            # La API no respeta los filtros de fecha, así que filtramos localmente
+            if arrival_start or arrival_end:
+                result = self._apply_client_side_date_filter(
+                    result, arrival_start, arrival_end
+                )
 
             logger.info(
                 f"Búsqueda de reservas completada. Encontradas: {result.get('total_items', 0)}"
@@ -187,3 +196,94 @@ class ReservationService:
             datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
             raise ValidationError(f"{field_name} debe tener formato YYYY-MM-DD")
+
+    def _convert_to_iso8601(self, date_str: str) -> str:
+        """
+        Convertir fecha YYYY-MM-DD a formato ISO 8601 para la API.
+
+        Args:
+            date_str: Fecha en formato YYYY-MM-DD
+
+        Returns:
+            Fecha en formato ISO 8601 (YYYY-MM-DDTHH:MM:SSZ)
+        """
+        from datetime import datetime
+
+        try:
+            # Parsear fecha YYYY-MM-DD
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            # Convertir a ISO 8601 con timezone UTC
+            return date_obj.strftime("%Y-%m-%dT%H:%M:%SZ")
+        except ValueError:
+            # Si ya está en formato ISO 8601, devolverlo tal como está
+            return date_str
+
+    def _apply_client_side_date_filter(
+        self,
+        result: Dict[str, Any],
+        arrival_start: Optional[str],
+        arrival_end: Optional[str],
+    ) -> Dict[str, Any]:
+        """
+        Aplicar filtro de fechas del lado del cliente para compensar bug de API TrackHS.
+
+        Args:
+            result: Resultado de la búsqueda de la API
+            arrival_start: Fecha de inicio (YYYY-MM-DD)
+            arrival_end: Fecha de fin (YYYY-MM-DD)
+
+        Returns:
+            Resultado filtrado
+        """
+        from datetime import datetime
+
+        reservations = result.get("_embedded", {}).get("reservations", [])
+        filtered_reservations = []
+
+        for reservation in reservations:
+            arrival_date = reservation.get("arrivalDate")
+            if not arrival_date:
+                continue
+
+            # Convertir fecha de llegada a objeto datetime para comparación
+            try:
+                res_date = datetime.strptime(arrival_date, "%Y-%m-%d")
+
+                # Aplicar filtros de fecha
+                if arrival_start:
+                    start_date = datetime.strptime(arrival_start, "%Y-%m-%d")
+                    if res_date < start_date:
+                        continue
+
+                if arrival_end:
+                    end_date = datetime.strptime(arrival_end, "%Y-%m-%d")
+                    if res_date > end_date:
+                        continue
+
+                filtered_reservations.append(reservation)
+
+            except ValueError:
+                # Si no se puede parsear la fecha, omitir esta reserva
+                logger.warning(f"No se pudo parsear fecha de llegada: {arrival_date}")
+                continue
+
+        # Actualizar el resultado con las reservas filtradas
+        result["_embedded"]["reservations"] = filtered_reservations
+        result["total_items"] = len(filtered_reservations)
+        result["page_size"] = len(filtered_reservations)
+
+        # Recalcular metadatos de paginación
+        if filtered_reservations:
+            result["page_count"] = (
+                1  # Con filtro del cliente, solo mostramos una página
+            )
+            result["page"] = 1
+        else:
+            result["page_count"] = 0
+            result["page"] = 1
+
+        logger.info(
+            f"Filtro del cliente aplicado: {len(filtered_reservations)} reservas encontradas"
+        )
+
+        return result
