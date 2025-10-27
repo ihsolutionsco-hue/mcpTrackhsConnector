@@ -6,7 +6,7 @@ Usando Pydantic Settings para validación y type safety
 import os
 from typing import List, Optional
 
-from pydantic import Field, validator
+from pydantic import ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -14,17 +14,24 @@ class TrackHSSettings(BaseSettings):
     """Configuración centralizada del servidor TrackHS MCP"""
 
     # Credenciales TrackHS (requeridas)
-    trackhs_username: str = Field(..., description="Usuario de TrackHS API")
-    trackhs_password: str = Field(..., description="Contraseña de TrackHS API")
+    trackhs_username: str = Field(
+        ..., description="Usuario de TrackHS API", alias="TRACKHS_USERNAME"
+    )
+    trackhs_password: str = Field(
+        ..., description="Contraseña de TrackHS API", alias="TRACKHS_PASSWORD"
+    )
 
     # URL de API (opcional, con default)
     trackhs_api_url: str = Field(
         default="https://ihmvacations.trackhs.com",
         description="URL base de la API TrackHS",
+        alias="TRACKHS_API_URL",
     )
 
     # Configuración de logging
-    log_level: str = Field(default="INFO", description="Nivel de logging")
+    log_level: str = Field(
+        default="INFO", description="Nivel de logging", alias="LOG_LEVEL"
+    )
     log_format: str = Field(default="json", description="Formato de logs")
 
     # Configuración de autenticación
@@ -34,7 +41,9 @@ class TrackHSSettings(BaseSettings):
 
     # Configuración de validación
     strict_validation: bool = Field(
-        default=True, description="Habilitar validación estricta de respuestas"
+        default=True,
+        description="Habilitar validación estricta de respuestas",
+        alias="STRICT_VALIDATION",
     )
 
     # Configuración de reintentos
@@ -46,6 +55,23 @@ class TrackHSSettings(BaseSettings):
     # Configuración de timeouts
     request_timeout: float = Field(
         default=30.0, description="Timeout de requests en segundos"
+    )
+    trackhs_timeout: int = Field(
+        default=30,
+        description="Timeout específico de TrackHS en segundos",
+        alias="TRACKHS_TIMEOUT",
+    )
+
+    # Configuración de respuestas
+    trackhs_compact_responses: bool = Field(
+        default=True,
+        description="Usar respuestas compactas de TrackHS",
+        alias="TRACKHS_COMPACT_RESPONSES",
+    )
+    trackhs_max_response_items: int = Field(
+        default=100,
+        description="Máximo número de elementos en respuestas",
+        alias="TRACKHS_MAX_RESPONSE_ITEMS",
     )
 
     # Configuración de CORS
@@ -77,20 +103,15 @@ class TrackHSSettings(BaseSettings):
         default=9090, description="Puerto para métricas Prometheus"
     )
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        # Mapear variables de entorno
-        fields = {
-            "trackhs_username": {"env": "TRACKHS_USERNAME"},
-            "trackhs_password": {"env": "TRACKHS_PASSWORD"},
-            "trackhs_api_url": {"env": "TRACKHS_API_URL"},
-            "log_level": {"env": "LOG_LEVEL"},
-            "strict_validation": {"env": "STRICT_VALIDATION"},
-        }
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="allow",  # Permitir campos extra para variables de entorno
+    )
 
-    @validator("log_level")
+    @field_validator("log_level")
+    @classmethod
     def validate_log_level(cls, v):
         """Validar nivel de logging"""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -98,7 +119,8 @@ class TrackHSSettings(BaseSettings):
             raise ValueError(f"log_level debe ser uno de: {valid_levels}")
         return v.upper()
 
-    @validator("auth_cache_ttl")
+    @field_validator("auth_cache_ttl")
+    @classmethod
     def validate_auth_cache_ttl(cls, v):
         """Validar TTL del cache de autenticación"""
         if v < 60:  # Mínimo 1 minuto
@@ -107,18 +129,36 @@ class TrackHSSettings(BaseSettings):
             raise ValueError("auth_cache_ttl no debe exceder 3600 segundos")
         return v
 
-    @validator("max_retries")
+    @field_validator("max_retries")
+    @classmethod
     def validate_max_retries(cls, v):
         """Validar número máximo de reintentos"""
         if v < 0 or v > 10:
             raise ValueError("max_retries debe estar entre 0 y 10")
         return v
 
-    @validator("request_timeout")
+    @field_validator("request_timeout")
+    @classmethod
     def validate_request_timeout(cls, v):
         """Validar timeout de requests"""
         if v < 5.0 or v > 300.0:
             raise ValueError("request_timeout debe estar entre 5 y 300 segundos")
+        return v
+
+    @field_validator("trackhs_timeout")
+    @classmethod
+    def validate_trackhs_timeout(cls, v):
+        """Validar timeout específico de TrackHS"""
+        if v < 5 or v > 300:
+            raise ValueError("trackhs_timeout debe estar entre 5 y 300 segundos")
+        return v
+
+    @field_validator("trackhs_max_response_items")
+    @classmethod
+    def validate_trackhs_max_response_items(cls, v):
+        """Validar máximo número de elementos en respuestas"""
+        if v < 1 or v > 1000:
+            raise ValueError("trackhs_max_response_items debe estar entre 1 y 1000")
         return v
 
 
