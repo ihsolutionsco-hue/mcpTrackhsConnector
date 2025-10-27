@@ -124,7 +124,9 @@ class UnitResponse(BaseModel):
     max_occupancy: Optional[int] = Field(
         None, ge=1, description="Capacidad máxima de huéspedes"
     )
-    area: Optional[float] = Field(None, ge=0, description="Área en metros cuadrados")
+    area: Optional[Union[float, int, None]] = Field(
+        None, description="Área en metros cuadrados"
+    )
     address: Optional[str] = Field(None, description="Dirección completa de la unidad")
     is_active: Optional[bool] = Field(None, description="Si la unidad está activa")
     is_bookable: Optional[bool] = Field(
@@ -152,6 +154,17 @@ class UnitResponse(BaseModel):
         if v is not None and not isinstance(v, int):
             try:
                 return int(v)
+            except (ValueError, TypeError):
+                return None
+        return v
+
+    @field_validator("area")
+    @classmethod
+    def validate_area(cls, v):
+        """Asegurar que el área sea un número o None"""
+        if v is not None:
+            try:
+                return float(v)
             except (ValueError, TypeError):
                 return None
         return v
@@ -395,8 +408,14 @@ AMENITIES_OUTPUT_SCHEMA = {
                                 "description": "Nombre de la amenidad",
                             },
                             "group": {
-                                "type": "string",
+                                "type": "object",
                                 "description": "Grupo de la amenidad",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "Nombre del grupo",
+                                    }
+                                },
                             },
                             "is_public": {
                                 "type": "boolean",

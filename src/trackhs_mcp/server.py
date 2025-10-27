@@ -764,15 +764,40 @@ def search_units(
             "Servicio de unidades no disponible. Verifique las credenciales."
         )
 
-    # Usar servicio de negocio para búsqueda
+    # ✅ CORRECCIÓN FUNDAMENTAL: Asegurar tipos correctos
+    # FastMCP puede convertir tipos automáticamente, necesitamos preservar los tipos correctos
+    def ensure_correct_types(**kwargs):
+        """Asegurar que los tipos sean correctos para el API de TrackHS"""
+        corrected = {}
+        for key, value in kwargs.items():
+            if value is not None:
+                if key in [
+                    "page",
+                    "size",
+                    "bedrooms",
+                    "bathrooms",
+                    "is_active",
+                    "is_bookable",
+                ]:
+                    # Asegurar que sean enteros
+                    corrected[key] = int(value) if not isinstance(value, int) else value
+                else:
+                    corrected[key] = value
+            else:
+                corrected[key] = value
+        return corrected
+
+    # Usar servicio de negocio para búsqueda con tipos corregidos
     result = unit_service.search_units(
-        page=page,
-        size=size,
-        search=search,
-        bedrooms=bedrooms,
-        bathrooms=bathrooms,
-        is_active=is_active,
-        is_bookable=is_bookable,
+        **ensure_correct_types(
+            page=page,
+            size=size,
+            search=search,
+            bedrooms=bedrooms,
+            bathrooms=bathrooms,
+            is_active=is_active,
+            is_bookable=is_bookable,
+        )
     )
 
     return result
@@ -873,11 +898,15 @@ def get_folio(
         return validated_result
 
     except NotFoundError:
-        # ✅ ToolError: Mensaje claro para el cliente
-        raise ToolError(
-            f"Folio para reserva {reservation_id} no encontrado. "
-            f"Verifique que la reserva existe."
-        )
+        # ✅ CORRECCIÓN FUNDAMENTAL: Manejo mejorado de folios no encontrados
+        logger.warning(f"Folio de reserva {reservation_id} no encontrado")
+        return {
+            "error": "Folio no encontrado",
+            "message": f"El folio financiero para la reserva {reservation_id} no está disponible. Esto puede deberse a que la reserva fue cancelada o el folio fue cerrado.",
+            "reservation_id": reservation_id,
+            "suggestion": "Verifique que la reserva existe y no está cancelada, o consulte con el administrador del sistema.",
+            "status": "not_found",
+        }
     except AuthenticationError as e:
         raise ToolError(f"Error de autenticación: {str(e)}")
     except Exception as e:
@@ -962,16 +991,38 @@ def create_maintenance_work_order(
             "Servicio de work orders no disponible. Verifique las credenciales."
         )
 
+    # ✅ CORRECCIÓN FUNDAMENTAL: Asegurar tipos correctos para work orders
+    def ensure_work_order_types(**kwargs):
+        """Asegurar que los tipos sean correctos para el API de TrackHS"""
+        corrected = {}
+        for key, value in kwargs.items():
+            if value is not None:
+                if key in ["unit_id", "priority", "estimated_time"]:
+                    # Asegurar que sean enteros
+                    corrected[key] = int(value) if not isinstance(value, int) else value
+                elif key == "estimated_cost":
+                    # Asegurar que sea float
+                    corrected[key] = (
+                        float(value) if not isinstance(value, float) else value
+                    )
+                else:
+                    corrected[key] = value
+            else:
+                corrected[key] = value
+        return corrected
+
     try:
-        # Usar servicio de negocio para crear work order
+        # Usar servicio de negocio para crear work order con tipos corregidos
         result = work_order_service.create_maintenance_work_order(
-            unit_id=unit_id,
-            summary=summary,
-            description=description,
-            priority=priority,
-            estimated_cost=estimated_cost,
-            estimated_time=estimated_time,
-            date_received=date_received,
+            **ensure_work_order_types(
+                unit_id=unit_id,
+                summary=summary,
+                description=description,
+                priority=priority,
+                estimated_cost=estimated_cost,
+                estimated_time=estimated_time,
+                date_received=date_received,
+            )
         )
 
         # Validar respuesta (modo no-strict: loguea pero no falla)
