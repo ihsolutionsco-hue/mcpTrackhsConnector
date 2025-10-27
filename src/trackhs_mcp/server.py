@@ -42,11 +42,11 @@ from .repositories import (
 )
 from .schemas import (
     AMENITIES_OUTPUT_SCHEMA,
-    FOLIO_OUTPUT_SCHEMA,
+    FOLIO_DETAIL_OUTPUT_SCHEMA,
     RESERVATION_DETAIL_OUTPUT_SCHEMA,
     RESERVATION_SEARCH_OUTPUT_SCHEMA,
     UNIT_SEARCH_OUTPUT_SCHEMA,
-    WORK_ORDER_OUTPUT_SCHEMA,
+    WORK_ORDER_DETAIL_OUTPUT_SCHEMA,
     CollectionResponse,
     FolioResponse,
     ReservationResponse,
@@ -173,6 +173,9 @@ def validate_response(
     """
     Valida datos de respuesta contra un modelo Pydantic.
 
+    MEJOR PRÁCTICA: Validación robusta con transformación automática de tipos.
+    Convierte tipos incorrectos automáticamente cuando es posible.
+
     Args:
         data: Datos a validar
         model_class: Clase del modelo Pydantic
@@ -189,16 +192,52 @@ def validate_response(
         strict = settings.strict_validation
 
     try:
-        validated = model_class.model_validate(data)
+        # Intentar validación con transformación automática de tipos
+        validated = model_class.model_validate(data, strict=False)
         logger.debug(f"Response validated successfully against {model_class.__name__}")
-        return validated.model_dump(by_alias=True)
+        return validated.model_dump(by_alias=True, exclude_none=True)
     except Exception as e:
         if strict:
             logger.error(f"Response validation failed: {str(e)}")
             raise ValidationError(f"Respuesta de API no válida: {str(e)}")
         else:
             logger.warning(f"Response validation warning (non-strict): {str(e)}")
-            return data  # Retornar datos originales en modo no-strict
+            # En modo no-strict, intentar limpiar datos básicos
+            return _clean_response_data(data, model_class)
+
+
+def _clean_response_data(data: Dict[str, Any], model_class: type) -> Dict[str, Any]:
+    """
+    Limpia datos de respuesta básicos para evitar errores de tipo.
+
+    MEJOR PRÁCTICA: Transformación automática de tipos comunes.
+    """
+    cleaned = data.copy()
+
+    # Limpiar campos comunes que causan problemas
+    if "confirmation_number" in cleaned and cleaned["confirmation_number"] is not None:
+        cleaned["confirmation_number"] = str(cleaned["confirmation_number"])
+
+    if "unit_id" in cleaned and cleaned["unit_id"] is not None:
+        try:
+            cleaned["unit_id"] = int(cleaned["unit_id"])
+        except (ValueError, TypeError):
+            cleaned["unit_id"] = None
+
+    # Limpiar campos numéricos
+    for field in ["bedrooms", "bathrooms", "max_occupancy", "priority"]:
+        if field in cleaned and cleaned[field] is not None:
+            try:
+                cleaned[field] = int(cleaned[field])
+            except (ValueError, TypeError):
+                cleaned[field] = None
+
+    # Limpiar campos de fecha
+    for field in ["arrival_date", "departure_date", "date_received", "date_completed"]:
+        if field in cleaned and cleaned[field] is not None:
+            cleaned[field] = str(cleaned[field])
+
+    return cleaned
 
 
 # Cliente HTTP robusto
@@ -672,17 +711,13 @@ def search_units(
         Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
     ] = None,
     is_active: Annotated[
-        Optional[int],
-        Field(
-            ge=0, le=1, description="Filtrar por unidades activas (1) o inactivas (0)"
-        ),
+        Optional[bool],
+        Field(description="Filtrar por unidades activas (true) o inactivas (false)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[int],
+        Optional[bool],
         Field(
-            ge=0,
-            le=1,
-            description="Filtrar por unidades disponibles para reservar (1) o no (0)",
+            description="Filtrar por unidades disponibles para reservar (true) o no (false)"
         ),
     ] = None,
 ) -> Dict[str, Any]:
@@ -710,7 +745,7 @@ def search_units(
 
     Ejemplos de uso:
     - search_units(bedrooms=2, bathrooms=1) # Unidades de 2 dormitorios, 1 baño
-    - search_units(is_active=1, is_bookable=1) # Unidades activas y disponibles
+    - search_units(is_active=True, is_bookable=True) # Unidades activas y disponibles
     - search_units(search="penthouse") # Buscar por nombre o descripción
     """
     # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
@@ -782,7 +817,7 @@ def search_amenities(
     return unit_service.search_amenities(page=page, size=size, search=search)
 
 
-@mcp.tool(output_schema=FOLIO_OUTPUT_SCHEMA)
+@mcp.tool(output_schema=FOLIO_DETAIL_OUTPUT_SCHEMA)
 def get_folio(
     reservation_id: Annotated[
         int,
@@ -842,7 +877,7 @@ def get_folio(
         raise
 
 
-@mcp.tool(output_schema=WORK_ORDER_OUTPUT_SCHEMA)
+@mcp.tool(output_schema=WORK_ORDER_DETAIL_OUTPUT_SCHEMA)
 def create_maintenance_work_order(
     unit_id: Annotated[
         int, Field(gt=0, description="ID de la unidad que requiere mantenimiento")
@@ -936,7 +971,7 @@ def create_maintenance_work_order(
         raise
 
 
-@mcp.tool(output_schema=WORK_ORDER_OUTPUT_SCHEMA)
+@mcp.tool(output_schema=WORK_ORDER_DETAIL_OUTPUT_SCHEMA)
 def create_housekeeping_work_order(
     unit_id: Annotated[
         int, Field(gt=0, description="ID de la unidad que requiere limpieza")

@@ -1,12 +1,24 @@
 """
 Esquemas Pydantic para TrackHS MCP Server
 Define enums, modelos y esquemas de salida para validación robusta
+
+MEJORES PRÁCTICAS IMPLEMENTADAS:
+- Un solo modelo Pydantic por entidad (DRY)
+- Schemas JSON generados automáticamente desde modelos
+- Validación estricta con mensajes claros
+- Documentación completa para LLMs
+- Tipos consistentes en toda la aplicación
 """
 
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+# =============================================================================
+# ENUMS Y CONSTANTES
+# =============================================================================
 
 
 class WorkOrderPriority(int, Enum):
@@ -38,479 +50,266 @@ class HousekeepingWorkOrderStatus(str, Enum):
     EXCEPTION = "exception"
 
 
-class CollectionMetadata(BaseModel):
-    """Metadatos de paginación para colecciones"""
-
-    page: int = Field(description="Página actual")
-    page_count: int = Field(description="Total de páginas")
-    page_size: int = Field(description="Tamaño de página")
-    total_items: int = Field(description="Total de elementos")
-
-
-class CollectionLinks(BaseModel):
-    """Enlaces HATEOAS para navegación"""
-
-    self: Optional[str] = Field(None, description="Enlace a la página actual")
-    first: Optional[str] = Field(None, description="Enlace a la primera página")
-    last: Optional[str] = Field(None, description="Enlace a la última página")
-    next: Optional[str] = Field(None, description="Enlace a la siguiente página")
-    prev: Optional[str] = Field(None, description="Enlace a la página anterior")
-
-
-class CollectionResponse(BaseModel):
-    """Respuesta estándar para colecciones con metadatos"""
-
-    page: int = Field(description="Página actual")
-    page_count: int = Field(description="Total de páginas")
-    page_size: int = Field(description="Tamaño de página")
-    total_items: int = Field(description="Total de elementos")
-    embedded: Dict[str, Any] = Field(alias="_embedded", description="Datos embebidos")
-    links: Dict[str, Any] = Field(alias="_links", description="Enlaces de navegación")
-
-    model_config = {"populate_by_name": True}
+# =============================================================================
+# MODELOS PRINCIPALES - UNA SOLA FUENTE DE VERDAD
+# =============================================================================
 
 
 class ReservationResponse(BaseModel):
-    """Modelo para validar respuesta de reserva individual"""
+    """Modelo completo para respuesta de reserva individual - UNA SOLA FUENTE DE VERDAD"""
 
-    id: int = Field(description="ID de la reserva")
+    id: int = Field(description="ID único de la reserva")
     confirmation_number: Optional[str] = Field(
-        None, description="Número de confirmación"
+        None, description="Número de confirmación de la reserva"
     )
-    status: Optional[str] = Field(None, description="Estado de la reserva")
-    arrival: Optional[str] = Field(None, description="Fecha de llegada (YYYY-MM-DD)")
-    departure: Optional[str] = Field(None, description="Fecha de salida (YYYY-MM-DD)")
+    status: Optional[str] = Field(None, description="Estado actual de la reserva")
+    arrival_date: Optional[str] = Field(
+        None, description="Fecha de llegada (YYYY-MM-DD)"
+    )
+    departure_date: Optional[str] = Field(
+        None, description="Fecha de salida (YYYY-MM-DD)"
+    )
 
-    model_config = {"extra": "allow"}  # Permitir campos adicionales
+    # Información del huésped
+    guest: Optional[Dict[str, Any]] = Field(None, description="Información del huésped")
+
+    # Información de la unidad
+    unit: Optional[Dict[str, Any]] = Field(
+        None, description="Información de la unidad reservada"
+    )
+
+    # Información financiera
+    financial: Optional[Dict[str, Any]] = Field(
+        None, description="Información financiera"
+    )
+
+    # Enlaces HATEOAS
+    links: Optional[Dict[str, Any]] = Field(
+        None, alias="_links", description="Enlaces a recursos relacionados"
+    )
+
+    model_config = {
+        "extra": "allow",  # Permitir campos adicionales de la API
+        "populate_by_name": True,  # Permitir alias
+        "validate_assignment": True,  # Validar asignaciones
+    }
+
+    @field_validator("confirmation_number")
+    @classmethod
+    def validate_confirmation_number(cls, v):
+        """Asegurar que confirmation_number sea string o None"""
+        if v is not None and not isinstance(v, str):
+            return str(v)
+        return v
+
+    @field_validator("arrival_date", "departure_date")
+    @classmethod
+    def validate_dates(cls, v):
+        """Validar formato de fechas"""
+        if v is not None and not isinstance(v, str):
+            return str(v)
+        return v
 
 
 class UnitResponse(BaseModel):
-    """Modelo para validar respuesta de unidad"""
+    """Modelo completo para respuesta de unidad - UNA SOLA FUENTE DE VERDAD"""
 
-    id: int = Field(description="ID de la unidad")
+    id: int = Field(description="ID único de la unidad")
     name: Optional[str] = Field(None, description="Nombre de la unidad")
     code: Optional[str] = Field(None, description="Código de la unidad")
-    bedrooms: Optional[int] = Field(None, description="Número de dormitorios")
-    bathrooms: Optional[int] = Field(None, description="Número de baños")
+    bedrooms: Optional[int] = Field(
+        None, ge=0, le=20, description="Número de dormitorios"
+    )
+    bathrooms: Optional[int] = Field(None, ge=0, le=20, description="Número de baños")
+    max_occupancy: Optional[int] = Field(
+        None, ge=1, description="Capacidad máxima de huéspedes"
+    )
+    area: Optional[float] = Field(None, ge=0, description="Área en metros cuadrados")
+    address: Optional[str] = Field(None, description="Dirección completa de la unidad")
+    is_active: Optional[bool] = Field(None, description="Si la unidad está activa")
+    is_bookable: Optional[bool] = Field(
+        None, description="Si la unidad está disponible para reservar"
+    )
+    amenities: Optional[List[str]] = Field(
+        None, description="Lista de amenidades disponibles"
+    )
 
-    model_config = {"extra": "allow"}
+    # Enlaces HATEOAS
+    links: Optional[Dict[str, Any]] = Field(
+        None, alias="_links", description="Enlaces a recursos relacionados"
+    )
+
+    model_config = {
+        "extra": "allow",
+        "populate_by_name": True,
+        "validate_assignment": True,
+    }
+
+    @field_validator("bedrooms", "bathrooms", "max_occupancy")
+    @classmethod
+    def validate_positive_integers(cls, v):
+        """Asegurar que los números sean enteros positivos o None"""
+        if v is not None and not isinstance(v, int):
+            try:
+                return int(v)
+            except (ValueError, TypeError):
+                return None
+        return v
 
 
 class FolioResponse(BaseModel):
-    """Modelo para validar respuesta de folio"""
+    """Modelo completo para respuesta de folio - UNA SOLA FUENTE DE VERDAD"""
 
-    id: int = Field(description="ID del folio")
-    reservation_id: Optional[int] = Field(None, description="ID de la reserva")
-    balance: Optional[float] = Field(None, description="Balance pendiente")
-    total: Optional[float] = Field(None, description="Total")
+    reservation_id: int = Field(description="ID de la reserva asociada")
+    balance: Optional[float] = Field(None, description="Balance total pendiente")
+    charges: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Lista de cargos aplicados"
+    )
+    payments: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Lista de pagos recibidos"
+    )
+    summary: Optional[Dict[str, Any]] = Field(None, description="Resumen financiero")
 
-    model_config = {"extra": "allow"}
+    # Enlaces HATEOAS
+    links: Optional[Dict[str, Any]] = Field(
+        None, alias="_links", description="Enlaces a recursos relacionados"
+    )
+
+    model_config = {
+        "extra": "allow",
+        "populate_by_name": True,
+        "validate_assignment": True,
+    }
+
+    @field_validator("balance")
+    @classmethod
+    def validate_balance(cls, v):
+        """Asegurar que balance sea float o None"""
+        if v is not None and not isinstance(v, (int, float)):
+            try:
+                return float(v)
+            except (ValueError, TypeError):
+                return None
+        return v
 
 
 class WorkOrderResponse(BaseModel):
-    """Modelo para validar respuesta de work order"""
+    """Modelo completo para respuesta de work order - UNA SOLA FUENTE DE VERDAD"""
 
-    id: int = Field(description="ID de la orden de trabajo")
-    status: Optional[str] = Field(None, description="Estado de la orden")
-    unit_id: Optional[int] = Field(None, description="ID de la unidad")
-    priority: Optional[int] = Field(None, description="Prioridad")
+    id: int = Field(description="ID único de la orden de trabajo")
+    status: Optional[str] = Field(None, description="Estado actual de la orden")
+    unit_id: Optional[int] = Field(None, description="ID de la unidad asociada")
+    priority: Optional[int] = Field(
+        None, ge=1, le=5, description="Prioridad (1=Baja, 3=Media, 5=Alta)"
+    )
+    summary: Optional[str] = Field(None, description="Resumen del trabajo")
+    description: Optional[str] = Field(None, description="Descripción detallada")
+    estimated_cost: Optional[float] = Field(None, ge=0, description="Costo estimado")
+    estimated_time: Optional[int] = Field(
+        None, ge=0, description="Tiempo estimado en minutos"
+    )
+    date_received: Optional[str] = Field(None, description="Fecha de recepción")
+    date_completed: Optional[str] = Field(None, description="Fecha de finalización")
+    assigned_to: Optional[str] = Field(None, description="Usuario asignado")
+    vendor: Optional[str] = Field(None, description="Proveedor asignado")
 
-    model_config = {"extra": "allow"}
+    # Enlaces HATEOAS
+    links: Optional[Dict[str, Any]] = Field(
+        None, alias="_links", description="Enlaces a recursos relacionados"
+    )
+
+    model_config = {
+        "extra": "allow",
+        "populate_by_name": True,
+        "validate_assignment": True,
+    }
+
+    @field_validator("unit_id")
+    @classmethod
+    def validate_unit_id(cls, v):
+        """Asegurar que unit_id sea entero positivo o None"""
+        if v is not None and not isinstance(v, int):
+            try:
+                return int(v)
+            except (ValueError, TypeError):
+                return None
+        return v
 
 
-# Esquemas de salida para tools
-RESERVATION_SEARCH_OUTPUT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "page": {"type": "integer", "description": "Página actual"},
-        "page_count": {"type": "integer", "description": "Total de páginas"},
-        "page_size": {"type": "integer", "description": "Tamaño de página"},
-        "total_items": {
-            "type": "integer",
-            "description": "Total de reservas encontradas",
-        },
-        "_embedded": {
-            "type": "object",
-            "description": "Datos embebidos de la respuesta",
-            "properties": {
-                "reservations": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "integer",
-                                "description": "ID único de la reserva",
-                            },
-                            "confirmationNumber": {
-                                "type": ["string", "null"],
-                                "description": "Número de confirmación",
-                            },
-                            "guest": {
-                                "type": ["object", "null"],
-                                "properties": {
-                                    "name": {
-                                        "type": ["string", "null"],
-                                        "description": "Nombre del huésped",
-                                    },
-                                    "email": {
-                                        "type": ["string", "null"],
-                                        "description": "Email del huésped",
-                                    },
-                                    "phone": {
-                                        "type": ["string", "null"],
-                                        "description": "Teléfono del huésped",
-                                    },
-                                },
-                            },
-                            "arrivalDate": {
-                                "type": ["string", "null"],
-                                "description": "Fecha de llegada (ISO 8601)",
-                            },
-                            "departureDate": {
-                                "type": ["string", "null"],
-                                "description": "Fecha de salida (ISO 8601)",
-                            },
-                            "status": {
-                                "type": ["string", "null"],
-                                "description": "Estado de la reserva",
-                            },
-                            "unit": {
-                                "type": ["object", "null"],
-                                "properties": {
-                                    "id": {
-                                        "type": ["integer", "null"],
-                                        "description": "ID de la unidad",
-                                    },
-                                    "name": {
-                                        "type": ["string", "null"],
-                                        "description": "Nombre de la unidad",
-                                    },
-                                    "code": {
-                                        "type": ["string", "null"],
-                                        "description": "Código de la unidad",
-                                    },
-                                },
-                            },
-                            "financial": {
-                                "type": ["object", "null"],
-                                "properties": {
-                                    "totalAmount": {
-                                        "type": ["number", "null"],
-                                        "description": "Monto total",
-                                    },
-                                    "balance": {
-                                        "type": ["number", "null"],
-                                        "description": "Balance pendiente",
-                                    },
-                                    "deposit": {
-                                        "type": ["number", "null"],
-                                        "description": "Depósito requerido",
-                                    },
-                                },
-                            },
-                            "_links": {
-                                "type": ["object", "null"],
-                                "description": "Enlaces a recursos relacionados",
-                            },
-                        },
-                    },
-                }
-            },
-        },
-        "_links": {"type": "object", "description": "Enlaces de navegación HATEOAS"},
-    },
-}
+# =============================================================================
+# GENERACIÓN AUTOMÁTICA DE SCHEMAS JSON DESDE MODELOS PYDANTIC
+# =============================================================================
 
-UNIT_SEARCH_OUTPUT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "page": {"type": "integer", "description": "Página actual"},
-        "page_count": {"type": "integer", "description": "Total de páginas"},
-        "page_size": {"type": "integer", "description": "Tamaño de página"},
-        "total_items": {
-            "type": "integer",
-            "description": "Total de unidades encontradas",
-        },
-        "_embedded": {
-            "type": "object",
-            "description": "Datos embebidos de la respuesta",
-            "properties": {
-                "units": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "type": "integer",
-                                "description": "ID único de la unidad",
-                            },
-                            "name": {
-                                "type": ["string", "null"],
-                                "description": "Nombre de la unidad",
-                            },
-                            "code": {
-                                "type": ["string", "null"],
-                                "description": "Código de la unidad",
-                            },
-                            "bedrooms": {
-                                "type": ["integer", "null"],
-                                "description": "Número de dormitorios",
-                            },
-                            "bathrooms": {
-                                "type": ["integer", "null"],
-                                "description": "Número de baños",
-                            },
-                            "max_occupancy": {
-                                "type": ["integer", "null"],
-                                "description": "Capacidad máxima",
-                            },
-                            "area": {
-                                "type": ["number", "null"],
-                                "description": "Área en metros cuadrados",
-                            },
-                            "address": {
-                                "type": ["string", "null"],
-                                "description": "Dirección de la unidad",
-                            },
-                            "amenities": {
-                                "type": ["array", "null"],
-                                "items": {"type": "string"},
-                                "description": "Amenidades disponibles",
-                            },
-                            "is_active": {
-                                "type": "boolean",
-                                "description": "Si la unidad está activa",
-                            },
-                            "is_bookable": {
-                                "type": "boolean",
-                                "description": "Si la unidad está disponible para reservar",
-                            },
-                        },
-                    },
-                }
-            },
-        },
-        "_links": {"type": "object", "description": "Enlaces de navegación HATEOAS"},
-    },
-}
 
-WORK_ORDER_OUTPUT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": {"type": "integer", "description": "ID único de la orden de trabajo"},
-        "status": {
-            "type": ["string", "null"],
-            "description": "Estado actual de la orden",
-        },
-        "priority": {
-            "type": ["integer", "null"],
-            "description": "Prioridad (1=Baja, 3=Media, 5=Alta)",
-        },
-        "summary": {"type": ["string", "null"], "description": "Resumen del trabajo"},
-        "description": {
-            "type": ["string", "null"],
-            "description": "Descripción detallada",
-        },
-        "unit_id": {"type": ["integer", "null"], "description": "ID de la unidad"},
-        "estimated_cost": {"type": ["number", "null"], "description": "Costo estimado"},
-        "estimated_time": {
-            "type": ["integer", "null"],
-            "description": "Tiempo estimado en minutos",
-        },
-        "date_received": {
-            "type": ["string", "null"],
-            "description": "Fecha de recepción",
-        },
-        "date_completed": {
-            "type": ["string", "null"],
-            "description": "Fecha de finalización",
-        },
-        "assigned_to": {"type": ["string", "null"], "description": "Usuario asignado"},
-        "vendor": {"type": ["string", "null"], "description": "Proveedor asignado"},
-        "_links": {
-            "type": ["object", "null"],
-            "description": "Enlaces a recursos relacionados",
-        },
-    },
-}
+def generate_json_schema(model_class: type) -> Dict[str, Any]:
+    """
+    Genera schema JSON automáticamente desde un modelo Pydantic.
 
-# Esquemas adicionales para herramientas sin output schema
-RESERVATION_DETAIL_OUTPUT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "id": {"type": "integer", "description": "ID único de la reserva"},
-        "confirmation_number": {
-            "type": ["string", "null"],
-            "description": "Número de confirmación",
-        },
-        "guest": {
-            "type": ["object", "null"],
-            "description": "Información del huésped",
-            "properties": {
-                "name": {
-                    "type": ["string", "null"],
-                    "description": "Nombre del huésped",
-                },
-                "email": {
-                    "type": ["string", "null"],
-                    "description": "Email del huésped",
-                },
-                "phone": {
-                    "type": ["string", "null"],
-                    "description": "Teléfono del huésped",
-                },
-                "address": {
-                    "type": ["string", "null"],
-                    "description": "Dirección del huésped",
-                },
-            },
-        },
-        "dates": {
-            "type": ["object", "null"],
-            "description": "Fechas de la reserva",
-            "properties": {
-                "arrival": {
-                    "type": ["string", "null"],
-                    "description": "Fecha de llegada",
-                },
-                "departure": {
-                    "type": ["string", "null"],
-                    "description": "Fecha de salida",
-                },
-                "nights": {
-                    "type": ["integer", "null"],
-                    "description": "Número de noches",
-                },
-            },
-        },
-        "unit": {
-            "type": ["object", "null"],
-            "description": "Información de la unidad reservada",
-            "properties": {
-                "id": {"type": ["integer", "null"], "description": "ID de la unidad"},
-                "name": {
-                    "type": ["string", "null"],
-                    "description": "Nombre de la unidad",
-                },
-                "code": {
-                    "type": ["string", "null"],
-                    "description": "Código de la unidad",
-                },
-                "bedrooms": {
-                    "type": ["integer", "null"],
-                    "description": "Número de dormitorios",
-                },
-                "bathrooms": {
-                    "type": ["integer", "null"],
-                    "description": "Número de baños",
-                },
-            },
-        },
-        "status": {"type": ["string", "null"], "description": "Estado de la reserva"},
-        "financial": {
-            "type": ["object", "null"],
-            "description": "Información financiera de la reserva",
-            "properties": {
-                "total_amount": {
-                    "type": ["number", "null"],
-                    "description": "Monto total",
-                },
-                "balance": {
-                    "type": ["number", "null"],
-                    "description": "Balance pendiente",
-                },
-                "deposit": {
-                    "type": ["number", "null"],
-                    "description": "Depósito requerido",
-                },
-            },
-        },
-        "_links": {
-            "type": ["object", "null"],
-            "description": "Enlaces a recursos relacionados",
-        },
-    },
-}
+    MEJOR PRÁCTICA: Un solo modelo Pydantic, schema JSON generado automáticamente.
+    Evita duplicación y mantiene consistencia.
+    """
+    return model_class.model_json_schema()
 
-FOLIO_OUTPUT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "reservation_id": {"type": "integer", "description": "ID de la reserva"},
-        "balance": {"type": ["number", "null"], "description": "Balance total"},
-        "charges": {
-            "type": ["array", "null"],
-            "description": "Lista de cargos aplicados a la reserva",
-            "items": {
+
+def generate_collection_schema(item_model: type) -> Dict[str, Any]:
+    """
+    Genera schema para colecciones paginadas.
+
+    Args:
+        item_model: Modelo Pydantic para los elementos de la colección
+
+    Returns:
+        Schema JSON para colección paginada
+    """
+    return {
+        "type": "object",
+        "properties": {
+            "page": {"type": "integer", "description": "Página actual"},
+            "page_count": {"type": "integer", "description": "Total de páginas"},
+            "page_size": {"type": "integer", "description": "Tamaño de página"},
+            "total_items": {"type": "integer", "description": "Total de elementos"},
+            "_embedded": {
                 "type": "object",
+                "description": "Datos embebidos de la respuesta",
                 "properties": {
-                    "id": {"type": ["integer", "null"], "description": "ID del cargo"},
-                    "description": {
-                        "type": ["string", "null"],
-                        "description": "Descripción del cargo",
-                    },
-                    "amount": {
-                        "type": ["number", "null"],
-                        "description": "Monto del cargo",
-                    },
-                    "date": {
-                        "type": ["string", "null"],
-                        "description": "Fecha del cargo",
-                    },
-                    "type": {
-                        "type": ["string", "null"],
-                        "description": "Tipo de cargo",
-                    },
+                    "items": {
+                        "type": "array",
+                        "items": generate_json_schema(item_model),
+                        "description": f"Lista de {item_model.__name__.lower().replace('response', 's')}",
+                    }
                 },
             },
-        },
-        "payments": {
-            "type": ["array", "null"],
-            "description": "Lista de pagos recibidos",
-            "items": {
+            "_links": {
                 "type": "object",
-                "properties": {
-                    "id": {"type": ["integer", "null"], "description": "ID del pago"},
-                    "amount": {
-                        "type": ["number", "null"],
-                        "description": "Monto del pago",
-                    },
-                    "date": {
-                        "type": ["string", "null"],
-                        "description": "Fecha del pago",
-                    },
-                    "method": {
-                        "type": ["string", "null"],
-                        "description": "Método de pago",
-                    },
-                    "status": {
-                        "type": ["string", "null"],
-                        "description": "Estado del pago",
-                    },
-                },
+                "description": "Enlaces de navegación HATEOAS",
             },
         },
-        "summary": {
-            "type": ["object", "null"],
-            "description": "Resumen financiero de la reserva",
-            "properties": {
-                "total_charges": {
-                    "type": ["number", "null"],
-                    "description": "Total de cargos",
-                },
-                "total_payments": {
-                    "type": ["number", "null"],
-                    "description": "Total de pagos",
-                },
-                "balance_due": {
-                    "type": ["number", "null"],
-                    "description": "Balance pendiente",
-                },
-            },
-        },
-    },
-}
+        "required": [
+            "page",
+            "page_count",
+            "page_size",
+            "total_items",
+            "_embedded",
+            "_links",
+        ],
+    }
 
+
+# =============================================================================
+# SCHEMAS GENERADOS AUTOMÁTICAMENTE - UNA SOLA FUENTE DE VERDAD
+# =============================================================================
+
+# Schemas de respuestas individuales
+RESERVATION_DETAIL_OUTPUT_SCHEMA = generate_json_schema(ReservationResponse)
+UNIT_DETAIL_OUTPUT_SCHEMA = generate_json_schema(UnitResponse)
+FOLIO_DETAIL_OUTPUT_SCHEMA = generate_json_schema(FolioResponse)
+WORK_ORDER_DETAIL_OUTPUT_SCHEMA = generate_json_schema(WorkOrderResponse)
+
+# Schemas de colecciones
+RESERVATION_SEARCH_OUTPUT_SCHEMA = generate_collection_schema(ReservationResponse)
+UNIT_SEARCH_OUTPUT_SCHEMA = generate_collection_schema(UnitResponse)
+
+# Schema para amenidades (caso especial - mantener estructura específica)
 AMENITIES_OUTPUT_SCHEMA = {
     "type": "object",
     "properties": {
@@ -562,3 +361,25 @@ AMENITIES_OUTPUT_SCHEMA = {
         "_links": {"type": "object", "description": "Enlaces de navegación HATEOAS"},
     },
 }
+
+# =============================================================================
+# ALIASES PARA COMPATIBILIDAD - MANTENER EXISTING CODE
+# =============================================================================
+
+# Alias para mantener compatibilidad con código existente
+WORK_ORDER_OUTPUT_SCHEMA = WORK_ORDER_DETAIL_OUTPUT_SCHEMA
+
+
+class CollectionResponse(BaseModel):
+    """Respuesta de colección paginada genérica."""
+
+    page: int = Field(..., description="Página actual")
+    page_count: int = Field(..., description="Total de páginas")
+    page_size: int = Field(..., description="Tamaño de página")
+    total_items: int = Field(..., description="Total de elementos")
+    embedded: Dict[str, Any] = Field(
+        ..., alias="_embedded", description="Datos embebidos"
+    )
+    links: Dict[str, Any] = Field(
+        ..., alias="_links", description="Enlaces de navegación"
+    )
