@@ -180,7 +180,7 @@ def validate_response(data: Dict[str, Any], model_class: type, strict: Optional[
     # Usar configuración global si no se especifica strict
     if strict is None:
         strict = settings.strict_validation
-    
+
     try:
         validated = model_class.model_validate(data)
         logger.debug(f"Response validated successfully against {model_class.__name__}")
@@ -200,7 +200,7 @@ class TrackHSClient:
         self.base_url = base_url
         self.auth = (username, password)
         self.client = httpx.Client(
-            auth=self.auth, 
+            auth=self.auth,
             timeout=settings.request_timeout
         )
         logger.info(f"TrackHSClient inicializado para {base_url} (timeout: {settings.request_timeout}s)")
@@ -333,13 +333,13 @@ try:
     else:
         api_client = TrackHSClient(API_BASE_URL, API_USERNAME, API_PASSWORD)
         logger.info("Cliente API TrackHS inicializado correctamente")
-        
+
         # Inicializar repositories
         reservation_repo = ReservationRepository(api_client, cache_ttl=settings.auth_cache_ttl)
         unit_repo = UnitRepository(api_client, cache_ttl=settings.auth_cache_ttl)
         work_order_repo = WorkOrderRepository(api_client, cache_ttl=settings.auth_cache_ttl)
         logger.info("Repositories inicializados correctamente")
-        
+
 except Exception as e:
     logger.error(f"Error inicializando cliente API: {e}")
     logger.warning("Continuando sin cliente API funcional")
@@ -1031,10 +1031,10 @@ def create_housekeeping_work_order(
 def prometheus_metrics() -> str:
     """
     Endpoint de métricas en formato Prometheus.
-    
+
     Retorna métricas del servidor en formato compatible con Prometheus
     para monitoreo y alertas.
-    
+
     Returns:
         Métricas en formato Prometheus
     """
@@ -1079,10 +1079,10 @@ def health_check() -> str:
             if 'metrics_middleware' in locals()
             else {"note": "Middleware metrics not available"}
         )
-        
+
         # Obtener métricas del cache
         cache_metrics = get_cache().get_metrics()
-        
+
         # Obtener métricas avanzadas
         advanced_metrics = get_metrics().get_metrics_summary()
 

@@ -10,7 +10,7 @@ from .work_order_repository import WorkOrderRepository
 
 __all__ = [
     "BaseRepository",
-    "ReservationRepository", 
+    "ReservationRepository",
     "UnitRepository",
     "WorkOrderRepository"
 ]

@@ -15,11 +15,11 @@ graph TB
     C --> D[Repository Layer]
     D --> E[TrackHS API Client]
     E --> F[TrackHS API]
-    
+
     C --> G[Cache Layer]
     C --> H[Metrics Layer]
     C --> I[Auth Layer]
-    
+
     G --> J[Intelligent Cache]
     H --> K[Prometheus Metrics]
     I --> L[Auth Cache]

@@ -73,11 +73,11 @@ async def buscar_reservas_fecha():
                 "size": 50
             }
         )
-        
+
         print(f"Encontradas {reservas['total_items']} reservas")
         for reserva in reservas['_embedded']['reservations']:
             print(f"- {reserva['confirmation_number']}: {reserva['guest']['name']}")
-            
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -95,7 +95,7 @@ async def obtener_detalles_reserva(reservation_id):
             "get_reservation",
             {"reservation_id": reservation_id}
         )
-        
+
         print(f"Reserva: {reserva['confirmation_number']}")
         print(f"Huésped: {reserva['guest']['name']}")
         print(f"Email: {reserva['guest']['email']}")
@@ -105,9 +105,9 @@ async def obtener_detalles_reserva(reservation_id):
         print(f"Estado: {reserva['status']}")
         print(f"Unidad: {reserva['unit']['name']}")
         print(f"Balance: ${reserva['balance']}")
-        
+
         return reserva
-        
+
     except Exception as e:
         print(f"Error: {e}")
         return None
@@ -129,11 +129,11 @@ async def buscar_reservas_huesped(email):
                 "size": 100
             }
         )
-        
+
         print(f"Reservas para {email}:")
         for reserva in reservas['_embedded']['reservations']:
             print(f"- {reserva['confirmation_number']}: {reserva['arrival_date']} a {reserva['departure_date']}")
-            
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -159,7 +159,7 @@ async def buscar_unidades_capacidad(bedrooms, bathrooms):
                 "size": 25
             }
         )
-        
+
         print(f"Unidades con {bedrooms} dormitorios y {bathrooms} baños:")
         for unidad in unidades['_embedded']['units']:
             print(f"- {unidad['name']} ({unidad['code']})")
@@ -167,7 +167,7 @@ async def buscar_unidades_capacidad(bedrooms, bathrooms):
             print(f"  Área: {unidad['area']} m²")
             print(f"  Dirección: {unidad['address']}")
             print()
-            
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -187,14 +187,14 @@ async def buscar_amenidades():
                 "size": 100
             }
         )
-        
+
         print("Amenidades disponibles:")
         for amenidad in amenidades['_embedded']['amenities']:
             print(f"- {amenidad['name']} ({amenidad['group']})")
             if amenidad['description']:
                 print(f"  {amenidad['description']}")
             print()
-            
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -214,25 +214,25 @@ async def obtener_folio_reserva(reservation_id):
             "get_folio",
             {"reservation_id": reservation_id}
         )
-        
+
         print(f"Folio para reserva {reservation_id}:")
         print(f"Balance: ${folio['balance']}")
         print(f"Cargos: {len(folio['charges'])}")
         print(f"Pagos: {len(folio['payments'])}")
         print(f"Impuestos: {len(folio['taxes'])}")
-        
+
         # Mostrar cargos
         if folio['charges']:
             print("\nCargos:")
             for cargo in folio['charges']:
                 print(f"- {cargo['description']}: ${cargo['amount']}")
-        
+
         # Mostrar pagos
         if folio['payments']:
             print("\nPagos:")
             for pago in folio['payments']:
                 print(f"- {pago['type']}: ${pago['amount']} ({pago['status']})")
-                
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -259,16 +259,16 @@ async def crear_orden_mantenimiento(unit_id, problema, descripcion, prioridad=3)
                 "estimated_time": 120
             }
         )
-        
+
         print(f"Orden de mantenimiento creada:")
         print(f"ID: {orden['id']}")
         print(f"Unidad: {unit_id}")
         print(f"Problema: {problema}")
         print(f"Prioridad: {prioridad}")
         print(f"Estado: {orden['status']}")
-        
+
         return orden
-        
+
     except Exception as e:
         print(f"Error: {e}")
         return None
@@ -299,15 +299,15 @@ async def crear_orden_housekeeping(unit_id, fecha, tipo_limpieza=1):
                 "cost": 50.0
             }
         )
-        
+
         print(f"Orden de housekeeping creada:")
         print(f"ID: {orden['id']}")
         print(f"Unidad: {unit_id}")
         print(f"Fecha: {fecha}")
         print(f"Estado: {orden['status']}")
-        
+
         return orden
-        
+
     except Exception as e:
         print(f"Error: {e}")
         return None
@@ -385,13 +385,13 @@ async def cliente_personalizado():
         async with ClientSession(read, write) as session:
             # Inicializar
             await session.initialize()
-            
+
             # Listar herramientas disponibles
             tools = await session.list_tools()
             print("Herramientas disponibles:")
             for tool in tools.tools:
                 print(f"- {tool.name}: {tool.description}")
-            
+
             # Usar herramienta
             result = await session.call_tool(
                 "search_reservations",
@@ -401,9 +401,9 @@ async def cliente_personalizado():
                     "status": "confirmed"
                 }
             )
-            
+
             print(f"Resultado: {result.content}")
-            
+
             # Cerrar sesión
             await session.close()
 
@@ -427,33 +427,33 @@ async def dashboard_reservas():
         hoy = datetime.now().strftime("%Y-%m-%d")
         ayer = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
         mañana = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
-        
+
         # Buscar reservas de ayer, hoy y mañana
         reservas_ayer = await mcp.call_tool("search_reservations", {
             "arrival_start": ayer,
             "arrival_end": ayer,
             "size": 100
         })
-        
+
         reservas_hoy = await mcp.call_tool("search_reservations", {
             "arrival_start": hoy,
             "arrival_end": hoy,
             "size": 100
         })
-        
+
         reservas_mañana = await mcp.call_tool("search_reservations", {
             "arrival_start": mañana,
             "arrival_end": mañana,
             "size": 100
         })
-        
+
         # Mostrar dashboard
         print("📊 DASHBOARD DE RESERVAS")
         print("=" * 50)
         print(f"📅 Ayer ({ayer}): {reservas_ayer['total_items']} reservas")
         print(f"📅 Hoy ({hoy}): {reservas_hoy['total_items']} reservas")
         print(f"📅 Mañana ({mañana}): {reservas_mañana['total_items']} reservas")
-        
+
         # Mostrar reservas de hoy
         if reservas_hoy['total_items'] > 0:
             print(f"\n🏠 RESERVAS DE HOY ({hoy}):")
@@ -462,7 +462,7 @@ async def dashboard_reservas():
                 print(f"  Unidad: {reserva['unit']['name']}")
                 print(f"  Estado: {reserva['status']}")
                 print()
-        
+
         # Mostrar reservas de mañana
         if reservas_mañana['total_items'] > 0:
             print(f"\n🏠 RESERVAS DE MAÑANA ({mañana}):")
@@ -471,7 +471,7 @@ async def dashboard_reservas():
                 print(f"  Unidad: {reserva['unit']['name']}")
                 print(f"  Estado: {reserva['status']}")
                 print()
-                
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -493,16 +493,16 @@ async def automatizar_checkout():
             "status": "confirmed",
             "size": 100
         })
-        
+
         print(f"🔄 AUTOMATIZACIÓN DE CHECKOUT - {hoy}")
         print(f"Reservas con checkout: {reservas_checkout['total_items']}")
-        
+
         for reserva in reservas_checkout['_embedded']['reservations']:
             unit_id = reserva['unit']['id']
             confirmation_number = reserva['confirmation_number']
-            
+
             print(f"\n📋 Procesando checkout: {confirmation_number}")
-            
+
             # Crear orden de housekeeping
             orden_limpieza = await mcp.call_tool("create_housekeeping_work_order", {
                 "unit_id": unit_id,
@@ -511,9 +511,9 @@ async def automatizar_checkout():
                 "clean_type_id": 1,
                 "comments": f"Limpieza post-checkout - {confirmation_number}"
             })
-            
+
             print(f"✅ Orden de limpieza creada: {orden_limpieza['id']}")
-            
+
             # Crear orden de inspección
             orden_inspeccion = await mcp.call_tool("create_housekeeping_work_order", {
                 "unit_id": unit_id,
@@ -521,9 +521,9 @@ async def automatizar_checkout():
                 "is_inspection": True,
                 "comments": f"Inspección post-checkout - {confirmation_number}"
             })
-            
+
             print(f"✅ Orden de inspección creada: {orden_inspeccion['id']}")
-            
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -544,35 +544,35 @@ async def reporte_ingresos(fecha_inicio, fecha_fin):
             "status": "confirmed",
             "size": 1000
         })
-        
+
         print(f"💰 REPORTE DE INGRESOS")
         print(f"Período: {fecha_inicio} a {fecha_fin}")
         print("=" * 50)
-        
+
         total_ingresos = 0
         reservas_procesadas = 0
-        
+
         for reserva in reservas['_embedded']['reservations']:
             try:
                 # Obtener folio de cada reserva
                 folio = await mcp.call_tool("get_folio", {
                     "reservation_id": reserva['id']
                 })
-                
+
                 balance = folio.get('balance', 0)
                 total_ingresos += balance
                 reservas_procesadas += 1
-                
+
                 print(f"Reserva {reserva['confirmation_number']}: ${balance}")
-                
+
             except Exception as e:
                 print(f"Error procesando reserva {reserva['id']}: {e}")
-        
+
         print(f"\n📊 RESUMEN:")
         print(f"Reservas procesadas: {reservas_procesadas}")
         print(f"Total de ingresos: ${total_ingresos:,.2f}")
         print(f"Ingreso promedio por reserva: ${total_ingresos/reservas_procesadas:,.2f}")
-        
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -593,25 +593,25 @@ async def manejo_errores_ejemplo():
             "arrival_start": "2024-01-15",
             "size": 10
         })
-        
+
         return resultado
-        
+
     except AuthenticationError as e:
         print(f"❌ Error de autenticación: {e}")
         # Reintentar con nuevas credenciales
         return None
-        
+
     except RateLimitError as e:
         print(f"⏳ Rate limit excedido: {e}")
         # Esperar y reintentar
         await asyncio.sleep(60)
         return await manejo_errores_ejemplo()
-        
+
     except APIError as e:
         print(f"🔌 Error de API: {e}")
         # Loggear y continuar
         return None
-        
+
     except Exception as e:
         print(f"💥 Error inesperado: {e}")
         # Loggear y re-lanzar
@@ -626,15 +626,15 @@ from src.trackhs_mcp.cache import get_cache
 async def uso_cache_inteligente():
     """Ejemplo de uso de cache inteligente"""
     cache = get_cache()
-    
+
     # Verificar cache primero
     cache_key = "reservations:2024-01-15:confirmed"
     cached_result = cache.get(cache_key)
-    
+
     if cached_result:
         print("📦 Datos obtenidos del cache")
         return cached_result
-    
+
     # Si no está en cache, obtener de API
     print("🌐 Obteniendo datos de API")
     resultado = await mcp.call_tool("search_reservations", {
@@ -642,11 +642,11 @@ async def uso_cache_inteligente():
         "status": "confirmed",
         "size": 50
     })
-    
+
     # Guardar en cache
     cache.set(cache_key, resultado, ttl=300)  # 5 minutos
     print("💾 Datos guardados en cache")
-    
+
     return resultado
 ```
 
@@ -658,7 +658,7 @@ async def paginacion_eficiente():
     todas_reservas = []
     page = 1
     size = 50
-    
+
     while True:
         try:
             # Obtener página
@@ -667,25 +667,25 @@ async def paginacion_eficiente():
                 "size": size,
                 "status": "confirmed"
             })
-            
+
             reservas = resultado['_embedded']['reservations']
             todas_reservas.extend(reservas)
-            
+
             print(f"📄 Página {page}: {len(reservas)} reservas")
-            
+
             # Verificar si hay más páginas
             if len(reservas) < size:
                 break
-                
+
             page += 1
-            
+
             # Pequeña pausa para no sobrecargar la API
             await asyncio.sleep(0.1)
-            
+
         except Exception as e:
             print(f"Error en página {page}: {e}")
             break
-    
+
     print(f"📊 Total de reservas obtenidas: {len(todas_reservas)}")
     return todas_reservas
 ```
@@ -698,31 +698,31 @@ from src.trackhs_mcp.metrics import get_metrics
 async def monitoreo_ejemplo():
     """Ejemplo de monitoreo y métricas"""
     metrics = get_metrics()
-    
+
     # Registrar métricas de request
     start_time = time.time()
-    
+
     try:
         resultado = await mcp.call_tool("search_reservations", {
             "arrival_start": "2024-01-15",
             "size": 10
         })
-        
+
         # Registrar éxito
         duration = time.time() - start_time
         metrics.record_request("GET", duration, 200)
         metrics.record_mcp_tool_call("search_reservations", duration, True)
-        
+
         print(f"✅ Request exitoso en {duration:.2f}s")
-        
+
     except Exception as e:
         # Registrar error
         duration = time.time() - start_time
         metrics.record_request("GET", duration, 500)
         metrics.record_mcp_tool_call("search_reservations", duration, False)
-        
+
         print(f"❌ Request falló en {duration:.2f}s: {e}")
-    
+
     # Mostrar métricas actuales
     print(f"📊 Métricas actuales:")
     print(f"Total requests: {metrics.metrics['requests_total']['value']}")
@@ -744,10 +744,10 @@ async def verificar_conectividad():
         resultado = await mcp.call_tool("search_amenities", {
             "size": 1
         })
-        
+
         print("✅ Conectividad OK")
         return True
-        
+
     except Exception as e:
         print(f"❌ Error de conectividad: {e}")
         return False
@@ -759,9 +759,9 @@ async def verificar_conectividad():
 def verificar_configuracion():
     """Verificar configuración del servidor"""
     import os
-    
+
     print("🔍 Verificando configuración...")
-    
+
     # Verificar variables de entorno
     required_vars = ['TRACKHS_USERNAME', 'TRACKHS_PASSWORD']
     for var in required_vars:
@@ -769,7 +769,7 @@ def verificar_configuracion():
             print(f"❌ Variable {var} no configurada")
         else:
             print(f"✅ Variable {var} configurada")
-    
+
     # Verificar archivo de configuración
     config_file = "fastmcp.json"
     if os.path.exists(config_file):
@@ -784,7 +784,7 @@ def verificar_configuracion():
 def limpiar_cache():
     """Limpiar cache del servidor"""
     from src.trackhs_mcp.cache import get_cache
-    
+
     cache = get_cache()
     cache.clear()
     print("🧹 Cache limpiado")
