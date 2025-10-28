@@ -29,10 +29,10 @@ class UnitService:
         page: int = 0,
         size: int = 10,
         search: Optional[str] = None,
-        bedrooms: Optional[int] = None,
-        bathrooms: Optional[int] = None,
-        is_active: Optional[int] = None,
-        is_bookable: Optional[int] = None,
+        bedrooms: Optional[str] = None,
+        bathrooms: Optional[str] = None,
+        is_active: Optional[str] = None,
+        is_bookable: Optional[str] = None,
         # Parámetros adicionales para API completa
         **additional_params: Any,
     ) -> Dict[str, Any]:
@@ -55,6 +55,21 @@ class UnitService:
             ValidationError: Si los parámetros no son válidos
             TrackHSError: Si hay error en la API
         """
+
+        # Función helper para convertir strings a int
+        def safe_int(value, param_name):
+            """Convertir string a int de forma segura"""
+            if value is None or value == "":
+                return None
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                raise ValidationError(f"{param_name} debe ser un número válido")
+
+        # Convertir parámetros string a int
+        bedrooms_int = safe_int(bedrooms, "bedrooms")
+        bathrooms_int = safe_int(bathrooms, "bathrooms")
+
         # Validaciones de negocio
         if page < 1:
             raise ValidationError("El número de página debe ser mayor a 0")
@@ -62,10 +77,10 @@ class UnitService:
         if size < 1 or size > 25:
             raise ValidationError("El tamaño de página debe estar entre 1 y 25")
 
-        if bedrooms is not None and bedrooms < 0:
+        if bedrooms_int is not None and bedrooms_int < 0:
             raise ValidationError("El número de dormitorios no puede ser negativo")
 
-        if bathrooms is not None and bathrooms < 0:
+        if bathrooms_int is not None and bathrooms_int < 0:
             raise ValidationError("El número de baños no puede ser negativo")
 
         # Validar is_active con conversión automática
@@ -94,8 +109,12 @@ class UnitService:
         logger.info(f"🔍 Iniciando búsqueda de unidades:")
         logger.info(f"   📄 Página: {page}, Tamaño: {size}")
         logger.info(f"   🔍 Búsqueda: {search if search else 'N/A'}")
-        logger.info(f"   🛏️ Dormitorios: {bedrooms if bedrooms is not None else 'N/A'}")
-        logger.info(f"   🚿 Baños: {bathrooms if bathrooms is not None else 'N/A'}")
+        logger.info(
+            f"   🛏️ Dormitorios: {bedrooms_int if bedrooms_int is not None else 'N/A'}"
+        )
+        logger.info(
+            f"   🚿 Baños: {bathrooms_int if bathrooms_int is not None else 'N/A'}"
+        )
         logger.info(f"   ✅ Activas: {is_active if is_active is not None else 'N/A'}")
         logger.info(
             f"   📅 Reservables: {is_bookable if is_bookable is not None else 'N/A'}"
@@ -106,10 +125,10 @@ class UnitService:
             params = {"page": page, "size": size}
             if search:
                 params["search"] = search
-            if bedrooms is not None:
-                params["bedrooms"] = bedrooms
-            if bathrooms is not None:
-                params["bathrooms"] = bathrooms
+            if bedrooms_int is not None:
+                params["bedrooms"] = bedrooms_int
+            if bathrooms_int is not None:
+                params["bathrooms"] = bathrooms_int
             if is_active is not None:
                 params["is_active"] = is_active
             if is_bookable is not None:
