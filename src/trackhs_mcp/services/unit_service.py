@@ -4,7 +4,7 @@ Contiene la lógica de negocio para unidades de alojamiento.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from ..exceptions import TrackHSError, ValidationError
 from ..models import UnitData, UnitSearchParams, UnitSearchResponse
@@ -29,10 +29,10 @@ class UnitService:
         page: int = 0,
         size: int = 10,
         search: Optional[str] = None,
-        bedrooms: Optional[int] = None,
-        bathrooms: Optional[int] = None,
-        is_active: Optional[int] = None,
-        is_bookable: Optional[int] = None,
+        bedrooms: Optional[Union[int, str]] = None,
+        bathrooms: Optional[Union[int, str]] = None,
+        is_active: Optional[Union[int, str]] = None,
+        is_bookable: Optional[Union[int, str]] = None,
         # Parámetros adicionales para API completa
         **additional_params: Any,
     ) -> Dict[str, Any]:
@@ -56,9 +56,33 @@ class UnitService:
             TrackHSError: Si hay error en la API
         """
 
-        # Los parámetros ya vienen como int desde la función MCP
-        bedrooms_int = bedrooms
-        bathrooms_int = bathrooms
+        # Función helper para convertir strings a int
+        def safe_int(value):
+            """Convertir string a int de forma segura"""
+            if value is None or value == "":
+                return None
+            try:
+                # Si ya es int, devolverlo
+                if isinstance(value, int):
+                    return value
+                # Si es string, convertir
+                if isinstance(value, str):
+                    # Limpiar string de espacios y caracteres no numéricos
+                    cleaned = value.strip()
+                    if not cleaned:
+                        return None
+                    return int(cleaned)
+                # Para otros tipos, intentar conversión directa
+                return int(value)
+            except (ValueError, TypeError, AttributeError):
+                logger.warning(f"No se pudo convertir '{value}' a int")
+                return None
+
+        # Convertir parámetros a int
+        bedrooms_int = safe_int(bedrooms)
+        bathrooms_int = safe_int(bathrooms)
+        is_active_int = safe_int(is_active)
+        is_bookable_int = safe_int(is_bookable)
 
         # Validaciones de negocio
         if page < 1:
@@ -75,12 +99,12 @@ class UnitService:
         if bathrooms_int is not None and bathrooms_int < 0:
             raise ValidationError("El número de baños no puede ser negativo")
 
-        # Validar is_active (ya viene como int desde MCP)
-        if is_active is not None and is_active not in [0, 1]:
+        # Validar is_active
+        if is_active_int is not None and is_active_int not in [0, 1]:
             raise ValidationError("is_active debe ser 0 o 1")
 
-        # Validar is_bookable (ya viene como int desde MCP)
-        if is_bookable is not None and is_bookable not in [0, 1]:
+        # Validar is_bookable
+        if is_bookable_int is not None and is_bookable_int not in [0, 1]:
             raise ValidationError("is_bookable debe ser 0 o 1")
 
         # Log detallado de parámetros de entrada
@@ -93,9 +117,9 @@ class UnitService:
         logger.info(
             f"   🚿 Baños: {bathrooms_int if bathrooms_int is not None else 'N/A'}"
         )
-        logger.info(f"   ✅ Activas: {is_active if is_active is not None else 'N/A'}")
+        logger.info(f"   ✅ Activas: {is_active_int if is_active_int is not None else 'N/A'}")
         logger.info(
-            f"   📅 Reservables: {is_bookable if is_bookable is not None else 'N/A'}"
+            f"   📅 Reservables: {is_bookable_int if is_bookable_int is not None else 'N/A'}"
         )
 
         try:
@@ -107,10 +131,10 @@ class UnitService:
                 params["bedrooms"] = bedrooms_int
             if bathrooms_int is not None:
                 params["bathrooms"] = bathrooms_int
-            if is_active is not None:
-                params["isActive"] = is_active
-            if is_bookable is not None:
-                params["isBookable"] = is_bookable
+            if is_active_int is not None:
+                params["isActive"] = is_active_int
+            if is_bookable_int is not None:
+                params["isBookable"] = is_bookable_int
 
             # Agregar parámetros adicionales
             params.update(additional_params)
