@@ -102,7 +102,7 @@ mcp = FastMCP(
 
     Todas las herramientas incluyen validación robusta y documentación completa.
     """,
-    strict_input_validation=False,
+    strict_input_validation=False,  # Permite coerción de tipos: "10" → 10
     mask_error_details=True,
     lifespan=lifespan,
 )

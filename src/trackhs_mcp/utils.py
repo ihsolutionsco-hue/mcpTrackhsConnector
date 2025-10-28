@@ -319,6 +319,24 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
             logger.warning(f"No se pudo convertir '{value}' a int")
             return None
 
+    # Función helper para convertir strings a float
+    def safe_float(value):
+        """Convertir string a float de forma segura"""
+        if value is None or value == "":
+            return None
+        try:
+            if isinstance(value, (int, float)):
+                return float(value)
+            if isinstance(value, str):
+                cleaned = value.strip()
+                if not cleaned:
+                    return None
+                return float(cleaned)
+            return float(value)
+        except (ValueError, TypeError, AttributeError):
+            logger.warning(f"No se pudo convertir '{value}' a float")
+            return None
+
     # Parámetros de paginación
     if kwargs.get("page") is not None:
         params["page"] = kwargs["page"]
@@ -367,7 +385,7 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     if kwargs.get("unit_ids") is not None:
         params["id"] = kwargs["unit_ids"]
 
-    # Parámetros de dormitorios
+    # Parámetros de dormitorios (ya son int por coerción de FastMCP)
     for param_name, api_name in [
         ("bedrooms", "bedrooms"),
         ("min_bedrooms", "minBedrooms"),
@@ -375,9 +393,9 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     ]:
         value = kwargs.get(param_name)
         if value is not None:
-            params[api_name] = value
+            params[api_name] = value  # FastMCP ya convirtió a int
 
-    # Parámetros de baños
+    # Parámetros de baños (ya son int por coerción de FastMCP)
     for param_name, api_name in [
         ("bathrooms", "bathrooms"),
         ("min_bathrooms", "minBathrooms"),
@@ -385,9 +403,9 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     ]:
         value = kwargs.get(param_name)
         if value is not None:
-            params[api_name] = value
+            params[api_name] = value  # FastMCP ya convirtió a int
 
-    # Parámetros de capacidad
+    # Parámetros de capacidad (ya son int por coerción de FastMCP)
     for param_name, api_name in [
         ("occupancy", "occupancy"),
         ("min_occupancy", "minOccupancy"),
@@ -395,7 +413,7 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     ]:
         value = kwargs.get(param_name)
         if value is not None:
-            params[api_name] = value
+            params[api_name] = value  # FastMCP ya convirtió a int
 
     # Parámetros de fechas
     if kwargs.get("arrival") is not None:
@@ -405,7 +423,7 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     if kwargs.get("content_updated_since") is not None:
         params["contentUpdatedSince"] = kwargs["content_updated_since"]
 
-    # Parámetros de estado y características
+    # Parámetros de estado y características (ya son int por coerción de FastMCP)
     for param_name, api_name in [
         ("is_active", "isActive"),
         ("is_bookable", "isBookable"),
@@ -413,12 +431,12 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     ]:
         value = kwargs.get(param_name)
         if value is not None:
-            params[api_name] = value
+            params[api_name] = value  # FastMCP ya convirtió a int
 
     if kwargs.get("unit_status") is not None:
         params["unitStatus"] = kwargs["unit_status"]
 
-    # Parámetros de funcionalidad adicional
+    # Parámetros de funcionalidad adicional (ya son int por coerción de FastMCP)
     for param_name, api_name in [
         ("computed", "computed"),
         ("inherited", "inherited"),
@@ -427,9 +445,9 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     ]:
         value = kwargs.get(param_name)
         if value is not None:
-            params[api_name] = value
+            params[api_name] = value  # FastMCP ya convirtió a int
 
-    # Parámetros de filtros adicionales
+    # Parámetros de filtros adicionales (convertir a int)
     for param_name, api_name in [
         ("calendar_id", "calendarId"),
         ("role_id", "roleId"),
@@ -437,6 +455,8 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     ]:
         value = kwargs.get(param_name)
         if value is not None:
-            params[api_name] = value
+            converted_value = safe_int(value)
+            if converted_value is not None:
+                params[api_name] = converted_value
 
     return params
