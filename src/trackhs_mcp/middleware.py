@@ -1,6 +1,6 @@
 """
-Middleware FastMCP-compatible para TrackHS MCP Server.
-Implementa logging, autenticación con cache, y métricas usando el sistema de middleware nativo de FastMCP 2.9+.
+Middleware esencial para FastMCP
+Solo AuthMiddleware y LoggingMiddleware - eliminando complejidad innecesaria
 """
 
 import logging
@@ -12,267 +12,199 @@ from fastmcp.server.middleware import Middleware, MiddlewareContext
 logger = logging.getLogger(__name__)
 
 
-class TrackHSMiddleware(Middleware):
+class LoggingMiddleware(Middleware):
     """
-    Middleware unificado para logging, autenticación y métricas.
-    Compatible con FastMCP 2.9+ usando el sistema de middleware nativo.
+    Middleware de logging estructurado simple.
 
-    Características:
-    - Logging automático de todas las operaciones
-    - Validación de autenticación con cache (evita verificar en cada request)
-    - Métricas de rendimiento (requests, errores, tiempos de respuesta)
-    - Compatible con el sistema de middleware de FastMCP
-
-    Args:
-        api_client: Cliente de API TrackHS (opcional durante inicialización)
-        auth_cache_ttl: Tiempo de vida del cache de autenticación en segundos (default: 300 = 5 minutos)
+    Logs básicos de requests y responses sin complejidad excesiva.
     """
 
-    def __init__(self, api_client=None, auth_cache_ttl: int = 300):
-        super().__init__()
-        self.api_client = api_client
-        self.auth_cache_ttl = auth_cache_ttl
-        self.last_auth_check: Optional[float] = None
-        self.is_authenticated = False
-
-        # Métricas
-        self.metrics = {
-            "total_requests": 0,
-            "successful_requests": 0,
-            "failed_requests": 0,
-        }
-        self.response_times: list[float] = []
-
-    def _check_authentication(self) -> bool:
+    def __init__(self, log_level: str = "INFO"):
         """
-        Verifica autenticación con cache para evitar validaciones innecesarias.
-
-        Solo hace una petición a la API si:
-        - Es la primera vez
-        - El cache expiró (después de auth_cache_ttl segundos)
-
-        Returns:
-            True si está autenticado
-
-        Raises:
-            AuthenticationError: Si las credenciales son inválidas
-        """
-        import os
-
-        from .exceptions import AuthenticationError
-
-        # En modo testing o sin credenciales, no fallar inmediatamente
-        if self.api_client is None:
-            # Permitir operación en modo testing
-            if os.getenv("TESTING") == "1" or os.getenv("PYTEST_CURRENT_TEST"):
-                logger.warning("⚠️  Running in test mode without API client")
-                self.is_authenticated = False
-                return False
-
-            raise AuthenticationError(
-                "Cliente API no disponible. Configure TRACKHS_USERNAME y TRACKHS_PASSWORD"
-            )
-
-        now = time.time()
-
-        # Verificar si necesitamos refrescar el cache
-        needs_refresh = (
-            self.last_auth_check is None
-            or (now - self.last_auth_check) > self.auth_cache_ttl
-        )
-
-        if needs_refresh:
-            try:
-                # Verificación ligera de conectividad y autenticación
-                self.api_client.get("api/pms/units/amenities", {"page": 1, "size": 1})
-                self.is_authenticated = True
-                self.last_auth_check = now
-                logger.debug(
-                    f"Authentication cache refreshed (TTL: {self.auth_cache_ttl}s)"
-                )
-            except Exception as e:
-                self.is_authenticated = False
-                logger.error(f"Authentication failed: {str(e)}")
-                raise AuthenticationError(f"Credenciales inválidas: {str(e)}")
-
-        if not self.is_authenticated:
-            raise AuthenticationError("No autenticado con TrackHS API")
-
-        return True
-
-    async def on_message(self, context: MiddlewareContext, call_next):
-        """
-        Intercepta cada mensaje MCP para aplicar logging, autenticación y métricas.
-
-        Este método se ejecuta automáticamente en cada llamada a una tool gracias
-        al sistema de middleware de FastMCP.
+            Inicializar middleware de logging.
 
         Args:
-            context: Contexto del mensaje MCP con información del request
-            call_next: Función para continuar con el siguiente middleware/tool
+                log_level: Nivel de logging (DEBUG, INFO, WARNING, ERROR)
+        """
+        self.log_level = getattr(logging, log_level.upper())
+        self.logger = logging.getLogger("trackhs_mcp.middleware")
+
+    async def __call__(self, context: MiddlewareContext, call_next) -> Any:
+        """
+        Procesar request a través del middleware de logging.
+
+        Args:
+            context: Contexto del middleware
+            call_next: Función para continuar la cadena
 
         Returns:
-            Resultado de la tool
-
-        Raises:
-            AuthenticationError: Si la autenticación falla
-            Exception: Cualquier error de la tool se propaga después de registrarse
+            Respuesta procesada
         """
-        self.metrics["total_requests"] += 1
+        # Log de inicio de request
         start_time = time.time()
 
-        # 1. Verificar autenticación (con cache) - solo para tools/call, no para metadatos
-        # Métodos que NO requieren autenticación (descubrimiento del servidor):
-        NO_AUTH_METHODS = {
-            "initialize",  # Inicialización del protocolo MCP
-            "ping",  # Verificación de conectividad
-            "tools/list",  # Listar herramientas disponibles
-            "resources/list",  # Listar recursos disponibles
-            "resources/templates/list",  # Listar templates de recursos
-            "prompts/list",  # Listar prompts disponibles
-        }
+        # Verificar que context.message existe y es un dict
+        if hasattr(context, "message") and isinstance(context.message, dict):
+            method = context.message.get("method", "unknown")
+            self.logger.info(f"MCP Request iniciado: {method}")
 
-        if context.method not in NO_AUTH_METHODS:
-            try:
-                self._check_authentication()
-            except Exception as e:
-                # Error de autenticación - no continuar
-                duration = time.time() - start_time
-                self.metrics["failed_requests"] += 1
-                logger.error(
-                    f"❌ Auth failed | "
-                    f"Duration: {duration:.2f}s | "
-                    f"Error: {type(e).__name__}: {str(e)}"
-                )
-                raise
+            if self.log_level <= logging.DEBUG:
+                self.logger.debug(f"Request context: {context.message}")
+        else:
+            self.logger.info("MCP Request iniciado")
 
-        # 2. Logging de request
-        logger.info(
-            f"🔧 Tool called: {context.method} | Request #{self.metrics['total_requests']}"
-        )
-
-        # 3. Ejecutar la herramienta
         try:
-            result = await call_next(context)
+            # Continuar con el siguiente middleware/handler
+            response = await call_next(context)
 
-            # 4. Métricas de éxito
+            # Log de éxito
             duration = time.time() - start_time
-            self.response_times.append(duration)
-            self.metrics["successful_requests"] += 1
+            self.logger.info(f"MCP Request completado en {duration:.3f}s")
 
-            avg_time = sum(self.response_times) / len(self.response_times)
+            if self.log_level <= logging.DEBUG:
+                self.logger.debug(f"Response: {response}")
 
-            logger.info(
-                f"✅ Success | "
-                f"Tool: {context.method} | "
-                f"Duration: {duration:.2f}s | "
-                f"Avg: {avg_time:.2f}s"
-            )
-
-            return result
+            return response
 
         except Exception as e:
-            # 5. Métricas de error
+            # Log de error
             duration = time.time() - start_time
-            self.metrics["failed_requests"] += 1
-            error_rate = (
-                self.metrics["failed_requests"] / self.metrics["total_requests"]
-            ) * 100
-
-            logger.error(
-                f"❌ Error | "
-                f"Tool: {context.method} | "
-                f"Duration: {duration:.2f}s | "
-                f"Error rate: {error_rate:.1f}% | "
-                f"Error: {type(e).__name__}: {str(e)}"
+            self.logger.error(
+                f"MCP Request falló en {duration:.3f}s: {type(e).__name__}: {str(e)}"
             )
 
+            if self.log_level <= logging.DEBUG:
+                self.logger.debug(f"Error details: {e}", exc_info=True)
+
+            # Re-lanzar la excepción
+            raise
+
+
+class AuthMiddleware(Middleware):
+    """
+    Middleware de autenticación simple.
+
+    Verifica que las credenciales estén configuradas antes de procesar requests.
+    """
+
+    def __init__(self, api_client: Optional[Any] = None):
+        """
+        Inicializar middleware de autenticación.
+
+        Args:
+            api_client: Cliente API para verificar conectividad (opcional)
+        """
+        self.api_client = api_client
+        self.logger = logging.getLogger("trackhs_mcp.auth")
+
+    async def __call__(self, context: MiddlewareContext, call_next) -> Any:
+        """
+        Procesar request a través del middleware de autenticación.
+
+        Args:
+            context: Contexto del middleware
+            call_next: Función para continuar la cadena
+
+        Returns:
+            Respuesta procesada
+
+        Raises:
+            ToolError: Si las credenciales no están configuradas
+        """
+        # Verificar que el cliente API esté disponible
+        if self.api_client is None:
+            from fastmcp.exceptions import ToolError
+
+            raise ToolError(
+                "Cliente API no está disponible. Verifique las credenciales "
+                "TRACKHS_USERNAME y TRACKHS_PASSWORD."
+            )
+
+        # Log de verificación de auth
+        self.logger.debug("Verificando autenticación...")
+
+        try:
+            # Continuar con el siguiente middleware/handler
+            response = await call_next(context)
+            self.logger.debug("Autenticación verificada correctamente")
+            return response
+        except Exception as e:
+            self.logger.error(f"Error en autenticación: {str(e)}")
+            raise
+
+
+class SimpleMetricsMiddleware(Middleware):
+    """
+    Middleware de métricas simple (opcional).
+
+    Métricas básicas sin complejidad de Prometheus.
+    """
+
+    def __init__(self):
+        """Inicializar middleware de métricas."""
+        self.request_count = 0
+        self.error_count = 0
+        self.total_duration = 0.0
+        self.logger = logging.getLogger("trackhs_mcp.metrics")
+
+    async def __call__(self, context: MiddlewareContext, call_next) -> Any:
+        """
+        Procesar request a través del middleware de métricas.
+
+        Args:
+            context: Contexto del middleware
+            call_next: Función para continuar la cadena
+
+        Returns:
+            Respuesta procesada
+        """
+        start_time = time.time()
+        self.request_count += 1
+
+        try:
+            response = await call_next(context)
+
+            duration = time.time() - start_time
+            self.total_duration += duration
+
+            # Log de métricas cada 10 requests
+            if self.request_count % 10 == 0:
+                avg_duration = self.total_duration / self.request_count
+                error_rate = (self.error_count / self.request_count) * 100
+
+                self.logger.info(
+                    f"Métricas: {self.request_count} requests, "
+                    f"avg: {avg_duration:.3f}s, error_rate: {error_rate:.1f}%"
+                )
+
+            return response
+
+        except Exception as e:
+            self.error_count += 1
+            self.logger.error(f"Error en request #{self.request_count}: {str(e)}")
             raise
 
     def get_metrics(self) -> Dict[str, Any]:
         """
-        Retorna métricas actuales del middleware.
+        Obtener métricas actuales.
 
         Returns:
-            Dict con métricas de requests, éxitos, errores y tiempos de respuesta
+            Diccionario con métricas básicas
         """
-        avg_time = (
-            sum(self.response_times) / len(self.response_times)
-            if self.response_times
-            else 0
+        avg_duration = (
+            self.total_duration / self.request_count if self.request_count > 0 else 0.0
         )
 
         error_rate = (
-            (self.metrics["failed_requests"] / self.metrics["total_requests"]) * 100
-            if self.metrics["total_requests"] > 0
-            else 0
+            (self.error_count / self.request_count) * 100
+            if self.request_count > 0
+            else 0.0
         )
 
         return {
-            **self.metrics,
-            "average_response_time_seconds": round(avg_time, 2),
-            "error_rate_percentage": round(error_rate, 2),
-            "total_response_times_recorded": len(self.response_times),
+            "total_requests": self.request_count,
+            "total_errors": self.error_count,
+            "average_duration_seconds": avg_duration,
+            "error_rate_percent": error_rate,
+            "total_duration_seconds": self.total_duration,
         }
-
-    def reset_metrics(self):
-        """Resetea las métricas (útil para testing)"""
-        self.metrics = {
-            "total_requests": 0,
-            "successful_requests": 0,
-            "failed_requests": 0,
-        }
-        self.response_times = []
-        logger.info("Middleware metrics reset")
-
-
-# Mantener clases antiguas para compatibilidad temporal durante la transición
-# TODO: Eliminar después de completar la refactorización
-
-
-class LoggingMiddleware:
-    """
-    DEPRECATED: Usar TrackHSMiddleware en su lugar.
-    Esta clase se mantiene temporalmente para compatibilidad.
-    """
-
-    def __init__(self):
-        logger.warning(
-            "LoggingMiddleware está deprecated. Use TrackHSMiddleware con mcp.add_middleware()"
-        )
-        self.request_count = 0
-        self.error_count = 0
-
-
-class AuthenticationMiddleware:
-    """
-    DEPRECATED: Usar TrackHSMiddleware en su lugar.
-    Esta clase se mantiene temporalmente para compatibilidad.
-    """
-
-    def __init__(self, api_client):
-        logger.warning(
-            "AuthenticationMiddleware está deprecated. Use TrackHSMiddleware con mcp.add_middleware()"
-        )
-        self.api_client = api_client
-
-
-class MetricsMiddleware:
-    """
-    DEPRECATED: Usar TrackHSMiddleware en su lugar.
-    Esta clase se mantiene temporalmente para compatibilidad.
-    """
-
-    def __init__(self):
-        logger.warning(
-            "MetricsMiddleware está deprecated. Use TrackHSMiddleware con mcp.add_middleware()"
-        )
-        self.metrics = {
-            "total_requests": 0,
-            "successful_requests": 0,
-            "failed_requests": 0,
-            "average_response_time": 0,
-            "error_rate": 0,
-            "start_time": time.time(),
-        }
-        self.response_times = []

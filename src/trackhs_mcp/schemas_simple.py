@@ -15,16 +15,14 @@ from pydantic import BaseModel, Field
 class ReservationSearchOutput(BaseModel):
     """Schema de salida para búsqueda de reservas"""
 
-    embedded: Dict[str, List[Dict[str, Any]]] = Field(
-        alias="_embedded", description="Reservas encontradas"
+    _embedded: Dict[str, List[Dict[str, Any]]] = Field(
+        description="Reservas encontradas"
     )
     page: int = Field(description="Página actual")
     page_count: int = Field(description="Total de páginas")
     page_size: int = Field(description="Tamaño de página")
     total_items: int = Field(description="Total de elementos")
-    links: Optional[Dict[str, Any]] = Field(
-        alias="_links", description="Enlaces de navegación"
-    )
+    _links: Optional[Dict[str, Any]] = Field(description="Enlaces de navegación")
 
 
 class ReservationDetailOutput(BaseModel):
@@ -48,31 +46,27 @@ class ReservationDetailOutput(BaseModel):
 class UnitSearchOutput(BaseModel):
     """Schema de salida para búsqueda de unidades"""
 
-    embedded: Dict[str, List[Dict[str, Any]]] = Field(
-        alias="_embedded", description="Unidades encontradas"
+    _embedded: Dict[str, List[Dict[str, Any]]] = Field(
+        description="Unidades encontradas"
     )
     page: int = Field(description="Página actual")
     page_count: int = Field(description="Total de páginas")
     page_size: int = Field(description="Tamaño de página")
     total_items: int = Field(description="Total de elementos")
-    links: Optional[Dict[str, Any]] = Field(
-        alias="_links", description="Enlaces de navegación"
-    )
+    _links: Optional[Dict[str, Any]] = Field(description="Enlaces de navegación")
 
 
 class AmenitiesOutput(BaseModel):
     """Schema de salida para búsqueda de amenidades"""
 
-    embedded: Dict[str, List[Dict[str, Any]]] = Field(
-        alias="_embedded", description="Amenidades encontradas"
+    _embedded: Dict[str, List[Dict[str, Any]]] = Field(
+        description="Amenidades encontradas"
     )
     page: int = Field(description="Página actual")
     page_count: int = Field(description="Total de páginas")
     page_size: int = Field(description="Tamaño de página")
     total_items: int = Field(description="Total de elementos")
-    links: Optional[Dict[str, Any]] = Field(
-        alias="_links", description="Enlaces de navegación"
-    )
+    _links: Optional[Dict[str, Any]] = Field(description="Enlaces de navegación")
 
 
 class FolioDetailOutput(BaseModel):
