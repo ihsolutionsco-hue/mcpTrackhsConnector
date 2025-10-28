@@ -780,13 +780,31 @@ def search_units(
         Optional[Union[int, List[int]]], Field(description="ID(s) de tipo de unidad")
     ] = None,
     # Parámetros de dormitorios
-    bedrooms: Optional[Union[int, str]] = None,
-    min_bedrooms: Optional[Union[int, str]] = None,
-    max_bedrooms: Optional[Union[int, str]] = None,
+    bedrooms: Annotated[
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número exacto de dormitorios"),
+    ] = None,
+    min_bedrooms: Annotated[
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número mínimo de dormitorios"),
+    ] = None,
+    max_bedrooms: Annotated[
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número máximo de dormitorios"),
+    ] = None,
     # Parámetros de baños
-    bathrooms: Optional[Union[int, str]] = None,
-    min_bathrooms: Optional[Union[int, str]] = None,
-    max_bathrooms: Optional[Union[int, str]] = None,
+    bathrooms: Annotated[
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número exacto de baños"),
+    ] = None,
+    min_bathrooms: Annotated[
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número mínimo de baños"),
+    ] = None,
+    max_bathrooms: Annotated[
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número máximo de baños"),
+    ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
         Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
@@ -817,9 +835,28 @@ def search_units(
         Field(description="Fecha ISO 8601 - unidades con cambios desde esta fecha"),
     ] = None,
     # Parámetros de estado y características
-    is_active: Optional[Union[int, str]] = None,
-    is_bookable: Optional[Union[int, str]] = None,
-    pets_friendly: Optional[Union[int, str]] = None,
+    is_active: Annotated[
+        Optional[Union[int, str]],
+        Field(
+            ge=0, le=1, description="Filtrar por unidades activas (1) o inactivas (0)"
+        ),
+    ] = None,
+    is_bookable: Annotated[
+        Optional[Union[int, str]],
+        Field(
+            ge=0,
+            le=1,
+            description="Filtrar por unidades disponibles para reservar (1) o no (0)",
+        ),
+    ] = None,
+    pets_friendly: Annotated[
+        Optional[Union[int, str]],
+        Field(
+            ge=0,
+            le=1,
+            description="Filtrar por unidades que permiten mascotas (1) o no (0)",
+        ),
+    ] = None,
     unit_status: Annotated[
         Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
         Field(description="Estado de la unidad"),
