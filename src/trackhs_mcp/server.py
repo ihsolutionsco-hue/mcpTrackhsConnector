@@ -1079,8 +1079,10 @@ def search_units(
             logger.debug(f"   {key}: {value}")
 
         # Usar servicio de negocio con limpieza de datos
+        # Convertir página de 0-based (MCP) a 1-based (API TrackHS)
+        page_1_based = api_params.get("page", 0) + 1
         result = unit_service.search_units(
-            page=api_params.get("page", 0),
+            page=page_1_based,
             size=api_params.get("size", 10),
             search=api_params.get("search"),
             bedrooms=api_params.get("bedrooms"),
