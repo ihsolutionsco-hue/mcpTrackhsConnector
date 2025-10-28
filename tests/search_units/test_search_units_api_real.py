@@ -258,7 +258,7 @@ class TestSearchUnitsAPIReal:
         # Test con parámetros inválidos
         with pytest.raises(Exception):
             await mcp_client.call_tool(
-                name="search_units", arguments={"page": 0}  # Inválido
+                name="search_units", arguments={"page": 0}  # Inválido - debe ser >= 1
             )
 
         with pytest.raises(Exception):

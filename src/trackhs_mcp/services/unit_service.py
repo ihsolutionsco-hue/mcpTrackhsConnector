@@ -26,7 +26,7 @@ class UnitService:
 
     def search_units(
         self,
-        page: int = 0,
+        page: int = 1,
         size: int = 10,
         search: Optional[str] = None,
         bedrooms: Optional[Union[int, str]] = None,
@@ -41,7 +41,7 @@ class UnitService:
 
         Args:
             page: Número de página (1-based)
-            size: Tamaño de página (1-25)
+            size: Tamaño de página (1-100)
             search: Búsqueda de texto
             bedrooms: Número de dormitorios
             bathrooms: Número de baños
@@ -62,17 +62,13 @@ class UnitService:
             if value is None or value == "":
                 return None
             try:
-                # Si ya es int, devolverlo
                 if isinstance(value, int):
                     return value
-                # Si es string, convertir
                 if isinstance(value, str):
-                    # Limpiar string de espacios y caracteres no numéricos
                     cleaned = value.strip()
                     if not cleaned:
                         return None
                     return int(cleaned)
-                # Para otros tipos, intentar conversión directa
                 return int(value)
             except (ValueError, TypeError, AttributeError):
                 logger.warning(f"No se pudo convertir '{value}' a int")
@@ -86,12 +82,10 @@ class UnitService:
 
         # Validaciones de negocio
         if page < 1:
-            raise ValidationError(
-                "El número de página debe ser mayor a 0 (la API real usa páginas basadas en 1, aunque la documentación diga 0)"
-            )
+            raise ValidationError("El número de página debe ser mayor a 0")
 
-        if size < 1 or size > 25:
-            raise ValidationError("El tamaño de página debe estar entre 1 y 25")
+        if size < 1 or size > 100:
+            raise ValidationError("El tamaño de página debe estar entre 1 y 100")
 
         if bedrooms_int is not None and bedrooms_int < 0:
             raise ValidationError("El número de dormitorios no puede ser negativo")
@@ -117,7 +111,9 @@ class UnitService:
         logger.info(
             f"   🚿 Baños: {bathrooms_int if bathrooms_int is not None else 'N/A'}"
         )
-        logger.info(f"   ✅ Activas: {is_active_int if is_active_int is not None else 'N/A'}")
+        logger.info(
+            f"   ✅ Activas: {is_active_int if is_active_int is not None else 'N/A'}"
+        )
         logger.info(
             f"   📅 Reservables: {is_bookable_int if is_bookable_int is not None else 'N/A'}"
         )
@@ -381,93 +377,73 @@ class UnitService:
 
     def _normalize_area(self, area_value: Any) -> Optional[float]:
         """
-        Normaliza el campo area a float de forma más agresiva.
+        Normaliza el campo area a float | None de forma estricta.
 
-        Maneja casos como:
-        - "3348.0" -> 3348.0
-        - "3348" -> 3348.0
-        - 3348 -> 3348.0
-        - None -> None
-        - "invalid" -> None
-        - "" -> None
-        - "null" -> None
-        - "N/A" -> None
-        - "undefined" -> None
-        - Cualquier valor no numérico -> None
+        Garantiza que el output siempre sea float o None, nunca string.
         """
         # Casos nulos directos
         if area_value is None:
             return None
 
-        # Convertir a string para procesamiento
-        if not isinstance(area_value, str):
-            area_value = str(area_value)
+        # Si ya es float, validar y retornar
+        if isinstance(area_value, float):
+            if area_value != area_value or area_value in [float("inf"), float("-inf")]:
+                return None
+            return area_value if area_value >= 0 else None
 
-        # Limpiar y normalizar string
-        area_value = str(area_value).strip()
+        # Si es int, convertir a float
+        if isinstance(area_value, int):
+            return float(area_value) if area_value >= 0 else None
 
-        # Casos de valores nulos
-        if not area_value or area_value.lower() in [
-            "null",
-            "none",
-            "n/a",
-            "undefined",
-            "nan",
-            "none",
-            "empty",
-            "",
-        ]:
-            return None
+        # Si es string, intentar conversión
+        if isinstance(area_value, str):
+            area_value = area_value.strip()
 
-        try:
-            # Intentar conversión directa si es número
-            if isinstance(area_value, (int, float)):
-                result = float(area_value)
-                if (
-                    result != result
-                    or result == float("inf")
-                    or result == float("-inf")
-                ):
-                    return None
-                return result
-
-            # Limpiar string de caracteres no numéricos, manteniendo punto decimal y signo
-            cleaned_str = "".join(c for c in area_value if c.isdigit() or c in ".-+")
-
-            # Verificar que no esté vacío después de limpiar
-            if not cleaned_str:
-                logger.debug(f"Area value '{area_value}' became empty after cleaning")
+            # Casos de valores nulos
+            if not area_value or area_value.lower() in [
+                "null",
+                "none",
+                "n/a",
+                "undefined",
+                "nan",
+                "empty",
+                "",
+            ]:
                 return None
 
-            # Verificar que no sea solo símbolos
-            if cleaned_str.replace(".", "").replace("-", "").replace("+", ""):
+            try:
+                # Limpiar string de caracteres no numéricos
+                cleaned_str = "".join(c for c in area_value if c.isdigit() or c in ".-")
+
+                if not cleaned_str:
+                    return None
+
                 result = float(cleaned_str)
 
-                # Verificar si el resultado es válido
+                # Validar resultado
                 if (
                     result != result
-                    or result == float("inf")
-                    or result == float("-inf")
+                    or result in [float("inf"), float("-inf")]
+                    or result < 0
                 ):
-                    logger.debug(
-                        f"Area value '{area_value}' resulted in invalid float: {result}"
-                    )
-                    return None
-
-                # Verificar que sea un número positivo (área no puede ser negativa)
-                if result < 0:
-                    logger.debug(f"Area value '{area_value}' is negative: {result}")
                     return None
 
                 return result
-            else:
-                logger.debug(
-                    f"Area value '{area_value}' contains only symbols after cleaning"
-                )
+
+            except (ValueError, TypeError):
                 return None
 
-        except (ValueError, TypeError, AttributeError) as e:
-            logger.debug(f"Could not normalize area value '{area_value}': {e}")
+        # Para otros tipos, intentar conversión directa
+        try:
+            result = float(area_value)
+            if (
+                result != result
+                or result in [float("inf"), float("-inf")]
+                or result < 0
+            ):
+                return None
+            return result
+        except (ValueError, TypeError):
             return None
 
     def _normalize_numeric(self, value: Any) -> Optional[int]:

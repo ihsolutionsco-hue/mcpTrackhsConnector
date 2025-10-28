@@ -293,7 +293,7 @@ class TestSearchUnitsE2E:
 
         # Test con parámetros inválidos
         invalid_cases = [
-            {"page": 0},  # Página inválida
+            {"page": 0},  # Página inválida - debe ser >= 1
             {"size": 0},  # Tamaño inválido
             {"bedrooms": -1},  # Dormitorios inválidos
             {"bathrooms": -1},  # Baños inválidos

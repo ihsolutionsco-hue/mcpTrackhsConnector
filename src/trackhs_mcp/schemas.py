@@ -397,11 +397,7 @@ UNIT_SEARCH_OUTPUT_SCHEMA = {
                                 "description": "Capacidad máxima",
                             },
                             "area": {
-                                "anyOf": [
-                                    {"type": "number"},
-                                    {"type": "string"},
-                                    {"type": "null"},
-                                ],
+                                "type": ["number", "null"],
                                 "description": "Área en metros cuadrados",
                             },
                             "address": {

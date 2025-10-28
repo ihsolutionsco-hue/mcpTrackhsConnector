@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+import pytest_asyncio
 
 # Agregar src al path
 src_dir = Path(__file__).parent.parent / "src"
@@ -24,7 +25,7 @@ from trackhs_mcp.server import mcp
 class TestSearchUnitsIntegration:
     """Tests de integración para search_units"""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mcp_client(self):
         """Cliente MCP para tests de integración"""
         transport = FastMCPTransport(mcp)
@@ -96,8 +97,15 @@ class TestSearchUnitsIntegration:
     @pytest.mark.asyncio
     async def test_search_units_basic_integration(self, mcp_client, mock_api_response):
         """Test de integración básica de search_units"""
-        with patch("trackhs_mcp.server.api_client") as mock_client:
+        with (
+            patch("trackhs_mcp.server.api_client") as mock_client,
+            patch(
+                "trackhs_mcp.middleware_native.TrackHSAuthMiddleware._check_authentication"
+            ) as mock_auth,
+        ):
+
             mock_client.get.return_value = mock_api_response
+            mock_auth.return_value = None  # Deshabilitar verificación de autenticación
 
             # Llamar a la herramienta a través del cliente MCP
             result = await mcp_client.call_tool(name="search_units", arguments={})

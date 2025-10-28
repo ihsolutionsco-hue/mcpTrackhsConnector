@@ -714,59 +714,7 @@ def get_reservation(
         raise
 
 
-# Clase de parámetros con validación personalizada para search_units
-class SearchUnitsParams(BaseModel):
-    """Parámetros para search_units con validación flexible de tipos"""
-
-    bedrooms: Annotated[
-        Optional[Union[int, str]], Field(description="Número exacto de dormitorios")
-    ] = None
-    bathrooms: Annotated[
-        Optional[Union[int, str]], Field(description="Número exacto de baños")
-    ] = None
-    is_active: Annotated[
-        Optional[Union[Literal[0, 1], str]],
-        Field(description="Unidades activas (1) o inactivas (0)"),
-    ] = None
-    is_bookable: Annotated[
-        Optional[Union[Literal[0, 1], str]],
-        Field(description="Unidades reservables (1) o no (0)"),
-    ] = None
-
-    @field_validator("bedrooms", "bathrooms")
-    @classmethod
-    def validate_numeric_range(cls, v):
-        if v is None:
-            return v
-        # Convertir string a int si es necesario
-        if isinstance(v, str):
-            try:
-                v = int(v.strip())
-            except (ValueError, AttributeError):
-                raise ValueError(f"'{v}' no es un número válido")
-        # Validar rango
-        if not (0 <= v <= 20):
-            raise ValueError(f"Valor {v} debe estar entre 0 y 20")
-        return v
-
-    @field_validator("is_active", "is_bookable")
-    @classmethod
-    def validate_boolean_like(cls, v):
-        if v is None:
-            return v
-        # Convertir string a int si es necesario
-        if isinstance(v, str):
-            v = v.strip()
-            if v in ["0", "1"]:
-                v = int(v)
-            elif v.lower() in ["true", "false"]:
-                v = 1 if v.lower() == "true" else 0
-            else:
-                raise ValueError(f"'{v}' no es un valor válido (0, 1, 'true', 'false')")
-        # Validar que sea 0 o 1
-        if v not in [0, 1]:
-            raise ValueError(f"Valor {v} debe ser 0 o 1")
-        return v
+# La validación de parámetros ahora se maneja directamente por FastMCP con Pydantic
 
 
 @mcp.tool(output_schema=UNIT_SEARCH_OUTPUT_SCHEMA)
@@ -775,11 +723,11 @@ def search_units(
     page: Annotated[
         int,
         Field(
-            ge=0,
+            ge=1,
             le=10000,
-            description="Número de página (0-based). Límite: 10k total results",
+            description="Número de página (1-based). Límite: 10k total results",
         ),
-    ] = 0,
+    ] = 1,
     size: Annotated[
         int,
         Field(
@@ -837,38 +785,38 @@ def search_units(
     # Parámetros de dormitorios
     bedrooms: Annotated[
         Optional[Union[int, str]],
-        Field(ge=0, le=20, description="Número exacto de dormitorios"),
+        Field(description="Número exacto de dormitorios"),
     ] = None,
     min_bedrooms: Annotated[
         Optional[Union[int, str]],
-        Field(ge=0, le=20, description="Número mínimo de dormitorios"),
+        Field(description="Número mínimo de dormitorios"),
     ] = None,
     max_bedrooms: Annotated[
         Optional[Union[int, str]],
-        Field(ge=0, le=20, description="Número máximo de dormitorios"),
+        Field(description="Número máximo de dormitorios"),
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
         Optional[Union[int, str]],
-        Field(ge=0, le=20, description="Número exacto de baños"),
+        Field(description="Número exacto de baños"),
     ] = None,
     min_bathrooms: Annotated[
         Optional[Union[int, str]],
-        Field(ge=0, le=20, description="Número mínimo de baños"),
+        Field(description="Número mínimo de baños"),
     ] = None,
     max_bathrooms: Annotated[
         Optional[Union[int, str]],
-        Field(ge=0, le=20, description="Número máximo de baños"),
+        Field(description="Número máximo de baños"),
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad exacta")
+        Optional[Union[int, str]], Field(description="Capacidad exacta")
     ] = None,
     min_occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad mínima")
+        Optional[Union[int, str]], Field(description="Capacidad mínima")
     ] = None,
     max_occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad máxima")
+        Optional[Union[int, str]], Field(description="Capacidad máxima")
     ] = None,
     # Parámetros de fechas
     arrival: Annotated[
@@ -908,30 +856,36 @@ def search_units(
     ] = None,
     # Parámetros de funcionalidad adicional
     computed: Annotated[
-        Optional[Union[Literal[0, 1], str]],
-        Field(description="Incluir valores computados adicionales (1) o no (0)"),
+        Optional[int],
+        Field(
+            ge=0,
+            le=1,
+            description="Incluir valores computados adicionales (1) o no (0)",
+        ),
     ] = None,
     inherited: Annotated[
-        Optional[Union[Literal[0, 1], str]],
-        Field(description="Incluir atributos heredados (1) o no (0)"),
+        Optional[int],
+        Field(ge=0, le=1, description="Incluir atributos heredados (1) o no (0)"),
     ] = None,
     limited: Annotated[
-        Optional[Union[Literal[0, 1], str]],
-        Field(description="Retornar atributos limitados (1) o completos (0)"),
+        Optional[int],
+        Field(
+            ge=0, le=1, description="Retornar atributos limitados (1) o completos (0)"
+        ),
     ] = None,
     include_descriptions: Annotated[
-        Optional[Union[Literal[0, 1], str]],
-        Field(description="Incluir descripciones de unidades (1) o no (0)"),
+        Optional[int],
+        Field(ge=0, le=1, description="Incluir descripciones de unidades (1) o no (0)"),
     ] = None,
     # Parámetros de filtros adicionales
     calendar_id: Annotated[
-        Optional[Union[int, str]], Field(gt=0, description="ID del grupo de calendario")
+        Optional[int], Field(gt=0, description="ID del grupo de calendario")
     ] = None,
     role_id: Annotated[
-        Optional[Union[int, str]], Field(gt=0, description="ID del rol específico")
+        Optional[int], Field(gt=0, description="ID del rol específico")
     ] = None,
     promo_code_id: Annotated[
-        Optional[Union[int, str]],
+        Optional[int],
         Field(gt=0, description="ID del código promocional válido"),
     ] = None,
     owner_id: Annotated[
@@ -1001,6 +955,7 @@ def search_units(
     - sort_direction: asc, desc
 
     EJEMPLOS DE USO:
+    - search_units(page=1, size=10) # Primera página, 10 unidades
     - search_units(bedrooms=2, bathrooms=1) # Apartamentos 2D/1B
     - search_units(is_active=1, is_bookable=1) # Unidades activas y disponibles
     - search_units(search="penthouse") # Buscar por nombre
@@ -1018,7 +973,7 @@ def search_units(
             "Servicio de unidades no disponible. Verifique las credenciales."
         )
 
-    # ✅ CORRECCIÓN FUNDAMENTAL: Construir parámetros para la API de TrackHS
+    # Construir parámetros para la API de TrackHS
     def build_api_params():
         """Construir parámetros para la API de TrackHS con todos los filtros"""
         params = {}
@@ -1029,56 +984,17 @@ def search_units(
             if value is None or value == "":
                 return None
             try:
-                # Si ya es int, devolverlo
                 if isinstance(value, int):
                     return value
-                # Si es string, convertir
                 if isinstance(value, str):
-                    # Limpiar string de espacios y caracteres no numéricos
                     cleaned = value.strip()
                     if not cleaned:
                         return None
                     return int(cleaned)
-                # Para otros tipos, intentar conversión directa
                 return int(value)
             except (ValueError, TypeError, AttributeError):
                 logger.warning(f"No se pudo convertir '{value}' a int")
                 return None
-
-        # Función helper para convertir valores booleanos a 1/0
-        def safe_boolean_int(value):
-            """Convertir valor booleano a 1 o 0 para la API de TrackHS"""
-            if value is None or value == "":
-                return None
-            try:
-                # Si ya es int, validar que sea 0 o 1
-                if isinstance(value, int):
-                    if value in [0, 1]:
-                        return value
-                    else:
-                        logger.warning(
-                            f"Valor booleano {value} no es 0 o 1, convirtiendo a 1"
-                        )
-                        return 1 if value else 0
-
-                # Si es string, convertir
-                if isinstance(value, str):
-                    cleaned = value.strip().lower()
-                    if cleaned in ["1", "true", "yes", "on", "enabled"]:
-                        return 1
-                    elif cleaned in ["0", "false", "no", "off", "disabled"]:
-                        return 0
-                    else:
-                        logger.warning(
-                            f"Valor booleano '{value}' no reconocido, usando 1"
-                        )
-                        return 1
-
-                # Para otros tipos, convertir a bool y luego a int
-                return 1 if bool(value) else 0
-            except (ValueError, TypeError, AttributeError):
-                logger.warning(f"No se pudo convertir '{value}' a booleano, usando 1")
-                return 1
 
         # Parámetros de paginación
         if page is not None:
@@ -1172,23 +1088,23 @@ def search_units(
 
         # Parámetros de estado y características
         if is_active is not None:
-            params["isActive"] = safe_boolean_int(is_active)
+            params["isActive"] = safe_int(is_active)
         if is_bookable is not None:
-            params["isBookable"] = safe_boolean_int(is_bookable)
+            params["isBookable"] = safe_int(is_bookable)
         if pets_friendly is not None:
-            params["petsFriendly"] = safe_boolean_int(pets_friendly)
+            params["petsFriendly"] = safe_int(pets_friendly)
         if unit_status is not None:
             params["unitStatus"] = unit_status
 
         # Parámetros de funcionalidad adicional
         if computed is not None:
-            params["computed"] = safe_boolean_int(computed)
+            params["computed"] = computed
         if inherited is not None:
-            params["inherited"] = safe_boolean_int(inherited)
+            params["inherited"] = inherited
         if limited is not None:
-            params["limited"] = safe_boolean_int(limited)
+            params["limited"] = limited
         if include_descriptions is not None:
-            params["includeDescriptions"] = safe_boolean_int(include_descriptions)
+            params["includeDescriptions"] = include_descriptions
 
         # Parámetros de filtros adicionales
         if calendar_id is not None:
@@ -1209,10 +1125,8 @@ def search_units(
             logger.debug(f"   {key}: {value}")
 
         # Usar servicio de negocio con limpieza de datos
-        # Convertir página de 0-based (MCP) a 1-based (API TrackHS)
-        page_1_based = api_params.get("page", 0) + 1
         result = unit_service.search_units(
-            page=page_1_based,
+            page=api_params.get("page", 1),
             size=api_params.get("size", 10),
             search=api_params.get("search"),
             bedrooms=api_params.get("bedrooms"),

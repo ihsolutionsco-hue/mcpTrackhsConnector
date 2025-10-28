@@ -6,8 +6,12 @@ Usando Pydantic Settings para validación y type safety
 import os
 from typing import List, Optional
 
+from dotenv import load_dotenv
 from pydantic import ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings
+
+# Cargar variables de entorno del archivo .env
+load_dotenv()
 
 
 class TrackHSSettings(BaseSettings):
