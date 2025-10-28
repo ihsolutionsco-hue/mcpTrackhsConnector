@@ -504,7 +504,7 @@ mcp = FastMCP(
     - Crear órdenes de trabajo (mantenimiento y housekeeping)
 
     Todas las herramientas incluyen validación robusta y documentación completa.""",
-    strict_input_validation=True,  # ✅ Validación estricta Pydantic
+    strict_input_validation=False,  # ✅ Validación flexible para compatibilidad con LLM clients
     mask_error_details=True,  # ✅ Seguridad: ocultar errores internos en producción
     lifespan=lifespan,  # ✅ FastMCP 2.13: Server Lifespan
 )
