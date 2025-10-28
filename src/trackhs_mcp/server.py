@@ -781,23 +781,29 @@ def search_units(
     ] = None,
     # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número exacto de dormitorios")
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número exacto de dormitorios"),
     ] = None,
     min_bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Mínimo número de dormitorios")
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Mínimo número de dormitorios"),
     ] = None,
     max_bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Máximo número de dormitorios")
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Máximo número de dormitorios"),
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Número exacto de baños"),
     ] = None,
     min_bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Mínimo número de baños")
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Mínimo número de baños"),
     ] = None,
     max_bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Máximo número de baños")
+        Optional[Union[int, str]],
+        Field(ge=0, le=20, description="Máximo número de baños"),
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
@@ -830,15 +836,15 @@ def search_units(
     ] = None,
     # Parámetros de estado y características
     is_active: Annotated[
-        Optional[Literal[0, 1]],
+        Optional[Union[int, str, bool]],
         Field(description="Unidades activas (1), inactivas (0), o todas (None)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[Literal[0, 1]],
+        Optional[Union[int, str, bool]],
         Field(description="Unidades disponibles para reservar (1) o no (0)"),
     ] = None,
     pets_friendly: Annotated[
-        Optional[Literal[0, 1]],
+        Optional[Union[int, str, bool]],
         Field(description="Unidades que permiten mascotas (1) o no (0)"),
     ] = None,
     unit_status: Annotated[
@@ -961,6 +967,32 @@ def search_units(
         """Construir parámetros para la API de TrackHS con todos los filtros"""
         params = {}
 
+        # Función helper para convertir tipos
+        def convert_to_int(value):
+            """Convertir string a int si es posible"""
+            if value is None:
+                return None
+            if isinstance(value, int):
+                return value
+            if isinstance(value, str):
+                try:
+                    return int(value)
+                except ValueError:
+                    return None
+            return value
+
+        def convert_to_bool_int(value):
+            """Convertir a int (0/1) para parámetros booleanos"""
+            if value is None:
+                return None
+            if isinstance(value, bool):
+                return 1 if value else 0
+            if isinstance(value, int):
+                return 1 if value else 0
+            if isinstance(value, str):
+                return 1 if value.lower() in ["true", "1", "yes"] else 0
+            return value
+
         # Parámetros de paginación
         if page is not None:
             params["page"] = page
@@ -1021,19 +1053,19 @@ def search_units(
 
         # Parámetros de dormitorios
         if bedrooms is not None:
-            params["bedrooms"] = bedrooms
+            params["bedrooms"] = convert_to_int(bedrooms)
         if min_bedrooms is not None:
-            params["minBedrooms"] = min_bedrooms
+            params["minBedrooms"] = convert_to_int(min_bedrooms)
         if max_bedrooms is not None:
-            params["maxBedrooms"] = max_bedrooms
+            params["maxBedrooms"] = convert_to_int(max_bedrooms)
 
         # Parámetros de baños
         if bathrooms is not None:
-            params["bathrooms"] = bathrooms
+            params["bathrooms"] = convert_to_int(bathrooms)
         if min_bathrooms is not None:
-            params["minBathrooms"] = min_bathrooms
+            params["minBathrooms"] = convert_to_int(min_bathrooms)
         if max_bathrooms is not None:
-            params["maxBathrooms"] = max_bathrooms
+            params["maxBathrooms"] = convert_to_int(max_bathrooms)
 
         # Parámetros de capacidad
         if occupancy is not None:
@@ -1053,11 +1085,11 @@ def search_units(
 
         # Parámetros de estado y características
         if is_active is not None:
-            params["isActive"] = is_active
+            params["isActive"] = convert_to_bool_int(is_active)
         if is_bookable is not None:
-            params["isBookable"] = is_bookable
+            params["isBookable"] = convert_to_bool_int(is_bookable)
         if pets_friendly is not None:
-            params["petsFriendly"] = pets_friendly
+            params["petsFriendly"] = convert_to_bool_int(pets_friendly)
         if unit_status is not None:
             params["unitStatus"] = unit_status
 
