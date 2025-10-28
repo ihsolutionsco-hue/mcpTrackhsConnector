@@ -33,7 +33,7 @@ jobs:
     - name: Create test environment
       run: |
         cat > .env << EOF
-        TRACKHS_API_URL=https://api-test.trackhs.com/api
+        TRACKHS_API_URL=https://ihmvacations.trackhs.com
         TRACKHS_USERNAME=test_user
         TRACKHS_PASSWORD=test_password
         TRACKHS_TIMEOUT=30
