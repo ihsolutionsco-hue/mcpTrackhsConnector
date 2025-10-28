@@ -519,3 +519,208 @@ class CollectionResponse(BaseModel):
     links: Dict[str, Any] = Field(
         ..., alias="_links", description="Enlaces de navegación"
     )
+
+
+# =============================================================================
+# ESQUEMAS DE ENTRADA PERSONALIZADOS
+# =============================================================================
+
+# Esquema de entrada personalizado para search_units que permite Union[int, str]
+UNIT_SEARCH_INPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "page": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Número de página (0-based). Límite: 10k total results",
+            "default": 0,
+        },
+        "size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Tamaño de página (1-100). Límite: 10k total results",
+            "default": 10,
+        },
+        "sort_column": {
+            "type": "string",
+            "enum": ["id", "name", "nodeName", "unitTypeName"],
+            "description": "Columna para ordenar resultados. Default: name",
+        },
+        "sort_direction": {
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "description": "Dirección de ordenamiento. Default: asc",
+        },
+        "search": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Búsqueda de texto en nombre o descripciones",
+        },
+        "term": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Búsqueda de texto en término específico",
+        },
+        "unit_code": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Búsqueda en código de unidad (exacta o con % para wildcard)",
+        },
+        "short_name": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Búsqueda en nombre corto (exacta o con % para wildcard)",
+        },
+        "bedrooms": {
+            "anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 20},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Número exacto de dormitorios",
+        },
+        "min_bedrooms": {
+            "anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 20},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Número mínimo de dormitorios",
+        },
+        "max_bedrooms": {
+            "anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 20},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Número máximo de dormitorios",
+        },
+        "bathrooms": {
+            "anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 20},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Número exacto de baños",
+        },
+        "min_bathrooms": {
+            "anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 20},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Número mínimo de baños",
+        },
+        "max_bathrooms": {
+            "anyOf": [
+                {"type": "integer", "minimum": 0, "maximum": 20},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Número máximo de baños",
+        },
+        "occupancy": {
+            "anyOf": [
+                {"type": "integer", "minimum": 1, "maximum": 50},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Capacidad exacta",
+        },
+        "min_occupancy": {
+            "anyOf": [
+                {"type": "integer", "minimum": 1, "maximum": 50},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Capacidad mínima",
+        },
+        "max_occupancy": {
+            "anyOf": [
+                {"type": "integer", "minimum": 1, "maximum": 50},
+                {"type": "string", "pattern": "^\\d+$"},
+            ],
+            "description": "Capacidad máxima",
+        },
+        "arrival": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Fecha de llegada (YYYY-MM-DD) para verificar disponibilidad",
+        },
+        "departure": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Fecha de salida (YYYY-MM-DD) para verificar disponibilidad",
+        },
+        "content_updated_since": {
+            "type": "string",
+            "description": "Fecha ISO 8601 - unidades con cambios desde esta fecha",
+        },
+        "is_active": {
+            "anyOf": [
+                {"type": "integer", "enum": [0, 1]},
+                {
+                    "type": "string",
+                    "enum": [
+                        "0",
+                        "1",
+                        "true",
+                        "false",
+                        "yes",
+                        "no",
+                        "on",
+                        "off",
+                        "enabled",
+                        "disabled",
+                    ],
+                },
+                {"type": "boolean"},
+            ],
+            "description": "Unidades activas (1/true) o inactivas (0/false)",
+        },
+        "is_bookable": {
+            "anyOf": [
+                {"type": "integer", "enum": [0, 1]},
+                {
+                    "type": "string",
+                    "enum": [
+                        "0",
+                        "1",
+                        "true",
+                        "false",
+                        "yes",
+                        "no",
+                        "on",
+                        "off",
+                        "enabled",
+                        "disabled",
+                    ],
+                },
+                {"type": "boolean"},
+            ],
+            "description": "Unidades reservables (1/true) o no (0/false)",
+        },
+        "pets_friendly": {
+            "anyOf": [
+                {"type": "integer", "enum": [0, 1]},
+                {
+                    "type": "string",
+                    "enum": [
+                        "0",
+                        "1",
+                        "true",
+                        "false",
+                        "yes",
+                        "no",
+                        "on",
+                        "off",
+                        "enabled",
+                        "disabled",
+                    ],
+                },
+                {"type": "boolean"},
+            ],
+            "description": "Unidades pet-friendly (1/true) o no (0/false)",
+        },
+        "unit_status": {
+            "type": "string",
+            "enum": ["clean", "dirty", "occupied", "inspection", "inprogress"],
+            "description": "Estado de la unidad",
+        },
+    },
+    "additionalProperties": False,
+}
