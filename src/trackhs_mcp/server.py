@@ -795,30 +795,37 @@ def search_units(
         corrected = {}
         for key, value in kwargs.items():
             if value is not None:
-                if key in ["page", "size", "bedrooms", "bathrooms"]:
-                    # Asegurar que sean enteros
-                    corrected[key] = int(value) if not isinstance(value, int) else value
-                elif key in ["is_active", "is_bookable"]:
-                    # Asegurar que sean enteros 0 o 1
-                    if isinstance(value, bool):
-                        corrected[key] = 1 if value else 0
-                    elif isinstance(value, str):
-                        corrected[key] = (
-                            1 if value.lower() in ["true", "1", "yes"] else 0
-                        )
-                    else:
+                try:
+                    if key in ["page", "size", "bedrooms", "bathrooms"]:
+                        # Asegurar que sean enteros
                         corrected[key] = (
                             int(value) if not isinstance(value, int) else value
                         )
-                else:
+                    elif key in ["is_active", "is_bookable"]:
+                        # Asegurar que sean enteros 0 o 1
+                        if isinstance(value, bool):
+                            corrected[key] = 1 if value else 0
+                        elif isinstance(value, str):
+                            corrected[key] = (
+                                1 if value.lower() in ["true", "1", "yes"] else 0
+                            )
+                        else:
+                            corrected[key] = (
+                                int(value) if not isinstance(value, int) else value
+                            )
+                    else:
+                        corrected[key] = value
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error converting parameter {key}={value}: {e}")
+                    # Mantener valor original si no se puede convertir
                     corrected[key] = value
             else:
                 corrected[key] = value
         return corrected
 
-    # Usar servicio de negocio para búsqueda con tipos corregidos
-    result = unit_service.search_units(
-        **ensure_correct_types(
+    try:
+        # Usar servicio de negocio con validación Pydantic mejorada
+        result = unit_service.search_units_with_validation(
             page=page,
             size=size,
             search=search,
@@ -827,9 +834,25 @@ def search_units(
             is_active=is_active,
             is_bookable=is_bookable,
         )
-    )
 
-    return result
+        # Log de éxito con métricas
+        total_items = result.get("total_items", 0)
+        page_count = result.get("page_count", 0)
+        logger.info(
+            f"✅ Búsqueda de unidades exitosa: {total_items} unidades encontradas, {page_count} páginas"
+        )
+
+        return result
+
+    except ValidationError as e:
+        logger.error(f"❌ Error de validación en search_units: {str(e)}")
+        raise
+    except TrackHSError as e:
+        logger.error(f"❌ Error de TrackHS en search_units: {str(e)}")
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error inesperado en search_units: {str(e)}")
+        raise TrackHSError(f"Error interno buscando unidades: {str(e)}")
 
 
 @mcp.tool(output_schema=AMENITIES_OUTPUT_SCHEMA)

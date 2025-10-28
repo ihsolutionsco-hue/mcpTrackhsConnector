@@ -7,6 +7,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from ..exceptions import TrackHSError, ValidationError
+from ..models import UnitData, UnitSearchParams, UnitSearchResponse
 from ..repositories import UnitRepository
 
 logger = logging.getLogger(__name__)
@@ -87,7 +88,16 @@ class UnitService:
                     "is_bookable debe ser 0, 1, True, False, 'true', 'false', '1', '0'"
                 )
 
-        logger.info(f"Buscando unidades: página {page}, tamaño {size}")
+        # Log detallado de parámetros de entrada
+        logger.info(f"🔍 Iniciando búsqueda de unidades:")
+        logger.info(f"   📄 Página: {page}, Tamaño: {size}")
+        logger.info(f"   🔍 Búsqueda: {search if search else 'N/A'}")
+        logger.info(f"   🛏️ Dormitorios: {bedrooms if bedrooms is not None else 'N/A'}")
+        logger.info(f"   🚿 Baños: {bathrooms if bathrooms is not None else 'N/A'}")
+        logger.info(f"   ✅ Activas: {is_active if is_active is not None else 'N/A'}")
+        logger.info(
+            f"   📅 Reservables: {is_bookable if is_bookable is not None else 'N/A'}"
+        )
 
         try:
             # Construir parámetros
@@ -103,21 +113,104 @@ class UnitService:
             if is_bookable is not None:
                 params["is_bookable"] = is_bookable
 
+            logger.debug(f"📤 Parámetros enviados a API: {params}")
+
             result = self.unit_repo.search(params)
+
+            # Log de respuesta cruda
+            total_items = result.get("total_items", 0)
+            page_count = result.get("page_count", 0)
+            units_count = len(result.get("_embedded", {}).get("units", []))
+            logger.info(
+                f"📥 Respuesta API recibida: {total_items} total, {page_count} páginas, {units_count} unidades en esta página"
+            )
 
             # ✅ CORRECCIÓN: Limpiar datos de respuesta para evitar errores de esquema
             if "_embedded" in result and "units" in result["_embedded"]:
-                result["_embedded"]["units"] = [
-                    self._clean_unit_data(unit) for unit in result["_embedded"]["units"]
-                ]
+                original_units = result["_embedded"]["units"]
+                cleaned_units = []
+                cleaning_errors = 0
+
+                for i, unit in enumerate(original_units):
+                    try:
+                        cleaned_unit = self._clean_unit_data(unit)
+                        cleaned_units.append(cleaned_unit)
+                    except Exception as e:
+                        cleaning_errors += 1
+                        logger.warning(f"⚠️ Error limpiando unidad {i}: {e}")
+                        # Mantener unidad original si no se puede limpiar
+                        cleaned_units.append(unit)
+
+                result["_embedded"]["units"] = cleaned_units
+
+                if cleaning_errors > 0:
+                    logger.warning(
+                        f"⚠️ {cleaning_errors} unidades tuvieron errores de limpieza"
+                    )
 
             logger.info(
-                f"Búsqueda de unidades completada. Encontradas: {result.get('total_items', 0)}"
+                f"✅ Búsqueda de unidades completada exitosamente: {total_items} unidades encontradas"
             )
             return result
 
         except Exception as e:
-            logger.error(f"Error buscando unidades: {str(e)}")
+            logger.error(f"❌ Error buscando unidades: {str(e)}")
+            logger.error(f"   Parámetros que causaron el error: {params}")
+            raise TrackHSError(f"Error buscando unidades: {str(e)}")
+
+    def search_units_with_validation(
+        self,
+        page: int = 1,
+        size: int = 10,
+        search: Optional[str] = None,
+        bedrooms: Optional[int] = None,
+        bathrooms: Optional[int] = None,
+        is_active: Optional[int] = None,
+        is_bookable: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """
+        Buscar unidades con validación robusta usando Pydantic.
+
+        Esta es la versión mejorada que usa modelos Pydantic para validación.
+        """
+        try:
+            # Validar parámetros con Pydantic
+            search_params = UnitSearchParams(
+                page=page,
+                size=size,
+                search=search,
+                bedrooms=bedrooms,
+                bathrooms=bathrooms,
+                is_active=is_active,
+                is_bookable=is_bookable,
+            )
+
+            logger.info(
+                f"✅ Parámetros validados con Pydantic: {search_params.model_dump()}"
+            )
+
+            # Usar parámetros validados
+            params = search_params.to_api_params()
+
+            # Realizar búsqueda
+            result = self.unit_repo.search(params)
+
+            # Validar respuesta con Pydantic
+            try:
+                validated_response = UnitSearchResponse(**result)
+                logger.info(
+                    f"✅ Respuesta validada con Pydantic: {validated_response.total_items} unidades"
+                )
+                return validated_response.model_dump()
+            except Exception as validation_error:
+                logger.warning(
+                    f"⚠️ Error validando respuesta con Pydantic: {validation_error}"
+                )
+                # Devolver respuesta original si falla la validación
+                return result
+
+        except Exception as e:
+            logger.error(f"❌ Error en búsqueda con validación Pydantic: {str(e)}")
             raise TrackHSError(f"Error buscando unidades: {str(e)}")
 
     def get_unit_by_id(self, unit_id: int) -> Dict[str, Any]:
@@ -195,37 +288,124 @@ class UnitService:
         """
         cleaned = unit_data.copy()
 
-        # Limpiar campo area específicamente
-        if "area" in cleaned and cleaned["area"] is not None:
-            try:
-                if isinstance(cleaned["area"], str):
-                    # Limpiar string de caracteres no numéricos
-                    cleaned_str = "".join(
-                        c for c in cleaned["area"] if c.isdigit() or c in ".-"
-                    )
-                    if cleaned_str:
-                        cleaned["area"] = float(cleaned_str)
-                    else:
-                        cleaned["area"] = None
-                else:
-                    cleaned["area"] = float(cleaned["area"])
-            except (ValueError, TypeError):
-                cleaned["area"] = None
+        # Limpiar campo area específicamente - MEJORADO
+        if "area" in cleaned:
+            cleaned["area"] = self._normalize_area(cleaned["area"])
 
-        # Limpiar campos numéricos
-        for field in ["bedrooms", "bathrooms", "max_occupancy"]:
-            if field in cleaned and cleaned[field] is not None:
-                try:
-                    cleaned[field] = int(cleaned[field])
-                except (ValueError, TypeError):
-                    cleaned[field] = None
+        # Limpiar campos numéricos - MEJORADO
+        numeric_fields = ["bedrooms", "bathrooms", "max_occupancy", "floors"]
+        for field in numeric_fields:
+            if field in cleaned:
+                cleaned[field] = self._normalize_numeric(cleaned[field])
 
-        # Limpiar campos booleanos
-        for field in ["is_active", "is_bookable"]:
-            if field in cleaned and cleaned[field] is not None:
-                if isinstance(cleaned[field], str):
-                    cleaned[field] = cleaned[field].lower() in ["true", "1", "yes"]
-                elif isinstance(cleaned[field], int):
-                    cleaned[field] = bool(cleaned[field])
+        # Limpiar campos booleanos - MEJORADO
+        boolean_fields = [
+            "is_active",
+            "is_bookable",
+            "pet_friendly",
+            "smoking_allowed",
+            "children_allowed",
+            "events_allowed",
+            "is_accessible",
+        ]
+        for field in boolean_fields:
+            if field in cleaned:
+                cleaned[field] = self._normalize_boolean(cleaned[field])
+
+        # Limpiar campos de tipo float - MEJORADO
+        float_fields = ["longitude", "latitude"]
+        for field in float_fields:
+            if field in cleaned:
+                cleaned[field] = self._normalize_float(cleaned[field])
 
         return cleaned
+
+    def _normalize_area(self, area_value: Any) -> Optional[float]:
+        """
+        Normaliza el campo area a float.
+
+        Maneja casos como:
+        - "3348.0" -> 3348.0
+        - "3348" -> 3348.0
+        - 3348 -> 3348.0
+        - None -> None
+        - "invalid" -> None
+        """
+        if area_value is None:
+            return None
+
+        try:
+            if isinstance(area_value, (int, float)):
+                return float(area_value)
+            elif isinstance(area_value, str):
+                # Limpiar string de caracteres no numéricos
+                cleaned_str = "".join(
+                    c for c in area_value.strip() if c.isdigit() or c in ".-"
+                )
+                if cleaned_str:
+                    return float(cleaned_str)
+                else:
+                    return None
+            else:
+                return None
+        except (ValueError, TypeError, AttributeError):
+            logger.warning(f"Could not normalize area value: {area_value}")
+            return None
+
+    def _normalize_numeric(self, value: Any) -> Optional[int]:
+        """Normaliza valores numéricos a int."""
+        if value is None:
+            return None
+
+        try:
+            if isinstance(value, (int, float)):
+                return int(value)
+            elif isinstance(value, str):
+                # Limpiar string de caracteres no numéricos
+                cleaned_str = "".join(c for c in value.strip() if c.isdigit())
+                if cleaned_str:
+                    return int(cleaned_str)
+                else:
+                    return None
+            else:
+                return None
+        except (ValueError, TypeError, AttributeError):
+            logger.warning(f"Could not normalize numeric value: {value}")
+            return None
+
+    def _normalize_boolean(self, value: Any) -> Optional[bool]:
+        """Normaliza valores booleanos."""
+        if value is None:
+            return None
+
+        if isinstance(value, bool):
+            return value
+        elif isinstance(value, int):
+            return bool(value)
+        elif isinstance(value, str):
+            return value.lower() in ["true", "1", "yes", "on", "enabled"]
+        else:
+            return None
+
+    def _normalize_float(self, value: Any) -> Optional[float]:
+        """Normaliza valores a float."""
+        if value is None:
+            return None
+
+        try:
+            if isinstance(value, (int, float)):
+                return float(value)
+            elif isinstance(value, str):
+                # Limpiar string de caracteres no numéricos
+                cleaned_str = "".join(
+                    c for c in value.strip() if c.isdigit() or c in ".-"
+                )
+                if cleaned_str:
+                    return float(cleaned_str)
+                else:
+                    return None
+            else:
+                return None
+        except (ValueError, TypeError, AttributeError):
+            logger.warning(f"Could not normalize float value: {value}")
+            return None
