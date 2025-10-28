@@ -200,17 +200,143 @@ def get_reservation(
 
 @mcp.tool(output_schema=UNIT_SEARCH_OUTPUT_SCHEMA)
 def search_units(
-    page: Annotated[int, Field(ge=1, le=10000, description="Número de página")] = 1,
-    size: Annotated[int, Field(ge=1, le=100, description="Tamaño de página")] = 10,
+    # Parámetros de paginación
+    page: Annotated[
+        int,
+        Field(
+            ge=1,
+            le=10000,
+            description="Número de página (1-based). Límite máximo: 10k total results",
+        ),
+    ] = 1,
+    size: Annotated[
+        int,
+        Field(
+            ge=1,
+            le=100,
+            description="Tamaño de página (1-100). Límite: 10k total results",
+        ),
+    ] = 10,
+    # Parámetros de ordenamiento
+    sort_column: Annotated[
+        Optional[Literal["id", "name", "nodeName", "unitTypeName"]],
+        Field(description="Columna para ordenar resultados. Default: name"),
+    ] = None,
+    sort_direction: Annotated[
+        Optional[Literal["asc", "desc"]],
+        Field(description="Dirección de ordenamiento. Default: asc"),
+    ] = None,
+    # Parámetros de búsqueda de texto
     search: Annotated[
-        Optional[str], Field(max_length=200, description="Búsqueda de texto")
+        Optional[str],
+        Field(
+            max_length=200, description="Búsqueda de texto en nombre o descripciones"
+        ),
     ] = None,
+    term: Annotated[
+        Optional[str],
+        Field(max_length=200, description="Búsqueda de texto en término específico"),
+    ] = None,
+    unit_code: Annotated[
+        Optional[str],
+        Field(
+            max_length=100,
+            description="Búsqueda en código de unidad (exacta o con % para wildcard)",
+        ),
+    ] = None,
+    short_name: Annotated[
+        Optional[str],
+        Field(
+            max_length=100,
+            description="Búsqueda en nombre corto (exacta o con % para wildcard)",
+        ),
+    ] = None,
+    # Parámetros de filtros por ID
+    node_id: Annotated[
+        Optional[Union[int, List[int]]],
+        Field(description="ID(s) de nodo - unidades descendientes"),
+    ] = None,
+    amenity_id: Annotated[
+        Optional[Union[int, List[int]]],
+        Field(description="ID(s) de amenidad - unidades que tienen estas amenidades"),
+    ] = None,
+    unit_type_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) de tipo de unidad")
+    ] = None,
+    owner_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) del propietario")
+    ] = None,
+    company_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) de la empresa")
+    ] = None,
+    channel_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) del canal activo")
+    ] = None,
+    lodging_type_id: Annotated[
+        Optional[Union[int, List[int]]],
+        Field(description="ID(s) del tipo de alojamiento"),
+    ] = None,
+    bed_type_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) del tipo de cama")
+    ] = None,
+    amenity_all: Annotated[
+        Optional[List[int]],
+        Field(description="Filtrar unidades que tengan TODAS estas amenidades"),
+    ] = None,
+    unit_ids: Annotated[
+        Optional[List[int]],
+        Field(description="Filtrar por IDs específicos de unidades"),
+    ] = None,
+    # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número de dormitorios")
+        Optional[int], Field(ge=0, le=20, description="Número exacto de dormitorios")
     ] = None,
+    min_bedrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Número mínimo de dormitorios")
+    ] = None,
+    max_bedrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Número máximo de dormitorios")
+    ] = None,
+    # Parámetros de baños
     bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número de baños")
+        Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
     ] = None,
+    min_bathrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Número mínimo de baños")
+    ] = None,
+    max_bathrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Número máximo de baños")
+    ] = None,
+    # Parámetros de capacidad
+    occupancy: Annotated[
+        Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
+    ] = None,
+    min_occupancy: Annotated[
+        Optional[int], Field(ge=1, le=50, description="Capacidad mínima")
+    ] = None,
+    max_occupancy: Annotated[
+        Optional[int], Field(ge=1, le=50, description="Capacidad máxima")
+    ] = None,
+    # Parámetros de fechas
+    arrival: Annotated[
+        Optional[str],
+        Field(
+            pattern=r"^\d{4}-\d{2}-\d{2}$",
+            description="Fecha de llegada (YYYY-MM-DD) para verificar disponibilidad",
+        ),
+    ] = None,
+    departure: Annotated[
+        Optional[str],
+        Field(
+            pattern=r"^\d{4}-\d{2}-\d{2}$",
+            description="Fecha de salida (YYYY-MM-DD) para verificar disponibilidad",
+        ),
+    ] = None,
+    content_updated_since: Annotated[
+        Optional[str],
+        Field(description="Fecha ISO 8601 - unidades con cambios desde esta fecha"),
+    ] = None,
+    # Parámetros de estado y características
     is_active: Annotated[
         Optional[int],
         Field(ge=0, le=1, description="Unidades activas (1) o inactivas (0)"),
@@ -223,9 +349,95 @@ def search_units(
         Optional[int],
         Field(ge=0, le=1, description="Unidades pet-friendly (1) o no (0)"),
     ] = None,
+    unit_status: Annotated[
+        Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
+        Field(description="Estado de la unidad"),
+    ] = None,
+    # Parámetros de funcionalidad adicional
+    computed: Annotated[
+        Optional[int],
+        Field(
+            ge=0,
+            le=1,
+            description="Incluir valores computados adicionales (1) o no (0)",
+        ),
+    ] = None,
+    inherited: Annotated[
+        Optional[int],
+        Field(ge=0, le=1, description="Incluir atributos heredados (1) o no (0)"),
+    ] = None,
+    limited: Annotated[
+        Optional[int],
+        Field(
+            ge=0, le=1, description="Retornar atributos limitados (1) o completos (0)"
+        ),
+    ] = None,
+    include_descriptions: Annotated[
+        Optional[int],
+        Field(ge=0, le=1, description="Incluir descripciones de unidades (1) o no (0)"),
+    ] = None,
+    # Parámetros de filtros adicionales
+    calendar_id: Annotated[
+        Optional[int], Field(gt=0, description="ID del grupo de calendario")
+    ] = None,
+    role_id: Annotated[
+        Optional[int], Field(gt=0, description="ID del rol específico")
+    ] = None,
+    promo_code_id: Annotated[
+        Optional[int], Field(gt=0, description="ID del código promocional válido")
+    ] = None,
 ) -> Dict[str, Any]:
     """
     Buscar unidades de alojamiento disponibles en TrackHS con filtros avanzados.
+
+    Esta herramienta implementa la API completa de búsqueda de unidades de TrackHS
+    con todos los parámetros disponibles según la documentación oficial.
+
+    FUNCIONALIDADES PRINCIPALES:
+    - Búsqueda por características físicas (dormitorios, baños, capacidad)
+    - Filtros por estado (activa, reservable, pet-friendly, estado de limpieza)
+    - Búsqueda de texto (nombre, descripción, código, término)
+    - Filtros por fechas de disponibilidad (arrival/departure)
+    - Filtros por IDs (nodo, amenidad, tipo de unidad, propietario, etc.)
+    - Ordenamiento personalizable
+    - Paginación flexible
+
+    PARÁMETROS DE BÚSQUEDA DE TEXTO:
+    - search: Búsqueda en nombre o descripciones
+    - term: Búsqueda en término específico
+    - unit_code: Búsqueda exacta en código (con % para wildcard)
+    - short_name: Búsqueda exacta en nombre corto (con % para wildcard)
+
+    PARÁMETROS DE CAPACIDAD:
+    - bedrooms/min_bedrooms/max_bedrooms: Filtros de dormitorios
+    - bathrooms/min_bathrooms/max_bathrooms: Filtros de baños
+    - occupancy/min_occupancy/max_occupancy: Filtros de capacidad
+
+    PARÁMETROS DE DISPONIBILIDAD:
+    - arrival/departure: Verificar disponibilidad en fechas específicas
+    - is_bookable: Solo unidades disponibles para reservar
+    - is_active: Solo unidades activas
+
+    PARÁMETROS DE CARACTERÍSTICAS:
+    - pets_friendly: Unidades que permiten mascotas
+    - unit_status: Estado de limpieza (clean, dirty, occupied, etc.)
+    - amenity_id: Unidades con amenidades específicas
+    - amenity_all: Unidades con TODAS las amenidades especificadas
+
+    PARÁMETROS DE ORDENAMIENTO:
+    - sort_column: id, name, nodeName, unitTypeName
+    - sort_direction: asc, desc
+
+    EJEMPLOS DE USO:
+    - search_units(page=1, size=10) # Primera página, 10 unidades
+    - search_units(bedrooms=2, bathrooms=1) # Apartamentos 2D/1B
+    - search_units(is_active=1, is_bookable=1) # Unidades activas y disponibles
+    - search_units(search="penthouse") # Buscar por nombre
+    - search_units(arrival="2024-01-15", departure="2024-01-20") # Disponibles en fechas
+    - search_units(amenity_id=[1,2,3]) # Con amenidades específicas
+    - search_units(pets_friendly=1, min_bedrooms=2) # Pet-friendly con 2+ dormitorios
+    - search_units(unit_status="clean", is_bookable=1) # Limpias y disponibles
+    - search_units(sort_column="name", sort_direction="asc") # Ordenadas por nombre
     """
     if api_client is None:
         raise ToolError("Cliente API no disponible. Verifique las credenciales.")
@@ -233,16 +445,60 @@ def search_units(
     logger.info(f"Buscando unidades: página {page}, tamaño {size}")
 
     try:
-        # Construir parámetros usando helper
+        # Construir parámetros usando helper con todos los nuevos parámetros
         api_params = build_units_search_params(
+            # Parámetros de paginación
             page=page,
             size=size,
+            # Parámetros de ordenamiento
+            sort_column=sort_column,
+            sort_direction=sort_direction,
+            # Parámetros de búsqueda de texto
             search=search,
+            term=term,
+            unit_code=unit_code,
+            short_name=short_name,
+            # Parámetros de filtros por ID
+            node_id=node_id,
+            amenity_id=amenity_id,
+            unit_type_id=unit_type_id,
+            owner_id=owner_id,
+            company_id=company_id,
+            channel_id=channel_id,
+            lodging_type_id=lodging_type_id,
+            bed_type_id=bed_type_id,
+            amenity_all=amenity_all,
+            unit_ids=unit_ids,
+            # Parámetros de dormitorios
             bedrooms=bedrooms,
+            min_bedrooms=min_bedrooms,
+            max_bedrooms=max_bedrooms,
+            # Parámetros de baños
             bathrooms=bathrooms,
+            min_bathrooms=min_bathrooms,
+            max_bathrooms=max_bathrooms,
+            # Parámetros de capacidad
+            occupancy=occupancy,
+            min_occupancy=min_occupancy,
+            max_occupancy=max_occupancy,
+            # Parámetros de fechas
+            arrival=arrival,
+            departure=departure,
+            content_updated_since=content_updated_since,
+            # Parámetros de estado y características
             is_active=is_active,
             is_bookable=is_bookable,
             pets_friendly=pets_friendly,
+            unit_status=unit_status,
+            # Parámetros de funcionalidad adicional
+            computed=computed,
+            inherited=inherited,
+            limited=limited,
+            include_descriptions=include_descriptions,
+            # Parámetros de filtros adicionales
+            calendar_id=calendar_id,
+            role_id=role_id,
+            promo_code_id=promo_code_id,
         )
 
         # Realizar búsqueda

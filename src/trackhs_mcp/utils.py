@@ -291,6 +291,7 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     Construir parámetros para la API de búsqueda de unidades.
 
     Convierte parámetros de Python a formato esperado por la API de TrackHS.
+    Implementa todos los parámetros disponibles según la especificación OpenAPI.
 
     Args:
         **kwargs: Parámetros de búsqueda
@@ -353,7 +354,13 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
     ]:
         value = kwargs.get(param_name)
         if value is not None:
-            params[api_name] = value if isinstance(value, list) else [value]
+            # Convertir a lista si es un solo valor
+            if isinstance(value, (int, str)):
+                params[api_name] = [value]
+            elif isinstance(value, list):
+                params[api_name] = value
+            else:
+                logger.warning(f"Tipo no soportado para {param_name}: {type(value)}")
 
     if kwargs.get("amenity_all") is not None:
         params["amenityAll"] = kwargs["amenity_all"]
