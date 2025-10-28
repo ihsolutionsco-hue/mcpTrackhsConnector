@@ -781,29 +781,29 @@ def search_units(
     ] = None,
     # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[int],
-        Field(ge=0, le=20, description="Número exacto de dormitorios"),
+        Optional[str],
+        Field(description="Número exacto de dormitorios (0-20)"),
     ] = None,
     min_bedrooms: Annotated[
-        Optional[int],
-        Field(ge=0, le=20, description="Mínimo número de dormitorios"),
+        Optional[str],
+        Field(description="Mínimo número de dormitorios (0-20)"),
     ] = None,
     max_bedrooms: Annotated[
-        Optional[int],
-        Field(ge=0, le=20, description="Máximo número de dormitorios"),
+        Optional[str],
+        Field(description="Máximo número de dormitorios (0-20)"),
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
-        Optional[int],
-        Field(ge=0, le=20, description="Número exacto de baños"),
+        Optional[str],
+        Field(description="Número exacto de baños (0-20)"),
     ] = None,
     min_bathrooms: Annotated[
-        Optional[int],
-        Field(ge=0, le=20, description="Mínimo número de baños"),
+        Optional[str],
+        Field(description="Mínimo número de baños (0-20)"),
     ] = None,
     max_bathrooms: Annotated[
-        Optional[int],
-        Field(ge=0, le=20, description="Máximo número de baños"),
+        Optional[str],
+        Field(description="Máximo número de baños (0-20)"),
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
@@ -836,15 +836,15 @@ def search_units(
     ] = None,
     # Parámetros de estado y características
     is_active: Annotated[
-        Optional[int],
+        Optional[str],
         Field(description="Unidades activas (1), inactivas (0), o todas (None)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[int],
+        Optional[str],
         Field(description="Unidades disponibles para reservar (1) o no (0)"),
     ] = None,
     pets_friendly: Annotated[
-        Optional[int],
+        Optional[str],
         Field(description="Unidades que permiten mascotas (1) o no (0)"),
     ] = None,
     unit_status: Annotated[
@@ -967,7 +967,15 @@ def search_units(
         """Construir parámetros para la API de TrackHS con todos los filtros"""
         params = {}
 
-        # FastMCP debería manejar la conversión automáticamente con strict_input_validation=False
+        # Función helper para convertir strings a int
+        def safe_int(value):
+            """Convertir string a int de forma segura"""
+            if value is None or value == "":
+                return None
+            try:
+                return int(value)
+            except (ValueError, TypeError):
+                return None
 
         # Parámetros de paginación
         if page is not None:
@@ -1029,19 +1037,19 @@ def search_units(
 
         # Parámetros de dormitorios
         if bedrooms is not None:
-            params["bedrooms"] = bedrooms
+            params["bedrooms"] = safe_int(bedrooms)
         if min_bedrooms is not None:
-            params["minBedrooms"] = min_bedrooms
+            params["minBedrooms"] = safe_int(min_bedrooms)
         if max_bedrooms is not None:
-            params["maxBedrooms"] = max_bedrooms
+            params["maxBedrooms"] = safe_int(max_bedrooms)
 
         # Parámetros de baños
         if bathrooms is not None:
-            params["bathrooms"] = bathrooms
+            params["bathrooms"] = safe_int(bathrooms)
         if min_bathrooms is not None:
-            params["minBathrooms"] = min_bathrooms
+            params["minBathrooms"] = safe_int(min_bathrooms)
         if max_bathrooms is not None:
-            params["maxBathrooms"] = max_bathrooms
+            params["maxBathrooms"] = safe_int(max_bathrooms)
 
         # Parámetros de capacidad
         if occupancy is not None:
@@ -1061,11 +1069,11 @@ def search_units(
 
         # Parámetros de estado y características
         if is_active is not None:
-            params["isActive"] = is_active
+            params["isActive"] = safe_int(is_active)
         if is_bookable is not None:
-            params["isBookable"] = is_bookable
+            params["isBookable"] = safe_int(is_bookable)
         if pets_friendly is not None:
-            params["petsFriendly"] = pets_friendly
+            params["petsFriendly"] = safe_int(pets_friendly)
         if unit_status is not None:
             params["unitStatus"] = unit_status
 
