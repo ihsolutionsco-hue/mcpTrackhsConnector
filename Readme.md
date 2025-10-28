@@ -1,4 +1,4 @@
-# MCP TrackHS Connector
+# TrackHS MCP Connector
 
 Conector MCP (Model Context Protocol) para la API de TrackHS, diseñado para integrar servicios de gestión hotelera con sistemas de IA.
 
@@ -7,8 +7,10 @@ Conector MCP (Model Context Protocol) para la API de TrackHS, diseñado para int
 - **Integración completa** con la API de TrackHS
 - **Herramientas MCP** para búsqueda de unidades, reservas, amenidades y más
 - **Autenticación segura** con múltiples métodos soportados
-- **Documentación completa** con ejemplos de uso
-- **Scripts de diagnóstico** para troubleshooting
+- **Arquitectura robusta** con servicios, repositorios y middleware
+- **Validación Pydantic** para datos de entrada y salida
+- **Manejo de errores** avanzado con reintentos automáticos
+- **Logging estructurado** para debugging y monitoreo
 - **Configuración flexible** para diferentes entornos
 
 ## 📁 Estructura del Proyecto
@@ -16,13 +18,22 @@ Conector MCP (Model Context Protocol) para la API de TrackHS, diseñado para int
 ```
 ├── src/                    # Código fuente del conector
 │   └── trackhs_mcp/       # Módulo principal
-├── docs/                  # Documentación del proyecto
-├── examples/              # Ejemplos de uso
-├── scripts/               # Scripts de utilidad y diagnóstico
+│       ├── server.py      # Servidor MCP principal
+│       ├── config.py      # Configuración centralizada
+│       ├── exceptions.py  # Excepciones personalizadas
+│       ├── schemas.py     # Esquemas Pydantic
+│       ├── services/      # Lógica de negocio
+│       │   ├── reservation_service.py
+│       │   ├── unit_service.py
+│       │   └── work_order_service.py
+│       ├── repositories/  # Acceso a datos
+│       │   ├── base.py
+│       │   ├── reservation_repository.py
+│       │   ├── unit_repository.py
+│       │   └── work_order_repository.py
+│       └── middleware_native.py  # Middleware personalizado
 ├── tests/                 # Tests unitarios e integración
 ├── config/                # Archivos de configuración
-├── temp_tests/            # Tests temporales (ignorados por git)
-├── reports/               # Reportes de pruebas (ignorados por git)
 ├── pyproject.toml         # Configuración del proyecto
 ├── requirements.txt       # Dependencias
 └── README.md             # Este archivo
@@ -32,7 +43,7 @@ Conector MCP (Model Context Protocol) para la API de TrackHS, diseñado para int
 
 ### Requisitos
 
-- Python 3.8+
+- Python 3.11+
 - Credenciales de TrackHS
 
 ### Instalación Local
@@ -54,7 +65,9 @@ pip install -e .
 ```bash
 export TRACKHS_USERNAME='tu_usuario'
 export TRACKHS_PASSWORD='tu_password'
-export TRACKHS_API_URL='https://ihmvacations.trackhs.com/api'  # Opcional
+export TRACKHS_API_URL='https://ihmvacations.trackhs.com'  # Opcional
+export LOG_LEVEL='INFO'  # Opcional
+export STRICT_VALIDATION='false'  # Opcional
 ```
 
 ## 🚀 Uso Rápido
@@ -65,42 +78,104 @@ export TRACKHS_API_URL='https://ihmvacations.trackhs.com/api'  # Opcional
 python -m trackhs_mcp
 ```
 
-### Usar las Herramientas MCP
+### Herramientas MCP Disponibles
 
 El conector proporciona las siguientes herramientas MCP:
 
-- `search_units` - Buscar unidades de alojamiento
-- `search_reservations` - Buscar reservas
-- `get_reservation` - Obtener detalles de una reserva
+#### 🔍 Búsqueda de Reservas
+- `search_reservations` - Buscar reservas con filtros avanzados
+- `get_reservation` - Obtener detalles de una reserva específica
 - `get_folio` - Obtener folio financiero de una reserva
+
+#### 🏠 Gestión de Unidades
+- `search_units` - Buscar unidades de alojamiento con filtros completos
 - `search_amenities` - Buscar amenidades disponibles
+
+#### 🔧 Órdenes de Trabajo
 - `create_maintenance_work_order` - Crear orden de mantenimiento
 - `create_housekeeping_work_order` - Crear orden de limpieza
 
-## 📚 Documentación
+### Ejemplos de Uso
 
-La documentación completa está disponible en la carpeta `docs/`:
+```python
+# Buscar reservas por fecha
+search_reservations(
+    arrival_start="2024-01-15",
+    arrival_end="2024-01-20",
+    status="confirmed"
+)
 
-- [Búsqueda de Unidades](docs/unit_collection.md)
-- [Gestión de Reservas](docs/reservation_collection.md)
-- [Amenidades](docs/get_amenities.md)
-- [Folios Financieros](docs/get_folio.md)
-- [Órdenes de Mantenimiento](docs/wo_maintenance.md)
-- [Órdenes de Limpieza](docs/wo_housekeeping.md)
+# Buscar unidades disponibles
+search_units(
+    bedrooms=2,
+    bathrooms=1,
+    is_active=1,
+    is_bookable=1
+)
 
-## 🔧 Scripts de Diagnóstico
+# Crear orden de mantenimiento
+create_maintenance_work_order(
+    unit_id=123,
+    summary="Fuga en grifo",
+    description="Grifo del baño principal gotea constantemente",
+    priority=3
+)
+```
 
-Para diagnosticar problemas de conectividad o configuración:
+## 🏗️ Arquitectura
 
-```bash
-# Prueba rápida
-python scripts/run_quick_test.py
+### Patrón de Servicios
 
-# Diagnóstico completo
-python scripts/run_final_diagnosis.py
+El proyecto sigue una arquitectura de servicios que separa las responsabilidades:
 
-# Verificar configuración
-python scripts/verify_server_config.py
+- **Servicios**: Lógica de negocio y validaciones
+- **Repositorios**: Acceso a datos y comunicación con API
+- **Middleware**: Autenticación, logging, métricas y reintentos
+- **Esquemas**: Validación de datos con Pydantic
+
+### Middleware Nativo
+
+- **ErrorHandlingMiddleware**: Manejo centralizado de errores
+- **RetryMiddleware**: Reintentos automáticos con backoff exponencial
+- **TrackHSAuthMiddleware**: Autenticación y autorización
+- **TrackHSLoggingMiddleware**: Logging estructurado
+- **TrackHSMetricsMiddleware**: Métricas y monitoreo
+- **TrackHSRateLimitMiddleware**: Control de velocidad
+
+### Validación de Datos
+
+- **Pydantic**: Validación robusta de entrada y salida
+- **Transformación automática**: Conversión de tipos problemáticos
+- **Sanitización**: Limpieza de datos sensibles para logs
+- **Validación flexible**: Modo estricto y no estricto
+
+## 🔧 Configuración
+
+### Variables de Entorno
+
+| Variable | Descripción | Default | Requerida |
+|----------|-------------|---------|-----------|
+| `TRACKHS_USERNAME` | Usuario de TrackHS | - | ✅ |
+| `TRACKHS_PASSWORD` | Contraseña de TrackHS | - | ✅ |
+| `TRACKHS_API_URL` | URL base de la API | `https://ihmvacations.trackhs.com` | ❌ |
+| `LOG_LEVEL` | Nivel de logging | `INFO` | ❌ |
+| `STRICT_VALIDATION` | Validación estricta | `false` | ❌ |
+| `MAX_RETRIES` | Máximo de reintentos | `3` | ❌ |
+| `REQUEST_TIMEOUT` | Timeout de requests | `30.0` | ❌ |
+
+### Configuración Avanzada
+
+```python
+# config/fastmcp.json
+{
+  "name": "TrackHS API",
+  "version": "2.0.0",
+  "description": "Servidor MCP para TrackHS API",
+  "environment": {
+    "TRACKHS_USERNAME": "your_username",
+    "TRACKHS_PASSWORD": "your_password"
+  }
+}
 ```
 
 ## 🧪 Testing
@@ -114,20 +189,44 @@ pytest --cov=src/trackhs_mcp
 
 # Tests específicos
 pytest tests/test_integration.py
+
+# Tests con verbose
+pytest -v
 ```
 
-## 🚀 Despliegue en FastMCP Cloud
+## 🚀 Despliegue
 
-1. **Configurar variables de entorno** en FastMCP Cloud:
-   ```
-   TRACKHS_USERNAME=tu_usuario
-   TRACKHS_PASSWORD=tu_password
-   TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
-   ```
+### FastMCP Cloud
 
+1. **Configurar variables de entorno** en FastMCP Cloud
 2. **Desplegar el servidor** usando la configuración de `config/fastmcp.json`
+3. **Probar la conectividad** usando las herramientas MCP
 
-3. **Probar la conectividad** usando los scripts de diagnóstico
+### Docker (Próximamente)
+
+```bash
+# Construir imagen
+docker build -t trackhs-mcp .
+
+# Ejecutar contenedor
+docker run -e TRACKHS_USERNAME=user -e TRACKHS_PASSWORD=pass trackhs-mcp
+```
+
+## 📊 Monitoreo
+
+### Health Check
+
+```bash
+# Verificar estado del servidor
+curl https://your-mcp-server.com/health
+```
+
+### Métricas Prometheus
+
+```bash
+# Obtener métricas
+curl https://your-mcp-server.com/metrics
+```
 
 ## 🔍 Troubleshooting
 
@@ -136,27 +235,17 @@ pytest tests/test_integration.py
 1. **Error de autenticación**: Verificar credenciales y URL base
 2. **Recurso no encontrado**: Verificar endpoint y configuración
 3. **Timeout**: Verificar conectividad de red
+4. **Validación fallida**: Revisar formato de datos de entrada
 
-### Scripts de Diagnóstico
+### Logs
 
 ```bash
-# Diagnóstico completo
-python scripts/run_final_diagnosis.py
+# Ver logs en tiempo real
+tail -f logs/trackhs-mcp.log
 
-# Verificar configuración específica
-python scripts/test_current_config.py
-
-# Probar conectividad
-python scripts/test_basic_connectivity.py
+# Filtrar por nivel
+grep "ERROR" logs/trackhs-mcp.log
 ```
-
-## 📄 Reportes
-
-Los scripts de diagnóstico generan reportes en la carpeta `reports/`:
-
-- `final_diagnosis_report_*.json` - Diagnóstico completo
-- `connectivity_test_results.json` - Resultados de conectividad
-- `local_tests_report_*.json` - Tests locales
 
 ## 🤝 Contribución
 
@@ -174,9 +263,9 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 Para soporte técnico o preguntas:
 
-1. Revisar la documentación en `docs/`
-2. Ejecutar los scripts de diagnóstico
-3. Crear un issue en GitHub con los reportes generados
+1. Revisar la documentación en este README
+2. Verificar logs del servidor
+3. Crear un issue en GitHub con información detallada
 
 ## 🎯 Roadmap
 
@@ -185,7 +274,13 @@ Para soporte técnico o preguntas:
 - [ ] Métricas y monitoreo avanzado
 - [ ] Soporte para webhooks
 - [ ] Integración con más sistemas MCP
+- [ ] Dockerización completa
+- [ ] Tests de carga y rendimiento
 
 ---
 
 **Desarrollado por IHM Solutions** - Soluciones de gestión hotelera inteligente
+
+**Versión**: 2.0.0
+**Python**: 3.11+
+**FastMCP**: 2.13.0+
