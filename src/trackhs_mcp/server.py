@@ -780,13 +780,13 @@ def search_units(
         Optional[Union[int, List[int]]], Field(description="ID(s) de tipo de unidad")
     ] = None,
     # Parámetros de dormitorios
-    bedrooms: Optional[str] = None,
-    min_bedrooms: Optional[str] = None,
-    max_bedrooms: Optional[str] = None,
+    bedrooms: Optional[Union[int, str]] = None,
+    min_bedrooms: Optional[Union[int, str]] = None,
+    max_bedrooms: Optional[Union[int, str]] = None,
     # Parámetros de baños
-    bathrooms: Optional[str] = None,
-    min_bathrooms: Optional[str] = None,
-    max_bathrooms: Optional[str] = None,
+    bathrooms: Optional[Union[int, str]] = None,
+    min_bathrooms: Optional[Union[int, str]] = None,
+    max_bathrooms: Optional[Union[int, str]] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
         Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
@@ -817,9 +817,9 @@ def search_units(
         Field(description="Fecha ISO 8601 - unidades con cambios desde esta fecha"),
     ] = None,
     # Parámetros de estado y características
-    is_active: Optional[str] = None,
-    is_bookable: Optional[str] = None,
-    pets_friendly: Optional[str] = None,
+    is_active: Optional[Union[int, str]] = None,
+    is_bookable: Optional[Union[int, str]] = None,
+    pets_friendly: Optional[Union[int, str]] = None,
     unit_status: Annotated[
         Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
         Field(description="Estado de la unidad"),
