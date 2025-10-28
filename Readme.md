@@ -1,375 +1,191 @@
-# Solución Completa - TrackHS API
+# MCP TrackHS Connector
 
-Esta es la solución completa para diagnosticar y resolver problemas con el servidor MCP de TrackHS en FastMCP Cloud.
+Conector MCP (Model Context Protocol) para la API de TrackHS, diseñado para integrar servicios de gestión hotelera con sistemas de IA.
 
-## 🎯 Problema Identificado
+## 🚀 Características
 
-**Error:** `Error calling tool 'search_units': Recurso no encontrado: <!DOCTYPE html>...`
+- **Integración completa** con la API de TrackHS
+- **Herramientas MCP** para búsqueda de unidades, reservas, amenidades y más
+- **Autenticación segura** con múltiples métodos soportados
+- **Documentación completa** con ejemplos de uso
+- **Scripts de diagnóstico** para troubleshooting
+- **Configuración flexible** para diferentes entornos
 
-**Causa:** La API está devolviendo una página HTML en lugar de una respuesta JSON, lo que indica un problema de configuración.
+## 📁 Estructura del Proyecto
 
-## 🚀 Solución Completa
-
-### Paso 1: Prueba Rápida (Recomendado)
-
-```bash
-python scripts/run_quick_test.py
+```
+├── src/                    # Código fuente del conector
+│   └── trackhs_mcp/       # Módulo principal
+├── docs/                  # Documentación del proyecto
+├── examples/              # Ejemplos de uso
+├── scripts/               # Scripts de utilidad y diagnóstico
+├── tests/                 # Tests unitarios e integración
+├── config/                # Archivos de configuración
+├── temp_tests/            # Tests temporales (ignorados por git)
+├── reports/               # Reportes de pruebas (ignorados por git)
+├── pyproject.toml         # Configuración del proyecto
+├── requirements.txt       # Dependencias
+└── README.md             # Este archivo
 ```
 
-**¿Qué hace?**
-- Ejecuta un test rápido de la configuración actual
-- Verifica que las credenciales funcionen
-- Confirma que el endpoint responda correctamente
-- Identifica si el problema se reproduce en local
+## 🛠️ Instalación
 
-**Ventajas:**
-- Test rápido y simple
-- Identifica problemas inmediatamente
-- Proporciona diagnóstico básico
-- Recomienda próximos pasos
+### Requisitos
 
-### Paso 2: Diagnóstico Final Completo (Si es necesario)
+- Python 3.8+
+- Credenciales de TrackHS
+
+### Instalación Local
 
 ```bash
-python scripts/run_final_diagnosis.py
+# Clonar el repositorio
+git clone https://github.com/ihsolutionsco-hue/mcpTrackhsConnector.git
+cd mcpTrackhsConnector
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Instalar en modo desarrollo
+pip install -e .
 ```
-
-**¿Qué hace?**
-- Verifica la configuración del servidor
-- Verifica la preparación para FastMCP Cloud
-- Prueba la conectividad básica
-- Prueba la configuración actual
-- Prueba múltiples configuraciones
-- Prueba diferentes métodos de autenticación
-- Identifica la configuración correcta
-- Genera un reporte completo
-
-### Paso 3: Configurar FastMCP Cloud
-
-Usar la configuración que funcionó en local:
-
-```bash
-# Variables de entorno en FastMCP Cloud
-TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
-TRACKHS_USERNAME=tu_usuario
-TRACKHS_PASSWORD=tu_password
-```
-
-### Paso 4: Desplegar en FastMCP Cloud
-
-1. Configurar variables de entorno
-2. Desplegar el servidor
-3. Probar la herramienta `search_units`
-
-## 🔍 Scripts de Diagnóstico Disponibles
-
-### Scripts Rápidos (Recomendados)
-
-#### 1. Prueba Rápida
-```bash
-python scripts/run_quick_test.py
-```
-
-#### 2. Diagnóstico Final Completo
-```bash
-python scripts/run_final_diagnosis.py
-```
-
-### Scripts Locales
-
-#### 1. Diagnóstico Local Completo
-```bash
-python scripts/run_complete_local_diagnosis.py
-```
-
-#### 2. Tests Locales Básicos
-```bash
-python scripts/run_local_tests.py
-```
-
-#### 3. Tests Individuales
-```bash
-python scripts/verify_server_config.py
-python scripts/check_fastmcp_cloud_ready.py
-python scripts/test_basic_connectivity.py
-python scripts/test_current_config_local.py
-python scripts/test_local_api_real.py
-python scripts/test_auth_methods_local.py
-```
-
-### Scripts de FastMCP Cloud
-
-#### 1. Diagnóstico Completo
-```bash
-python scripts/complete_diagnosis.py
-```
-
-#### 2. Tests Específicos
-```bash
-python scripts/test_specific_issue.py
-python scripts/test_current_config.py
-python scripts/test_url_variations_simple.py
-python scripts/test_auth_methods.py
-python scripts/test_endpoints.py
-```
-
-## 📋 Configuración Requerida
 
 ### Variables de Entorno
+
 ```bash
 export TRACKHS_USERNAME='tu_usuario'
 export TRACKHS_PASSWORD='tu_password'
 export TRACKHS_API_URL='https://ihmvacations.trackhs.com/api'  # Opcional
 ```
 
-### Archivo .env (Alternativa)
+## 🚀 Uso Rápido
+
+### Ejecutar el Servidor MCP
+
 ```bash
-TRACKHS_USERNAME=tu_usuario
-TRACKHS_PASSWORD=tu_password
-TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
+python -m trackhs_mcp
 ```
 
-## 🔍 Flujo de Diagnóstico Recomendado
+### Usar las Herramientas MCP
 
-### 1. Prueba Rápida (Primero)
-```bash
-# Ejecutar prueba rápida
-python scripts/run_quick_test.py
+El conector proporciona las siguientes herramientas MCP:
 
-# Si funciona, configurar FastMCP Cloud
-# Si no funciona, ejecutar diagnóstico completo
-```
+- `search_units` - Buscar unidades de alojamiento
+- `search_reservations` - Buscar reservas
+- `get_reservation` - Obtener detalles de una reserva
+- `get_folio` - Obtener folio financiero de una reserva
+- `search_amenities` - Buscar amenidades disponibles
+- `create_maintenance_work_order` - Crear orden de mantenimiento
+- `create_housekeeping_work_order` - Crear orden de limpieza
 
-### 2. Diagnóstico Final Completo (Si es necesario)
-```bash
-# Ejecutar diagnóstico final completo
-python scripts/run_final_diagnosis.py
+## 📚 Documentación
 
-# Si hay problemas específicos
-python scripts/test_current_config_local.py
-python scripts/test_local_api_real.py
-python scripts/test_auth_methods_local.py
-```
+La documentación completa está disponible en la carpeta `docs/`:
 
-### 3. Configurar FastMCP Cloud
-```bash
-# Usar la configuración que funcionó en local
-# Configurar variables de entorno en FastMCP Cloud
-# Desplegar el servidor
-```
-
-### 4. Probar en FastMCP Cloud
-```bash
-# Probar la herramienta search_units
-# Verificar que funcione correctamente
-```
-
-### 5. Diagnóstico en FastMCP Cloud (Si es necesario)
-```bash
-# Si el problema persiste en FastMCP Cloud
-python scripts/complete_diagnosis.py
-python scripts/test_specific_issue.py
-```
-
-## 🛠️ Soluciones Comunes
-
-### Problema: Credenciales Incorrectas
-```bash
-# Verificar con TrackHS
-# Obtener credenciales correctas
-# Actualizar variables de entorno
-```
-
-### Problema: URL Base Incorrecta
-```bash
-# Probar diferentes URLs
-https://ihmvacations.trackhs.com/api
-https://ihmvacations.trackhs.com
-https://api.trackhs.com/api
-https://api.trackhs.com
-```
-
-### Problema: Endpoint Incorrecto
-```bash
-# Probar diferentes endpoints
-pms/units
-units
-api/pms/units
-```
-
-### Problema: Método de Autenticación Incorrecto
-```bash
-# Probar diferentes métodos
-Basic Auth (usuario/contraseña)
-Bearer Token
-Headers personalizados
-API Key
-```
-
-## 📄 Archivos de Reporte
-
-Los scripts generan archivos de reporte con timestamp:
-
-- `final_diagnosis_report_YYYYMMDD_HHMMSS.json`
-- `complete_local_diagnosis_report_YYYYMMDD_HHMMSS.json`
-- `complete_diagnosis_report_YYYYMMDD_HHMMSS.json`
-- `local_tests_report_YYYYMMDD_HHMMSS.json`
-- `local_api_test_results.json`
-- `auth_methods_test_results.json`
-- `server_config_verification.json`
-- `fastmcp_cloud_readiness.json`
-
-**Incluye estos archivos cuando contactes soporte técnico.**
-
-## 🔧 Configuración para FastMCP Cloud
-
-### Variables de Entorno Requeridas
-```bash
-TRACKHS_USERNAME=tu_usuario
-TRACKHS_PASSWORD=tu_password
-```
-
-### Variables de Entorno Opcionales
-```bash
-TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
-```
-
-### Estructura de Archivos Requerida
-```
-src/trackhs_mcp/__init__.py
-src/trackhs_mcp/__main__.py
-src/trackhs_mcp/server.py
-src/trackhs_mcp/schemas.py
-src/trackhs_mcp/exceptions.py
-src/trackhs_mcp/middleware.py
-fastmcp.json
-requirements.txt
-pyproject.toml
-```
-
-## 📞 Soporte Técnico
-
-Si los diagnósticos no resuelven el problema, contacta soporte técnico con:
-
-1. **Archivo de reporte** (generado por los scripts)
-2. **Logs del servidor** (de FastMCP Cloud)
-3. **Configuración de variables** (sin credenciales)
-4. **Descripción del problema** (error específico)
-
-## 🎯 Resultado Esperado
-
-Después de ejecutar los diagnósticos, deberías tener:
-
-1. **Configuración funcional** identificada
-2. **Variables de entorno** correctas
-3. **URL base** correcta
-4. **Endpoint** correcto
-5. **Método de autenticación** correcto
-
-Con esta información, puedes configurar FastMCP Cloud correctamente y resolver el problema.
-
-## 🚀 Próximos Pasos
-
-### 1. Ejecutar Prueba Rápida
-```bash
-python scripts/run_quick_test.py
-```
-
-### 2. Si funciona, configurar FastMCP Cloud
-- Configurar variables de entorno en FastMCP Cloud
-- Usar la configuración que funcionó en local
-- Desplegar el servidor
-
-### 3. Si no funciona, ejecutar diagnóstico completo
-```bash
-python scripts/run_final_diagnosis.py
-```
-
-### 4. Identificar configuración correcta
-- Revisar los resultados del diagnóstico
-- Identificar la configuración que funcionó
-- Anotar las variables de entorno correctas
-
-### 5. Configurar FastMCP Cloud
-- Configurar variables de entorno en FastMCP Cloud
-- Usar la configuración que funcionó en local
-- Desplegar el servidor
-
-### 6. Probar en FastMCP Cloud
-- Probar la herramienta `search_units`
-- Verificar que funcione correctamente
-- Monitorear el funcionamiento
-
-## 🔍 Ventajas del Diagnóstico
-
-### ✅ Ventajas
-- Prueba la API real de TrackHS
-- Identifica problemas antes de desplegar
-- Ahorra tiempo en FastMCP Cloud
-- Proporciona diagnóstico detallado
-- Permite probar múltiples configuraciones
-- Verifica la configuración del servidor
-- Verifica la preparación para FastMCP Cloud
-- Ejecuta todos los diagnósticos en secuencia
-
-### ⚠️ Consideraciones
-- Requiere credenciales reales
-- Requiere conexión a internet
-- No replica exactamente el entorno de FastMCP Cloud
-- Puede fallar si la API no está disponible
-
-## 📞 Soporte Técnico
-
-Si necesitas ayuda adicional:
-
-1. **Revisa la documentación** en `docs/`
-2. **Ejecuta los diagnósticos** y revisa los reportes
-3. **Contacta soporte técnico** con los reportes generados
-4. **Incluye información detallada** sobre el problema
-
-## 🎉 Conclusión
-
-El diagnóstico completo te ayudará a:
-
-1. **Identificar la configuración correcta** que funciona con la API real
-2. **Configurar FastMCP Cloud** con la configuración correcta
-3. **Resolver el problema** de "Recurso no encontrado"
-4. **Tener un servidor MCP funcional** en FastMCP Cloud
-
-Sigue el flujo de diagnóstico recomendado y deberías poder resolver el problema exitosamente.
-
-## 📚 Documentación Adicional
-
-- `docs/FASTMCP_CLOUD_DIAGNOSIS.md` - Diagnóstico específico de FastMCP Cloud
-- `docs/LOCAL_TESTS_README.md` - Tests locales
-- `docs/DIAGNOSIS_SCRIPTS_README.md` - Guía de scripts de diagnóstico
-- `docs/COMPLETE_DIAGNOSIS_README.md` - Diagnóstico completo
-- `docs/FINAL_DIAGNOSIS_GUIDE.md` - Guía final de diagnóstico
-- `README_DIAGNOSIS.md` - README de diagnóstico
-- `README_FINAL.md` - README final
+- [Búsqueda de Unidades](docs/unit_collection.md)
+- [Gestión de Reservas](docs/reservation_collection.md)
+- [Amenidades](docs/get_amenities.md)
+- [Folios Financieros](docs/get_folio.md)
+- [Órdenes de Mantenimiento](docs/wo_maintenance.md)
+- [Órdenes de Limpieza](docs/wo_housekeeping.md)
 
 ## 🔧 Scripts de Diagnóstico
 
-- `scripts/run_quick_test.py` - Prueba rápida
-- `scripts/run_final_diagnosis.py` - Diagnóstico final completo
-- `scripts/run_complete_local_diagnosis.py` - Diagnóstico completo local
-- `scripts/run_local_tests.py` - Tests locales básicos
-- `scripts/complete_diagnosis.py` - Diagnóstico completo
-- `scripts/verify_server_config.py` - Verificación de configuración
-- `scripts/check_fastmcp_cloud_ready.py` - Verificación de preparación para FastMCP Cloud
-- `scripts/test_basic_connectivity.py` - Test de conectividad básica
-- `scripts/test_current_config_local.py` - Test de configuración actual
-- `scripts/test_local_api_real.py` - Test de múltiples configuraciones
-- `scripts/test_auth_methods_local.py` - Test de métodos de autenticación
-- `scripts/test_specific_issue.py` - Test del problema específico
+Para diagnosticar problemas de conectividad o configuración:
 
-## 🎯 Resultado Final
+```bash
+# Prueba rápida
+python scripts/run_quick_test.py
 
-Después de seguir esta guía, deberías tener:
+# Diagnóstico completo
+python scripts/run_final_diagnosis.py
 
-1. **Un servidor MCP funcional** en FastMCP Cloud
-2. **La herramienta `search_units` funcionando** correctamente
-3. **Un diagnóstico completo** de la configuración
-4. **Documentación** para futuros problemas
+# Verificar configuración
+python scripts/verify_server_config.py
+```
 
-¡El problema debería estar resuelto!
+## 🧪 Testing
+
+```bash
+# Ejecutar todos los tests
+pytest
+
+# Tests con cobertura
+pytest --cov=src/trackhs_mcp
+
+# Tests específicos
+pytest tests/test_integration.py
+```
+
+## 🚀 Despliegue en FastMCP Cloud
+
+1. **Configurar variables de entorno** en FastMCP Cloud:
+   ```
+   TRACKHS_USERNAME=tu_usuario
+   TRACKHS_PASSWORD=tu_password
+   TRACKHS_API_URL=https://ihmvacations.trackhs.com/api
+   ```
+
+2. **Desplegar el servidor** usando la configuración de `config/fastmcp.json`
+
+3. **Probar la conectividad** usando los scripts de diagnóstico
+
+## 🔍 Troubleshooting
+
+### Problemas Comunes
+
+1. **Error de autenticación**: Verificar credenciales y URL base
+2. **Recurso no encontrado**: Verificar endpoint y configuración
+3. **Timeout**: Verificar conectividad de red
+
+### Scripts de Diagnóstico
+
+```bash
+# Diagnóstico completo
+python scripts/run_final_diagnosis.py
+
+# Verificar configuración específica
+python scripts/test_current_config.py
+
+# Probar conectividad
+python scripts/test_basic_connectivity.py
+```
+
+## 📄 Reportes
+
+Los scripts de diagnóstico generan reportes en la carpeta `reports/`:
+
+- `final_diagnosis_report_*.json` - Diagnóstico completo
+- `connectivity_test_results.json` - Resultados de conectividad
+- `local_tests_report_*.json` - Tests locales
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir un Pull Request
+
+## 📝 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 📞 Soporte
+
+Para soporte técnico o preguntas:
+
+1. Revisar la documentación en `docs/`
+2. Ejecutar los scripts de diagnóstico
+3. Crear un issue en GitHub con los reportes generados
+
+## 🎯 Roadmap
+
+- [ ] Soporte para más endpoints de TrackHS
+- [ ] Cache inteligente para mejorar rendimiento
+- [ ] Métricas y monitoreo avanzado
+- [ ] Soporte para webhooks
+- [ ] Integración con más sistemas MCP
+
+---
+
+**Desarrollado por IHM Solutions** - Soluciones de gestión hotelera inteligente

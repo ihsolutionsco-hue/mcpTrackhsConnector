@@ -149,3 +149,8 @@ coverage.xml
 *.log
 logs/
 temp/
+
+# Project specific
+temp_tests/
+reports/
+*.json
