@@ -836,33 +836,33 @@ def search_units(
     ] = None,
     # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número exacto de dormitorios")
+        Optional[int], Field(ge=0, le=20, description="Número exacto de dormitorios")
     ] = None,
     min_bedrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número mínimo de dormitorios")
+        Optional[int], Field(ge=0, le=20, description="Número mínimo de dormitorios")
     ] = None,
     max_bedrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número máximo de dormitorios")
+        Optional[int], Field(ge=0, le=20, description="Número máximo de dormitorios")
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número exacto de baños")
+        Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
     ] = None,
     min_bathrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número mínimo de baños")
+        Optional[int], Field(ge=0, le=20, description="Número mínimo de baños")
     ] = None,
     max_bathrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número máximo de baños")
+        Optional[int], Field(ge=0, le=20, description="Número máximo de baños")
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad exacta")
+        Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
     ] = None,
     min_occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad mínima")
+        Optional[int], Field(ge=1, le=50, description="Capacidad mínima")
     ] = None,
     max_occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad máxima")
+        Optional[int], Field(ge=1, le=50, description="Capacidad máxima")
     ] = None,
     # Parámetros de fechas
     arrival: Annotated[
@@ -885,14 +885,14 @@ def search_units(
     ] = None,
     # Parámetros de estado y características
     is_active: Annotated[
-        Optional[Union[int, str]],
+        Optional[int],
         Field(description="Unidades activas (1) o inactivas (0)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[Union[int, str]], Field(description="Unidades reservables (1) o no (0)")
+        Optional[int], Field(description="Unidades reservables (1) o no (0)")
     ] = None,
     pets_friendly: Annotated[
-        Optional[Union[int, str]], Field(description="Unidades pet-friendly (1) o no (0)")
+        Optional[int], Field(description="Unidades pet-friendly (1) o no (0)")
     ] = None,
     unit_status: Annotated[
         Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
