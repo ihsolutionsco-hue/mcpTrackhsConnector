@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 import httpx
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
-from pydantic import Field
+from pydantic import BaseModel, Field, field_validator
 from typing_extensions import Annotated
 
 from .cache import get_cache
@@ -714,6 +714,59 @@ def get_reservation(
         raise
 
 
+# Clase de parámetros con validación personalizada para search_units
+class SearchUnitsParams(BaseModel):
+    """Parámetros para search_units con validación flexible de tipos"""
+
+    bedrooms: Annotated[
+        Optional[Union[int, str]], Field(description="Número exacto de dormitorios")
+    ] = None
+    bathrooms: Annotated[
+        Optional[Union[int, str]], Field(description="Número exacto de baños")
+    ] = None
+    is_active: Annotated[
+        Optional[Union[Literal[0, 1], str]],
+        Field(description="Unidades activas (1) o inactivas (0)"),
+    ] = None
+    is_bookable: Annotated[
+        Optional[Union[Literal[0, 1], str]], Field(description="Unidades reservables (1) o no (0)")
+    ] = None
+
+    @field_validator('bedrooms', 'bathrooms')
+    @classmethod
+    def validate_numeric_range(cls, v):
+        if v is None:
+            return v
+        # Convertir string a int si es necesario
+        if isinstance(v, str):
+            try:
+                v = int(v.strip())
+            except (ValueError, AttributeError):
+                raise ValueError(f"'{v}' no es un número válido")
+        # Validar rango
+        if not (0 <= v <= 20):
+            raise ValueError(f"Valor {v} debe estar entre 0 y 20")
+        return v
+
+    @field_validator('is_active', 'is_bookable')
+    @classmethod
+    def validate_boolean_like(cls, v):
+        if v is None:
+            return v
+        # Convertir string a int si es necesario
+        if isinstance(v, str):
+            v = v.strip()
+            if v in ['0', '1']:
+                v = int(v)
+            elif v.lower() in ['true', 'false']:
+                v = 1 if v.lower() == 'true' else 0
+            else:
+                raise ValueError(f"'{v}' no es un valor válido (0, 1, 'true', 'false')")
+        # Validar que sea 0 o 1
+        if v not in [0, 1]:
+            raise ValueError(f"Valor {v} debe ser 0 o 1")
+        return v
+
 @mcp.tool
 def search_units(
     # Parámetros de paginación
@@ -781,33 +834,33 @@ def search_units(
     ] = None,
     # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número exacto de dormitorios")
+        Optional[Union[int, str]], Field(ge=0, le=20, description="Número exacto de dormitorios")
     ] = None,
     min_bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número mínimo de dormitorios")
+        Optional[Union[int, str]], Field(ge=0, le=20, description="Número mínimo de dormitorios")
     ] = None,
     max_bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número máximo de dormitorios")
+        Optional[Union[int, str]], Field(ge=0, le=20, description="Número máximo de dormitorios")
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
+        Optional[Union[int, str]], Field(ge=0, le=20, description="Número exacto de baños")
     ] = None,
     min_bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número mínimo de baños")
+        Optional[Union[int, str]], Field(ge=0, le=20, description="Número mínimo de baños")
     ] = None,
     max_bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número máximo de baños")
+        Optional[Union[int, str]], Field(ge=0, le=20, description="Número máximo de baños")
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
-        Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
+        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad exacta")
     ] = None,
     min_occupancy: Annotated[
-        Optional[int], Field(ge=1, le=50, description="Capacidad mínima")
+        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad mínima")
     ] = None,
     max_occupancy: Annotated[
-        Optional[int], Field(ge=1, le=50, description="Capacidad máxima")
+        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad máxima")
     ] = None,
     # Parámetros de fechas
     arrival: Annotated[
@@ -830,14 +883,14 @@ def search_units(
     ] = None,
     # Parámetros de estado y características
     is_active: Annotated[
-        Optional[Literal[0, 1]],
+        Optional[Union[Literal[0, 1], str]],
         Field(description="Unidades activas (1) o inactivas (0)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[Literal[0, 1]], Field(description="Unidades reservables (1) o no (0)")
+        Optional[Union[Literal[0, 1], str]], Field(description="Unidades reservables (1) o no (0)")
     ] = None,
     pets_friendly: Annotated[
-        Optional[Literal[0, 1]], Field(description="Unidades pet-friendly (1) o no (0)")
+        Optional[Union[Literal[0, 1], str]], Field(description="Unidades pet-friendly (1) o no (0)")
     ] = None,
     unit_status: Annotated[
         Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
@@ -845,30 +898,30 @@ def search_units(
     ] = None,
     # Parámetros de funcionalidad adicional
     computed: Annotated[
-        Optional[Literal[0, 1]],
+        Optional[Union[Literal[0, 1], str]],
         Field(description="Incluir valores computados adicionales (1) o no (0)"),
     ] = None,
     inherited: Annotated[
-        Optional[Literal[0, 1]],
+        Optional[Union[Literal[0, 1], str]],
         Field(description="Incluir atributos heredados (1) o no (0)"),
     ] = None,
     limited: Annotated[
-        Optional[Literal[0, 1]],
+        Optional[Union[Literal[0, 1], str]],
         Field(description="Retornar atributos limitados (1) o completos (0)"),
     ] = None,
     include_descriptions: Annotated[
-        Optional[Literal[0, 1]],
+        Optional[Union[Literal[0, 1], str]],
         Field(description="Incluir descripciones de unidades (1) o no (0)"),
     ] = None,
     # Parámetros de filtros adicionales
     calendar_id: Annotated[
-        Optional[int], Field(gt=0, description="ID del grupo de calendario")
+        Optional[Union[int, str]], Field(gt=0, description="ID del grupo de calendario")
     ] = None,
     role_id: Annotated[
-        Optional[int], Field(gt=0, description="ID del rol específico")
+        Optional[Union[int, str]], Field(gt=0, description="ID del rol específico")
     ] = None,
     promo_code_id: Annotated[
-        Optional[int], Field(gt=0, description="ID del código promocional válido")
+        Optional[Union[int, str]], Field(gt=0, description="ID del código promocional válido")
     ] = None,
     owner_id: Annotated[
         Optional[Union[int, List[int]]], Field(description="ID(s) del propietario")
@@ -965,8 +1018,20 @@ def search_units(
             if value is None or value == "":
                 return None
             try:
+                # Si ya es int, devolverlo
+                if isinstance(value, int):
+                    return value
+                # Si es string, convertir
+                if isinstance(value, str):
+                    # Limpiar string de espacios y caracteres no numéricos
+                    cleaned = value.strip()
+                    if not cleaned:
+                        return None
+                    return int(cleaned)
+                # Para otros tipos, intentar conversión directa
                 return int(value)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, AttributeError):
+                logger.warning(f"No se pudo convertir '{value}' a int")
                 return None
 
         # Parámetros de paginación
