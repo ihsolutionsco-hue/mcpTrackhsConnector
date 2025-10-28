@@ -167,6 +167,22 @@ class UnitService:
                 else:
                     logger.debug("✅ Todas las unidades se limpiaron correctamente")
 
+            # ✅ CORRECCIÓN: Limpiar campo area problemático en la respuesta
+            if "_embedded" in result and "units" in result["_embedded"]:
+                for unit in result["_embedded"]["units"]:
+                    if "area" in unit:
+                        area_value = unit["area"]
+                        if isinstance(area_value, str):
+                            try:
+                                # Intentar convertir a float
+                                unit["area"] = float(area_value)
+                            except (ValueError, TypeError):
+                                # Si no se puede convertir, eliminar el campo
+                                unit.pop("area", None)
+                        elif area_value is None or area_value == "":
+                            # Si es None o string vacío, eliminar el campo
+                            unit.pop("area", None)
+
             logger.info(
                 f"✅ Búsqueda de unidades completada exitosamente: {total_items} unidades encontradas"
             )

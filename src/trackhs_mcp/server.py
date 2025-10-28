@@ -1194,22 +1194,6 @@ def search_units(
 
         # La limpieza de datos se aplica en el servicio unit_service.search_units()
 
-        # ✅ CORRECCIÓN FINAL: Limpiar campo area problemático en la respuesta
-        if "_embedded" in result and "units" in result["_embedded"]:
-            for unit in result["_embedded"]["units"]:
-                if "area" in unit:
-                    area_value = unit["area"]
-                    if isinstance(area_value, str):
-                        try:
-                            # Intentar convertir a float
-                            unit["area"] = float(area_value)
-                        except (ValueError, TypeError):
-                            # Si no se puede convertir, eliminar el campo
-                            unit.pop("area", None)
-                    elif area_value is None or area_value == "":
-                        # Si es None o string vacío, eliminar el campo
-                        unit.pop("area", None)
-
         # Log de éxito con métricas
         total_items = result.get("total_items", 0)
         page_count = result.get("page_count", 0)
