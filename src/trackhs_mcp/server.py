@@ -10,7 +10,7 @@ import sys
 import time
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional, Union
 
 import httpx
 from fastmcp import FastMCP
@@ -716,72 +716,239 @@ def get_reservation(
 
 @mcp.tool(output_schema=UNIT_SEARCH_OUTPUT_SCHEMA)
 def search_units(
+    # Parámetros de paginación
     page: Annotated[
-        int, Field(ge=1, le=400, description="Número de página (1-based)")
-    ] = 1,
+        int,
+        Field(
+            ge=0,
+            le=10000,
+            description="Número de página (0-based). Límite: 10k total results",
+        ),
+    ] = 0,
     size: Annotated[
-        int, Field(ge=1, le=25, description="Tamaño de página (1-25)")
+        int,
+        Field(
+            ge=1,
+            le=100,
+            description="Tamaño de página (1-100). Límite: 10k total results",
+        ),
     ] = 10,
+    # Parámetros de ordenamiento
+    sort_column: Annotated[
+        Optional[Literal["id", "name", "nodeName", "unitTypeName"]],
+        Field(description="Columna para ordenar resultados. Default: name"),
+    ] = None,
+    sort_direction: Annotated[
+        Optional[Literal["asc", "desc"]],
+        Field(description="Dirección de ordenamiento. Default: asc"),
+    ] = None,
+    # Parámetros de búsqueda de texto
     search: Annotated[
         Optional[str],
         Field(
-            max_length=200,
-            description="Búsqueda de texto (nombre, descripción, código)",
+            max_length=200, description="Búsqueda de texto en nombre o descripciones"
         ),
     ] = None,
-    bedrooms: Annotated[
-        Optional[int],
-        Field(ge=0, le=20, description="Número exacto de dormitorios"),
+    term: Annotated[
+        Optional[str],
+        Field(max_length=200, description="Búsqueda de texto en término específico"),
     ] = None,
-    bathrooms: Annotated[
-        Optional[int],
-        Field(ge=0, le=20, description="Número exacto de baños"),
-    ] = None,
-    is_active: Annotated[
-        Optional[int],
+    unit_code: Annotated[
+        Optional[str],
         Field(
-            ge=0, le=1, description="Filtrar por unidades activas (1) o inactivas (0)"
+            max_length=100,
+            description="Búsqueda en código de unidad (exacta o con % para wildcard)",
         ),
+    ] = None,
+    short_name: Annotated[
+        Optional[str],
+        Field(
+            max_length=100,
+            description="Búsqueda en nombre corto (exacta o con % para wildcard)",
+        ),
+    ] = None,
+    # Parámetros de filtros por ID
+    node_id: Annotated[
+        Optional[Union[int, List[int]]],
+        Field(description="ID(s) de nodo - unidades descendientes"),
+    ] = None,
+    amenity_id: Annotated[
+        Optional[Union[int, List[int]]],
+        Field(description="ID(s) de amenidad - unidades que tienen estas amenidades"),
+    ] = None,
+    unit_type_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) de tipo de unidad")
+    ] = None,
+    # Parámetros de dormitorios
+    bedrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Número exacto de dormitorios")
+    ] = None,
+    min_bedrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Mínimo número de dormitorios")
+    ] = None,
+    max_bedrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Máximo número de dormitorios")
+    ] = None,
+    # Parámetros de baños
+    bathrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
+    ] = None,
+    min_bathrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Mínimo número de baños")
+    ] = None,
+    max_bathrooms: Annotated[
+        Optional[int], Field(ge=0, le=20, description="Máximo número de baños")
+    ] = None,
+    # Parámetros de capacidad
+    occupancy: Annotated[
+        Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
+    ] = None,
+    min_occupancy: Annotated[
+        Optional[int], Field(ge=1, le=50, description="Capacidad mínima")
+    ] = None,
+    max_occupancy: Annotated[
+        Optional[int], Field(ge=1, le=50, description="Capacidad máxima")
+    ] = None,
+    # Parámetros de fechas
+    arrival: Annotated[
+        Optional[str],
+        Field(
+            pattern=r"^\d{4}-\d{2}-\d{2}$",
+            description="Fecha de llegada (YYYY-MM-DD) para verificar disponibilidad",
+        ),
+    ] = None,
+    departure: Annotated[
+        Optional[str],
+        Field(
+            pattern=r"^\d{4}-\d{2}-\d{2}$",
+            description="Fecha de salida (YYYY-MM-DD) para verificar disponibilidad",
+        ),
+    ] = None,
+    content_updated_since: Annotated[
+        Optional[str],
+        Field(description="Fecha ISO 8601 - unidades con cambios desde esta fecha"),
+    ] = None,
+    # Parámetros de estado y características
+    is_active: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Unidades activas (1), inactivas (0), o todas (None)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[int],
-        Field(
-            ge=0,
-            le=1,
-            description="Filtrar por unidades disponibles para reservar (1) o no (0)",
-        ),
+        Optional[Literal[0, 1]],
+        Field(description="Unidades disponibles para reservar (1) o no (0)"),
+    ] = None,
+    pets_friendly: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Unidades que permiten mascotas (1) o no (0)"),
+    ] = None,
+    unit_status: Annotated[
+        Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
+        Field(description="Estado de la unidad"),
+    ] = None,
+    # Parámetros de funcionalidad adicional
+    computed: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Incluir valores computados adicionales (1) o no (0)"),
+    ] = None,
+    inherited: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Incluir atributos heredados (1) o no (0)"),
+    ] = None,
+    limited: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Retornar atributos limitados (1) o completos (0)"),
+    ] = None,
+    include_descriptions: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Incluir descripciones de unidades (1) o no (0)"),
+    ] = None,
+    # Parámetros de filtros adicionales
+    calendar_id: Annotated[
+        Optional[int], Field(gt=0, description="ID del grupo de calendario")
+    ] = None,
+    role_id: Annotated[
+        Optional[int], Field(gt=0, description="ID del rol específico")
+    ] = None,
+    promo_code_id: Annotated[
+        Optional[int], Field(gt=0, description="ID del código promocional válido")
+    ] = None,
+    owner_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) del propietario")
+    ] = None,
+    company_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) de la empresa")
+    ] = None,
+    channel_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) del canal activo")
+    ] = None,
+    lodging_type_id: Annotated[
+        Optional[Union[int, List[int]]],
+        Field(description="ID(s) del tipo de alojamiento"),
+    ] = None,
+    bed_type_id: Annotated[
+        Optional[Union[int, List[int]]], Field(description="ID(s) del tipo de cama")
+    ] = None,
+    amenity_all: Annotated[
+        Optional[List[int]],
+        Field(description="Filtrar unidades que tengan TODAS estas amenidades"),
+    ] = None,
+    unit_ids: Annotated[
+        Optional[List[int]],
+        Field(description="Filtrar por IDs específicos de unidades"),
     ] = None,
 ) -> Dict[str, Any]:
     """
-    Buscar unidades de alojamiento disponibles en TrackHS.
+    Buscar unidades de alojamiento disponibles en TrackHS con filtros avanzados.
 
-    Permite filtrar unidades por características específicas como dormitorios,
-    baños, y búsqueda de texto en nombre/descripción.
+    Esta herramienta implementa la API completa de búsqueda de unidades de TrackHS
+    con todos los parámetros disponibles según la documentación oficial.
 
-    Respuesta incluye para cada unidad:
-    - Información básica (id, nombre, código)
-    - Características físicas (dormitorios, baños, área, capacidad)
-    - Ubicación y dirección completa
-    - Amenidades disponibles
-    - Reglas de la casa y políticas
-    - Información de check-in/check-out
-    - Estado de disponibilidad
+    FUNCIONALIDADES PRINCIPALES:
+    - Búsqueda por características físicas (dormitorios, baños, capacidad)
+    - Filtros por estado (activa, reservable, pet-friendly, estado de limpieza)
+    - Búsqueda de texto (nombre, descripción, código, término)
+    - Filtros por fechas de disponibilidad (arrival/departure)
+    - Filtros por IDs (nodo, amenidad, tipo de unidad, propietario, etc.)
+    - Ordenamiento personalizable
+    - Paginación flexible
 
-    Casos de uso:
-    - Búsqueda de unidades por capacidad (bedrooms/bathrooms)
-    - Filtrado por características específicas
-    - Listado de inventario disponible
-    - Búsqueda por ubicación o nombre
-    - Verificar disponibilidad de unidades
+    PARÁMETROS DE BÚSQUEDA DE TEXTO:
+    - search: Búsqueda en nombre o descripciones
+    - term: Búsqueda en término específico
+    - unit_code: Búsqueda exacta en código (con % para wildcard)
+    - short_name: Búsqueda exacta en nombre corto (con % para wildcard)
 
-    Ejemplos de uso:
-    - search_units(bedrooms=2, bathrooms=1) # Unidades de 2 dormitorios, 1 baño
-    - search_units(is_active=True, is_bookable=True) # Unidades activas y disponibles
-    - search_units(search="penthouse") # Buscar por nombre o descripción
+    PARÁMETROS DE CAPACIDAD:
+    - bedrooms/min_bedrooms/max_bedrooms: Filtros de dormitorios
+    - bathrooms/min_bathrooms/max_bathrooms: Filtros de baños
+    - occupancy/min_occupancy/max_occupancy: Filtros de capacidad
+
+    PARÁMETROS DE DISPONIBILIDAD:
+    - arrival/departure: Verificar disponibilidad en fechas específicas
+    - is_bookable: Solo unidades disponibles para reservar
+    - is_active: Solo unidades activas
+
+    PARÁMETROS DE CARACTERÍSTICAS:
+    - pets_friendly: Unidades que permiten mascotas
+    - unit_status: Estado de limpieza (clean, dirty, occupied, etc.)
+    - amenity_id: Unidades con amenidades específicas
+    - amenity_all: Unidades con TODAS las amenidades especificadas
+
+    PARÁMETROS DE ORDENAMIENTO:
+    - sort_column: id, name, nodeName, unitTypeName
+    - sort_direction: asc, desc
+
+    EJEMPLOS DE USO:
+    - search_units(bedrooms=2, bathrooms=1) # Apartamentos 2D/1B
+    - search_units(is_active=1, is_bookable=1) # Unidades activas y disponibles
+    - search_units(search="penthouse") # Buscar por nombre
+    - search_units(arrival="2024-01-15", departure="2024-01-20") # Disponibles en fechas
+    - search_units(amenity_id=[1,2,3]) # Con amenidades específicas
+    - search_units(pets_friendly=1, min_bedrooms=2) # Pet-friendly con 2+ dormitorios
+    - search_units(unit_status="clean", is_bookable=1) # Limpias y disponibles
+    - search_units(sort_column="name", sort_direction="asc") # Ordenadas por nombre
     """
     # ✅ Middleware se aplica automáticamente (logging, auth, métricas, reintentos)
-
-    # Los parámetros ya están validados por FastMCP como int
 
     # Verificar que el servicio esté disponible
     if unit_service is None:
@@ -789,50 +956,162 @@ def search_units(
             "Servicio de unidades no disponible. Verifique las credenciales."
         )
 
-    # ✅ CORRECCIÓN FUNDAMENTAL: Asegurar tipos correctos para el API de TrackHS
-    def ensure_correct_types(**kwargs):
-        """Asegurar que los tipos sean correctos para el API de TrackHS"""
-        corrected = {}
-        for key, value in kwargs.items():
-            if value is not None:
-                try:
-                    if key in ["page", "size", "bedrooms", "bathrooms"]:
-                        # Asegurar que sean enteros
-                        corrected[key] = (
-                            int(value) if not isinstance(value, int) else value
-                        )
-                    elif key in ["is_active", "is_bookable"]:
-                        # Asegurar que sean enteros 0 o 1
-                        if isinstance(value, bool):
-                            corrected[key] = 1 if value else 0
-                        elif isinstance(value, str):
-                            corrected[key] = (
-                                1 if value.lower() in ["true", "1", "yes"] else 0
-                            )
-                        else:
-                            corrected[key] = (
-                                int(value) if not isinstance(value, int) else value
-                            )
-                    else:
-                        corrected[key] = value
-                except (ValueError, TypeError) as e:
-                    logger.warning(f"Error converting parameter {key}={value}: {e}")
-                    # Mantener valor original si no se puede convertir
-                    corrected[key] = value
-            else:
-                corrected[key] = value
-        return corrected
+    # ✅ CORRECCIÓN FUNDAMENTAL: Construir parámetros para la API de TrackHS
+    def build_api_params():
+        """Construir parámetros para la API de TrackHS con todos los filtros"""
+        params = {}
+
+        # Parámetros de paginación
+        if page is not None:
+            params["page"] = page
+        if size is not None:
+            params["size"] = size
+
+        # Parámetros de ordenamiento
+        if sort_column is not None:
+            params["sortColumn"] = sort_column
+        if sort_direction is not None:
+            params["sortDirection"] = sort_direction
+
+        # Parámetros de búsqueda de texto
+        if search is not None:
+            params["search"] = search
+        if term is not None:
+            params["term"] = term
+        if unit_code is not None:
+            params["unitCode"] = unit_code
+        if short_name is not None:
+            params["shortName"] = short_name
+
+        # Parámetros de filtros por ID (convertir arrays a formato API)
+        if node_id is not None:
+            params["nodeId"] = node_id if isinstance(node_id, list) else [node_id]
+        if amenity_id is not None:
+            params["amenityId"] = (
+                amenity_id if isinstance(amenity_id, list) else [amenity_id]
+            )
+        if unit_type_id is not None:
+            params["unitTypeId"] = (
+                unit_type_id if isinstance(unit_type_id, list) else [unit_type_id]
+            )
+        if owner_id is not None:
+            params["ownerId"] = owner_id if isinstance(owner_id, list) else [owner_id]
+        if company_id is not None:
+            params["companyId"] = (
+                company_id if isinstance(company_id, list) else [company_id]
+            )
+        if channel_id is not None:
+            params["channelId"] = (
+                channel_id if isinstance(channel_id, list) else [channel_id]
+            )
+        if lodging_type_id is not None:
+            params["lodgingTypeId"] = (
+                lodging_type_id
+                if isinstance(lodging_type_id, list)
+                else [lodging_type_id]
+            )
+        if bed_type_id is not None:
+            params["bedTypeId"] = (
+                bed_type_id if isinstance(bed_type_id, list) else [bed_type_id]
+            )
+        if amenity_all is not None:
+            params["amenityAll"] = amenity_all
+        if unit_ids is not None:
+            params["id"] = unit_ids
+
+        # Parámetros de dormitorios
+        if bedrooms is not None:
+            params["bedrooms"] = bedrooms
+        if min_bedrooms is not None:
+            params["minBedrooms"] = min_bedrooms
+        if max_bedrooms is not None:
+            params["maxBedrooms"] = max_bedrooms
+
+        # Parámetros de baños
+        if bathrooms is not None:
+            params["bathrooms"] = bathrooms
+        if min_bathrooms is not None:
+            params["minBathrooms"] = min_bathrooms
+        if max_bathrooms is not None:
+            params["maxBathrooms"] = max_bathrooms
+
+        # Parámetros de capacidad
+        if occupancy is not None:
+            params["occupancy"] = occupancy
+        if min_occupancy is not None:
+            params["minOccupancy"] = min_occupancy
+        if max_occupancy is not None:
+            params["maxOccupancy"] = max_occupancy
+
+        # Parámetros de fechas
+        if arrival is not None:
+            params["arrival"] = arrival
+        if departure is not None:
+            params["departure"] = departure
+        if content_updated_since is not None:
+            params["contentUpdatedSince"] = content_updated_since
+
+        # Parámetros de estado y características
+        if is_active is not None:
+            params["isActive"] = is_active
+        if is_bookable is not None:
+            params["isBookable"] = is_bookable
+        if pets_friendly is not None:
+            params["petsFriendly"] = pets_friendly
+        if unit_status is not None:
+            params["unitStatus"] = unit_status
+
+        # Parámetros de funcionalidad adicional
+        if computed is not None:
+            params["computed"] = computed
+        if inherited is not None:
+            params["inherited"] = inherited
+        if limited is not None:
+            params["limited"] = limited
+        if include_descriptions is not None:
+            params["includeDescriptions"] = include_descriptions
+
+        # Parámetros de filtros adicionales
+        if calendar_id is not None:
+            params["calendarId"] = calendar_id
+        if role_id is not None:
+            params["roleId"] = role_id
+        if promo_code_id is not None:
+            params["promoCodeId"] = promo_code_id
+
+        return params
 
     try:
-        # Usar servicio de negocio con validación Pydantic mejorada
-        result = unit_service.search_units_with_validation(
-            page=page,
-            size=size,
-            search=search,
-            bedrooms=bedrooms,
-            bathrooms=bathrooms,
-            is_active=is_active,
-            is_bookable=is_bookable,
+        # Construir parámetros para la API
+        api_params = build_api_params()
+
+        logger.info(f"🔍 Búsqueda de unidades con {len(api_params)} parámetros:")
+        for key, value in api_params.items():
+            logger.debug(f"   {key}: {value}")
+
+        # Usar servicio de negocio con limpieza de datos
+        result = unit_service.search_units(
+            page=api_params.get("page", 0),
+            size=api_params.get("size", 10),
+            search=api_params.get("search"),
+            bedrooms=api_params.get("bedrooms"),
+            bathrooms=api_params.get("bathrooms"),
+            is_active=api_params.get("isActive"),
+            is_bookable=api_params.get("isBookable"),
+            **{
+                k: v
+                for k, v in api_params.items()
+                if k
+                not in [
+                    "page",
+                    "size",
+                    "search",
+                    "bedrooms",
+                    "bathrooms",
+                    "isActive",
+                    "isBookable",
+                ]
+            },
         )
 
         # Log de éxito con métricas

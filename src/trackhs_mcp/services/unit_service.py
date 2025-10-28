@@ -26,13 +26,15 @@ class UnitService:
 
     def search_units(
         self,
-        page: int = 1,
+        page: int = 0,
         size: int = 10,
         search: Optional[str] = None,
         bedrooms: Optional[int] = None,
         bathrooms: Optional[int] = None,
         is_active: Optional[int] = None,
         is_bookable: Optional[int] = None,
+        # Parámetros adicionales para API completa
+        **additional_params: Any,
     ) -> Dict[str, Any]:
         """
         Buscar unidades de alojamiento.
@@ -100,7 +102,7 @@ class UnitService:
         )
 
         try:
-            # Construir parámetros
+            # Construir parámetros base
             params = {"page": page, "size": size}
             if search:
                 params["search"] = search
@@ -112,6 +114,9 @@ class UnitService:
                 params["is_active"] = is_active
             if is_bookable is not None:
                 params["is_bookable"] = is_bookable
+
+            # Agregar parámetros adicionales
+            params.update(additional_params)
 
             logger.debug(f"📤 Parámetros enviados a API: {params}")
 
@@ -131,9 +136,24 @@ class UnitService:
                 cleaned_units = []
                 cleaning_errors = 0
 
+                logger.debug(f"🧹 Limpiando {len(original_units)} unidades...")
+
                 for i, unit in enumerate(original_units):
                     try:
+                        # Log del área original antes de limpiar
+                        original_area = unit.get("area")
+                        logger.debug(
+                            f"Unidad {i}: área original = {original_area} (tipo: {type(original_area)})"
+                        )
+
                         cleaned_unit = self._clean_unit_data(unit)
+
+                        # Log del área después de limpiar
+                        cleaned_area = cleaned_unit.get("area")
+                        logger.debug(
+                            f"Unidad {i}: área limpia = {cleaned_area} (tipo: {type(cleaned_area)})"
+                        )
+
                         cleaned_units.append(cleaned_unit)
                     except Exception as e:
                         cleaning_errors += 1
@@ -147,6 +167,8 @@ class UnitService:
                     logger.warning(
                         f"⚠️ {cleaning_errors} unidades tuvieron errores de limpieza"
                     )
+                else:
+                    logger.debug("✅ Todas las unidades se limpiaron correctamente")
 
             logger.info(
                 f"✅ Búsqueda de unidades completada exitosamente: {total_items} unidades encontradas"
@@ -330,8 +352,9 @@ class UnitService:
         - 3348 -> 3348.0
         - None -> None
         - "invalid" -> None
+        - "" -> None
         """
-        if area_value is None:
+        if area_value is None or area_value == "":
             return None
 
         try:
@@ -345,11 +368,17 @@ class UnitService:
                 if cleaned_str:
                     return float(cleaned_str)
                 else:
+                    logger.debug(
+                        f"Area value '{area_value}' could not be converted to float"
+                    )
                     return None
             else:
+                logger.debug(
+                    f"Area value type {type(area_value)} not supported: {area_value}"
+                )
                 return None
-        except (ValueError, TypeError, AttributeError):
-            logger.warning(f"Could not normalize area value: {area_value}")
+        except (ValueError, TypeError, AttributeError) as e:
+            logger.warning(f"Could not normalize area value '{area_value}': {e}")
             return None
 
     def _normalize_numeric(self, value: Any) -> Optional[int]:
