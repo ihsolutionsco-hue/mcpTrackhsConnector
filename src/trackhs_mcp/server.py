@@ -1103,35 +1103,7 @@ def search_units(
             },
         )
 
-        # ✅ CORRECCIÓN CRÍTICA: Aplicar limpieza de datos adicional para evitar errores de esquema
-        if "_embedded" in result and "units" in result["_embedded"]:
-            original_units = result["_embedded"]["units"]
-            cleaned_units = []
-            cleaning_errors = 0
-
-            logger.debug(
-                f"🧹 Aplicando limpieza adicional a {len(original_units)} unidades..."
-            )
-
-            for i, unit in enumerate(original_units):
-                try:
-                    # Aplicar limpieza de datos del servicio
-                    cleaned_unit = unit_service._clean_unit_data(unit)
-                    cleaned_units.append(cleaned_unit)
-                except Exception as e:
-                    cleaning_errors += 1
-                    logger.warning(f"⚠️ Error limpiando unidad {i}: {e}")
-                    # Mantener unidad original si no se puede limpiar
-                    cleaned_units.append(unit)
-
-            result["_embedded"]["units"] = cleaned_units
-
-            if cleaning_errors > 0:
-                logger.warning(
-                    f"⚠️ {cleaning_errors} unidades tuvieron errores de limpieza"
-                )
-            else:
-                logger.debug("✅ Todas las unidades se limpiaron correctamente")
+        # La limpieza de datos se aplica en el servicio unit_service.search_units()
 
         # Log de éxito con métricas
         total_items = result.get("total_items", 0)

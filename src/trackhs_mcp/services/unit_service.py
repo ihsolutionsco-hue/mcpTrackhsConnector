@@ -363,7 +363,7 @@ class UnitService:
 
     def _normalize_area(self, area_value: Any) -> Optional[float]:
         """
-        Normaliza el campo area a float.
+        Normaliza el campo area a float de forma más agresiva.
 
         Maneja casos como:
         - "3348.0" -> 3348.0
@@ -375,64 +375,81 @@ class UnitService:
         - "null" -> None
         - "N/A" -> None
         - "undefined" -> None
+        - Cualquier valor no numérico -> None
         """
-        if area_value is None or area_value == "":
+        # Casos nulos directos
+        if area_value is None:
             return None
 
-        # Manejar strings que representan valores nulos
-        if isinstance(area_value, str):
-            area_value = area_value.strip().lower()
-            if area_value in ["null", "none", "n/a", "undefined", "nan", ""]:
-                return None
+        # Convertir a string para procesamiento
+        if not isinstance(area_value, str):
+            area_value = str(area_value)
+
+        # Limpiar y normalizar string
+        area_value = str(area_value).strip()
+
+        # Casos de valores nulos
+        if not area_value or area_value.lower() in [
+            "null",
+            "none",
+            "n/a",
+            "undefined",
+            "nan",
+            "none",
+            "empty",
+            "",
+        ]:
+            return None
 
         try:
+            # Intentar conversión directa si es número
             if isinstance(area_value, (int, float)):
-                # Verificar si es NaN o infinito
-                if isinstance(area_value, float) and (
-                    area_value != area_value
-                    or area_value == float("inf")
-                    or area_value == float("-inf")
+                result = float(area_value)
+                if (
+                    result != result
+                    or result == float("inf")
+                    or result == float("-inf")
                 ):
-                    logger.debug(f"Area value is NaN or infinite: {area_value}")
                     return None
-                return float(area_value)
-            elif isinstance(area_value, str):
-                # Limpiar string de caracteres no numéricos, manteniendo punto decimal
-                cleaned_str = "".join(
-                    c for c in area_value.strip() if c.isdigit() or c in ".-"
-                )
-                if cleaned_str:
-                    # Verificar que no sea solo puntos o guiones
-                    if cleaned_str.replace(".", "").replace("-", ""):
-                        result = float(cleaned_str)
-                        # Verificar si el resultado es válido
-                        if (
-                            result != result
-                            or result == float("inf")
-                            or result == float("-inf")
-                        ):
-                            logger.debug(
-                                f"Area value '{area_value}' resulted in invalid float: {result}"
-                            )
-                            return None
-                        return result
-                    else:
-                        logger.debug(
-                            f"Area value '{area_value}' contains only non-numeric characters"
-                        )
-                        return None
-                else:
+                return result
+
+            # Limpiar string de caracteres no numéricos, manteniendo punto decimal y signo
+            cleaned_str = "".join(c for c in area_value if c.isdigit() or c in ".-+")
+
+            # Verificar que no esté vacío después de limpiar
+            if not cleaned_str:
+                logger.debug(f"Area value '{area_value}' became empty after cleaning")
+                return None
+
+            # Verificar que no sea solo símbolos
+            if cleaned_str.replace(".", "").replace("-", "").replace("+", ""):
+                result = float(cleaned_str)
+
+                # Verificar si el resultado es válido
+                if (
+                    result != result
+                    or result == float("inf")
+                    or result == float("-inf")
+                ):
                     logger.debug(
-                        f"Area value '{area_value}' could not be converted to float"
+                        f"Area value '{area_value}' resulted in invalid float: {result}"
                     )
                     return None
+
+                # Verificar que sea un número positivo (área no puede ser negativa)
+                if result < 0:
+                    logger.debug(f"Area value '{area_value}' is negative: {result}")
+                    return None
+
+                return result
             else:
                 logger.debug(
-                    f"Area value type {type(area_value)} not supported: {area_value}"
+                    f"Area value '{area_value}' contains only symbols after cleaning"
                 )
                 return None
+
         except (ValueError, TypeError, AttributeError) as e:
-            logger.warning(f"Could not normalize area value '{area_value}': {e}")
+            logger.debug(f"Could not normalize area value '{area_value}': {e}")
             return None
 
     def _normalize_numeric(self, value: Any) -> Optional[int]:
