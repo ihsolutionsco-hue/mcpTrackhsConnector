@@ -1197,12 +1197,17 @@ def search_units(
         # ✅ CORRECCIÓN FINAL: Limpiar campo area problemático en la respuesta
         if "_embedded" in result and "units" in result["_embedded"]:
             for unit in result["_embedded"]["units"]:
-                if "area" in unit and isinstance(unit["area"], str):
-                    try:
-                        # Intentar convertir a float
-                        unit["area"] = float(unit["area"])
-                    except (ValueError, TypeError):
-                        # Si no se puede convertir, eliminar el campo
+                if "area" in unit:
+                    area_value = unit["area"]
+                    if isinstance(area_value, str):
+                        try:
+                            # Intentar convertir a float
+                            unit["area"] = float(area_value)
+                        except (ValueError, TypeError):
+                            # Si no se puede convertir, eliminar el campo
+                            unit.pop("area", None)
+                    elif area_value is None or area_value == "":
+                        # Si es None o string vacío, eliminar el campo
                         unit.pop("area", None)
 
         # Log de éxito con métricas
