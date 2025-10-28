@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Test Protocolo MCP - TrackHS MCP Server
-Verifica que las correcciones de validación funcionen correctamente usando el protocolo MCP
+Test Directo de Herramientas MCP - TrackHS MCP Server
+Verifica que las correcciones de validación funcionen correctamente usando las herramientas MCP directamente
 """
 
-import asyncio
 import json
 import os
 import sys
@@ -20,21 +19,31 @@ os.environ.setdefault("TRACKHS_PASSWORD", "test_password")
 os.environ.setdefault("TRACKHS_API_URL", "https://ihmvacations.trackhs.com/api")
 
 
-async def test_mcp_protocol():
-    """Test usando el protocolo MCP correctamente"""
-    print("🧪 TESTING PROTOCOLO MCP - CORRECCIONES IMPLEMENTADAS")
-    print("=" * 60)
+def test_direct_mcp_tools():
+    """Test directo de herramientas MCP"""
+    print("🧪 TESTING HERRAMIENTAS MCP DIRECTAS - CORRECCIONES IMPLEMENTADAS")
+    print("=" * 70)
 
-    # Importar el servidor MCP
+    # Importar el servidor MCP completo
     from trackhs_mcp.server import mcp
 
     results = []
 
+    # Obtener las herramientas del servidor MCP
+    tools = mcp.get_tools()
+    print(f"📋 Herramientas disponibles: {len(tools)}")
+    for tool in tools:
+        print(f"   - {tool.name}: {tool.description[:50]}...")
+
+    print("\n" + "=" * 70)
+    print("🔧 TESTING HERRAMIENTAS INDIVIDUALES")
+    print("=" * 70)
+
     # Test 1: search_units con parámetros string
     print("\n1. Testing search_units con parámetros string...")
     try:
-        # Usar el protocolo MCP correctamente
-        result = await mcp.call_tool(
+        # Usar la herramienta MCP directamente
+        result = mcp.call_tool(
             "search_units",
             {
                 "bedrooms": "2",  # String que debería convertirse a int
@@ -69,7 +78,7 @@ async def test_mcp_protocol():
     # Test 2: search_units con parámetros integer
     print("\n2. Testing search_units con parámetros integer...")
     try:
-        result = await mcp.call_tool(
+        result = mcp.call_tool(
             "search_units",
             {
                 "bedrooms": 2,  # Integer directo
@@ -98,7 +107,7 @@ async def test_mcp_protocol():
     # Test 3: search_amenities
     print("\n3. Testing search_amenities...")
     try:
-        result = await mcp.call_tool("search_amenities", {"size": 5})
+        result = mcp.call_tool("search_amenities", {"size": 5})
 
         if result and "_embedded" in result:
             print("✅ search_amenities: FUNCIONA")
@@ -122,7 +131,7 @@ async def test_mcp_protocol():
     # Test 4: get_folio con reserva existente
     print("\n4. Testing get_folio con reserva existente...")
     try:
-        result = await mcp.call_tool("get_folio", {"reservation_id": 27360905})
+        result = mcp.call_tool("get_folio", {"reservation_id": 27360905})
 
         if result and "reservation_id" in result:
             print("✅ get_folio: FUNCIONA")
@@ -148,7 +157,7 @@ async def test_mcp_protocol():
     # Test 5: create_maintenance_work_order
     print("\n5. Testing create_maintenance_work_order...")
     try:
-        result = await mcp.call_tool(
+        result = mcp.call_tool(
             "create_maintenance_work_order",
             {
                 "unit_id": 75,
@@ -193,7 +202,7 @@ async def test_mcp_protocol():
     # Test 6: create_housekeeping_work_order
     print("\n6. Testing create_housekeeping_work_order...")
     try:
-        result = await mcp.call_tool(
+        result = mcp.call_tool(
             "create_housekeeping_work_order",
             {
                 "unit_id": 75,
@@ -237,20 +246,20 @@ async def test_mcp_protocol():
     return results
 
 
-async def main():
+def main():
     """Función principal de testing"""
-    print("🚀 INICIANDO TEST PROTOCOLO MCP - CORRECCIONES IMPLEMENTADAS")
-    print("=" * 70)
+    print("🚀 INICIANDO TEST MCP TOOLS DIRECTAS - CORRECCIONES IMPLEMENTADAS")
+    print("=" * 80)
     print(f"Timestamp: {datetime.now().isoformat()}")
-    print("=" * 70)
+    print("=" * 80)
 
     # Ejecutar tests
-    results = await test_mcp_protocol()
+    results = test_direct_mcp_tools()
 
     # Resumen
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 80)
     print("📊 RESUMEN DE RESULTADOS")
-    print("=" * 70)
+    print("=" * 80)
 
     success_count = sum(1 for r in results if r["status"] == "success")
     handled_count = sum(1 for r in results if r["status"] == "handled")
@@ -280,15 +289,15 @@ async def main():
         "results": results,
     }
 
-    filename = f"test_mcp_protocol_{timestamp}.json"
+    filename = f"test_direct_mcp_tools_{timestamp}.json"
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
 
     print(f"\n📄 Reporte guardado en: {filename}")
-    print("=" * 70)
+    print("=" * 80)
     print("✅ TESTING COMPLETADO")
-    print("=" * 70)
+    print("=" * 80)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-10-27T19:00:01.354683",
+  "summary": {
+    "total_tests": 5,
+    "successful": 0,
+    "handled": 0,
+    "failed": 0,
+    "errors": 5,
+    "success_rate": 0.0
+  },
+  "results": [
+    {
+      "test": "tools_registered",
+      "status": "error",
+      "error": "object of type 'coroutine' has no len()"
+    },
+    {
+      "test": "search_units_registered",
+      "status": "error",
+      "error": "'coroutine' object is not iterable"
+    },
+    {
+      "test": "get_folio_registered",
+      "status": "error",
+      "error": "'coroutine' object is not iterable"
+    },
+    {
+      "test": "validation_schemas",
+      "status": "error",
+      "error": "'coroutine' object is not iterable"
+    },
+    {
+      "test": "get_folio_schema",
+      "status": "error",
+      "error": "'coroutine' object is not iterable"
+    }
+  ]
+}

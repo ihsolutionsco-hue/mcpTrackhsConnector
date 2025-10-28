@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-10-27T19:00:44.452723",
+  "summary": {
+    "total_tests": 6,
+    "successful": 0,
+    "handled": 0,
+    "failed": 0,
+    "errors": 6,
+    "success_rate": 0.0
+  },
+  "results": [
+    {
+      "test": "tools_registered",
+      "status": "error",
+      "error": "'str' object has no attribute 'name'"
+    },
+    {
+      "test": "search_units_registered",
+      "status": "error",
+      "error": "'str' object has no attribute 'name'"
+    },
+    {
+      "test": "get_folio_registered",
+      "status": "error",
+      "error": "'str' object has no attribute 'name'"
+    },
+    {
+      "test": "validation_schemas",
+      "status": "error",
+      "error": "'str' object has no attribute 'name'"
+    },
+    {
+      "test": "get_folio_schema",
+      "status": "error",
+      "error": "'str' object has no attribute 'name'"
+    },
+    {
+      "test": "type_conversion",
+      "status": "error",
+      "error": "'str' object has no attribute 'name'"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-10-27T18:56:57.776741",
+  "summary": {
+    "total_tests": 6,
+    "successful": 0,
+    "handled": 0,
+    "failed": 0,
+    "errors": 6,
+    "success_rate": 0.0
+  },
+  "results": [
+    {
+      "test": "search_units_string",
+      "status": "error",
+      "error": "'FunctionTool' object is not callable"
+    },
+    {
+      "test": "search_units_int",
+      "status": "error",
+      "error": "'FunctionTool' object is not callable"
+    },
+    {
+      "test": "search_amenities",
+      "status": "error",
+      "error": "'FunctionTool' object is not callable"
+    },
+    {
+      "test": "get_folio",
+      "status": "error",
+      "error": "'FunctionTool' object is not callable"
+    },
+    {
+      "test": "create_maintenance_work_order",
+      "status": "error",
+      "error": "'FunctionTool' object is not callable"
+    },
+    {
+      "test": "create_housekeeping_work_order",
+      "status": "error",
+      "error": "'FunctionTool' object is not callable"
+    }
+  ]
+}
