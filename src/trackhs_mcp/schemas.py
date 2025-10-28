@@ -470,14 +470,8 @@ AMENITIES_OUTPUT_SCHEMA = {
                                 "description": "Nombre de la amenidad",
                             },
                             "group": {
-                                "type": "object",
+                                "type": ["string", "null"],
                                 "description": "Grupo de la amenidad",
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "description": "Nombre del grupo",
-                                    }
-                                },
                             },
                             "is_public": {
                                 "type": "boolean",
