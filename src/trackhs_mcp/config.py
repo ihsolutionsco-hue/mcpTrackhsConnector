@@ -41,7 +41,7 @@ class TrackHSSettings(BaseSettings):
 
     # Configuración de validación
     strict_validation: bool = Field(
-        default=True,
+        default=False,
         description="Habilitar validación estricta de respuestas",
         alias="STRICT_VALIDATION",
     )
