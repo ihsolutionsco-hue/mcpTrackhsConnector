@@ -72,7 +72,9 @@ class UnitService:
 
         # Validaciones de negocio
         if page < 1:
-            raise ValidationError("El número de página debe ser mayor a 0")
+            raise ValidationError(
+                "El número de página debe ser mayor a 0 (la API real usa páginas basadas en 1, aunque la documentación diga 0)"
+            )
 
         if size < 1 or size > 25:
             raise ValidationError("El tamaño de página debe estar entre 1 y 25")
@@ -122,7 +124,7 @@ class UnitService:
 
         try:
             # Construir parámetros base
-            params = {"page": page, "size": size}
+            params = {"page": page, "size": size, "computed": 1}
             if search:
                 params["search"] = search
             if bedrooms_int is not None:
@@ -130,9 +132,9 @@ class UnitService:
             if bathrooms_int is not None:
                 params["bathrooms"] = bathrooms_int
             if is_active is not None:
-                params["is_active"] = is_active
+                params["isActive"] = is_active
             if is_bookable is not None:
-                params["is_bookable"] = is_bookable
+                params["isBookable"] = is_bookable
 
             # Agregar parámetros adicionales
             params.update(additional_params)
