@@ -20,11 +20,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 try:
-    from trackhs_mcp.simple_server import mcp
+    from trackhs_mcp.server import mcp
 
-    logger.info("TrackHS Simple MCP Server importado correctamente")
+    logger.info("TrackHS MCP Server importado correctamente")
 except Exception as e:
-    logger.error(f"Error importando TrackHS Simple MCP Server: {e}")
+    logger.error(f"Error importando TrackHS MCP Server: {e}")
     raise
 
 if __name__ == "__main__":

@@ -714,7 +714,7 @@ def get_reservation(
         raise
 
 
-@mcp.tool(output_schema=UNIT_SEARCH_OUTPUT_SCHEMA)
+@mcp.tool
 def search_units(
     # Parámetros de paginación
     page: Annotated[
@@ -780,31 +780,13 @@ def search_units(
         Optional[Union[int, List[int]]], Field(description="ID(s) de tipo de unidad")
     ] = None,
     # Parámetros de dormitorios
-    bedrooms: Annotated[
-        Optional[str],
-        Field(description="Número exacto de dormitorios (0-20)"),
-    ] = None,
-    min_bedrooms: Annotated[
-        Optional[str],
-        Field(description="Mínimo número de dormitorios (0-20)"),
-    ] = None,
-    max_bedrooms: Annotated[
-        Optional[str],
-        Field(description="Máximo número de dormitorios (0-20)"),
-    ] = None,
+    bedrooms: Optional[str] = None,
+    min_bedrooms: Optional[str] = None,
+    max_bedrooms: Optional[str] = None,
     # Parámetros de baños
-    bathrooms: Annotated[
-        Optional[str],
-        Field(description="Número exacto de baños (0-20)"),
-    ] = None,
-    min_bathrooms: Annotated[
-        Optional[str],
-        Field(description="Mínimo número de baños (0-20)"),
-    ] = None,
-    max_bathrooms: Annotated[
-        Optional[str],
-        Field(description="Máximo número de baños (0-20)"),
-    ] = None,
+    bathrooms: Optional[str] = None,
+    min_bathrooms: Optional[str] = None,
+    max_bathrooms: Optional[str] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
         Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
@@ -835,18 +817,9 @@ def search_units(
         Field(description="Fecha ISO 8601 - unidades con cambios desde esta fecha"),
     ] = None,
     # Parámetros de estado y características
-    is_active: Annotated[
-        Optional[str],
-        Field(description="Unidades activas (1), inactivas (0), o todas (None)"),
-    ] = None,
-    is_bookable: Annotated[
-        Optional[str],
-        Field(description="Unidades disponibles para reservar (1) o no (0)"),
-    ] = None,
-    pets_friendly: Annotated[
-        Optional[str],
-        Field(description="Unidades que permiten mascotas (1) o no (0)"),
-    ] = None,
+    is_active: Optional[str] = None,
+    is_bookable: Optional[str] = None,
+    pets_friendly: Optional[str] = None,
     unit_status: Annotated[
         Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
         Field(description="Estado de la unidad"),
@@ -902,7 +875,7 @@ def search_units(
         Optional[List[int]],
         Field(description="Filtrar por IDs específicos de unidades"),
     ] = None,
-) -> Dict[str, Any]:
+) -> Any:
     """
     Buscar unidades de alojamiento disponibles en TrackHS con filtros avanzados.
 
