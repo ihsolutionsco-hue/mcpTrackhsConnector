@@ -784,39 +784,39 @@ def search_units(
     ] = None,
     # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Número exacto de dormitorios"),
+        Optional[int],
+        Field(ge=0, le=20, description="Número exacto de dormitorios"),
     ] = None,
     min_bedrooms: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Número mínimo de dormitorios"),
+        Optional[int],
+        Field(ge=0, le=20, description="Número mínimo de dormitorios"),
     ] = None,
     max_bedrooms: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Número máximo de dormitorios"),
+        Optional[int],
+        Field(ge=0, le=20, description="Número máximo de dormitorios"),
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Número exacto de baños"),
+        Optional[int],
+        Field(ge=0, le=20, description="Número exacto de baños"),
     ] = None,
     min_bathrooms: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Número mínimo de baños"),
+        Optional[int],
+        Field(ge=0, le=20, description="Número mínimo de baños"),
     ] = None,
     max_bathrooms: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Número máximo de baños"),
+        Optional[int],
+        Field(ge=0, le=20, description="Número máximo de baños"),
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
-        Optional[Union[int, str]], Field(description="Capacidad exacta")
+        Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
     ] = None,
     min_occupancy: Annotated[
-        Optional[Union[int, str]], Field(description="Capacidad mínima")
+        Optional[int], Field(ge=1, le=50, description="Capacidad mínima")
     ] = None,
     max_occupancy: Annotated[
-        Optional[Union[int, str]], Field(description="Capacidad máxima")
+        Optional[int], Field(ge=1, le=50, description="Capacidad máxima")
     ] = None,
     # Parámetros de fechas
     arrival: Annotated[
@@ -839,16 +839,16 @@ def search_units(
     ] = None,
     # Parámetros de estado y características
     is_active: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Unidades activas (1) o inactivas (0)"),
+        Optional[int],
+        Field(ge=0, le=1, description="Unidades activas (1) o inactivas (0)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Unidades reservables (1) o no (0)"),
+        Optional[int],
+        Field(ge=0, le=1, description="Unidades reservables (1) o no (0)"),
     ] = None,
     pets_friendly: Annotated[
-        Optional[Union[int, str]],
-        Field(description="Unidades pet-friendly (1) o no (0)"),
+        Optional[int],
+        Field(ge=0, le=1, description="Unidades pet-friendly (1) o no (0)"),
     ] = None,
     unit_status: Annotated[
         Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
@@ -1054,29 +1054,29 @@ def search_units(
         if unit_ids is not None:
             params["id"] = unit_ids
 
-        # Parámetros de dormitorios
+        # Parámetros de dormitorios (ya son int, no necesitan conversión)
         if bedrooms is not None:
-            params["bedrooms"] = safe_int(bedrooms)
+            params["bedrooms"] = bedrooms
         if min_bedrooms is not None:
-            params["minBedrooms"] = safe_int(min_bedrooms)
+            params["minBedrooms"] = min_bedrooms
         if max_bedrooms is not None:
-            params["maxBedrooms"] = safe_int(max_bedrooms)
+            params["maxBedrooms"] = max_bedrooms
 
-        # Parámetros de baños
+        # Parámetros de baños (ya son int, no necesitan conversión)
         if bathrooms is not None:
-            params["bathrooms"] = safe_int(bathrooms)
+            params["bathrooms"] = bathrooms
         if min_bathrooms is not None:
-            params["minBathrooms"] = safe_int(min_bathrooms)
+            params["minBathrooms"] = min_bathrooms
         if max_bathrooms is not None:
-            params["maxBathrooms"] = safe_int(max_bathrooms)
+            params["maxBathrooms"] = max_bathrooms
 
-        # Parámetros de capacidad
+        # Parámetros de capacidad (ya son int, no necesitan conversión)
         if occupancy is not None:
-            params["occupancy"] = safe_int(occupancy)
+            params["occupancy"] = occupancy
         if min_occupancy is not None:
-            params["minOccupancy"] = safe_int(min_occupancy)
+            params["minOccupancy"] = min_occupancy
         if max_occupancy is not None:
-            params["maxOccupancy"] = safe_int(max_occupancy)
+            params["maxOccupancy"] = max_occupancy
 
         # Parámetros de fechas
         if arrival is not None:
@@ -1086,13 +1086,13 @@ def search_units(
         if content_updated_since is not None:
             params["contentUpdatedSince"] = content_updated_since
 
-        # Parámetros de estado y características
+        # Parámetros de estado y características (ya son int, no necesitan conversión)
         if is_active is not None:
-            params["isActive"] = safe_int(is_active)
+            params["isActive"] = is_active
         if is_bookable is not None:
-            params["isBookable"] = safe_int(is_bookable)
+            params["isBookable"] = is_bookable
         if pets_friendly is not None:
-            params["petsFriendly"] = safe_int(pets_friendly)
+            params["petsFriendly"] = pets_friendly
         if unit_status is not None:
             params["unitStatus"] = unit_status
 

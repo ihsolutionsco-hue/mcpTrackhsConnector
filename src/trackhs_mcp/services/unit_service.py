@@ -29,10 +29,10 @@ class UnitService:
         page: int = 1,
         size: int = 10,
         search: Optional[str] = None,
-        bedrooms: Optional[Union[int, str]] = None,
-        bathrooms: Optional[Union[int, str]] = None,
-        is_active: Optional[Union[int, str]] = None,
-        is_bookable: Optional[Union[int, str]] = None,
+        bedrooms: Optional[int] = None,
+        bathrooms: Optional[int] = None,
+        is_active: Optional[int] = None,
+        is_bookable: Optional[int] = None,
         # Parámetros adicionales para API completa
         **additional_params: Any,
     ) -> Dict[str, Any]:
@@ -74,11 +74,11 @@ class UnitService:
                 logger.warning(f"No se pudo convertir '{value}' a int")
                 return None
 
-        # Convertir parámetros a int
-        bedrooms_int = safe_int(bedrooms)
-        bathrooms_int = safe_int(bathrooms)
-        is_active_int = safe_int(is_active)
-        is_bookable_int = safe_int(is_bookable)
+        # Los parámetros ya son int, no necesitan conversión
+        bedrooms_int = bedrooms
+        bathrooms_int = bathrooms
+        is_active_int = is_active
+        is_bookable_int = is_bookable
 
         # Validaciones de negocio
         if page < 1:
