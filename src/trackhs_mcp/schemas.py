@@ -164,6 +164,13 @@ class UnitResponse(BaseModel):
         """Asegurar que el área sea un número o None"""
         if v is not None:
             try:
+                # Convertir string a float si es necesario
+                if isinstance(v, str):
+                    # Limpiar string de caracteres no numéricos
+                    cleaned = "".join(c for c in v if c.isdigit() or c in ".-")
+                    if cleaned:
+                        return float(cleaned)
+                    return None
                 return float(v)
             except (ValueError, TypeError):
                 return None
@@ -362,7 +369,62 @@ UNIT_SEARCH_OUTPUT_SCHEMA = {
             "properties": {
                 "units": {
                     "type": "array",
-                    "items": generate_json_schema(UnitResponse),
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "description": "ID único de la unidad",
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "Nombre de la unidad",
+                            },
+                            "code": {
+                                "type": "string",
+                                "description": "Código de la unidad",
+                            },
+                            "bedrooms": {
+                                "type": "integer",
+                                "description": "Número de dormitorios",
+                            },
+                            "bathrooms": {
+                                "type": "integer",
+                                "description": "Número de baños",
+                            },
+                            "max_occupancy": {
+                                "type": "integer",
+                                "description": "Capacidad máxima",
+                            },
+                            "area": {
+                                "type": ["number", "null"],
+                                "description": "Área en metros cuadrados",
+                            },
+                            "address": {
+                                "type": "string",
+                                "description": "Dirección completa",
+                            },
+                            "is_active": {
+                                "type": ["boolean", "null"],
+                                "description": "Si está activa",
+                            },
+                            "is_bookable": {
+                                "type": ["boolean", "null"],
+                                "description": "Si está disponible para reservar",
+                            },
+                            "amenities": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Lista de amenidades",
+                            },
+                            "_links": {
+                                "type": "object",
+                                "description": "Enlaces relacionados",
+                            },
+                        },
+                        "required": ["id"],
+                        "additionalProperties": True,
+                    },
                     "description": "Lista de unidades",
                 }
             },

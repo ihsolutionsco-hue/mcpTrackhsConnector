@@ -1,0 +1,66 @@
+{
+  "timestamp": "2025-10-27T19:13:33.189465",
+  "total_tests": 7,
+  "successful_tests": 7,
+  "failed_tests": 0,
+  "success_rate": 100.0,
+  "data_types_correct": 7,
+  "results": [
+    {
+      "test": "Búsqueda básica (5 unidades)",
+      "status": "SUCCESS",
+      "duration_ms": 1272.06,
+      "units_found": 5,
+      "total_items": 247,
+      "data_types_ok": true
+    },
+    {
+      "test": "Búsqueda con filtros numéricos",
+      "status": "SUCCESS",
+      "duration_ms": 375.64,
+      "units_found": 1,
+      "total_items": 1,
+      "data_types_ok": true
+    },
+    {
+      "test": "Búsqueda con filtros booleanos (enteros)",
+      "status": "SUCCESS",
+      "duration_ms": 469.73,
+      "units_found": 3,
+      "total_items": 247,
+      "data_types_ok": true
+    },
+    {
+      "test": "Búsqueda con filtros booleanos (strings)",
+      "status": "SUCCESS",
+      "duration_ms": 1.47,
+      "units_found": 3,
+      "total_items": 247,
+      "data_types_ok": true
+    },
+    {
+      "test": "Búsqueda con filtros booleanos (booleanos)",
+      "status": "SUCCESS",
+      "duration_ms": 1.42,
+      "units_found": 3,
+      "total_items": 247,
+      "data_types_ok": true
+    },
+    {
+      "test": "Búsqueda con texto",
+      "status": "SUCCESS",
+      "duration_ms": 207.96,
+      "units_found": 0,
+      "total_items": 0,
+      "data_types_ok": true
+    },
+    {
+      "test": "Búsqueda con paginación",
+      "status": "SUCCESS",
+      "duration_ms": 351.38,
+      "units_found": 2,
+      "total_items": 247,
+      "data_types_ok": true
+    }
+  ]
+}

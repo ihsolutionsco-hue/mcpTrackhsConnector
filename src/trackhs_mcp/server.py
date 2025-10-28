@@ -232,10 +232,35 @@ def _clean_response_data(data: Dict[str, Any], model_class: type) -> Dict[str, A
             except (ValueError, TypeError):
                 cleaned[field] = None
 
+    # Limpiar campo area específicamente
+    if "area" in cleaned and cleaned["area"] is not None:
+        try:
+            if isinstance(cleaned["area"], str):
+                # Limpiar string de caracteres no numéricos
+                cleaned_str = "".join(
+                    c for c in cleaned["area"] if c.isdigit() or c in ".-"
+                )
+                if cleaned_str:
+                    cleaned["area"] = float(cleaned_str)
+                else:
+                    cleaned["area"] = None
+            else:
+                cleaned["area"] = float(cleaned["area"])
+        except (ValueError, TypeError):
+            cleaned["area"] = None
+
     # Limpiar campos de fecha
     for field in ["arrival_date", "departure_date", "date_received", "date_completed"]:
         if field in cleaned and cleaned[field] is not None:
             cleaned[field] = str(cleaned[field])
+
+    # Limpiar campos booleanos
+    for field in ["is_active", "is_bookable"]:
+        if field in cleaned and cleaned[field] is not None:
+            if isinstance(cleaned[field], str):
+                cleaned[field] = cleaned[field].lower() in ["true", "1", "yes"]
+            elif isinstance(cleaned[field], int):
+                cleaned[field] = bool(cleaned[field])
 
     return cleaned
 
@@ -764,23 +789,27 @@ def search_units(
             "Servicio de unidades no disponible. Verifique las credenciales."
         )
 
-    # ✅ CORRECCIÓN FUNDAMENTAL: Asegurar tipos correctos
-    # FastMCP puede convertir tipos automáticamente, necesitamos preservar los tipos correctos
+    # ✅ CORRECCIÓN FUNDAMENTAL: Asegurar tipos correctos para el API de TrackHS
     def ensure_correct_types(**kwargs):
         """Asegurar que los tipos sean correctos para el API de TrackHS"""
         corrected = {}
         for key, value in kwargs.items():
             if value is not None:
-                if key in [
-                    "page",
-                    "size",
-                    "bedrooms",
-                    "bathrooms",
-                    "is_active",
-                    "is_bookable",
-                ]:
+                if key in ["page", "size", "bedrooms", "bathrooms"]:
                     # Asegurar que sean enteros
                     corrected[key] = int(value) if not isinstance(value, int) else value
+                elif key in ["is_active", "is_bookable"]:
+                    # Asegurar que sean enteros 0 o 1
+                    if isinstance(value, bool):
+                        corrected[key] = 1 if value else 0
+                    elif isinstance(value, str):
+                        corrected[key] = (
+                            1 if value.lower() in ["true", "1", "yes"] else 0
+                        )
+                    else:
+                        corrected[key] = (
+                            int(value) if not isinstance(value, int) else value
+                        )
                 else:
                     corrected[key] = value
             else:

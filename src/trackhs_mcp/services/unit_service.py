@@ -65,11 +65,27 @@ class UnitService:
         if bathrooms is not None and bathrooms < 0:
             raise ValidationError("El número de baños no puede ser negativo")
 
-        if is_active is not None and is_active not in [0, 1]:
-            raise ValidationError("is_active debe ser 0 o 1")
+        # Validar is_active con conversión automática
+        if is_active is not None:
+            if isinstance(is_active, str):
+                is_active = 1 if is_active.lower() in ["true", "1", "yes"] else 0
+            elif isinstance(is_active, bool):
+                is_active = 1 if is_active else 0
+            elif is_active not in [0, 1]:
+                raise ValidationError(
+                    "is_active debe ser 0, 1, True, False, 'true', 'false', '1', '0'"
+                )
 
-        if is_bookable is not None and is_bookable not in [0, 1]:
-            raise ValidationError("is_bookable debe ser 0 o 1")
+        # Validar is_bookable con conversión automática
+        if is_bookable is not None:
+            if isinstance(is_bookable, str):
+                is_bookable = 1 if is_bookable.lower() in ["true", "1", "yes"] else 0
+            elif isinstance(is_bookable, bool):
+                is_bookable = 1 if is_bookable else 0
+            elif is_bookable not in [0, 1]:
+                raise ValidationError(
+                    "is_bookable debe ser 0, 1, True, False, 'true', 'false', '1', '0'"
+                )
 
         logger.info(f"Buscando unidades: página {page}, tamaño {size}")
 
@@ -88,6 +104,12 @@ class UnitService:
                 params["is_bookable"] = is_bookable
 
             result = self.unit_repo.search(params)
+
+            # ✅ CORRECCIÓN: Limpiar datos de respuesta para evitar errores de esquema
+            if "_embedded" in result and "units" in result["_embedded"]:
+                result["_embedded"]["units"] = [
+                    self._clean_unit_data(unit) for unit in result["_embedded"]["units"]
+                ]
 
             logger.info(
                 f"Búsqueda de unidades completada. Encontradas: {result.get('total_items', 0)}"
@@ -164,3 +186,46 @@ class UnitService:
         except Exception as e:
             logger.error(f"Error buscando amenidades: {str(e)}")
             raise TrackHSError(f"Error buscando amenidades: {str(e)}")
+
+    def _clean_unit_data(self, unit_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Limpia datos de unidad para evitar errores de esquema.
+
+        MEJOR PRÁCTICA: Transformación automática de tipos problemáticos.
+        """
+        cleaned = unit_data.copy()
+
+        # Limpiar campo area específicamente
+        if "area" in cleaned and cleaned["area"] is not None:
+            try:
+                if isinstance(cleaned["area"], str):
+                    # Limpiar string de caracteres no numéricos
+                    cleaned_str = "".join(
+                        c for c in cleaned["area"] if c.isdigit() or c in ".-"
+                    )
+                    if cleaned_str:
+                        cleaned["area"] = float(cleaned_str)
+                    else:
+                        cleaned["area"] = None
+                else:
+                    cleaned["area"] = float(cleaned["area"])
+            except (ValueError, TypeError):
+                cleaned["area"] = None
+
+        # Limpiar campos numéricos
+        for field in ["bedrooms", "bathrooms", "max_occupancy"]:
+            if field in cleaned and cleaned[field] is not None:
+                try:
+                    cleaned[field] = int(cleaned[field])
+                except (ValueError, TypeError):
+                    cleaned[field] = None
+
+        # Limpiar campos booleanos
+        for field in ["is_active", "is_bookable"]:
+            if field in cleaned and cleaned[field] is not None:
+                if isinstance(cleaned[field], str):
+                    cleaned[field] = cleaned[field].lower() in ["true", "1", "yes"]
+                elif isinstance(cleaned[field], int):
+                    cleaned[field] = bool(cleaned[field])
+
+        return cleaned
