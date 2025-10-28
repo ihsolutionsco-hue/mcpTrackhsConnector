@@ -415,11 +415,27 @@ def build_units_search_params(**kwargs) -> Dict[str, Any]:
         if value is not None:
             params[api_name] = value  # FastMCP ya convirtió a int
 
-    # Parámetros de fechas
-    if kwargs.get("arrival") is not None:
-        params["arrival"] = kwargs["arrival"]
-    if kwargs.get("departure") is not None:
-        params["departure"] = kwargs["departure"]
+    # Parámetros de fechas (manejar strings "null")
+    arrival = kwargs.get("arrival")
+    if arrival is not None and arrival != "null" and arrival.strip():
+        # Validar formato de fecha
+        import re
+
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", arrival):
+            params["arrival"] = arrival
+        else:
+            logger.warning(f"Formato de fecha inválido para arrival: {arrival}")
+
+    departure = kwargs.get("departure")
+    if departure is not None and departure != "null" and departure.strip():
+        # Validar formato de fecha
+        import re
+
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", departure):
+            params["departure"] = departure
+        else:
+            logger.warning(f"Formato de fecha inválido para departure: {departure}")
+
     if kwargs.get("content_updated_since") is not None:
         params["contentUpdatedSince"] = kwargs["content_updated_since"]
 

@@ -129,14 +129,12 @@ def search_reservations(
     arrival_start: Annotated[
         Optional[str],
         Field(
-            pattern=r"^\d{4}-\d{2}-\d{2}$",
             description="Fecha de llegada inicio (YYYY-MM-DD)",
         ),
     ] = None,
     arrival_end: Annotated[
         Optional[str],
         Field(
-            pattern=r"^\d{4}-\d{2}-\d{2}$",
             description="Fecha de llegada fin (YYYY-MM-DD)",
         ),
     ] = None,
@@ -154,10 +152,24 @@ def search_reservations(
     params = {"page": page, "size": size}
     if search:
         params["search"] = search
-    if arrival_start:
-        params["arrivalStart"] = arrival_start
-    if arrival_end:
-        params["arrivalEnd"] = arrival_end
+    if arrival_start and arrival_start != "null" and arrival_start.strip():
+        # Validar formato de fecha
+        import re
+
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", arrival_start):
+            params["arrivalStart"] = arrival_start
+        else:
+            logger.warning(
+                f"Formato de fecha inválido para arrival_start: {arrival_start}"
+            )
+    if arrival_end and arrival_end != "null" and arrival_end.strip():
+        # Validar formato de fecha
+        import re
+
+        if re.match(r"^\d{4}-\d{2}-\d{2}$", arrival_end):
+            params["arrivalEnd"] = arrival_end
+        else:
+            logger.warning(f"Formato de fecha inválido para arrival_end: {arrival_end}")
     if status:
         params["status"] = status
 
@@ -321,14 +333,12 @@ def search_units(
     arrival: Annotated[
         Optional[str],
         Field(
-            pattern=r"^\d{4}-\d{2}-\d{2}$",
             description="Fecha de llegada (YYYY-MM-DD) para verificar disponibilidad",
         ),
     ] = None,
     departure: Annotated[
         Optional[str],
         Field(
-            pattern=r"^\d{4}-\d{2}-\d{2}$",
             description="Fecha de salida (YYYY-MM-DD) para verificar disponibilidad",
         ),
     ] = None,
