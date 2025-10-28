@@ -13,7 +13,8 @@
     "name": "TrackHS API",
     "description": "Servidor MCP para TrackHS API con validación Pydantic y middleware nativo",
     "version": "2.1.0",
-    "website_url": "https://github.com/ihsolutionsco-hue/mcpTrackhsConnector"
+    "website_url": "https://github.com/ihsolutionsco-hue/mcpTrackhsConnector",
+    "strict_input_validation": false
   },
   "logging": {
     "level": "INFO",
