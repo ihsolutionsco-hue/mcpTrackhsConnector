@@ -26,7 +26,13 @@ except Exception as e:
     logger.error(f"❌ Error importando TrackHS MCP Server: {e}")
     raise
 
+
+def main():
+    """Función principal para el entrypoint del script."""
+    logger.info("🚀 Iniciando TrackHS MCP Server en modo HTTP...")
+    # Configurar servidor HTTP para FastMCP Cloud
+    mcp.run(transport="http", host="0.0.0.0", port=8000)
+
+
 if __name__ == "__main__":
-    logger.info("🚀 Iniciando TrackHS MCP Server...")
-    # FastMCP maneja automáticamente la configuración HTTP
-    mcp.run()
+    main()

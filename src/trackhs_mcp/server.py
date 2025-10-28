@@ -522,5 +522,5 @@ def health_check() -> Dict[str, Any]:
 # =============================================================================
 
 if __name__ == "__main__":
-    logger.info("Iniciando servidor TrackHS MCP")
-    mcp.run()
+    logger.info("Iniciando servidor TrackHS MCP en modo HTTP")
+    mcp.run(transport="http", host="0.0.0.0", port=8000)
