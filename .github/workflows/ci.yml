@@ -60,7 +60,7 @@ jobs:
       run: |
         python -c "
         import json
-        with open('config/fastmcp.json', 'r') as f:
+        with open('fastmcp.json', 'r') as f:
             config = json.load(f)
         print('✅ FastMCP configuration valid')
         print('   Server:', config['server']['name'])
@@ -114,8 +114,8 @@ jobs:
         echo "🔍 Checking deployment configuration..."
 
         # Check essential files
-        if [ ! -f "config/fastmcp.json" ]; then
-          echo "❌ config/fastmcp.json missing"
+        if [ ! -f "fastmcp.json" ]; then
+          echo "❌ fastmcp.json missing"
           exit 1
         fi
 
