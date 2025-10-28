@@ -372,20 +372,55 @@ class UnitService:
         - None -> None
         - "invalid" -> None
         - "" -> None
+        - "null" -> None
+        - "N/A" -> None
+        - "undefined" -> None
         """
         if area_value is None or area_value == "":
             return None
 
+        # Manejar strings que representan valores nulos
+        if isinstance(area_value, str):
+            area_value = area_value.strip().lower()
+            if area_value in ["null", "none", "n/a", "undefined", "nan", ""]:
+                return None
+
         try:
             if isinstance(area_value, (int, float)):
+                # Verificar si es NaN o infinito
+                if isinstance(area_value, float) and (
+                    area_value != area_value
+                    or area_value == float("inf")
+                    or area_value == float("-inf")
+                ):
+                    logger.debug(f"Area value is NaN or infinite: {area_value}")
+                    return None
                 return float(area_value)
             elif isinstance(area_value, str):
-                # Limpiar string de caracteres no numéricos
+                # Limpiar string de caracteres no numéricos, manteniendo punto decimal
                 cleaned_str = "".join(
                     c for c in area_value.strip() if c.isdigit() or c in ".-"
                 )
                 if cleaned_str:
-                    return float(cleaned_str)
+                    # Verificar que no sea solo puntos o guiones
+                    if cleaned_str.replace(".", "").replace("-", ""):
+                        result = float(cleaned_str)
+                        # Verificar si el resultado es válido
+                        if (
+                            result != result
+                            or result == float("inf")
+                            or result == float("-inf")
+                        ):
+                            logger.debug(
+                                f"Area value '{area_value}' resulted in invalid float: {result}"
+                            )
+                            return None
+                        return result
+                    else:
+                        logger.debug(
+                            f"Area value '{area_value}' contains only non-numeric characters"
+                        )
+                        return None
                 else:
                     logger.debug(
                         f"Area value '{area_value}' could not be converted to float"
