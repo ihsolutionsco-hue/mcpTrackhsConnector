@@ -29,10 +29,10 @@ class UnitService:
         page: int = 0,
         size: int = 10,
         search: Optional[str] = None,
-        bedrooms: Optional[str] = None,
-        bathrooms: Optional[str] = None,
-        is_active: Optional[str] = None,
-        is_bookable: Optional[str] = None,
+        bedrooms: Optional[int] = None,
+        bathrooms: Optional[int] = None,
+        is_active: Optional[int] = None,
+        is_bookable: Optional[int] = None,
         # Parámetros adicionales para API completa
         **additional_params: Any,
     ) -> Dict[str, Any]:
@@ -56,19 +56,9 @@ class UnitService:
             TrackHSError: Si hay error en la API
         """
 
-        # Función helper para convertir strings a int
-        def safe_int(value, param_name):
-            """Convertir string a int de forma segura"""
-            if value is None or value == "":
-                return None
-            try:
-                return int(value)
-            except (ValueError, TypeError):
-                raise ValidationError(f"{param_name} debe ser un número válido")
-
-        # Convertir parámetros string a int
-        bedrooms_int = safe_int(bedrooms, "bedrooms")
-        bathrooms_int = safe_int(bathrooms, "bathrooms")
+        # Los parámetros ya vienen como int desde la función MCP
+        bedrooms_int = bedrooms
+        bathrooms_int = bathrooms
 
         # Validaciones de negocio
         if page < 1:
@@ -85,27 +75,13 @@ class UnitService:
         if bathrooms_int is not None and bathrooms_int < 0:
             raise ValidationError("El número de baños no puede ser negativo")
 
-        # Validar is_active con conversión automática
-        if is_active is not None:
-            if isinstance(is_active, str):
-                is_active = 1 if is_active.lower() in ["true", "1", "yes"] else 0
-            elif isinstance(is_active, bool):
-                is_active = 1 if is_active else 0
-            elif is_active not in [0, 1]:
-                raise ValidationError(
-                    "is_active debe ser 0, 1, True, False, 'true', 'false', '1', '0'"
-                )
+        # Validar is_active (ya viene como int desde MCP)
+        if is_active is not None and is_active not in [0, 1]:
+            raise ValidationError("is_active debe ser 0 o 1")
 
-        # Validar is_bookable con conversión automática
-        if is_bookable is not None:
-            if isinstance(is_bookable, str):
-                is_bookable = 1 if is_bookable.lower() in ["true", "1", "yes"] else 0
-            elif isinstance(is_bookable, bool):
-                is_bookable = 1 if is_bookable else 0
-            elif is_bookable not in [0, 1]:
-                raise ValidationError(
-                    "is_bookable debe ser 0, 1, True, False, 'true', 'false', '1', '0'"
-                )
+        # Validar is_bookable (ya viene como int desde MCP)
+        if is_bookable is not None and is_bookable not in [0, 1]:
+            raise ValidationError("is_bookable debe ser 0 o 1")
 
         # Log detallado de parámetros de entrada
         logger.info(f"🔍 Iniciando búsqueda de unidades:")

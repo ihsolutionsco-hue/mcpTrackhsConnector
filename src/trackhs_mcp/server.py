@@ -729,10 +729,11 @@ class SearchUnitsParams(BaseModel):
         Field(description="Unidades activas (1) o inactivas (0)"),
     ] = None
     is_bookable: Annotated[
-        Optional[Union[Literal[0, 1], str]], Field(description="Unidades reservables (1) o no (0)")
+        Optional[Union[Literal[0, 1], str]],
+        Field(description="Unidades reservables (1) o no (0)"),
     ] = None
 
-    @field_validator('bedrooms', 'bathrooms')
+    @field_validator("bedrooms", "bathrooms")
     @classmethod
     def validate_numeric_range(cls, v):
         if v is None:
@@ -748,7 +749,7 @@ class SearchUnitsParams(BaseModel):
             raise ValueError(f"Valor {v} debe estar entre 0 y 20")
         return v
 
-    @field_validator('is_active', 'is_bookable')
+    @field_validator("is_active", "is_bookable")
     @classmethod
     def validate_boolean_like(cls, v):
         if v is None:
@@ -756,16 +757,17 @@ class SearchUnitsParams(BaseModel):
         # Convertir string a int si es necesario
         if isinstance(v, str):
             v = v.strip()
-            if v in ['0', '1']:
+            if v in ["0", "1"]:
                 v = int(v)
-            elif v.lower() in ['true', 'false']:
-                v = 1 if v.lower() == 'true' else 0
+            elif v.lower() in ["true", "false"]:
+                v = 1 if v.lower() == "true" else 0
             else:
                 raise ValueError(f"'{v}' no es un valor válido (0, 1, 'true', 'false')")
         # Validar que sea 0 o 1
         if v not in [0, 1]:
             raise ValueError(f"Valor {v} debe ser 0 o 1")
         return v
+
 
 @mcp.tool
 def search_units(
@@ -834,33 +836,33 @@ def search_units(
     ] = None,
     # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número exacto de dormitorios")
+        Optional[int], Field(ge=0, le=20, description="Número exacto de dormitorios")
     ] = None,
     min_bedrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número mínimo de dormitorios")
+        Optional[int], Field(ge=0, le=20, description="Número mínimo de dormitorios")
     ] = None,
     max_bedrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número máximo de dormitorios")
+        Optional[int], Field(ge=0, le=20, description="Número máximo de dormitorios")
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número exacto de baños")
+        Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
     ] = None,
     min_bathrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número mínimo de baños")
+        Optional[int], Field(ge=0, le=20, description="Número mínimo de baños")
     ] = None,
     max_bathrooms: Annotated[
-        Optional[Union[int, str]], Field(ge=0, le=20, description="Número máximo de baños")
+        Optional[int], Field(ge=0, le=20, description="Número máximo de baños")
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad exacta")
+        Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
     ] = None,
     min_occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad mínima")
+        Optional[int], Field(ge=1, le=50, description="Capacidad mínima")
     ] = None,
     max_occupancy: Annotated[
-        Optional[Union[int, str]], Field(ge=1, le=50, description="Capacidad máxima")
+        Optional[int], Field(ge=1, le=50, description="Capacidad máxima")
     ] = None,
     # Parámetros de fechas
     arrival: Annotated[
@@ -883,14 +885,14 @@ def search_units(
     ] = None,
     # Parámetros de estado y características
     is_active: Annotated[
-        Optional[Union[Literal[0, 1], str]],
+        Optional[int],
         Field(description="Unidades activas (1) o inactivas (0)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[Union[Literal[0, 1], str]], Field(description="Unidades reservables (1) o no (0)")
+        Optional[int], Field(description="Unidades reservables (1) o no (0)")
     ] = None,
     pets_friendly: Annotated[
-        Optional[Union[Literal[0, 1], str]], Field(description="Unidades pet-friendly (1) o no (0)")
+        Optional[int], Field(description="Unidades pet-friendly (1) o no (0)")
     ] = None,
     unit_status: Annotated[
         Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
@@ -921,7 +923,8 @@ def search_units(
         Optional[Union[int, str]], Field(gt=0, description="ID del rol específico")
     ] = None,
     promo_code_id: Annotated[
-        Optional[Union[int, str]], Field(gt=0, description="ID del código promocional válido")
+        Optional[Union[int, str]],
+        Field(gt=0, description="ID del código promocional válido"),
     ] = None,
     owner_id: Annotated[
         Optional[Union[int, List[int]]], Field(description="ID(s) del propietario")
@@ -947,7 +950,7 @@ def search_units(
         Optional[List[int]],
         Field(description="Filtrar por IDs específicos de unidades"),
     ] = None,
-) -> Any:
+) -> Dict[str, Any]:
     """
     Buscar unidades de alojamiento disponibles en TrackHS con filtros avanzados.
 
@@ -1110,11 +1113,11 @@ def search_units(
 
         # Parámetros de capacidad
         if occupancy is not None:
-            params["occupancy"] = occupancy
+            params["occupancy"] = safe_int(occupancy)
         if min_occupancy is not None:
-            params["minOccupancy"] = min_occupancy
+            params["minOccupancy"] = safe_int(min_occupancy)
         if max_occupancy is not None:
-            params["maxOccupancy"] = max_occupancy
+            params["maxOccupancy"] = safe_int(max_occupancy)
 
         # Parámetros de fechas
         if arrival is not None:
@@ -1190,6 +1193,17 @@ def search_units(
         )
 
         # La limpieza de datos se aplica en el servicio unit_service.search_units()
+
+        # ✅ CORRECCIÓN FINAL: Limpiar campo area problemático en la respuesta
+        if "_embedded" in result and "units" in result["_embedded"]:
+            for unit in result["_embedded"]["units"]:
+                if "area" in unit and isinstance(unit["area"], str):
+                    try:
+                        # Intentar convertir a float
+                        unit["area"] = float(unit["area"])
+                    except (ValueError, TypeError):
+                        # Si no se puede convertir, eliminar el campo
+                        unit.pop("area", None)
 
         # Log de éxito con métricas
         total_items = result.get("total_items", 0)

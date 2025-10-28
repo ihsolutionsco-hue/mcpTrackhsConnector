@@ -124,7 +124,7 @@ class UnitResponse(BaseModel):
     max_occupancy: Optional[int] = Field(
         None, ge=1, description="Capacidad máxima de huéspedes"
     )
-    area: Optional[Union[float, int, None]] = Field(
+    area: Optional[Union[float, int, str, None]] = Field(
         None, description="Área en metros cuadrados"
     )
     address: Optional[str] = Field(None, description="Dirección completa de la unidad")
@@ -397,7 +397,11 @@ UNIT_SEARCH_OUTPUT_SCHEMA = {
                                 "description": "Capacidad máxima",
                             },
                             "area": {
-                                "type": ["number", "null"],
+                                "anyOf": [
+                                    {"type": "number"},
+                                    {"type": "string"},
+                                    {"type": "null"},
+                                ],
                                 "description": "Área en metros cuadrados",
                             },
                             "address": {
