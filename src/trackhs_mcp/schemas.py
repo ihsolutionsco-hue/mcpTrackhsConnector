@@ -397,7 +397,7 @@ UNIT_SEARCH_OUTPUT_SCHEMA = {
                                 "description": "Capacidad máxima",
                             },
                             "area": {
-                                "type": "number",
+                                "type": ["number", "null"],
                                 "description": "Área en metros cuadrados",
                             },
                             "address": {
