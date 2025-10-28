@@ -13,14 +13,14 @@ def debug_fastmcp_config():
     """Debugger específico para FastMCP"""
     print("🔍 DEBUGGER FASTMCP - CONFIGURACIÓN Y HERRAMIENTAS")
     print("=" * 60)
-    
+
     try:
         from trackhs_mcp.server import mcp
-        
+
         print(f"📋 Objeto MCP:")
         print(f"   Tipo: {type(mcp)}")
         print(f"   Módulo: {mcp.__class__.__module__}")
-        
+
         # Verificar atributos disponibles
         print(f"\n🔍 Atributos disponibles:")
         attrs = [attr for attr in dir(mcp) if not attr.startswith('_')]
@@ -30,10 +30,10 @@ def debug_fastmcp_config():
                 print(f"   {attr}: {type(value)} = {value}")
             except Exception as e:
                 print(f"   {attr}: ERROR - {e}")
-        
+
         # Verificar si hay herramientas registradas
         print(f"\n🔍 Verificando herramientas:")
-        
+
         # Método 1: tools
         if hasattr(mcp, 'tools'):
             tools = mcp.tools
@@ -44,21 +44,21 @@ def debug_fastmcp_config():
                     print(f"      {i}: {type(tool)} = {tool}")
         else:
             print("   ❌ mcp.tools no existe")
-        
+
         # Método 2: _tools
         if hasattr(mcp, '_tools'):
             tools = mcp._tools
             print(f"   mcp._tools: {type(tools)} = {tools}")
         else:
             print("   ❌ mcp._tools no existe")
-        
+
         # Método 3: tool_registry
         if hasattr(mcp, 'tool_registry'):
             registry = mcp.tool_registry
             print(f"   mcp.tool_registry: {type(registry)} = {registry}")
         else:
             print("   ❌ mcp.tool_registry no existe")
-        
+
         # Método 4: Buscar en todos los atributos
         print(f"\n🔍 Buscando herramientas en todos los atributos:")
         for attr_name in dir(mcp):
@@ -68,7 +68,7 @@ def debug_fastmcp_config():
                     print(f"   {attr_name}: {type(attr_value)} = {attr_value}")
                 except Exception as e:
                     print(f"   {attr_name}: ERROR - {e}")
-        
+
         # Verificar configuración del servidor
         print(f"\n🔍 Configuración del servidor:")
         if hasattr(mcp, 'config'):
@@ -76,7 +76,7 @@ def debug_fastmcp_config():
             print(f"   mcp.config: {type(config)} = {config}")
         else:
             print("   ❌ mcp.config no existe")
-        
+
         # Verificar si hay métodos de registro
         print(f"\n🔍 Métodos de registro disponibles:")
         reg_methods = [attr for attr in dir(mcp) if 'register' in attr.lower() or 'tool' in attr.lower()]
@@ -86,11 +86,11 @@ def debug_fastmcp_config():
                 print(f"   {method}: {type(method_obj)}")
             except Exception as e:
                 print(f"   {method}: ERROR - {e}")
-        
+
         # Verificar si search_units está registrada de alguna manera
         print(f"\n🔍 Buscando search_units:")
         search_units_found = False
-        
+
         # Buscar en tools
         if hasattr(mcp, 'tools'):
             tools = mcp.tools
@@ -102,7 +102,7 @@ def debug_fastmcp_config():
                     elif hasattr(tool, '__name__') and tool.__name__ == 'search_units':
                         print(f"   ✅ search_units encontrada en mcp.tools: {tool}")
                         search_units_found = True
-        
+
         # Buscar en todos los atributos
         for attr_name in dir(mcp):
             try:
@@ -115,21 +115,21 @@ def debug_fastmcp_config():
                     search_units_found = True
             except:
                 pass
-        
+
         if not search_units_found:
             print("   ❌ search_units no encontrada en ningún lugar")
-        
+
         # Verificar el decorador @mcp.tool
         print(f"\n🔍 Verificando decorador @mcp.tool:")
         from trackhs_mcp.server import search_units
         print(f"   search_units: {type(search_units)}")
         print(f"   Es FunctionTool: {type(search_units).__name__ == 'FunctionTool'}")
-        
+
         if hasattr(search_units, 'name'):
             print(f"   Nombre: {search_units.name}")
         if hasattr(search_units, 'description'):
             print(f"   Descripción: {search_units.description[:100]}...")
-        
+
     except Exception as e:
         print(f"❌ ERROR CRÍTICO: {e}")
         import traceback

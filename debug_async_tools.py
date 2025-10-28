@@ -14,15 +14,15 @@ async def debug_async_tools():
     """Debugger asíncrono para herramientas"""
     print("🔍 DEBUGGER ASÍNCRONO - HERRAMIENTAS FASTMCP")
     print("=" * 50)
-    
+
     try:
         from trackhs_mcp.server import mcp
-        
+
         print(f"📋 Usando await mcp.get_tools():")
         tools = await mcp.get_tools()
         print(f"   Tipo: {type(tools)}")
         print(f"   Cantidad: {len(tools) if hasattr(tools, '__len__') else 'N/A'}")
-        
+
         if isinstance(tools, dict):
             print(f"   Claves del diccionario: {list(tools.keys())}")
             for key, value in tools.items():
@@ -34,7 +34,7 @@ async def debug_async_tools():
                     print(f"      Nombre: {tool.name}")
                 if hasattr(tool, 'description'):
                     print(f"      Descripción: {tool.description[:100]}...")
-        
+
         # Buscar search_units específicamente
         print(f"\n🔍 Buscando search_units:")
         search_units_tool = None
@@ -51,12 +51,12 @@ async def debug_async_tools():
                 if hasattr(tool, 'name') and tool.name == 'search_units':
                     search_units_tool = tool
                     break
-        
+
         if search_units_tool:
             print(f"   ✅ search_units encontrada:")
             print(f"      Tipo: {type(search_units_tool)}")
             print(f"      Nombre: {search_units_tool.name}")
-            
+
             # Analizar esquema de entrada
             if hasattr(search_units_tool, 'inputSchema'):
                 input_schema = search_units_tool.inputSchema
@@ -64,13 +64,13 @@ async def debug_async_tools():
                 if isinstance(input_schema, dict):
                     props = input_schema.get('properties', {})
                     print(f"         Propiedades: {list(props.keys())}")
-                    
+
                     # Analizar parámetros específicos
                     for param in ['bedrooms', 'bathrooms', 'is_active', 'is_bookable']:
                         if param in props:
                             param_schema = props[param]
                             print(f"         🎯 {param}: {param_schema}")
-            
+
             # Analizar esquema de salida
             if hasattr(search_units_tool, 'outputSchema'):
                 output_schema = search_units_tool.outputSchema
@@ -78,7 +78,7 @@ async def debug_async_tools():
                 if isinstance(output_schema, dict):
                     props = output_schema.get('properties', {})
                     print(f"         Propiedades: {list(props.keys())}")
-                    
+
                     # Buscar campo area en esquema de salida
                     if '_embedded' in props:
                         embedded = props['_embedded']
@@ -92,7 +92,7 @@ async def debug_async_tools():
                                     print(f"            {area_schema}")
         else:
             print("   ❌ search_units no encontrada")
-        
+
         # Probar llamada directa a la herramienta
         print(f"\n🔍 Probando llamada directa:")
         if search_units_tool:
@@ -107,7 +107,7 @@ async def debug_async_tools():
                         print(f"      Claves: {list(result.keys())}")
                         if 'total_items' in result:
                             print(f"      Total items: {result['total_items']}")
-                        
+
                         # Analizar campo area en resultado
                         if '_embedded' in result and 'units' in result['_embedded']:
                             units = result['_embedded']['units']
@@ -121,7 +121,7 @@ async def debug_async_tools():
                 print(f"   ❌ Error en llamada directa: {e}")
                 import traceback
                 traceback.print_exc()
-        
+
     except Exception as e:
         print(f"❌ ERROR CRÍTICO: {e}")
         import traceback
