@@ -4,6 +4,8 @@ Herramienta de diagnóstico para la API de TrackHS
 
 from typing import Any, Dict, List, Optional
 
+from pydantic import ConfigDict
+
 from schemas.base import BaseSchema
 from utils.exceptions import TrackHSAPIError
 
@@ -15,8 +17,7 @@ class DiagnoseAPIInput(BaseSchema):
 
     test_type: str = "full"
 
-    class Config:
-        schema_extra = {"example": {"test_type": "full"}}
+    model_config = ConfigDict(json_schema_extra={"example": {"test_type": "full"}})
 
 
 class DiagnoseAPIOutput(BaseSchema):

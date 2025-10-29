@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .base import BaseSchema, PaginationParams, PaginationResponse
 
@@ -182,7 +182,8 @@ class UnitSearchParams(PaginationParams):
         default=SortDirection.ASC, description="Dirección de ordenamiento"
     )
 
-    @validator("arrival", "departure")
+    @field_validator("arrival", "departure")
+    @classmethod
     def validate_date_format(cls, v):
         """Validar formato de fecha YYYY-MM-DD"""
         if v is not None:
@@ -192,7 +193,8 @@ class UnitSearchParams(PaginationParams):
                 raise ValueError("Formato de fecha debe ser YYYY-MM-DD")
         return v
 
-    @validator("content_updated_since")
+    @field_validator("content_updated_since")
+    @classmethod
     def validate_iso_datetime(cls, v):
         """Validar formato ISO 8601"""
         if v is not None:
@@ -267,5 +269,4 @@ class UnitSearchResponse(PaginationResponse):
         default=None, description="Datos adicionales de la API"
     )
 
-    class Config:
-        extra = "allow"  # Permitir campos adicionales de la API
+    model_config = ConfigDict(extra="allow")  # Permitir campos adicionales de la API

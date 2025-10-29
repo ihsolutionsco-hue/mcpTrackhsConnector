@@ -5,7 +5,7 @@ Configuración para TrackHS MCP Server
 import os
 from typing import Optional
 
-from pydantic import Field
+from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
 
 
@@ -29,9 +29,7 @@ class Settings(BaseSettings):
     # Configuración de API
     api_timeout: int = Field(default=30, env="API_TIMEOUT")
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = ConfigDict(env_file=".env", case_sensitive=False)
 
 
 def get_settings() -> Settings:
