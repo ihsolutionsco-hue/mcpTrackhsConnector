@@ -15,6 +15,10 @@ from fastmcp.exceptions import ToolError
 from pydantic import BaseModel, Field, field_validator
 from typing_extensions import Annotated
 
+from .amenities_error_handler import AmenitiesErrorHandler
+from .amenities_logging import amenities_logger
+from .amenities_models import AmenitiesSearchParams
+from .amenities_service import AmenitiesService
 from .client import TrackHSClient
 from .config import get_settings, validate_configuration
 from .middleware import validate_and_coerce_tool_input
@@ -710,15 +714,24 @@ def search_units(
         raise ToolError(f"Error buscando unidades: {str(e)}")
 
 
-@mcp.tool
+@mcp.tool(
+    output_schema=AMENITIES_OUTPUT_SCHEMA,
+    annotations={
+        "title": "Buscar Amenidades de TrackHS",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    },
+)
 def search_amenities(
     # Parámetros de paginación
     page: Annotated[
         int, Field(ge=1, le=10000, description="Número de página (1-based)")
     ] = 1,
     size: Annotated[int, Field(ge=1, le=100, description="Tamaño de página")] = 10,
-    # Parámetros de ordenamiento
-    sort_column: Annotated[
+    # Parámetros de ordenamiento (usando camelCase como en la API)
+    sortColumn: Annotated[
         Optional[
             Literal[
                 "id",
@@ -731,7 +744,7 @@ def search_amenities(
         ],
         Field(description="Columna para ordenar resultados. Default: order"),
     ] = None,
-    sort_direction: Annotated[
+    sortDirection: Annotated[
         Optional[Literal["asc", "desc"]],
         Field(description="Dirección de ordenamiento. Default: asc"),
     ] = None,
@@ -741,17 +754,17 @@ def search_amenities(
         Field(max_length=200, description="Búsqueda en nombre de amenidad"),
     ] = None,
     # Parámetros de filtrado
-    group_id: Annotated[
+    groupId: Annotated[
         Optional[int],
         Field(description="Filtrar por ID de grupo"),
     ] = None,
-    is_public: Annotated[
+    isPublic: Annotated[
         Optional[FlexibleIntType],
         Field(
             ge=0, le=1, description="Filtrar por amenidades públicas (1) o privadas (0)"
         ),
     ] = None,
-    public_searchable: Annotated[
+    publicSearchable: Annotated[
         Optional[FlexibleIntType],
         Field(
             ge=0,
@@ -759,26 +772,33 @@ def search_amenities(
             description="Filtrar por amenidades buscables públicamente (1) o no (0)",
         ),
     ] = None,
-    is_filterable: Annotated[
+    isFilterable: Annotated[
         Optional[FlexibleIntType],
         Field(ge=0, le=1, description="Filtrar por amenidades filtrables (1) o no (0)"),
     ] = None,
     # Parámetros de tipos de plataformas OTA
-    homeaway_type: Annotated[
+    homeawayType: Annotated[
         Optional[str],
         Field(
             max_length=200,
             description="Buscar por tipo de HomeAway (soporta % para wildcard)",
         ),
     ] = None,
-    airbnb_type: Annotated[
+    airbnbType: Annotated[
         Optional[str],
         Field(
             max_length=200,
             description="Buscar por tipo de Airbnb (soporta % para wildcard)",
         ),
     ] = None,
-    marriott_type: Annotated[
+    tripadvisorType: Annotated[
+        Optional[str],
+        Field(
+            max_length=200,
+            description="Buscar por tipo de TripAdvisor (soporta % para wildcard)",
+        ),
+    ] = None,
+    marriottType: Annotated[
         Optional[str],
         Field(
             max_length=200,
@@ -790,93 +810,95 @@ def search_amenities(
     Buscar amenidades/servicios disponibles en el sistema TrackHS.
 
     Esta herramienta implementa la API completa de búsqueda de amenidades de TrackHS
-    con todos los parámetros disponibles según la documentación oficial.
+    con validación robusta, manejo de errores mejorado, logging estructurado y
+    siguiendo las mejores prácticas de FastMCP 2.0+.
 
     FUNCIONALIDADES PRINCIPALES:
     - Búsqueda por texto en nombre de amenidad
     - Filtros por características (público, filtrable, buscable)
     - Filtros por grupo de amenidades
-    - Búsqueda por tipos de plataformas OTA (Airbnb, HomeAway, Marriott)
+    - Búsqueda por tipos de plataformas OTA (Airbnb, HomeAway, TripAdvisor, Marriott)
     - Ordenamiento personalizable
     - Paginación flexible
+    - Validación robusta de parámetros
+    - Manejo de errores específico por tipo
+    - Logging estructurado para observabilidad
+    - Arquitectura modular y mantenible
 
     PARÁMETROS DE BÚSQUEDA:
-    - search: Búsqueda en nombre de amenidad
-    - homeaway_type, airbnb_type, marriott_type: Búsqueda por tipos OTA
+    - search: Búsqueda en nombre de amenidad (mínimo 2 caracteres)
+    - homeawayType, airbnbType, tripadvisorType, marriottType: Búsqueda por tipos OTA
 
     PARÁMETROS DE FILTRADO:
-    - group_id: Filtrar por ID de grupo específico
-    - is_public: Solo amenidades públicas (1) o privadas (0)
-    - public_searchable: Solo amenidades buscables públicamente (1) o no (0)
-    - is_filterable: Solo amenidades filtrables (1) o no (0)
+    - groupId: Filtrar por ID de grupo específico (debe ser > 0)
+    - isPublic: Solo amenidades públicas (1) o privadas (0)
+    - publicSearchable: Solo amenidades buscables públicamente (1) o no (0)
+    - isFilterable: Solo amenidades filtrables (1) o no (0)
 
     PARÁMETROS DE ORDENAMIENTO:
-    - sort_column: id, order, isPublic, publicSearchable, isFilterable, createdAt
-    - sort_direction: asc, desc
+    - sortColumn: id, order, isPublic, publicSearchable, isFilterable, createdAt
+    - sortDirection: asc, desc
 
     EJEMPLOS DE USO:
     - search_amenities(page=1, size=10) # Primera página, 10 amenidades
     - search_amenities(search="wifi") # Buscar amenidades con "wifi"
-    - search_amenities(is_public=1, is_filterable=1) # Solo públicas y filtrables
-    - search_amenities(airbnb_type="ac") # Buscar por tipo de Airbnb
-    - search_amenities(sort_column="name", sort_direction="asc") # Ordenadas por nombre
-    - search_amenities(group_id=2) # Solo amenidades del grupo 2
+    - search_amenities(isPublic=1, isFilterable=1) # Solo públicas y filtrables
+    - search_amenities(airbnbType="ac") # Buscar por tipo de Airbnb
+    - search_amenities(sortColumn="id", sortDirection="asc") # Ordenadas por ID
+    - search_amenities(groupId=2) # Solo amenidades del grupo 2
+    - search_amenities(tripadvisorType="pool%") # Buscar por tipo de TripAdvisor con wildcard
+
+    Returns:
+        Dict[str, Any]: Respuesta de la API con amenidades encontradas
+
+    Raises:
+        ToolError: Si hay error de validación, autenticación, autorización o conexión
     """
-    if api_client is None:
-        raise ToolError("Cliente API no disponible. Verifique las credenciales.")
+    # Inicializar servicio de amenidades
+    amenities_service = AmenitiesService(api_client)
 
-    # Convertir parámetros FlexibleIntType a enteros
-    is_public = validate_flexible_int(is_public) if is_public is not None else None
-    public_searchable = (
-        validate_flexible_int(public_searchable)
-        if public_searchable is not None
-        else None
+    # Log del inicio de la operación
+    amenities_logger.log_search_start(
+        page=page,
+        size=size,
+        search_params={
+            "search": search,
+            "groupId": groupId,
+            "isPublic": isPublic,
+            "sortColumn": sortColumn,
+            "sortDirection": sortDirection,
+        },
     )
-    is_filterable = (
-        validate_flexible_int(is_filterable) if is_filterable is not None else None
-    )
-
-    logger.info(f"Buscando amenidades: página {page}, tamaño {size}")
 
     try:
-        # Construir parámetros
-        params = {"page": page, "size": size}
+        # Delegar la búsqueda al servicio
+        result = amenities_service.search_amenities(
+            page=page,
+            size=size,
+            sortColumn=sortColumn,
+            sortDirection=sortDirection,
+            search=search,
+            groupId=groupId,
+            isPublic=isPublic,
+            publicSearchable=publicSearchable,
+            isFilterable=isFilterable,
+            homeawayType=homeawayType,
+            airbnbType=airbnbType,
+            tripadvisorType=tripadvisorType,
+            marriottType=marriottType,
+        )
 
-        # Parámetros de ordenamiento
-        if sort_column:
-            params["sortColumn"] = sort_column
-        if sort_direction:
-            params["sortDirection"] = sort_direction
-
-        # Parámetros de búsqueda
-        if search:
-            params["search"] = search
-
-        # Parámetros de filtrado
-        if group_id is not None:
-            params["groupId"] = group_id
-        if is_public is not None:
-            params["isPublic"] = is_public
-        if public_searchable is not None:
-            params["publicSearchable"] = public_searchable
-        if is_filterable is not None:
-            params["isFilterable"] = is_filterable
-
-        # Parámetros de tipos OTA
-        if homeaway_type:
-            params["homeawayType"] = homeaway_type
-        if airbnb_type:
-            params["airbnbType"] = airbnb_type
-        if marriott_type:
-            params["marriottType"] = marriott_type
-
-        result = api_client.get("api/pms/units/amenities", params)
+        # Log del éxito de la operación
         total_items = result.get("total_items", 0)
-        logger.info(f"Encontradas {total_items} amenidades")
+        amenities_logger.log_search_success(
+            total_items=total_items, page=page, size=size
+        )
+
         return result
+
     except Exception as e:
-        logger.error(f"Error buscando amenidades: {str(e)}")
-        raise ToolError(f"Error buscando amenidades: {str(e)}")
+        # El servicio ya maneja el logging de errores
+        raise
 
 
 @mcp.tool(output_schema=FOLIO_DETAIL_OUTPUT_SCHEMA)
