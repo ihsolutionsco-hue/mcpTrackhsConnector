@@ -7,7 +7,7 @@ import os
 import sys
 from typing import Any, Dict, List, Optional
 
-from fastmcp import mcp
+from fastmcp import FastMCP
 from pydantic import Field
 
 from schemas.amenity import AmenitySearchParams, AmenitySearchResponse
@@ -42,7 +42,7 @@ def setup_tools(client: TrackHSAPIClient) -> None:
     logger.info("Cliente API configurado para herramientas MCP")
 
 
-@mcp.tool()
+@FastMCP.tool()
 def search_reservations(
     page: int = Field(default=1, ge=1, description="Número de página (1-based)"),
     size: int = Field(default=10, ge=1, le=100, description="Tamaño de página (1-100)"),
@@ -99,7 +99,7 @@ def search_reservations(
         raise TrackHSAPIError(f"Error buscando reservas: {str(e)}")
 
 
-@mcp.tool()
+@FastMCP.tool()
 def get_reservation(
     reservation_id: int = Field(gt=0, description="ID único de la reserva en TrackHS")
 ) -> Dict[str, Any]:
@@ -131,7 +131,7 @@ def get_reservation(
         raise TrackHSAPIError(f"Error obteniendo reserva: {str(e)}")
 
 
-@mcp.tool()
+@FastMCP.tool()
 def search_units(
     page: int = Field(default=1, ge=1, description="Número de página (1-based)"),
     size: int = Field(default=10, ge=1, le=100, description="Tamaño de página (1-100)"),
@@ -193,7 +193,7 @@ def search_units(
         raise TrackHSAPIError(f"Error buscando unidades: {str(e)}")
 
 
-@mcp.tool()
+@FastMCP.tool()
 def search_amenities(
     page: int = Field(default=1, ge=1, description="Número de página (1-based)"),
     size: int = Field(default=10, ge=1, le=100, description="Tamaño de página (1-100)"),
@@ -251,7 +251,7 @@ def search_amenities(
         raise TrackHSAPIError(f"Error buscando amenidades: {str(e)}")
 
 
-@mcp.tool()
+@FastMCP.tool()
 def get_folio(
     reservation_id: int = Field(
         gt=0, description="ID de la reserva para obtener su folio financiero"
@@ -285,7 +285,7 @@ def get_folio(
         raise TrackHSAPIError(f"Error obteniendo folio: {str(e)}")
 
 
-@mcp.tool()
+@FastMCP.tool()
 def create_maintenance_work_order(
     unit_id: int = Field(
         gt=0, description="ID de la unidad que requiere mantenimiento"
@@ -344,7 +344,7 @@ def create_maintenance_work_order(
         raise TrackHSAPIError(f"Error creando orden de mantenimiento: {str(e)}")
 
 
-@mcp.tool()
+@FastMCP.tool()
 def create_housekeeping_work_order(
     unit_id: int = Field(gt=0, description="ID de la unidad que requiere limpieza"),
     scheduled_at: str = Field(description="Fecha programada (YYYY-MM-DD)"),
