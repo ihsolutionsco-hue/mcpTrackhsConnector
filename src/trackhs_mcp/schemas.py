@@ -86,9 +86,6 @@ class AmenityItem(BaseModel):
     )
     homeawayType: Optional[str] = Field(default=None, description="Tipo de HomeAway")
     airbnbType: Optional[str] = Field(default=None, description="Tipo de Airbnb")
-    tripadvisorType: Optional[str] = Field(
-        default=None, description="Tipo de TripAdvisor"
-    )
     marriottType: Optional[str] = Field(default=None, description="Tipo de Marriott")
     bookingDotComPropertyType: Optional[str] = Field(
         default=None, description="Tipo de propiedad de Booking.com"

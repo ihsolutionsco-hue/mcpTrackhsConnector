@@ -778,13 +778,6 @@ def search_amenities(
             description="Buscar por tipo de Airbnb (soporta % para wildcard)",
         ),
     ] = None,
-    tripadvisor_type: Annotated[
-        Optional[str],
-        Field(
-            max_length=200,
-            description="Buscar por tipo de TripAdvisor (soporta % para wildcard)",
-        ),
-    ] = None,
     marriott_type: Annotated[
         Optional[str],
         Field(
@@ -874,8 +867,6 @@ def search_amenities(
             params["homeawayType"] = homeaway_type
         if airbnb_type:
             params["airbnbType"] = airbnb_type
-        if tripadvisor_type:
-            params["tripadvisorType"] = tripadvisor_type
         if marriott_type:
             params["marriottType"] = marriott_type
 
