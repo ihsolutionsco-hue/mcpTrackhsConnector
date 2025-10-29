@@ -5,6 +5,7 @@ Herramientas MCP para TrackHS
 from .base import BaseTool
 from .create_housekeeping_work_order import CreateHousekeepingWorkOrderTool
 from .create_maintenance_work_order import CreateMaintenanceWorkOrderTool
+from .diagnose_api import DiagnoseAPITool
 from .get_folio import GetFolioTool
 from .get_reservation import GetReservationTool
 from .search_amenities import SearchAmenitiesTool
@@ -20,6 +21,7 @@ TOOLS = [
     GetFolioTool,
     CreateMaintenanceWorkOrderTool,
     CreateHousekeepingWorkOrderTool,
+    DiagnoseAPITool,
 ]
 
 __all__ = [
@@ -31,5 +33,6 @@ __all__ = [
     "GetFolioTool",
     "CreateMaintenanceWorkOrderTool",
     "CreateHousekeepingWorkOrderTool",
+    "DiagnoseAPITool",
     "TOOLS",
 ]

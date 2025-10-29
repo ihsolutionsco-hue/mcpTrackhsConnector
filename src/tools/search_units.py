@@ -76,15 +76,70 @@ class SearchUnitsTool(BaseTool):
         Returns:
             Resultado de la búsqueda
         """
+        # Log de inicio de búsqueda
+        self.logger.info(
+            "Iniciando búsqueda de unidades",
+            extra={
+                "input_params": validated_input.model_dump(),
+                "has_filters": self._has_meaningful_filters(validated_input),
+                "filter_count": self._count_filters(validated_input),
+            },
+        )
+
         # Preparar parámetros para la API
         params = self._prepare_api_params(validated_input)
+
+        # Log de parámetros preparados
+        self.logger.info(
+            "Parámetros preparados para API",
+            extra={
+                "api_params": params,
+                "param_count": len(params),
+                "boolean_conversions": self._get_boolean_conversions(validated_input),
+            },
+        )
 
         # Realizar llamada a la API
         try:
             result = self.api_client.get("api/pms/units", params)
 
+            # Log de respuesta de API
+            self.logger.info(
+                "Respuesta recibida de API",
+                extra={
+                    "response_type": type(result).__name__,
+                    "response_keys": (
+                        list(result.keys()) if isinstance(result, dict) else "not_dict"
+                    ),
+                    "has_units": (
+                        "units" in result if isinstance(result, dict) else False
+                    ),
+                    "units_count": (
+                        len(result.get("units", [])) if isinstance(result, dict) else 0
+                    ),
+                    "total_items": (
+                        result.get("total_items", "not_found")
+                        if isinstance(result, dict)
+                        else "not_found"
+                    ),
+                },
+            )
+
             # Procesar resultado
             processed_result = self._process_api_response(result)
+
+            # Log de resultado final
+            self.logger.info(
+                "Búsqueda completada exitosamente",
+                extra={
+                    "final_units_count": len(processed_result.get("units", [])),
+                    "total_items": processed_result.get("total_items", 0),
+                    "total_pages": processed_result.get("total_pages", 0),
+                    "current_page": processed_result.get("current_page", 0),
+                    "has_next": processed_result.get("has_next", False),
+                    "has_prev": processed_result.get("has_prev", False),
+                },
+            )
 
             return processed_result
 
@@ -95,9 +150,107 @@ class SearchUnitsTool(BaseTool):
                     "error_type": type(e).__name__,
                     "error_message": str(e),
                     "search_params": params,
+                    "input_params": validated_input.model_dump(),
                 },
             )
             raise TrackHSAPIError(f"Error buscando unidades: {str(e)}")
+
+    def _has_meaningful_filters(self, validated_input: UnitSearchParams) -> bool:
+        """Verifica si hay filtros significativos aplicados"""
+        meaningful_fields = [
+            "search",
+            "term",
+            "unit_code",
+            "short_name",
+            "bedrooms",
+            "bathrooms",
+            "occupancy",
+            "min_bedrooms",
+            "max_bedrooms",
+            "min_bathrooms",
+            "max_bathrooms",
+            "min_occupancy",
+            "max_occupancy",
+            "is_active",
+            "is_bookable",
+            "pets_friendly",
+            "unit_status",
+            "arrival",
+            "departure",
+            "amenity_id",
+            "node_id",
+            "unit_type_id",
+            "owner_id",
+            "company_id",
+            "channel_id",
+            "lodging_type_id",
+            "bed_type_id",
+            "amenity_all",
+            "unit_ids",
+        ]
+
+        return any(
+            getattr(validated_input, field) is not None for field in meaningful_fields
+        )
+
+    def _count_filters(self, validated_input: UnitSearchParams) -> int:
+        """Cuenta el número de filtros aplicados"""
+        meaningful_fields = [
+            "search",
+            "term",
+            "unit_code",
+            "short_name",
+            "bedrooms",
+            "bathrooms",
+            "occupancy",
+            "min_bedrooms",
+            "max_bedrooms",
+            "min_bathrooms",
+            "max_bathrooms",
+            "min_occupancy",
+            "max_occupancy",
+            "is_active",
+            "is_bookable",
+            "pets_friendly",
+            "unit_status",
+            "arrival",
+            "departure",
+            "amenity_id",
+            "node_id",
+            "unit_type_id",
+            "owner_id",
+            "company_id",
+            "channel_id",
+            "lodging_type_id",
+            "bed_type_id",
+            "amenity_all",
+            "unit_ids",
+        ]
+
+        return sum(
+            1
+            for field in meaningful_fields
+            if getattr(validated_input, field) is not None
+        )
+
+    def _get_boolean_conversions(
+        self, validated_input: UnitSearchParams
+    ) -> Dict[str, Any]:
+        """Obtiene las conversiones booleanas aplicadas"""
+        conversions = {}
+        boolean_fields = [
+            "is_active",
+            "is_bookable",
+            "pets_friendly",
+            "allow_unit_rates",
+        ]
+
+        for field in boolean_fields:
+            value = getattr(validated_input, field)
+            if value is not None:
+                conversions[field] = {"original": value, "converted": 1 if value else 0}
+
+        return conversions
 
     def _prepare_api_params(self, validated_input: UnitSearchParams) -> Dict[str, Any]:
         """

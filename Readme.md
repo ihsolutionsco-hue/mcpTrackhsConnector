@@ -161,12 +161,44 @@ python tests/unit/test_simple_refactored.py
 
 # Ejecutar tests específicos
 python tests/unit/test_server_refactored.py
+
+# Testing de características de debugging
+python scripts/test_debugging.py
 ```
+
+## 🔧 Debugging
+
+El sistema incluye herramientas avanzadas de debugging para diagnosticar problemas con la API de TrackHS:
+
+### Herramientas Disponibles
+
+- **`diagnose_api`**: Diagnóstico automático de conectividad, autenticación y estructura de datos
+- **Logging detallado**: Análisis paso a paso de búsquedas y respuestas de API
+- **Métricas de debugging**: Contadores y análisis de rendimiento
+
+### Comandos Rápidos
+
+```bash
+# Configurar entorno de debugging
+python scripts/setup_debugging.py
+
+# Ejecutar diagnóstico completo
+python scripts/test_debugging.py
+
+# Iniciar servidor con logging detallado
+LOG_LEVEL=DEBUG python src/server.py
+```
+
+### Documentación de Debugging
+
+- [docs/DEBUGGING.md](docs/DEBUGGING.md) - Guía completa de debugging
+- [scripts/](scripts/) - Scripts de testing y configuración
 
 ## 📚 Documentación
 
 - [CHANGELOG.md](CHANGELOG.md) - Historial de cambios
 - [REFACTORING_FINAL_SUMMARY.md](REFACTORING_FINAL_SUMMARY.md) - Resumen de refactorización
+- [docs/DEBUGGING.md](docs/DEBUGGING.md) - Guía de debugging
 
 ## 🤝 Contribución
 
