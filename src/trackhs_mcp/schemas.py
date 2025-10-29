@@ -78,35 +78,41 @@ class AmenityLinks(BaseModel):
 class AmenityItem(BaseModel):
     """Schema para un item de amenidad individual"""
 
-    id: Optional[int] = Field(description="ID de la amenidad")
+    id: Optional[int] = Field(default=None, description="ID de la amenidad")
     name: str = Field(description="Nombre de la amenidad")
-    groupId: Optional[int] = Field(description="ID del grupo")
-    group: Optional[AmenityGroup] = Field(description="Información del grupo")
-    homeawayType: Optional[str] = Field(description="Tipo de HomeAway")
-    airbnbType: Optional[str] = Field(description="Tipo de Airbnb")
-    tripadvisorType: Optional[str] = Field(description="Tipo de TripAdvisor")
-    marriottType: Optional[str] = Field(description="Tipo de Marriott")
+    groupId: Optional[int] = Field(default=None, description="ID del grupo")
+    group: Optional[AmenityGroup] = Field(
+        default=None, description="Información del grupo"
+    )
+    homeawayType: Optional[str] = Field(default=None, description="Tipo de HomeAway")
+    airbnbType: Optional[str] = Field(default=None, description="Tipo de Airbnb")
+    tripadvisorType: Optional[str] = Field(
+        default=None, description="Tipo de TripAdvisor"
+    )
+    marriottType: Optional[str] = Field(default=None, description="Tipo de Marriott")
     bookingDotComPropertyType: Optional[str] = Field(
-        description="Tipo de propiedad de Booking.com"
+        default=None, description="Tipo de propiedad de Booking.com"
     )
     bookingDotComAccommodationType: Optional[str] = Field(
-        description="Tipo de alojamiento de Booking.com"
+        default=None, description="Tipo de alojamiento de Booking.com"
     )
     expediaPropertyType: Optional[str] = Field(
-        description="Tipo de propiedad de Expedia"
+        default=None, description="Tipo de propiedad de Expedia"
     )
     expediaAccommodationType: Optional[str] = Field(
-        description="Tipo de alojamiento de Expedia"
+        default=None, description="Tipo de alojamiento de Expedia"
     )
-    isFilterable: Optional[bool] = Field(description="Si es filtrable")
-    isPublic: Optional[bool] = Field(description="Si es público")
-    publicSearchable: Optional[bool] = Field(description="Si es buscable públicamente")
-    createdBy: Optional[str] = Field(description="Creado por")
-    createdAt: Optional[str] = Field(description="Fecha de creación")
-    updatedBy: Optional[str] = Field(description="Actualizado por")
-    updatedAt: Optional[str] = Field(description="Fecha de actualización")
+    isFilterable: Optional[bool] = Field(default=None, description="Si es filtrable")
+    isPublic: Optional[bool] = Field(default=None, description="Si es público")
+    publicSearchable: Optional[bool] = Field(
+        default=None, description="Si es buscable públicamente"
+    )
+    createdBy: Optional[str] = Field(default=None, description="Creado por")
+    createdAt: Optional[str] = Field(default=None, description="Fecha de creación")
+    updatedBy: Optional[str] = Field(default=None, description="Actualizado por")
+    updatedAt: Optional[str] = Field(default=None, description="Fecha de actualización")
     links: Optional[AmenityLinks] = Field(
-        alias="_links", description="Enlaces de la amenidad"
+        default=None, alias="_links", description="Enlaces de la amenidad"
     )
 
 
