@@ -38,7 +38,7 @@ repos:
       - id: pytest-mcp
         name: Tests MCP Protocol
         entry: pytest
-        args: [tests/test_mcp_protocol.py, tests/test_mcp_server.py, -v, --tb=short]
+        args: [tests/unit/test_simple_refactored.py, -v, --tb=short]
         language: system
         pass_filenames: false
         always_run: false
@@ -49,7 +49,7 @@ repos:
       - id: mcp-server-check
         name: Validar servidor MCP
         entry: python
-        args: [-c, "from src.trackhs_mcp.server import mcp; print('MCP Server OK')"]
+        args: [-c, "from src.server import TrackHSServer; print('MCP Server OK')"]
         language: system
         pass_filenames: false
         always_run: false
