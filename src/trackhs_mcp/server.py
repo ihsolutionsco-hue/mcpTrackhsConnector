@@ -31,26 +31,19 @@ from .utils import build_units_search_params, clean_unit_data
 # Configuración centralizada
 settings = get_settings()
 
-# Tipo personalizado para parámetros numéricos que acepta strings e ints
-class FlexibleInt:
-    """Tipo que acepta tanto int como str y convierte automáticamente"""
-
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if v is None:
-            return None
-        if isinstance(v, int):
-            return v
-        if isinstance(v, str):
-            try:
-                return int(v)
-            except ValueError:
-                raise ValueError(f"No se puede convertir '{v}' a entero")
-        raise ValueError(f"Tipo no soportado: {type(v)}")
+# Función de validación para parámetros numéricos flexibles
+def validate_flexible_int(v):
+    """Valida y convierte parámetros que pueden ser int o str"""
+    if v is None:
+        return None
+    if isinstance(v, int):
+        return v
+    if isinstance(v, str):
+        try:
+            return int(v)
+        except ValueError:
+            raise ValueError(f"No se puede convertir '{v}' a entero")
+    raise ValueError(f"Tipo no soportado: {type(v)}")
 
 # Alias para usar en las anotaciones
 FlexibleIntType = Union[int, str, None]
@@ -270,18 +263,14 @@ def get_reservation(
 def search_units(
     # Parámetros de paginación
     page: Annotated[
-        FlexibleIntType,
+        Any,
         Field(
-            ge=1,
-            le=10000,
             description="Número de página (1-based). Límite máximo: 10k total results",
         ),
     ] = 1,
     size: Annotated[
-        FlexibleIntType,
+        Any,
         Field(
-            ge=1,
-            le=100,
             description="Tamaño de página (1-100). Límite: 10k total results",
         ),
     ] = 10,
@@ -357,33 +346,33 @@ def search_units(
     ] = None,
     # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número exacto de dormitorios")
+        Optional[Any], Field(description="Número exacto de dormitorios")
     ] = None,
     min_bedrooms: Annotated[
-        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número mínimo de dormitorios")
+        Optional[Any], Field(description="Número mínimo de dormitorios")
     ] = None,
     max_bedrooms: Annotated[
-        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número máximo de dormitorios")
+        Optional[Any], Field(description="Número máximo de dormitorios")
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
-        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número exacto de baños")
+        Optional[Any], Field(description="Número exacto de baños")
     ] = None,
     min_bathrooms: Annotated[
-        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número mínimo de baños")
+        Optional[Any], Field(description="Número mínimo de baños")
     ] = None,
     max_bathrooms: Annotated[
-        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número máximo de baños")
+        Optional[Any], Field(description="Número máximo de baños")
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
-        Optional[FlexibleIntType], Field(ge=1, le=50, description="Capacidad exacta")
+        Optional[Any], Field(description="Capacidad exacta")
     ] = None,
     min_occupancy: Annotated[
-        Optional[FlexibleIntType], Field(ge=1, le=50, description="Capacidad mínima")
+        Optional[Any], Field(description="Capacidad mínima")
     ] = None,
     max_occupancy: Annotated[
-        Optional[FlexibleIntType], Field(ge=1, le=50, description="Capacidad máxima")
+        Optional[Any], Field(description="Capacidad máxima")
     ] = None,
     # Parámetros de fechas
     arrival: Annotated[
@@ -404,16 +393,16 @@ def search_units(
     ] = None,
     # Parámetros de estado y características
     is_active: Annotated[
-        Optional[FlexibleIntType],
-        Field(ge=0, le=1, description="Unidades activas (1) o inactivas (0)"),
+        Optional[Any],
+        Field(description="Unidades activas (1) o inactivas (0)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[FlexibleIntType],
-        Field(ge=0, le=1, description="Unidades reservables (1) o no (0)"),
+        Optional[Any],
+        Field(description="Unidades reservables (1) o no (0)"),
     ] = None,
     pets_friendly: Annotated[
-        Optional[FlexibleIntType],
-        Field(ge=0, le=1, description="Unidades pet-friendly (1) o no (0)"),
+        Optional[Any],
+        Field(description="Unidades pet-friendly (1) o no (0)"),
     ] = None,
     unit_status: Annotated[
         Optional[Literal["clean", "dirty", "occupied", "inspection", "inprogress"]],
@@ -508,7 +497,22 @@ def search_units(
     if api_client is None:
         raise ToolError("Cliente API no disponible. Verifique las credenciales.")
 
-    # Los parámetros ya están convertidos por Pydantic con FlexibleIntType
+    # Convertir parámetros Any a enteros usando nuestra función de validación
+    page = validate_flexible_int(page) if page is not None else 1
+    size = validate_flexible_int(size) if size is not None else 10
+    bedrooms = validate_flexible_int(bedrooms) if bedrooms is not None else None
+    min_bedrooms = validate_flexible_int(min_bedrooms) if min_bedrooms is not None else None
+    max_bedrooms = validate_flexible_int(max_bedrooms) if max_bedrooms is not None else None
+    bathrooms = validate_flexible_int(bathrooms) if bathrooms is not None else None
+    min_bathrooms = validate_flexible_int(min_bathrooms) if min_bathrooms is not None else None
+    max_bathrooms = validate_flexible_int(max_bathrooms) if max_bathrooms is not None else None
+    occupancy = validate_flexible_int(occupancy) if occupancy is not None else None
+    min_occupancy = validate_flexible_int(min_occupancy) if min_occupancy is not None else None
+    max_occupancy = validate_flexible_int(max_occupancy) if max_occupancy is not None else None
+    is_active = validate_flexible_int(is_active) if is_active is not None else None
+    is_bookable = validate_flexible_int(is_bookable) if is_bookable is not None else None
+    pets_friendly = validate_flexible_int(pets_friendly) if pets_friendly is not None else None
+    
     # Aplicar middleware de coerción de tipos como respaldo adicional
     params_dict = {
         "page": page,
