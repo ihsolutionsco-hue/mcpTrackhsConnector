@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing_extensions import Annotated
 
 from .client import TrackHSClient
@@ -30,6 +30,30 @@ from .utils import build_units_search_params, clean_unit_data
 
 # Configuración centralizada
 settings = get_settings()
+
+# Tipo personalizado para parámetros numéricos que acepta strings e ints
+class FlexibleInt:
+    """Tipo que acepta tanto int como str y convierte automáticamente"""
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, int):
+            return v
+        if isinstance(v, str):
+            try:
+                return int(v)
+            except ValueError:
+                raise ValueError(f"No se puede convertir '{v}' a entero")
+        raise ValueError(f"Tipo no soportado: {type(v)}")
+
+# Alias para usar en las anotaciones
+FlexibleIntType = Union[int, str, None]
 
 # Validar configuración al inicio
 if not validate_configuration():
@@ -246,7 +270,7 @@ def get_reservation(
 def search_units(
     # Parámetros de paginación
     page: Annotated[
-        int,
+        FlexibleIntType,
         Field(
             ge=1,
             le=10000,
@@ -254,7 +278,7 @@ def search_units(
         ),
     ] = 1,
     size: Annotated[
-        int,
+        FlexibleIntType,
         Field(
             ge=1,
             le=100,
@@ -333,33 +357,33 @@ def search_units(
     ] = None,
     # Parámetros de dormitorios
     bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número exacto de dormitorios")
+        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número exacto de dormitorios")
     ] = None,
     min_bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número mínimo de dormitorios")
+        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número mínimo de dormitorios")
     ] = None,
     max_bedrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número máximo de dormitorios")
+        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número máximo de dormitorios")
     ] = None,
     # Parámetros de baños
     bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número exacto de baños")
+        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número exacto de baños")
     ] = None,
     min_bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número mínimo de baños")
+        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número mínimo de baños")
     ] = None,
     max_bathrooms: Annotated[
-        Optional[int], Field(ge=0, le=20, description="Número máximo de baños")
+        Optional[FlexibleIntType], Field(ge=0, le=20, description="Número máximo de baños")
     ] = None,
     # Parámetros de capacidad
     occupancy: Annotated[
-        Optional[int], Field(ge=1, le=50, description="Capacidad exacta")
+        Optional[FlexibleIntType], Field(ge=1, le=50, description="Capacidad exacta")
     ] = None,
     min_occupancy: Annotated[
-        Optional[int], Field(ge=1, le=50, description="Capacidad mínima")
+        Optional[FlexibleIntType], Field(ge=1, le=50, description="Capacidad mínima")
     ] = None,
     max_occupancy: Annotated[
-        Optional[int], Field(ge=1, le=50, description="Capacidad máxima")
+        Optional[FlexibleIntType], Field(ge=1, le=50, description="Capacidad máxima")
     ] = None,
     # Parámetros de fechas
     arrival: Annotated[
@@ -380,15 +404,15 @@ def search_units(
     ] = None,
     # Parámetros de estado y características
     is_active: Annotated[
-        Optional[int],
+        Optional[FlexibleIntType],
         Field(ge=0, le=1, description="Unidades activas (1) o inactivas (0)"),
     ] = None,
     is_bookable: Annotated[
-        Optional[int],
+        Optional[FlexibleIntType],
         Field(ge=0, le=1, description="Unidades reservables (1) o no (0)"),
     ] = None,
     pets_friendly: Annotated[
-        Optional[int],
+        Optional[FlexibleIntType],
         Field(ge=0, le=1, description="Unidades pet-friendly (1) o no (0)"),
     ] = None,
     unit_status: Annotated[
@@ -397,7 +421,7 @@ def search_units(
     ] = None,
     # Parámetros de funcionalidad adicional
     computed: Annotated[
-        Optional[int],
+        Optional[FlexibleIntType],
         Field(
             ge=0,
             le=1,
@@ -405,28 +429,28 @@ def search_units(
         ),
     ] = None,
     inherited: Annotated[
-        Optional[int],
+        Optional[FlexibleIntType],
         Field(ge=0, le=1, description="Incluir atributos heredados (1) o no (0)"),
     ] = None,
     limited: Annotated[
-        Optional[int],
+        Optional[FlexibleIntType],
         Field(
             ge=0, le=1, description="Retornar atributos limitados (1) o completos (0)"
         ),
     ] = None,
     include_descriptions: Annotated[
-        Optional[int],
+        Optional[FlexibleIntType],
         Field(ge=0, le=1, description="Incluir descripciones de unidades (1) o no (0)"),
     ] = None,
     # Parámetros de filtros adicionales
     calendar_id: Annotated[
-        Optional[int], Field(gt=0, description="ID del grupo de calendario")
+        Optional[FlexibleIntType], Field(gt=0, description="ID del grupo de calendario")
     ] = None,
     role_id: Annotated[
-        Optional[int], Field(gt=0, description="ID del rol específico")
+        Optional[FlexibleIntType], Field(gt=0, description="ID del rol específico")
     ] = None,
     promo_code_id: Annotated[
-        Optional[int], Field(gt=0, description="ID del código promocional válido")
+        Optional[FlexibleIntType], Field(gt=0, description="ID del código promocional válido")
     ] = None,
 ) -> Dict[str, Any]:
     """
@@ -484,7 +508,8 @@ def search_units(
     if api_client is None:
         raise ToolError("Cliente API no disponible. Verifique las credenciales.")
 
-    # Aplicar middleware de coerción de tipos
+    # Los parámetros ya están convertidos por Pydantic con FlexibleIntType
+    # Aplicar middleware de coerción de tipos como respaldo adicional
     params_dict = {
         "page": page,
         "size": size,
