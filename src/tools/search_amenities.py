@@ -4,8 +4,9 @@ Herramienta para buscar amenidades
 
 from typing import Any, Dict
 
-from ..schemas.amenity import AmenitySearchParams, AmenitySearchResponse
-from ..utils.exceptions import TrackHSAPIError
+from schemas.amenity import AmenitySearchParams, AmenitySearchResponse
+from utils.exceptions import TrackHSAPIError
+
 from .base import BaseTool
 
 

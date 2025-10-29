@@ -4,8 +4,9 @@ Herramienta para buscar reservas
 
 from typing import Any, Dict
 
-from ..schemas.reservation import ReservationSearchParams, ReservationSearchResponse
-from ..utils.exceptions import TrackHSAPIError
+from schemas.reservation import ReservationSearchParams, ReservationSearchResponse
+from utils.exceptions import TrackHSAPIError
+
 from .base import BaseTool
 
 

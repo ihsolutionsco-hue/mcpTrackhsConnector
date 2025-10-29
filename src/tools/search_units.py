@@ -4,8 +4,9 @@ Herramienta para buscar unidades de alojamiento
 
 from typing import Any, Dict, List, Optional
 
-from ..schemas.unit import UnitSearchParams, UnitSearchResponse
-from ..utils.exceptions import TrackHSAPIError
+from schemas.unit import UnitSearchParams, UnitSearchResponse
+from utils.exceptions import TrackHSAPIError
+
 from .base import BaseTool
 
 

@@ -49,7 +49,7 @@ repos:
       - id: mcp-server-check
         name: Validar servidor MCP
         entry: python
-        args: [-c, "from src.server import TrackHSServer; print('MCP Server OK')"]
+        args: [-c, "import sys; sys.path.insert(0, 'src'); from server import TrackHSServer; print('MCP Server OK')"]
         language: system
         pass_filenames: false
         always_run: false

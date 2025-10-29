@@ -8,9 +8,9 @@ from typing import Any, Dict, Optional
 
 from fastmcp import FastMCP
 
-from .server_logic import create_api_client, create_mcp_server, register_tools
-from .utils.api_client import TrackHSAPIClient
-from .utils.logger import get_logger
+from server_logic import create_api_client, create_mcp_server, register_tools
+from utils.api_client import TrackHSAPIClient
+from utils.logger import get_logger
 
 
 class TrackHSServer:

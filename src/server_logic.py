@@ -9,10 +9,10 @@ from typing import Any, Dict, Optional
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 
-from .tools import TOOLS
-from .utils.api_client import TrackHSAPIClient
-from .utils.exceptions import TrackHSError
-from .utils.logger import get_logger
+from tools import TOOLS
+from utils.api_client import TrackHSAPIClient
+from utils.exceptions import TrackHSError
+from utils.logger import get_logger
 
 
 def create_api_client() -> Optional[TrackHSAPIClient]:

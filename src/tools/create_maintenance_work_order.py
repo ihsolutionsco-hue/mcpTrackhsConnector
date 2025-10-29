@@ -4,8 +4,9 @@ Herramienta para crear órdenes de trabajo de mantenimiento
 
 from typing import Any, Dict
 
-from ..schemas.work_order import MaintenanceWorkOrderParams, WorkOrderResponse
-from ..utils.exceptions import TrackHSAPIError
+from schemas.work_order import MaintenanceWorkOrderParams, WorkOrderResponse
+from utils.exceptions import TrackHSAPIError
+
 from .base import BaseTool
 
 

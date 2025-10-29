@@ -7,8 +7,8 @@ from typing import Any, Dict, Optional, Type
 
 from pydantic import BaseModel
 
-from ..utils.exceptions import TrackHSError
-from ..utils.logger import get_logger
+from utils.exceptions import TrackHSError
+from utils.logger import get_logger
 
 
 class BaseTool(ABC):
