@@ -39,9 +39,7 @@ class TrackHSSettings(BaseSettings):
     log_format: str = Field(default="json", description="Formato de logs")
 
     # Configuración de autenticación
-    auth_cache_ttl: int = Field(
-        default=300, description="TTL del cache de autenticación en segundos"
-    )
+    # auth_cache_ttl eliminado - no se usa cache
 
     # Configuración de validación
     strict_validation: bool = Field(
@@ -130,15 +128,7 @@ class TrackHSSettings(BaseSettings):
             raise ValueError(f"log_level debe ser uno de: {valid_levels}")
         return v.upper()
 
-    @field_validator("auth_cache_ttl")
-    @classmethod
-    def validate_auth_cache_ttl(cls, v):
-        """Validar TTL del cache de autenticación"""
-        if v < 60:  # Mínimo 1 minuto
-            raise ValueError("auth_cache_ttl debe ser al menos 60 segundos")
-        if v > 3600:  # Máximo 1 hora
-            raise ValueError("auth_cache_ttl no debe exceder 3600 segundos")
-        return v
+    # Validación de auth_cache_ttl eliminada - no se usa cache
 
     @field_validator("max_retries")
     @classmethod

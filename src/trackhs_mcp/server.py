@@ -240,7 +240,7 @@ def search_reservations(
         raise ToolError(f"Error buscando reservas: {str(e)}")
 
 
-@mcp.tool(output_schema=RESERVATION_DETAIL_OUTPUT_SCHEMA)
+@mcp.tool()
 def get_reservation(
     reservation_id: Annotated[
         int, Field(gt=0, description="ID único de la reserva en TrackHS")
@@ -285,6 +285,19 @@ def get_reservation(
     try:
         # Usar la nueva URL de la API V2
         result = api_client.get(f"api/v2/pms/reservations/{reservation_id}")
+
+        # Mapear datos de API V2 al esquema esperado
+        if "alternates" in result and result["alternates"]:
+            # Si hay alternates, usar el primero como confirmation_number
+            result["confirmation_number"] = result["alternates"][0]
+        else:
+            # Si no hay alternates, usar el ID como confirmation_number
+            result["confirmation_number"] = str(reservation_id)
+
+        # Asegurar que el campo confirmation_number esté presente
+        if "confirmation_number" not in result:
+            result["confirmation_number"] = str(reservation_id)
+
         logger.info(f"Reserva {reservation_id} obtenida exitosamente con API V2")
         return result
     except Exception as e:

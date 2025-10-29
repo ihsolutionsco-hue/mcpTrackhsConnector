@@ -30,10 +30,18 @@ class ReservationSearchOutput(BaseModel):
 class ReservationDetailOutput(BaseModel):
     """Schema de salida para detalles de reserva V2 - Completo según API TrackHS V2"""
 
+    model_config = ConfigDict(extra="allow")
+
     # Campos básicos de la reserva
     id: int = Field(description="ID de la reserva")
     alternates: Optional[List[str]] = Field(
         default=None, description="Números de confirmación alternativos"
+    )
+    # Campo de compatibilidad para el esquema de validación (NO existe en API V2)
+    # Se mapea desde alternates en la función get_reservation
+    confirmation_number: Optional[str] = Field(
+        default=None,
+        description="Número de confirmación principal (mapeado desde alternates)",
     )
     currency: Optional[str] = Field(default=None, description="Moneda de la reserva")
     unitId: Optional[int] = Field(default=None, description="ID de la unidad")
