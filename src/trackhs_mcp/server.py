@@ -796,13 +796,13 @@ def search_amenities(
     - Búsqueda por texto en nombre de amenidad
     - Filtros por características (público, filtrable, buscable)
     - Filtros por grupo de amenidades
-    - Búsqueda por tipos de plataformas OTA (Airbnb, HomeAway, Marriott, TripAdvisor)
+    - Búsqueda por tipos de plataformas OTA (Airbnb, HomeAway, Marriott)
     - Ordenamiento personalizable
     - Paginación flexible
 
     PARÁMETROS DE BÚSQUEDA:
     - search: Búsqueda en nombre de amenidad
-    - homeaway_type, airbnb_type, tripadvisor_type, marriott_type: Búsqueda por tipos OTA
+    - homeaway_type, airbnb_type, marriott_type: Búsqueda por tipos OTA
 
     PARÁMETROS DE FILTRADO:
     - group_id: Filtrar por ID de grupo específico
