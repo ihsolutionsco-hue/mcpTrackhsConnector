@@ -68,9 +68,18 @@ TRACKHS_API_URL=https://ihmvacations.trackhs.com
 
 ## 🎯 Uso
 
-### Ejecutar el servidor:
+### Ejecutar el servidor localmente:
 ```bash
 python src/server.py
+```
+
+### Ejecutar con configuración declarativa:
+```bash
+# Usar fastmcp.json (recomendado)
+fastmcp run
+
+# O especificar archivo de configuración
+fastmcp run fastmcp.json
 ```
 
 ### Ejecutar tests:
@@ -93,9 +102,56 @@ python tests/unit/test_simple_refactored.py
 - ✅ **Arquitectura escalable** con separación de responsabilidades
 - ✅ **Schemas Pydantic** para validación robusta
 - ✅ **Logging estructurado** para debugging y monitoreo
+- ✅ **Timing Middleware** para monitoreo de rendimiento automático
+- ✅ **Configuración declarativa** con fastmcp.json
 - ✅ **Tests unitarios** para verificación de funcionalidad
 - ✅ **Manejo de errores** robusto con excepciones específicas
 - ✅ **Documentación completa** con type hints
+
+## 📊 Monitoreo y Rendimiento
+
+### Timing Middleware
+El servidor incluye **Timing Middleware** que registra automáticamente el tiempo de ejecución de cada herramienta:
+
+```bash
+# Los logs mostrarán información de rendimiento como:
+[INFO] search_reservations completed in 2.341s
+[INFO] get_reservation completed in 0.823s
+[WARN] create_maintenance_work_order completed in 8.912s
+```
+
+### Configuración Declarativa
+El archivo `fastmcp.json` define toda la configuración del servidor:
+
+```json
+{
+  "source": {
+    "path": "src/__main__.py"
+  },
+  "environment": {
+    "type": "uv",
+    "python": ">=3.11",
+    "dependencies": [
+      "fastmcp>=2.13.0",
+      "httpx>=0.27.0",
+      "pydantic>=2.12.3"
+    ]
+  },
+  "secrets": {
+    "required": [
+      "TRACKHS_API_URL",
+      "TRACKHS_USERNAME",
+      "TRACKHS_PASSWORD"
+    ]
+  }
+}
+```
+
+**Beneficios:**
+- ✅ **Deployment reproducible** sin warnings de seguridad
+- ✅ **Configuración versionada** y portable
+- ✅ **Detección automática** de dependencias
+- ✅ **Integración perfecta** con FastMCP Cloud
 
 ## 🧪 Testing
 

@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
+from fastmcp.server.middleware.timing import TimingMiddleware
 
 from tools import TOOLS
 from utils.api_client import TrackHSAPIClient
@@ -77,6 +78,9 @@ def create_mcp_server() -> FastMCP:
             strict_input_validation=False,  # CRÍTICO: Permite coerción de tipos
             mask_error_details=True,
         )
+
+        # Agregar timing middleware para monitoreo de rendimiento
+        mcp_server.add_middleware(TimingMiddleware())
 
         logger.info("Servidor MCP configurado")
         return mcp_server
