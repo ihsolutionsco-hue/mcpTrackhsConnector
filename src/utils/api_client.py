@@ -504,6 +504,422 @@ class TrackHSAPIClient:
         # Limpiar valores None
         return {k: v for k, v in processed.items() if v is not None}
 
+    def search_amenities(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Busca amenidades con filtros avanzados
+
+        Args:
+            params: Parámetros de búsqueda de amenidades
+
+        Returns:
+            Respuesta de la API con amenidades encontradas
+        """
+        # Log de parámetros de entrada
+        self.logger.info(
+            "Iniciando búsqueda de amenidades",
+            extra={
+                "original_params": params,
+                "param_count": len(params),
+            },
+        )
+
+        # Realizar llamada a la API
+        result = self.get("api/pms/units/amenities", params)
+
+        # Log de respuesta cruda de la API
+        self.logger.info(
+            "Respuesta cruda de amenidades API",
+            extra={
+                "api_response_keys": (
+                    list(result.keys()) if isinstance(result, dict) else "not_dict"
+                ),
+                "has_amenities": (
+                    "amenities" in result if isinstance(result, dict) else False
+                ),
+                "amenities_count": (
+                    len(result.get("amenities", [])) if isinstance(result, dict) else 0
+                ),
+            },
+        )
+
+        # Procesar respuesta
+        processed_result = self._process_amenities_response(result)
+
+        # Log de resultado final
+        self.logger.info(
+            "Resultado procesado de búsqueda de amenidades",
+            extra={
+                "processed_amenities_count": len(processed_result.get("amenities", [])),
+                "total_items": processed_result.get("total_items", 0),
+                "total_pages": processed_result.get("total_pages", 0),
+            },
+        )
+
+        return processed_result
+
+    def search_reservations(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Busca reservas con filtros avanzados
+
+        Args:
+            params: Parámetros de búsqueda de reservas
+
+        Returns:
+            Respuesta de la API con reservas encontradas
+        """
+        # Log de parámetros de entrada
+        self.logger.info(
+            "Iniciando búsqueda de reservas",
+            extra={
+                "original_params": params,
+                "param_count": len(params),
+            },
+        )
+
+        # Realizar llamada a la API
+        result = self.get("api/pms/reservations", params)
+
+        # Log de respuesta cruda de la API
+        self.logger.info(
+            "Respuesta cruda de reservas API",
+            extra={
+                "api_response_keys": (
+                    list(result.keys()) if isinstance(result, dict) else "not_dict"
+                ),
+                "has_reservations": (
+                    "reservations" in result if isinstance(result, dict) else False
+                ),
+                "reservations_count": (
+                    len(result.get("reservations", []))
+                    if isinstance(result, dict)
+                    else 0
+                ),
+            },
+        )
+
+        # Procesar respuesta
+        processed_result = self._process_reservations_response(result)
+
+        # Log de resultado final
+        self.logger.info(
+            "Resultado procesado de búsqueda de reservas",
+            extra={
+                "processed_reservations_count": len(
+                    processed_result.get("reservations", [])
+                ),
+                "total_items": processed_result.get("total_items", 0),
+                "total_pages": processed_result.get("total_pages", 0),
+            },
+        )
+
+        return processed_result
+
+    def get_reservation(self, reservation_id: int) -> Dict[str, Any]:
+        """
+        Obtiene una reserva específica por ID
+
+        Args:
+            reservation_id: ID de la reserva
+
+        Returns:
+            Datos de la reserva
+        """
+        self.logger.info(
+            "Obteniendo reserva",
+            extra={"reservation_id": reservation_id},
+        )
+
+        result = self.get(f"api/pms/reservations/{reservation_id}")
+
+        self.logger.info(
+            "Reserva obtenida exitosamente",
+            extra={"reservation_id": reservation_id},
+        )
+
+        return result
+
+    def get_folio(self, reservation_id: int) -> Dict[str, Any]:
+        """
+        Obtiene el folio financiero de una reserva
+
+        Args:
+            reservation_id: ID de la reserva
+
+        Returns:
+            Datos del folio financiero
+        """
+        self.logger.info(
+            "Obteniendo folio financiero",
+            extra={"reservation_id": reservation_id},
+        )
+
+        result = self.get(f"api/pms/reservations/{reservation_id}/folio")
+
+        self.logger.info(
+            "Folio financiero obtenido exitosamente",
+            extra={"reservation_id": reservation_id},
+        )
+
+        return result
+
+    def create_maintenance_work_order(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Crea una orden de trabajo de mantenimiento
+
+        Args:
+            params: Parámetros de la orden de trabajo
+
+        Returns:
+            Datos de la orden creada
+        """
+        self.logger.info(
+            "Creando orden de mantenimiento",
+            extra={"unit_id": params.get("unit_id")},
+        )
+
+        result = self.post("api/pms/work-orders/maintenance", params)
+
+        self.logger.info(
+            "Orden de mantenimiento creada exitosamente",
+            extra={"work_order_id": result.get("id")},
+        )
+
+        return result
+
+    def create_housekeeping_work_order(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Crea una orden de trabajo de housekeeping
+
+        Args:
+            params: Parámetros de la orden de trabajo
+
+        Returns:
+            Datos de la orden creada
+        """
+        self.logger.info(
+            "Creando orden de housekeeping",
+            extra={"unit_id": params.get("unit_id")},
+        )
+
+        result = self.post("api/pms/work-orders/housekeeping", params)
+
+        self.logger.info(
+            "Orden de housekeeping creada exitosamente",
+            extra={"work_order_id": result.get("id")},
+        )
+
+        return result
+
+    def _process_amenities_response(self, api_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Procesa la respuesta de la API de amenidades
+
+        Args:
+            api_result: Respuesta cruda de la API
+
+        Returns:
+            Respuesta procesada
+        """
+        # Extraer datos de paginación
+        amenities, total_items, current_page, page_size = (
+            self._extract_amenities_pagination_data(api_result)
+        )
+
+        # Calcular información de paginación
+        total_pages = (
+            (total_items + page_size - 1) // page_size if total_items > 0 else 0
+        )
+
+        # Procesar amenidades
+        processed_amenities = []
+        for amenity in amenities:
+            try:
+                processed_amenity = self._process_amenity(amenity)
+                processed_amenities.append(processed_amenity)
+            except Exception as e:
+                self.logger.warning(
+                    f"Error procesando amenidad: {str(e)}",
+                    extra={"amenity_data": amenity, "error_type": type(e).__name__},
+                )
+
+        return {
+            "amenities": processed_amenities,
+            "total_items": total_items,
+            "total_pages": total_pages,
+            "current_page": current_page,
+            "page_size": page_size,
+            "has_next": current_page < total_pages,
+            "has_prev": current_page > 1,
+        }
+
+    def _process_reservations_response(
+        self, api_result: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Procesa la respuesta de la API de reservas
+
+        Args:
+            api_result: Respuesta cruda de la API
+
+        Returns:
+            Respuesta procesada
+        """
+        # Extraer datos de paginación
+        reservations, total_items, current_page, page_size = (
+            self._extract_reservations_pagination_data(api_result)
+        )
+
+        # Calcular información de paginación
+        total_pages = (
+            (total_items + page_size - 1) // page_size if total_items > 0 else 0
+        )
+
+        # Procesar reservas
+        processed_reservations = []
+        for reservation in reservations:
+            try:
+                processed_reservation = self._process_reservation(reservation)
+                processed_reservations.append(processed_reservation)
+            except Exception as e:
+                self.logger.warning(
+                    f"Error procesando reserva: {str(e)}",
+                    extra={
+                        "reservation_data": reservation,
+                        "error_type": type(e).__name__,
+                    },
+                )
+
+        return {
+            "reservations": processed_reservations,
+            "total_items": total_items,
+            "total_pages": total_pages,
+            "current_page": current_page,
+            "page_size": page_size,
+            "has_next": current_page < total_pages,
+            "has_prev": current_page > 1,
+        }
+
+    def _extract_amenities_pagination_data(self, api_result: Dict[str, Any]) -> tuple:
+        """
+        Extrae datos de paginación de la respuesta de amenidades
+
+        Returns:
+            tuple: (amenities, total_items, current_page, page_size)
+        """
+        if not isinstance(api_result, dict):
+            return [], 0, 1, 10
+
+        # Intentar diferentes estructuras de respuesta
+        if "_embedded" in api_result:
+            embedded_data = api_result.get("_embedded", {})
+            amenities = embedded_data.get("amenities", [])
+            total_items = api_result.get("total_items", 0)
+            current_page = api_result.get("page", 1)
+            page_size = api_result.get("size", 10)
+        else:
+            amenities = api_result.get("amenities", [])
+            total_items = api_result.get("total_items", 0)
+            current_page = api_result.get("page", 1)
+            page_size = api_result.get("size", 10)
+
+        if not isinstance(amenities, list):
+            amenities = []
+
+        return amenities, total_items, current_page, page_size
+
+    def _extract_reservations_pagination_data(
+        self, api_result: Dict[str, Any]
+    ) -> tuple:
+        """
+        Extrae datos de paginación de la respuesta de reservas
+
+        Returns:
+            tuple: (reservations, total_items, current_page, page_size)
+        """
+        if not isinstance(api_result, dict):
+            return [], 0, 1, 10
+
+        # Intentar diferentes estructuras de respuesta
+        if "_embedded" in api_result:
+            embedded_data = api_result.get("_embedded", {})
+            reservations = embedded_data.get("reservations", [])
+            total_items = api_result.get("total_items", 0)
+            current_page = api_result.get("page", 1)
+            page_size = api_result.get("size", 10)
+        else:
+            reservations = api_result.get("reservations", [])
+            total_items = api_result.get("total_items", 0)
+            current_page = api_result.get("page", 1)
+            page_size = api_result.get("size", 10)
+
+        if not isinstance(reservations, list):
+            reservations = []
+
+        return reservations, total_items, current_page, page_size
+
+    def _process_amenity(self, amenity: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Procesa una amenidad individual
+
+        Args:
+            amenity: Datos de la amenidad
+
+        Returns:
+            Amenidad procesada
+        """
+        processed = {
+            "id": amenity.get("id"),
+            "name": amenity.get("name"),
+            "description": amenity.get("description"),
+            "group_id": amenity.get("groupId"),
+            "group_name": amenity.get("groupName"),
+            "order": amenity.get("order"),
+            "is_public": amenity.get("isPublic"),
+            "public_searchable": amenity.get("publicSearchable"),
+            "is_filterable": amenity.get("isFilterable"),
+            "homeaway_type": amenity.get("homeawayType"),
+            "airbnb_type": amenity.get("airbnbType"),
+            "tripadvisor_type": amenity.get("tripadvisorType"),
+            "marriott_type": amenity.get("marriottType"),
+            "created_at": amenity.get("createdAt"),
+            "updated_at": amenity.get("updatedAt"),
+            "links": amenity.get("links"),
+        }
+
+        return {k: v for k, v in processed.items() if v is not None}
+
+    def _process_reservation(self, reservation: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Procesa una reserva individual
+
+        Args:
+            reservation: Datos de la reserva
+
+        Returns:
+            Reserva procesada
+        """
+        processed = {
+            "id": reservation.get("id"),
+            "confirmation_number": reservation.get("confirmation_number"),
+            "currency": reservation.get("currency"),
+            "unit_id": reservation.get("unitId"),
+            "unit_type_id": reservation.get("unitTypeId"),
+            "arrival_date": reservation.get("arrival"),
+            "departure_date": reservation.get("departure"),
+            "status": reservation.get("status"),
+            "total_amount": reservation.get("totalAmount"),
+            "guest_count": reservation.get("guestCount"),
+            "alternates": reservation.get("alternates"),
+            "created_at": reservation.get("createdAt"),
+            "updated_at": reservation.get("updatedAt"),
+            "unit": reservation.get("unit"),
+            "contact": reservation.get("contact"),
+            "policies": reservation.get("policies"),
+            "links": reservation.get("links"),
+        }
+
+        return {k: v for k, v in processed.items() if v is not None}
+
     def close(self) -> None:
         """Cierra el cliente HTTP"""
         self.client.close()

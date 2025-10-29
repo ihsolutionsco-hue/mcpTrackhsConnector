@@ -70,7 +70,12 @@ def register_tools_with_mcp(mcp_server) -> None:
         con todos los parámetros disponibles según la documentación oficial.
         """
         if not api_client:
-            raise TrackHSAPIError("Cliente API no configurado")
+            error_msg = (
+                "Cliente API no configurado. "
+                "Esto indica que las credenciales de TrackHS no están configuradas. "
+                "Configure TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno o archivo .env"
+            )
+            raise TrackHSAPIError(error_msg)
 
         try:
             # Validar parámetros
@@ -112,7 +117,12 @@ def register_tools_with_mcp(mcp_server) -> None:
         Obtener detalles completos de una reserva específica por ID.
         """
         if not api_client:
-            raise TrackHSAPIError("Cliente API no configurado")
+            error_msg = (
+                "Cliente API no configurado. "
+                "Esto indica que las credenciales de TrackHS no están configuradas. "
+                "Configure TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno o archivo .env"
+            )
+            raise TrackHSAPIError(error_msg)
 
         try:
             # Validar ID
@@ -336,7 +346,12 @@ def register_tools_with_mcp(mcp_server) -> None:
         - search_units(sort_column="name", sort_direction="asc") # Ordenadas por nombre
         """
         if not api_client:
-            raise TrackHSAPIError("Cliente API no configurado")
+            error_msg = (
+                "Cliente API no configurado. "
+                "Esto indica que las credenciales de TrackHS no están configuradas. "
+                "Configure TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno o archivo .env"
+            )
+            raise TrackHSAPIError(error_msg)
 
         try:
             # Validar parámetros
@@ -429,7 +444,12 @@ def register_tools_with_mcp(mcp_server) -> None:
         Buscar amenidades/servicios disponibles en el sistema TrackHS.
         """
         if not api_client:
-            raise TrackHSAPIError("Cliente API no configurado")
+            error_msg = (
+                "Cliente API no configurado. "
+                "Esto indica que las credenciales de TrackHS no están configuradas. "
+                "Configure TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno o archivo .env"
+            )
+            raise TrackHSAPIError(error_msg)
 
         try:
             # Validar parámetros
@@ -472,7 +492,12 @@ def register_tools_with_mcp(mcp_server) -> None:
         Obtener el folio financiero completo de una reserva.
         """
         if not api_client:
-            raise TrackHSAPIError("Cliente API no configurado")
+            error_msg = (
+                "Cliente API no configurado. "
+                "Esto indica que las credenciales de TrackHS no están configuradas. "
+                "Configure TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno o archivo .env"
+            )
+            raise TrackHSAPIError(error_msg)
 
         try:
             # Validar ID
@@ -525,7 +550,12 @@ def register_tools_with_mcp(mcp_server) -> None:
         Crear una orden de trabajo de mantenimiento para una unidad.
         """
         if not api_client:
-            raise TrackHSAPIError("Cliente API no configurado")
+            error_msg = (
+                "Cliente API no configurado. "
+                "Esto indica que las credenciales de TrackHS no están configuradas. "
+                "Configure TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno o archivo .env"
+            )
+            raise TrackHSAPIError(error_msg)
 
         try:
             # Validar parámetros
@@ -578,7 +608,12 @@ def register_tools_with_mcp(mcp_server) -> None:
         Crear una orden de trabajo de housekeeping (limpieza) para una unidad.
         """
         if not api_client:
-            raise TrackHSAPIError("Cliente API no configurado")
+            error_msg = (
+                "Cliente API no configurado. "
+                "Esto indica que las credenciales de TrackHS no están configuradas. "
+                "Configure TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno o archivo .env"
+            )
+            raise TrackHSAPIError(error_msg)
 
         try:
             # Validar parámetros

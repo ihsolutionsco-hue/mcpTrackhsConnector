@@ -6,7 +6,11 @@ Separación de responsabilidades siguiendo mejores prácticas
 import os
 from typing import Any, Dict, Optional
 
+from dotenv import load_dotenv
 from fastmcp import FastMCP
+
+# Cargar variables de entorno desde .env
+load_dotenv()
 from fastmcp.exceptions import ToolError
 from fastmcp.server.middleware.timing import TimingMiddleware
 
@@ -31,13 +35,28 @@ def create_api_client() -> Optional[TrackHSAPIClient]:
         api_url = os.getenv("TRACKHS_API_URL", "https://ihmvacations.trackhs.com")
 
         if not username or not password:
-            logger.warning(
-                "Credenciales de TrackHS no configuradas",
+            logger.error(
+                "CREDENCIALES DE TRACKHS NO CONFIGURADAS",
                 extra={
                     "username_configured": bool(username),
                     "password_configured": bool(password),
+                    "error_type": "missing_credentials",
+                    "solution": "Configure TRACKHS_USERNAME y TRACKHS_PASSWORD en variables de entorno o archivo .env",
                 },
             )
+            print("\n" + "=" * 60)
+            print("ERROR: CREDENCIALES DE TRACKHS NO CONFIGURADAS")
+            print("=" * 60)
+            print("Para usar el servidor MCP de TrackHS, necesitas configurar:")
+            print("1. TRACKHS_USERNAME - Tu usuario de TrackHS")
+            print("2. TRACKHS_PASSWORD - Tu contraseña de TrackHS")
+            print("\nOpciones de configuración:")
+            print("a) Variables de entorno:")
+            print("   set TRACKHS_USERNAME=tu_usuario")
+            print("   set TRACKHS_PASSWORD=tu_contrasena")
+            print("\nb) Archivo .env (recomendado):")
+            print("   Copia env.example como .env y configura las credenciales")
+            print("=" * 60)
             return None
 
         api_client = TrackHSAPIClient(
