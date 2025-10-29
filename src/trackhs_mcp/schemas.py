@@ -78,10 +78,12 @@ class AmenityLinks(BaseModel):
 class AmenityItem(BaseModel):
     """Schema para un item de amenidad individual"""
 
+    model_config = ConfigDict(extra="allow")
+
     id: Optional[int] = Field(default=None, description="ID de la amenidad")
     name: str = Field(description="Nombre de la amenidad")
     groupId: Optional[int] = Field(default=None, description="ID del grupo")
-    group: Optional[Union[str, Dict[str, Any]]] = Field(
+    group: Optional[Any] = Field(
         default=None, description="Nombre del grupo o objeto del grupo"
     )
     homeawayType: Optional[str] = Field(default=None, description="Tipo de HomeAway")
