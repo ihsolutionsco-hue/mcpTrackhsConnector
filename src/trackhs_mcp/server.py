@@ -758,9 +758,18 @@ def search_amenities(
         Optional[int],
         Field(description="Filtrar por ID de grupo"),
     ] = None,
-    isPublic: Optional[Any] = None,
-    publicSearchable: Optional[Any] = None,
-    isFilterable: Optional[Any] = None,
+    isPublic: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Filtrar por amenidades públicas (1) o privadas (0)"),
+    ] = None,
+    publicSearchable: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Filtrar por amenidades buscables públicamente (1) o no (0)"),
+    ] = None,
+    isFilterable: Annotated[
+        Optional[Literal[0, 1]],
+        Field(description="Filtrar por amenidades filtrables (1) o no (0)"),
+    ] = None,
     # Parámetros de tipos de plataformas OTA
     homeawayType: Annotated[
         Optional[str],
@@ -839,24 +848,7 @@ def search_amenities(
     Raises:
         ToolError: Si hay error de validación, autenticación, autorización o conexión
     """
-    # Convertir y validar parámetros de filtrado booleanos
-    if isPublic is not None:
-        if isinstance(isPublic, str):
-            isPublic = int(isPublic)
-        if isPublic not in [0, 1]:
-            raise ToolError("isPublic debe ser 0 o 1")
-
-    if publicSearchable is not None:
-        if isinstance(publicSearchable, str):
-            publicSearchable = int(publicSearchable)
-        if publicSearchable not in [0, 1]:
-            raise ToolError("publicSearchable debe ser 0 o 1")
-
-    if isFilterable is not None:
-        if isinstance(isFilterable, str):
-            isFilterable = int(isFilterable)
-        if isFilterable not in [0, 1]:
-            raise ToolError("isFilterable debe ser 0 o 1")
+    # Los parámetros booleanos ahora se validan automáticamente con Literal[0, 1]
 
     # Inicializar servicio de amenidades
     amenities_service = AmenitiesService(api_client)
