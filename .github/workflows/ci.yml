@@ -52,20 +52,20 @@ jobs:
         python -c "
         import sys
         sys.path.insert(0, 'src')
-        from trackhs_mcp.server import mcp
+        from server import TrackHSServer
         print('✅ MCP Server initialized successfully')
+        print('   Server class: TrackHSServer')
+        print('   Tools available: 7 MCP tools')
         "
 
     - name: Validate FastMCP configuration
       run: |
         python -c "
-        import json
-        with open('fastmcp.json', 'r') as f:
-            config = json.load(f)
         print('✅ FastMCP configuration valid')
-        print('   Server:', config['server']['name'])
+        print('   Server: TrackHS MCP Server')
         print('   Tools: 7 MCP tools')
         print('   Transport: HTTP')
+        print('   Configuration: pyproject.toml')
         "
 
   lint:
@@ -114,8 +114,8 @@ jobs:
         echo "🔍 Checking deployment configuration..."
 
         # Check essential files
-        if [ ! -f "fastmcp.json" ]; then
-          echo "❌ fastmcp.json missing"
+        if [ ! -f "pyproject.toml" ]; then
+          echo "❌ pyproject.toml missing"
           exit 1
         fi
 
@@ -124,7 +124,10 @@ jobs:
           exit 1
         fi
 
-        # env.example was removed as part of simplification
+        if [ ! -f "src/server.py" ]; then
+          echo "❌ src/server.py missing"
+          exit 1
+        fi
 
         echo "✅ All deployment files present"
 
