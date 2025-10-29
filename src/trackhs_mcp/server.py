@@ -758,18 +758,9 @@ def search_amenities(
         Optional[int],
         Field(description="Filtrar por ID de grupo"),
     ] = None,
-    isPublic: Annotated[
-        Optional[Any],
-        Field(description="Filtrar por amenidades públicas (1) o privadas (0)"),
-    ] = None,
-    publicSearchable: Annotated[
-        Optional[Any],
-        Field(description="Filtrar por amenidades buscables públicamente (1) o no (0)"),
-    ] = None,
-    isFilterable: Annotated[
-        Optional[Any],
-        Field(description="Filtrar por amenidades filtrables (1) o no (0)"),
-    ] = None,
+    isPublic: Optional[Any] = None,
+    publicSearchable: Optional[Any] = None,
+    isFilterable: Optional[Any] = None,
     # Parámetros de tipos de plataformas OTA
     homeawayType: Annotated[
         Optional[str],
