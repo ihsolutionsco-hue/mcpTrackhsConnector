@@ -226,11 +226,22 @@ class TrackHSAPIClient:
             params_dict = params
 
         # Log de parámetros de entrada
+        boolean_params = {k: v for k, v in params_dict.items() if isinstance(v, bool)}
+        range_params = {
+            k: v
+            for k, v in params_dict.items()
+            if k.startswith(("min_", "max_")) and v is not None
+        }
+        array_params = {k: v for k, v in params_dict.items() if isinstance(v, list)}
+
         self.logger.info(
             "Iniciando búsqueda de unidades",
             extra={
                 "original_params": params_dict,
                 "param_count": len(params_dict),
+                "boolean_params": boolean_params,
+                "range_params": range_params,
+                "array_params": array_params,
                 "has_filters": any(
                     v is not None for v in params_dict.values() if v != 1 and v != 0
                 ),
@@ -241,15 +252,36 @@ class TrackHSAPIClient:
         api_params = self._convert_boolean_params(params_dict)
 
         # Log de parámetros convertidos
+        conversion_changes = {}
+        for k, v in api_params.items():
+            if k in params_dict and params_dict[k] != v:
+                conversion_changes[k] = {
+                    "original": params_dict[k],
+                    "converted": v,
+                    "original_type": type(params_dict[k]).__name__,
+                    "converted_type": type(v).__name__,
+                }
+
+        # Separar parámetros por tipo para mejor debugging
+        converted_boolean = {
+            k: v
+            for k, v in api_params.items()
+            if k in ["is_active", "is_bookable", "pets_friendly", "allow_unit_rates"]
+        }
+        converted_range = {
+            k: v for k, v in api_params.items() if k.startswith(("min_", "max_"))
+        }
+        converted_arrays = {k: v for k, v in api_params.items() if isinstance(v, list)}
+
         self.logger.info(
             "Parámetros convertidos para API",
             extra={
                 "converted_params": api_params,
-                "conversion_changes": {
-                    k: {"original": params.get(k), "converted": v}
-                    for k, v in api_params.items()
-                    if k in params and params[k] != v
-                },
+                "conversion_changes": conversion_changes,
+                "converted_boolean": converted_boolean,
+                "converted_range": converted_range,
+                "converted_arrays": converted_arrays,
+                "total_conversions": len(conversion_changes),
             },
         )
 
@@ -257,6 +289,24 @@ class TrackHSAPIClient:
         result = self.get("api/pms/units", api_params)
 
         # Log de respuesta cruda de la API
+        units_sample = []
+        if isinstance(result, dict) and "units" in result:
+            units = result.get("units", [])
+            if isinstance(units, list) and units:
+                # Mostrar los primeros 3 elementos para debugging
+                units_sample = [
+                    {
+                        "id": unit.get("id"),
+                        "name": unit.get("name", "unknown")[:50],  # Truncar nombre
+                        "is_active": unit.get("isActive"),
+                        "is_bookable": unit.get("isBookable"),
+                        "bedrooms": unit.get("bedrooms"),
+                        "bathrooms": unit.get("bathrooms"),
+                        "pets_friendly": unit.get("petsFriendly"),
+                    }
+                    for unit in units[:3]
+                ]
+
         self.logger.info(
             "Respuesta cruda de la API",
             extra={
@@ -276,6 +326,15 @@ class TrackHSAPIClient:
                     "embedded"
                     if "_embedded" in result
                     else "direct" if isinstance(result, dict) else "unknown"
+                ),
+                "units_sample": units_sample,
+                "first_unit_keys": (
+                    list(result.get("units", [{}])[0].keys())
+                    if isinstance(result, dict)
+                    and result.get("units")
+                    and isinstance(result["units"], list)
+                    and result["units"]
+                    else []
                 ),
             },
         )

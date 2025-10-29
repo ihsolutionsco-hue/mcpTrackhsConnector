@@ -6,12 +6,18 @@ from typing import Any, Dict, List, Optional
 
 from schemas.unit import UnitSearchParams, UnitSearchResponse
 from utils.exceptions import TrackHSAPIError
+from utils.response_validators import ResponseValidator
 
 from .base import BaseTool
 
 
 class SearchUnitsTool(BaseTool):
     """Herramienta para buscar unidades de alojamiento en TrackHS"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.validator = ResponseValidator()
+        self.validator.set_logger(self.logger)
 
     @property
     def name(self) -> str:
@@ -96,6 +102,7 @@ class SearchUnitsTool(BaseTool):
                 "api_params": params,
                 "param_count": len(params),
                 "boolean_conversions": self._get_boolean_conversions(validated_input),
+                "range_filters": self._get_range_filters(validated_input),
             },
         )
 
@@ -128,6 +135,11 @@ class SearchUnitsTool(BaseTool):
             # Procesar resultado
             processed_result = self._process_api_response(result)
 
+            # Validar respuesta contra filtros aplicados
+            validation_report = self._validate_response_against_filters(
+                processed_result.get("units", []), params
+            )
+
             # Log de resultado final
             self.logger.info(
                 "Búsqueda completada exitosamente",
@@ -138,6 +150,8 @@ class SearchUnitsTool(BaseTool):
                     "current_page": processed_result.get("current_page", 0),
                     "has_next": processed_result.get("has_next", False),
                     "has_prev": processed_result.get("has_prev", False),
+                    "validation_summary": validation_report.summary,
+                    "validation_issues": validation_report.has_issues,
                 },
             )
 
@@ -252,6 +266,94 @@ class SearchUnitsTool(BaseTool):
 
         return conversions
 
+    def _get_range_filters(self, validated_input: UnitSearchParams) -> Dict[str, Any]:
+        """Obtiene los filtros de rango aplicados"""
+        range_filters = {}
+        range_fields = [
+            "min_bedrooms",
+            "max_bedrooms",
+            "min_bathrooms",
+            "max_bathrooms",
+            "min_occupancy",
+            "max_occupancy",
+        ]
+
+        for field in range_fields:
+            value = getattr(validated_input, field)
+            if value is not None:
+                range_filters[field] = value
+
+        return range_filters
+
+    def _validate_response_against_filters(
+        self, units: List[Dict[str, Any]], search_params: Dict[str, Any]
+    ) -> Any:
+        """
+        Valida que la respuesta de la API cumpla con los filtros aplicados
+
+        Args:
+            units: Lista de unidades devueltas por la API
+            search_params: Parámetros de búsqueda enviados a la API
+
+        Returns:
+            ValidationReport con el resultado de las validaciones
+        """
+        try:
+            validation_report = self.validator.validate_units_response(
+                units, search_params
+            )
+
+            # Log detallado de validación
+            if validation_report.has_issues:
+                self.logger.warning(
+                    "Se detectaron inconsistencias en la respuesta de la API",
+                    extra={
+                        "validation_summary": validation_report.summary,
+                        "failed_validations": validation_report.failed_validations,
+                        "total_validations": validation_report.total_validations,
+                        "issues": [
+                            {
+                                "field": r.field_name,
+                                "message": r.message,
+                                "invalid_count": r.invalid_count,
+                            }
+                            for r in validation_report.results
+                            if not r.is_valid
+                        ],
+                    },
+                )
+            else:
+                self.logger.debug(
+                    "Validación de respuesta exitosa",
+                    extra={
+                        "validation_summary": validation_report.summary,
+                        "total_validations": validation_report.total_validations,
+                    },
+                )
+
+            return validation_report
+
+        except Exception as e:
+            self.logger.error(
+                f"Error durante validación de respuesta: {str(e)}",
+                extra={
+                    "error_type": type(e).__name__,
+                    "units_count": len(units),
+                    "search_params": search_params,
+                },
+            )
+            # Retornar un reporte vacío en caso de error
+            from utils.response_validators import ValidationReport
+
+            return ValidationReport(
+                total_validations=0,
+                passed_validations=0,
+                failed_validations=0,
+                results=[],
+                summary="Error durante validación",
+                has_issues=True,
+            )
+
     def _prepare_api_params(self, validated_input: UnitSearchParams) -> Dict[str, Any]:
         """
         Prepara parámetros para la llamada a la API
@@ -274,25 +376,37 @@ class SearchUnitsTool(BaseTool):
         if validated_input.short_name:
             params["short_name"] = validated_input.short_name
 
-        # Parámetros de características físicas
+        # Parámetros de características físicas (camelCase según documentación oficial)
         if validated_input.bedrooms is not None:
             params["bedrooms"] = validated_input.bedrooms
+        if validated_input.min_bedrooms is not None:
+            params["minBedrooms"] = validated_input.min_bedrooms  # camelCase
+        if validated_input.max_bedrooms is not None:
+            params["maxBedrooms"] = validated_input.max_bedrooms  # camelCase
         if validated_input.bathrooms is not None:
             params["bathrooms"] = validated_input.bathrooms
+        if validated_input.min_bathrooms is not None:
+            params["minBathrooms"] = validated_input.min_bathrooms  # camelCase
+        if validated_input.max_bathrooms is not None:
+            params["maxBathrooms"] = validated_input.max_bathrooms  # camelCase
+        if validated_input.occupancy is not None:
+            params["occupancy"] = validated_input.occupancy
         if validated_input.min_occupancy is not None:
-            params["min_occupancy"] = validated_input.min_occupancy
+            params["minOccupancy"] = validated_input.min_occupancy  # camelCase
         if validated_input.max_occupancy is not None:
-            params["max_occupancy"] = validated_input.max_occupancy
+            params["maxOccupancy"] = validated_input.max_occupancy  # camelCase
 
-        # Parámetros de estado
+        # Parámetros de estado (camelCase según documentación oficial)
         if validated_input.is_active is not None:
-            params["is_active"] = 1 if validated_input.is_active else 0
+            params["isActive"] = 1 if validated_input.is_active else 0  # camelCase
         if validated_input.is_bookable is not None:
-            params["is_bookable"] = 1 if validated_input.is_bookable else 0
+            params["isBookable"] = 1 if validated_input.is_bookable else 0  # camelCase
         if validated_input.pets_friendly is not None:
-            params["pets_friendly"] = 1 if validated_input.pets_friendly else 0
+            params["petsFriendly"] = (
+                1 if validated_input.pets_friendly else 0
+            )  # camelCase
         if validated_input.unit_status:
-            params["unit_status"] = validated_input.unit_status
+            params["unitStatus"] = validated_input.unit_status  # camelCase
 
         # Parámetros de fechas
         if validated_input.arrival:
