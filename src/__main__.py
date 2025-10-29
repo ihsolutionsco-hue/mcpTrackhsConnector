@@ -9,7 +9,7 @@ import sys
 # Agregar el directorio src al path para importaciones
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from mcp_tools import setup_tools
+from mcp_tools import register_tools_with_mcp, setup_tools
 from server_logic import create_api_client, create_mcp_server
 
 # Crear el servidor MCP para FastMCP Cloud
@@ -19,6 +19,7 @@ mcp_server = create_mcp_server()
 # Configurar herramientas si hay cliente API
 if api_client:
     setup_tools(api_client)
+    register_tools_with_mcp(mcp_server)
     print("✅ Herramientas MCP configuradas exitosamente")
 else:
     print("⚠️ Warning: Cliente API no disponible - herramientas no configuradas")
