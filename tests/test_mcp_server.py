@@ -1,5 +1,5 @@
 """
-Tests para el protocolo MCP
+Tests para el servidor MCP
 """
 
 import pytest

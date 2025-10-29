@@ -60,18 +60,82 @@ class UnitSearchOutput(BaseModel):
     )
 
 
-class AmenitiesOutput(BaseModel):
-    """Schema de salida para búsqueda de amenidades"""
+class AmenityGroup(BaseModel):
+    """Schema para el grupo de amenidad"""
 
-    embedded: Dict[str, List[Dict[str, Any]]] = Field(
-        alias="_embedded", description="Amenidades encontradas"
+    name: Optional[str] = Field(description="Nombre del grupo")
+
+
+class AmenityLinks(BaseModel):
+    """Schema para enlaces de amenidad"""
+
+    self: Optional[Dict[str, str]] = Field(
+        default=None, description="Enlace a la amenidad"
     )
-    page: int = Field(description="Página actual")
-    page_count: int = Field(description="Total de páginas")
-    page_size: int = Field(description="Tamaño de página")
+    group: Optional[Dict[str, str]] = Field(default=None, description="Enlace al grupo")
+
+
+class AmenityItem(BaseModel):
+    """Schema para un item de amenidad individual"""
+
+    id: Optional[int] = Field(description="ID de la amenidad")
+    name: str = Field(description="Nombre de la amenidad")
+    groupId: Optional[int] = Field(description="ID del grupo")
+    group: Optional[AmenityGroup] = Field(description="Información del grupo")
+    homeawayType: Optional[str] = Field(description="Tipo de HomeAway")
+    airbnbType: Optional[str] = Field(description="Tipo de Airbnb")
+    tripadvisorType: Optional[str] = Field(description="Tipo de TripAdvisor")
+    marriottType: Optional[str] = Field(description="Tipo de Marriott")
+    bookingDotComPropertyType: Optional[str] = Field(
+        description="Tipo de propiedad de Booking.com"
+    )
+    bookingDotComAccommodationType: Optional[str] = Field(
+        description="Tipo de alojamiento de Booking.com"
+    )
+    expediaPropertyType: Optional[str] = Field(
+        description="Tipo de propiedad de Expedia"
+    )
+    expediaAccommodationType: Optional[str] = Field(
+        description="Tipo de alojamiento de Expedia"
+    )
+    isFilterable: Optional[bool] = Field(description="Si es filtrable")
+    isPublic: Optional[bool] = Field(description="Si es público")
+    publicSearchable: Optional[bool] = Field(description="Si es buscable públicamente")
+    createdBy: Optional[str] = Field(description="Creado por")
+    createdAt: Optional[str] = Field(description="Fecha de creación")
+    updatedBy: Optional[str] = Field(description="Actualizado por")
+    updatedAt: Optional[str] = Field(description="Fecha de actualización")
+    links: Optional[AmenityLinks] = Field(
+        alias="_links", description="Enlaces de la amenidad"
+    )
+
+
+class AmenitiesEmbedded(BaseModel):
+    """Schema para la sección _embedded de amenidades"""
+
+    amenities: List[AmenityItem] = Field(description="Lista de amenidades")
+
+
+class AmenitiesLinks(BaseModel):
+    """Schema para enlaces de navegación"""
+
+    self: Dict[str, str] = Field(description="Enlace actual")
+    first: Optional[Dict[str, str]] = Field(default=None, description="Primera página")
+    last: Optional[Dict[str, str]] = Field(default=None, description="Última página")
+    next: Optional[Dict[str, str]] = Field(default=None, description="Siguiente página")
+    prev: Optional[Dict[str, str]] = Field(default=None, description="Página anterior")
+
+
+class AmenitiesOutput(BaseModel):
+    """Schema de salida para búsqueda de amenidades según OpenAPI spec"""
+
+    links: AmenitiesLinks = Field(alias="_links", description="Enlaces de navegación")
     total_items: int = Field(description="Total de elementos")
-    links: Optional[Dict[str, Any]] = Field(
-        alias="_links", description="Enlaces de navegación"
+    page_size: int = Field(description="Tamaño de página")
+    page_count: int = Field(description="Total de páginas")
+    page: int = Field(description="Página actual")
+    embedded: AmenitiesEmbedded = Field(
+        alias="_embedded", description="Amenidades encontradas"
     )
 
 
