@@ -81,9 +81,7 @@ class AmenityItem(BaseModel):
     id: Optional[int] = Field(default=None, description="ID de la amenidad")
     name: str = Field(description="Nombre de la amenidad")
     groupId: Optional[int] = Field(default=None, description="ID del grupo")
-    group: Optional[AmenityGroup] = Field(
-        default=None, description="Información del grupo"
-    )
+    group: Optional[str] = Field(default=None, description="Nombre del grupo")
     homeawayType: Optional[str] = Field(default=None, description="Tipo de HomeAway")
     airbnbType: Optional[str] = Field(default=None, description="Tipo de Airbnb")
     marriottType: Optional[str] = Field(default=None, description="Tipo de Marriott")
