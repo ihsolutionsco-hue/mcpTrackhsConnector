@@ -112,6 +112,9 @@ class AmenitiesService:
             if not isinstance(result, dict):
                 raise ValueError("Respuesta inesperada de la API de TrackHS")
 
+            # Normalizar el campo 'group' para que sea siempre string
+            self._normalize_amenities_groups(result)
+
             total_items = result.get("total_items", 0)
             logger.info(f"Encontradas {total_items} amenidades")
 
@@ -211,3 +214,39 @@ class AmenitiesService:
             Lista de plataformas OTA soportadas
         """
         return ["homeawayType", "airbnbType", "tripadvisorType", "marriottType"]
+
+    def _normalize_amenities_groups(self, result: Dict[str, Any]) -> None:
+        """
+        Normalizar el campo 'group' de las amenidades para que sea siempre string.
+
+        Algunos endpoints de TrackHS retornan el campo 'group' como un objeto
+        {"name": "Nombre del grupo"} en lugar de solo el string "Nombre del grupo".
+        Esta función normaliza esos casos para evitar errores de validación de schema.
+
+        Args:
+            result: Resultado de la API que será modificado in-place
+        """
+        if not isinstance(result, dict):
+            return
+
+        # Verificar si hay amenidades en la respuesta
+        if "_embedded" not in result or "amenities" not in result["_embedded"]:
+            return
+
+        amenities = result["_embedded"]["amenities"]
+        if not isinstance(amenities, list):
+            return
+
+        # Normalizar cada amenidad
+        for amenity in amenities:
+            if not isinstance(amenity, dict):
+                continue
+
+            # Si 'group' es un diccionario con 'name', extraer el string
+            if "group" in amenity and isinstance(amenity["group"], dict):
+                group_name = amenity["group"].get("name", "")
+                amenity["group"] = group_name
+
+                logger.debug(
+                    f"Normalizado campo 'group' en amenidad {amenity.get('id', 'unknown')}: {group_name}"
+                )
