@@ -759,22 +759,16 @@ def search_amenities(
         Field(description="Filtrar por ID de grupo"),
     ] = None,
     isPublic: Annotated[
-        Optional[Union[int, str]],
-        Field(
-            ge=0, le=1, description="Filtrar por amenidades públicas (1) o privadas (0)"
-        ),
+        Optional[Any],
+        Field(description="Filtrar por amenidades públicas (1) o privadas (0)"),
     ] = None,
     publicSearchable: Annotated[
-        Optional[Union[int, str]],
-        Field(
-            ge=0,
-            le=1,
-            description="Filtrar por amenidades buscables públicamente (1) o no (0)",
-        ),
+        Optional[Any],
+        Field(description="Filtrar por amenidades buscables públicamente (1) o no (0)"),
     ] = None,
     isFilterable: Annotated[
-        Optional[Union[int, str]],
-        Field(ge=0, le=1, description="Filtrar por amenidades filtrables (1) o no (0)"),
+        Optional[Any],
+        Field(description="Filtrar por amenidades filtrables (1) o no (0)"),
     ] = None,
     # Parámetros de tipos de plataformas OTA
     homeawayType: Annotated[
@@ -854,13 +848,24 @@ def search_amenities(
     Raises:
         ToolError: Si hay error de validación, autenticación, autorización o conexión
     """
-    # Convertir parámetros string a int si es necesario
-    if isPublic is not None and isinstance(isPublic, str):
-        isPublic = int(isPublic)
-    if publicSearchable is not None and isinstance(publicSearchable, str):
-        publicSearchable = int(publicSearchable)
-    if isFilterable is not None and isinstance(isFilterable, str):
-        isFilterable = int(isFilterable)
+    # Convertir y validar parámetros de filtrado booleanos
+    if isPublic is not None:
+        if isinstance(isPublic, str):
+            isPublic = int(isPublic)
+        if isPublic not in [0, 1]:
+            raise ToolError("isPublic debe ser 0 o 1")
+
+    if publicSearchable is not None:
+        if isinstance(publicSearchable, str):
+            publicSearchable = int(publicSearchable)
+        if publicSearchable not in [0, 1]:
+            raise ToolError("publicSearchable debe ser 0 o 1")
+
+    if isFilterable is not None:
+        if isinstance(isFilterable, str):
+            isFilterable = int(isFilterable)
+        if isFilterable not in [0, 1]:
+            raise ToolError("isFilterable debe ser 0 o 1")
 
     # Inicializar servicio de amenidades
     amenities_service = AmenitiesService(api_client)
