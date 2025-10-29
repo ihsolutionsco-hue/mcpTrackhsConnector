@@ -186,7 +186,12 @@ class TrackHSAPIClient:
             )
             raise TrackHSAPIError(f"Error de conexión: {str(e)}")
 
-        except TrackHSError:
+        except (
+            TrackHSAPIError,
+            TrackHSAuthenticationError,
+            TrackHSAuthorizationError,
+            TrackHSNotFoundError,
+        ):
             # Re-lanzar errores de TrackHS
             raise
 

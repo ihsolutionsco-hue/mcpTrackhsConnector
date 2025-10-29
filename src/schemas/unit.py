@@ -258,3 +258,14 @@ class UnitSearchResponse(PaginationResponse):
     """Respuesta de búsqueda de unidades"""
 
     units: List[UnitDetailResponse] = Field(description="Lista de unidades encontradas")
+
+    # Campos opcionales que pueden venir de la API
+    embedded: Optional[Dict[str, Any]] = Field(
+        default=None, description="Datos embebidos de la API"
+    )
+    data: Optional[Dict[str, Any]] = Field(
+        default=None, description="Datos adicionales de la API"
+    )
+
+    class Config:
+        extra = "allow"  # Permitir campos adicionales de la API

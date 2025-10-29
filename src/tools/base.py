@@ -149,9 +149,37 @@ class BaseTool(ABC):
                     "output_data": output_data,
                 },
             )
-            # En caso de error de validación de salida, devolver los datos originales
-            # para no romper la funcionalidad
-            return output_data
+            # En caso de error de validación de salida, intentar crear una respuesta mínima válida
+            try:
+                # Crear una respuesta mínima con los campos requeridos
+                minimal_response = {
+                    "units": output_data.get("units", []),
+                    "total_items": output_data.get("total_items", 0),
+                    "total_pages": output_data.get("total_pages", 0),
+                    "current_page": output_data.get("current_page", 1),
+                    "page_size": output_data.get("page_size", 10),
+                    "has_next": output_data.get("has_next", False),
+                    "has_prev": output_data.get("has_prev", False),
+                }
+                # Agregar campos adicionales si existen
+                for key, value in output_data.items():
+                    if key not in minimal_response:
+                        minimal_response[key] = value
+
+                validated = self.output_schema(**minimal_response)
+                return validated.model_dump()
+            except Exception as e2:
+                self.logger.error(
+                    f"Error crítico en validación de salida en {self.name}",
+                    extra={
+                        "tool_name": self.name,
+                        "validation_error": str(e2),
+                        "original_error": str(e),
+                        "output_data": output_data,
+                    },
+                )
+                # Como último recurso, devolver los datos originales
+                return output_data
 
     @abstractmethod
     def _execute_logic(self, validated_input: BaseModel) -> Dict[str, Any]:

@@ -187,18 +187,42 @@ class SearchUnitsTool(BaseTool):
         Returns:
             Resultado procesado
         """
+        # Manejar diferentes estructuras de respuesta de la API
+        if "_embedded" in api_result:
+            # Estructura con _embedded
+            embedded_data = api_result.get("_embedded", {})
+            units = embedded_data.get("units", [])
+            total_items = api_result.get("total_items", 0)
+            current_page = api_result.get("page", 1)
+            page_size = api_result.get("size", 10)
+        elif "embedded" in api_result:
+            # Estructura con embedded (sin guión bajo)
+            embedded_data = api_result.get("embedded", {})
+            units = embedded_data.get("units", [])
+            total_items = api_result.get("total_items", 0)
+            current_page = api_result.get("page", 1)
+            page_size = api_result.get("size", 10)
+        elif "data" in api_result:
+            # Estructura con data
+            data = api_result.get("data", {})
+            units = data.get("units", [])
+            total_items = data.get("total_items", 0)
+            current_page = data.get("page", 1)
+            page_size = data.get("size", 10)
+        else:
+            # Estructura directa
+            units = api_result.get("units", [])
+            total_items = api_result.get("total_items", 0)
+            current_page = api_result.get("page", 1)
+            page_size = api_result.get("size", 10)
+
         # Calcular información de paginación
-        total_items = api_result.get("total_items", 0)
-        current_page = api_result.get("page", 1)
-        page_size = api_result.get("size", 10)
         total_pages = (
             (total_items + page_size - 1) // page_size if total_items > 0 else 0
         )
 
         # Procesar unidades
-        units = api_result.get("units", [])
         processed_units = []
-
         for unit in units:
             processed_unit = self._process_unit(unit)
             processed_units.append(processed_unit)
