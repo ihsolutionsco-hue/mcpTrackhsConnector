@@ -28,21 +28,198 @@ class ReservationSearchOutput(BaseModel):
 
 
 class ReservationDetailOutput(BaseModel):
-    """Schema de salida para detalles de reserva"""
+    """Schema de salida para detalles de reserva V2 - Completo según API TrackHS V2"""
 
+    # Campos básicos de la reserva
     id: int = Field(description="ID de la reserva")
-    confirmation_number: Optional[str] = Field(description="Número de confirmación")
-    guest_name: Optional[str] = Field(description="Nombre del huésped")
-    email: Optional[str] = Field(description="Email del huésped")
-    phone: Optional[str] = Field(description="Teléfono del huésped")
-    arrival_date: Optional[str] = Field(description="Fecha de llegada")
-    departure_date: Optional[str] = Field(description="Fecha de salida")
-    status: Optional[str] = Field(description="Estado de la reserva")
-    unit_id: Optional[int] = Field(description="ID de la unidad")
-    total_amount: Optional[float] = Field(description="Monto total")
-    balance: Optional[float] = Field(description="Balance pendiente")
-    # Campos adicionales que pueden estar presentes
-    additional_data: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    alternates: Optional[List[str]] = Field(
+        default=None, description="Números de confirmación alternativos"
+    )
+    currency: Optional[str] = Field(default=None, description="Moneda de la reserva")
+    unitId: Optional[int] = Field(default=None, description="ID de la unidad")
+    unitTypeId: Optional[int] = Field(default=None, description="ID del tipo de unidad")
+
+    # Campos de seguridad y fraude
+    clientIPAddress: Optional[str] = Field(
+        default=None, description="IP del cliente para detección de fraude"
+    )
+    session: Optional[str] = Field(
+        default=None, description="Datos de sesión para detección de fraude"
+    )
+
+    # Información de fechas
+    arrivalDate: Optional[str] = Field(
+        default=None, description="Fecha de llegada (ISO 8601)"
+    )
+    departureDate: Optional[str] = Field(
+        default=None, description="Fecha de salida (ISO 8601)"
+    )
+    arrivalTime: Optional[str] = Field(
+        default=None, description="Fecha y hora de llegada (ISO 8601)"
+    )
+    departureTime: Optional[str] = Field(
+        default=None, description="Fecha y hora de salida (ISO 8601)"
+    )
+    nights: Optional[float] = Field(default=None, description="Número de noches")
+    earlyArrival: Optional[bool] = Field(default=None, description="Llegada temprana")
+    lateDeparture: Optional[bool] = Field(default=None, description="Salida tardía")
+
+    # Estado y bloqueos
+    status: Optional[str] = Field(default=None, description="Estado de la reserva")
+    isUnitLocked: Optional[bool] = Field(default=None, description="Unidad bloqueada")
+    isUnitAssigned: Optional[bool] = Field(default=None, description="Unidad asignada")
+    isUnitTypeLocked: Optional[bool] = Field(
+        default=None, description="Tipo de unidad bloqueado"
+    )
+    isChannelLocked: Optional[bool] = Field(default=None, description="Canal bloqueado")
+
+    # Información de cancelación
+    cancelledAt: Optional[str] = Field(
+        default=None, description="Fecha de cancelación (ISO 8601)"
+    )
+    cancellationReasonId: Optional[int] = Field(
+        default=None, description="ID del motivo de cancelación"
+    )
+
+    # Ocupantes
+    occupants: Optional[List[Dict[str, Any]]] = Field(
+        default=None, description="Lista de ocupantes"
+    )
+
+    # Depósito de seguridad
+    securityDeposit: Optional[Dict[str, Any]] = Field(
+        default=None, description="Detalles del depósito de seguridad"
+    )
+
+    # Fechas de auditoría
+    updatedAt: Optional[str] = Field(
+        default=None, description="Fecha de última actualización (ISO 8601)"
+    )
+    createdAt: Optional[str] = Field(
+        default=None, description="Fecha de creación (ISO 8601)"
+    )
+    bookedAt: Optional[str] = Field(
+        default=None, description="Fecha de reserva (ISO 8601)"
+    )
+
+    # Desglose financiero del huésped
+    guestBreakdown: Optional[Dict[str, Any]] = Field(
+        default=None, description="Desglose financiero del huésped"
+    )
+
+    # Desglose financiero del propietario
+    ownerBreakdown: Optional[Dict[str, Any]] = Field(
+        default=None, description="Desglose financiero del propietario"
+    )
+
+    # Campos de descuento
+    discountReasonId: Optional[int] = Field(
+        default=None, description="ID del motivo de descuento"
+    )
+    discountNotes: Optional[str] = Field(
+        default=None, description="Notas del descuento"
+    )
+
+    # IDs de referencia
+    contactId: Optional[int] = Field(default=None, description="ID del contacto")
+    channelId: Optional[int] = Field(default=None, description="ID del canal")
+    subChannel: Optional[str] = Field(default=None, description="Subcanal")
+    folioId: Optional[int] = Field(default=None, description="ID del folio")
+    guaranteePolicyId: Optional[int] = Field(
+        default=None, description="ID de la política de garantía"
+    )
+    cancellationPolicyId: Optional[int] = Field(
+        default=None, description="ID de la política de cancelación"
+    )
+    userId: Optional[int] = Field(default=None, description="ID del usuario")
+    travelAgentId: Optional[int] = Field(
+        default=None, description="ID del agente de viajes"
+    )
+    campaignId: Optional[int] = Field(default=None, description="ID de la campaña")
+    typeId: Optional[int] = Field(default=None, description="ID del tipo")
+    rateTypeId: Optional[int] = Field(default=None, description="ID del tipo de tarifa")
+    unitCodeId: Optional[int] = Field(
+        default=None, description="ID del código de unidad"
+    )
+    cancelledById: Optional[int] = Field(
+        default=None, description="ID de quien canceló"
+    )
+    paymentMethodId: Optional[int] = Field(
+        default=None, description="ID del método de pago"
+    )
+    quoteId: Optional[int] = Field(default=None, description="ID de la cotización")
+    promoCodeId: Optional[int] = Field(
+        default=None, description="ID del código promocional"
+    )
+    groupId: Optional[int] = Field(default=None, description="ID del grupo")
+
+    # Configuraciones adicionales
+    holdExpiresAt: Optional[str] = Field(
+        default=None, description="Fecha de expiración de la reserva (ISO 8601)"
+    )
+    isTaxable: Optional[bool] = Field(default=None, description="Sujeto a impuestos")
+    inviteUuid: Optional[str] = Field(default=None, description="UUID de invitación")
+    uuid: Optional[str] = Field(default=None, description="UUID de la reserva")
+    source: Optional[str] = Field(default=None, description="Fuente de la reserva")
+    agreementStatus: Optional[str] = Field(
+        default=None, description="Estado del acuerdo"
+    )
+    automatePayment: Optional[bool] = Field(
+        default=None, description="Pago automatizado"
+    )
+    revenueRealizedMethod: Optional[str] = Field(
+        default=None, description="Método de realización de ingresos"
+    )
+
+    # Programación de pagos
+    scheduleType1: Optional[str] = Field(
+        default=None, description="Tipo de programación 1"
+    )
+    schedulePercentage1: Optional[float] = Field(
+        default=None, description="Porcentaje de programación 1"
+    )
+    scheduleType2: Optional[str] = Field(
+        default=None, description="Tipo de programación 2"
+    )
+    schedulePercentage2: Optional[float] = Field(
+        default=None, description="Porcentaje de programación 2"
+    )
+
+    # Usuarios de auditoría
+    updatedBy: Optional[str] = Field(default=None, description="Actualizado por")
+    createdBy: Optional[str] = Field(default=None, description="Creado por")
+
+    # Plan de pago
+    paymentPlan: Optional[List[Dict[str, Any]]] = Field(
+        default=None, description="Plan de pago"
+    )
+
+    # Información de tarifas
+    rateType: Optional[Dict[str, Any]] = Field(
+        default=None, description="Tipo de tarifa"
+    )
+
+    # Productos de seguro de viaje
+    travelInsuranceProducts: Optional[List[Dict[str, Any]]] = Field(
+        default=None, description="Productos de seguro de viaje"
+    )
+
+    # Información embebida
+    embedded: Optional[Dict[str, Any]] = Field(
+        default=None,
+        alias="_embedded",
+        description="Datos embebidos (unidad, contacto, políticas, etc.)",
+    )
+
+    # Enlaces
+    links: Optional[Dict[str, Any]] = Field(
+        default=None, alias="_links", description="Enlaces relacionados"
+    )
+
+    # Campos adicionales para compatibilidad
+    additional_data: Optional[Dict[str, Any]] = Field(
+        default_factory=dict, description="Datos adicionales"
+    )
 
 
 class UnitSearchOutput(BaseModel):

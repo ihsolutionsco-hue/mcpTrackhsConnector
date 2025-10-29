@@ -247,16 +247,45 @@ def get_reservation(
     ],
 ) -> Dict[str, Any]:
     """
-    Obtener detalles completos de una reserva específica por ID.
+    Obtener detalles completos de una reserva específica por ID usando la API V2 de TrackHS.
+
+    Esta herramienta implementa la API completa de Get Reservation V2 de TrackHS
+    con todos los campos disponibles según la documentación oficial.
+
+    FUNCIONALIDADES PRINCIPALES:
+    - Información completa de la reserva (fechas, estado, ocupantes)
+    - Desglose financiero detallado (huésped y propietario)
+    - Información de políticas (garantía, cancelación)
+    - Datos embebidos (unidad, contacto, usuario, etc.)
+    - Información de tarifas y planes de pago
+    - Productos de seguro de viaje
+    - Enlaces relacionados y navegación
+
+    CAMPOS INCLUIDOS:
+    - Datos básicos: ID, moneda, fechas, estado
+    - Información de unidad: ID, tipo, bloqueos
+    - Ocupantes: lista completa con detalles
+    - Finanzas: desglose completo de costos
+    - Políticas: garantía, cancelación, códigos promocionales
+    - Auditoría: fechas de creación, actualización, reserva
+    - Datos embebidos: unidad, contacto, políticas, usuario
+    - Enlaces: navegación a recursos relacionados
+
+    Returns:
+        Dict[str, Any]: Respuesta completa de la API V2 con todos los campos disponibles
+
+    Raises:
+        ToolError: Si hay error de autenticación, autorización o conexión
     """
     if api_client is None:
         raise ToolError("Cliente API no disponible. Verifique las credenciales.")
 
-    logger.info(f"Obteniendo reserva {reservation_id}")
+    logger.info(f"Obteniendo reserva {reservation_id} usando API V2")
 
     try:
-        result = api_client.get(f"api/pms/reservations/{reservation_id}")
-        logger.info(f"Reserva {reservation_id} obtenida exitosamente")
+        # Usar la nueva URL de la API V2
+        result = api_client.get(f"api/v2/pms/reservations/{reservation_id}")
+        logger.info(f"Reserva {reservation_id} obtenida exitosamente con API V2")
         return result
     except Exception as e:
         if "404" in str(e) or "not found" in str(e).lower():
