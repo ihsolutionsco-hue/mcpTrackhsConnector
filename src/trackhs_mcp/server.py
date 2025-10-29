@@ -17,6 +17,7 @@ from typing_extensions import Annotated
 
 from .client import TrackHSClient
 from .config import get_settings, validate_configuration
+from .middleware import validate_and_coerce_tool_input
 from .schemas import (
     AMENITIES_OUTPUT_SCHEMA,
     FOLIO_DETAIL_OUTPUT_SCHEMA,
@@ -102,10 +103,41 @@ mcp = FastMCP(
 
     Todas las herramientas incluyen validación robusta y documentación completa.
     """,
-    strict_input_validation=False,  # Permite coerción de tipos: "10" → 10
+    strict_input_validation=False,  # CRÍTICO: Permite coerción de tipos: "10" → 10
     mask_error_details=True,
     lifespan=lifespan,
 )
+
+# Verificación de configuración crítica
+logger.info("🔧 CONFIGURACIÓN FASTMCP VERIFICADA:")
+logger.info(f"   ✅ strict_input_validation: {mcp.strict_input_validation}")
+logger.info(f"   ✅ force_input_coercion: {settings.force_input_coercion}")
+
+# Verificar atributos opcionales
+try:
+    logger.info(f"   ✅ mask_error_details: {mcp.mask_error_details}")
+except AttributeError:
+    logger.info("   ⚠️ mask_error_details: No disponible en esta versión")
+
+# Verificación adicional de que la configuración se aplicó
+if mcp.strict_input_validation:
+    logger.error("❌ ERROR CRÍTICO: strict_input_validation está en True!")
+    logger.error("   Esto causará fallos en la validación de tipos de parámetros")
+    logger.error("   Los parámetros numéricos enviados como strings fallarán")
+    logger.error("   Se activará middleware de coerción como respaldo")
+else:
+    logger.info("✅ CONFIGURACIÓN CORRECTA: strict_input_validation=False")
+    logger.info(
+        "   Los parámetros numéricos como strings serán convertidos automáticamente"
+    )
+
+# Verificación de configuración de coerción
+if settings.force_input_coercion:
+    logger.info("✅ MIDDLEWARE DE COERCIÓN ACTIVADO")
+    logger.info("   Garantiza conversión de tipos incluso si FastMCP falla")
+else:
+    logger.warning("⚠️ MIDDLEWARE DE COERCIÓN DESACTIVADO")
+    logger.warning("   Depende completamente de la configuración de FastMCP")
 
 logger.info("Servidor configurado correctamente")
 
@@ -451,6 +483,101 @@ def search_units(
     """
     if api_client is None:
         raise ToolError("Cliente API no disponible. Verifique las credenciales.")
+
+    # Aplicar middleware de coerción de tipos
+    params_dict = {
+        "page": page,
+        "size": size,
+        "sort_column": sort_column,
+        "sort_direction": sort_direction,
+        "search": search,
+        "term": term,
+        "unit_code": unit_code,
+        "short_name": short_name,
+        "node_id": node_id,
+        "amenity_id": amenity_id,
+        "unit_type_id": unit_type_id,
+        "bedrooms": bedrooms,
+        "min_bedrooms": min_bedrooms,
+        "max_bedrooms": max_bedrooms,
+        "bathrooms": bathrooms,
+        "min_bathrooms": min_bathrooms,
+        "max_bathrooms": max_bathrooms,
+        "occupancy": occupancy,
+        "min_occupancy": min_occupancy,
+        "max_occupancy": max_occupancy,
+        "arrival": arrival,
+        "departure": departure,
+        "content_updated_since": content_updated_since,
+        "is_active": is_active,
+        "is_bookable": is_bookable,
+        "pets_friendly": pets_friendly,
+        "unit_status": unit_status,
+        "computed": computed,
+        "inherited": inherited,
+        "limited": limited,
+        "include_descriptions": include_descriptions,
+        "calendar_id": calendar_id,
+        "role_id": role_id,
+        "promo_code_id": promo_code_id,
+        "owner_id": owner_id,
+        "company_id": company_id,
+        "channel_id": channel_id,
+        "lodging_type_id": lodging_type_id,
+        "bed_type_id": bed_type_id,
+        "amenity_all": amenity_all,
+        "unit_ids": unit_ids,
+    }
+
+    # Aplicar coerción de tipos
+    coerced_params = validate_and_coerce_tool_input("search_units", params_dict)
+
+    # Extraer parámetros convertidos
+    page = coerced_params.get("page", page)
+    size = coerced_params.get("size", size)
+    sort_column = coerced_params.get("sort_column", sort_column)
+    sort_direction = coerced_params.get("sort_direction", sort_direction)
+    search = coerced_params.get("search", search)
+    term = coerced_params.get("term", term)
+    unit_code = coerced_params.get("unit_code", unit_code)
+    short_name = coerced_params.get("short_name", short_name)
+    node_id = coerced_params.get("node_id", node_id)
+    amenity_id = coerced_params.get("amenity_id", amenity_id)
+    unit_type_id = coerced_params.get("unit_type_id", unit_type_id)
+    bedrooms = coerced_params.get("bedrooms", bedrooms)
+    min_bedrooms = coerced_params.get("min_bedrooms", min_bedrooms)
+    max_bedrooms = coerced_params.get("max_bedrooms", max_bedrooms)
+    bathrooms = coerced_params.get("bathrooms", bathrooms)
+    min_bathrooms = coerced_params.get("min_bathrooms", min_bathrooms)
+    max_bathrooms = coerced_params.get("max_bathrooms", max_bathrooms)
+    occupancy = coerced_params.get("occupancy", occupancy)
+    min_occupancy = coerced_params.get("min_occupancy", min_occupancy)
+    max_occupancy = coerced_params.get("max_occupancy", max_occupancy)
+    arrival = coerced_params.get("arrival", arrival)
+    departure = coerced_params.get("departure", departure)
+    content_updated_since = coerced_params.get(
+        "content_updated_since", content_updated_since
+    )
+    is_active = coerced_params.get("is_active", is_active)
+    is_bookable = coerced_params.get("is_bookable", is_bookable)
+    pets_friendly = coerced_params.get("pets_friendly", pets_friendly)
+    unit_status = coerced_params.get("unit_status", unit_status)
+    computed = coerced_params.get("computed", computed)
+    inherited = coerced_params.get("inherited", inherited)
+    limited = coerced_params.get("limited", limited)
+    include_descriptions = coerced_params.get(
+        "include_descriptions", include_descriptions
+    )
+    calendar_id = coerced_params.get("calendar_id", calendar_id)
+    role_id = coerced_params.get("role_id", role_id)
+    promo_code_id = coerced_params.get("promo_code_id", promo_code_id)
+    owner_id = coerced_params.get("owner_id", owner_id)
+    company_id = coerced_params.get("company_id", company_id)
+    channel_id = coerced_params.get("channel_id", channel_id)
+    lodging_type_id = coerced_params.get("lodging_type_id", lodging_type_id)
+    bed_type_id = coerced_params.get("bed_type_id", bed_type_id)
+    amenity_all = coerced_params.get("amenity_all", amenity_all)
+    unit_ids = coerced_params.get("unit_ids", unit_ids)
 
     logger.info(f"Buscando unidades: página {page}, tamaño {size}")
 

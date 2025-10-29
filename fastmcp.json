@@ -16,26 +16,31 @@
       "python-dotenv>=1.0.1",
       "pydantic>=2.12.3"
     ],
-    "variables": {
-      "TRACKHS_USERNAME": {
-        "required": true,
-        "description": "Usuario de TrackHS API"
-      },
-      "TRACKHS_PASSWORD": {
-        "required": true,
-        "description": "Contraseña de TrackHS API"
-      },
-      "TRACKHS_API_URL": {
-        "required": false,
-        "default": "https://ihmvacations.trackhs.com",
-        "description": "URL base de la API TrackHS"
-      },
-      "LOG_LEVEL": {
-        "required": false,
-        "default": "INFO",
-        "description": "Nivel de logging"
-      }
-    }
+        "variables": {
+          "TRACKHS_USERNAME": {
+            "required": true,
+            "description": "Usuario de TrackHS API"
+          },
+          "TRACKHS_PASSWORD": {
+            "required": true,
+            "description": "Contraseña de TrackHS API"
+          },
+          "TRACKHS_API_URL": {
+            "required": false,
+            "default": "https://ihmvacations.trackhs.com",
+            "description": "URL base de la API TrackHS"
+          },
+          "LOG_LEVEL": {
+            "required": false,
+            "default": "INFO",
+            "description": "Nivel de logging"
+          },
+          "FORCE_INPUT_COERCION": {
+            "required": false,
+            "default": "true",
+            "description": "Forzar coerción de tipos de entrada (CRÍTICO para parámetros numéricos)"
+          }
+        }
   },
   "deployment": {
     "health_check": {

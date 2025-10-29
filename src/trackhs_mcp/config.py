@@ -50,6 +50,13 @@ class TrackHSSettings(BaseSettings):
         alias="STRICT_VALIDATION",
     )
 
+    # Configuración crítica para FastMCP
+    force_input_coercion: bool = Field(
+        default=True,
+        description="Forzar coerción de tipos de entrada (CRÍTICO para parámetros numéricos)",
+        alias="FORCE_INPUT_COERCION",
+    )
+
     # Configuración de reintentos
     max_retries: int = Field(default=3, description="Máximo número de reintentos")
     retry_delay: float = Field(
