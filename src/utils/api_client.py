@@ -209,30 +209,36 @@ class TrackHSAPIClient:
             )
             raise TrackHSAPIError(f"Error inesperado: {str(e)}")
 
-    def search_units(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def search_units(self, params) -> Dict[str, Any]:
         """
         Busca unidades de alojamiento con filtros avanzados
 
         Args:
-            params: Parámetros de búsqueda de unidades
+            params: Parámetros de búsqueda de unidades (dict o Pydantic model)
 
         Returns:
             Respuesta de la API con unidades encontradas
         """
+        # Convertir a diccionario si es un modelo Pydantic
+        if hasattr(params, "model_dump"):
+            params_dict = params.model_dump()
+        else:
+            params_dict = params
+
         # Log de parámetros de entrada
         self.logger.info(
             "Iniciando búsqueda de unidades",
             extra={
-                "original_params": params,
-                "param_count": len(params),
+                "original_params": params_dict,
+                "param_count": len(params_dict),
                 "has_filters": any(
-                    v is not None for v in params.values() if v != 1 and v != 0
+                    v is not None for v in params_dict.values() if v != 1 and v != 0
                 ),
             },
         )
 
         # Convertir parámetros booleanos a enteros (1/0) según la API
-        api_params = self._convert_boolean_params(params)
+        api_params = self._convert_boolean_params(params_dict)
 
         # Log de parámetros convertidos
         self.logger.info(
@@ -315,6 +321,10 @@ class TrackHSAPIClient:
         }
 
         for key, value in params.items():
+            # Filtrar valores vacíos, None, o strings vacíos
+            if value is None or value == "" or value == "None" or value == "null":
+                continue
+
             if key in boolean_fields and value is not None:
                 converted[key] = 1 if value else 0
             else:
@@ -504,27 +514,33 @@ class TrackHSAPIClient:
         # Limpiar valores None
         return {k: v for k, v in processed.items() if v is not None}
 
-    def search_amenities(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def search_amenities(self, params) -> Dict[str, Any]:
         """
         Busca amenidades con filtros avanzados
 
         Args:
-            params: Parámetros de búsqueda de amenidades
+            params: Parámetros de búsqueda de amenidades (dict o Pydantic model)
 
         Returns:
             Respuesta de la API con amenidades encontradas
         """
+        # Convertir a diccionario si es un modelo Pydantic
+        if hasattr(params, "model_dump"):
+            params_dict = params.model_dump()
+        else:
+            params_dict = params
+
         # Log de parámetros de entrada
         self.logger.info(
             "Iniciando búsqueda de amenidades",
             extra={
-                "original_params": params,
-                "param_count": len(params),
+                "original_params": params_dict,
+                "param_count": len(params_dict),
             },
         )
 
         # Realizar llamada a la API
-        result = self.get("api/pms/units/amenities", params)
+        result = self.get("api/pms/units/amenities", params_dict)
 
         # Log de respuesta cruda de la API
         self.logger.info(
@@ -557,27 +573,33 @@ class TrackHSAPIClient:
 
         return processed_result
 
-    def search_reservations(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def search_reservations(self, params) -> Dict[str, Any]:
         """
         Busca reservas con filtros avanzados
 
         Args:
-            params: Parámetros de búsqueda de reservas
+            params: Parámetros de búsqueda de reservas (dict o Pydantic model)
 
         Returns:
             Respuesta de la API con reservas encontradas
         """
+        # Convertir a diccionario si es un modelo Pydantic
+        if hasattr(params, "model_dump"):
+            params_dict = params.model_dump()
+        else:
+            params_dict = params
+
         # Log de parámetros de entrada
         self.logger.info(
             "Iniciando búsqueda de reservas",
             extra={
-                "original_params": params,
-                "param_count": len(params),
+                "original_params": params_dict,
+                "param_count": len(params_dict),
             },
         )
 
         # Realizar llamada a la API
-        result = self.get("api/pms/reservations", params)
+        result = self.get("api/pms/reservations", params_dict)
 
         # Log de respuesta cruda de la API
         self.logger.info(
@@ -662,22 +684,28 @@ class TrackHSAPIClient:
 
         return result
 
-    def create_maintenance_work_order(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def create_maintenance_work_order(self, params) -> Dict[str, Any]:
         """
         Crea una orden de trabajo de mantenimiento
 
         Args:
-            params: Parámetros de la orden de trabajo
+            params: Parámetros de la orden de trabajo (dict o Pydantic model)
 
         Returns:
             Datos de la orden creada
         """
+        # Convertir a diccionario si es un modelo Pydantic
+        if hasattr(params, "model_dump"):
+            params_dict = params.model_dump()
+        else:
+            params_dict = params
+
         self.logger.info(
             "Creando orden de mantenimiento",
-            extra={"unit_id": params.get("unit_id")},
+            extra={"unit_id": params_dict.get("unit_id")},
         )
 
-        result = self.post("api/pms/work-orders/maintenance", params)
+        result = self.post("api/pms/work-orders/maintenance", params_dict)
 
         self.logger.info(
             "Orden de mantenimiento creada exitosamente",
@@ -686,22 +714,28 @@ class TrackHSAPIClient:
 
         return result
 
-    def create_housekeeping_work_order(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    def create_housekeeping_work_order(self, params) -> Dict[str, Any]:
         """
         Crea una orden de trabajo de housekeeping
 
         Args:
-            params: Parámetros de la orden de trabajo
+            params: Parámetros de la orden de trabajo (dict o Pydantic model)
 
         Returns:
             Datos de la orden creada
         """
+        # Convertir a diccionario si es un modelo Pydantic
+        if hasattr(params, "model_dump"):
+            params_dict = params.model_dump()
+        else:
+            params_dict = params
+
         self.logger.info(
             "Creando orden de housekeeping",
-            extra={"unit_id": params.get("unit_id")},
+            extra={"unit_id": params_dict.get("unit_id")},
         )
 
-        result = self.post("api/pms/work-orders/housekeeping", params)
+        result = self.post("api/pms/work-orders/housekeeping", params_dict)
 
         self.logger.info(
             "Orden de housekeeping creada exitosamente",
