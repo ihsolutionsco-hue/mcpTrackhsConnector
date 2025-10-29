@@ -512,7 +512,7 @@ def search_units(
     is_active = validate_flexible_int(is_active) if is_active is not None else None
     is_bookable = validate_flexible_int(is_bookable) if is_bookable is not None else None
     pets_friendly = validate_flexible_int(pets_friendly) if pets_friendly is not None else None
-    
+
     # Aplicar middleware de coerción de tipos como respaldo adicional
     params_dict = {
         "page": page,
