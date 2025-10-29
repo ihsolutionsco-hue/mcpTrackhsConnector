@@ -715,7 +715,6 @@ def search_units(
 
 
 @mcp.tool(
-    output_schema=AMENITIES_OUTPUT_SCHEMA,
     annotations={
         "title": "Buscar Amenidades de TrackHS",
         "readOnlyHint": True,
