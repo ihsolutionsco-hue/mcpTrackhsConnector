@@ -759,13 +759,13 @@ def search_amenities(
         Field(description="Filtrar por ID de grupo"),
     ] = None,
     isPublic: Annotated[
-        Optional[FlexibleIntType],
+        Optional[Union[int, str]],
         Field(
             ge=0, le=1, description="Filtrar por amenidades públicas (1) o privadas (0)"
         ),
     ] = None,
     publicSearchable: Annotated[
-        Optional[FlexibleIntType],
+        Optional[Union[int, str]],
         Field(
             ge=0,
             le=1,
@@ -773,7 +773,7 @@ def search_amenities(
         ),
     ] = None,
     isFilterable: Annotated[
-        Optional[FlexibleIntType],
+        Optional[Union[int, str]],
         Field(ge=0, le=1, description="Filtrar por amenidades filtrables (1) o no (0)"),
     ] = None,
     # Parámetros de tipos de plataformas OTA
@@ -854,6 +854,14 @@ def search_amenities(
     Raises:
         ToolError: Si hay error de validación, autenticación, autorización o conexión
     """
+    # Convertir parámetros string a int si es necesario
+    if isPublic is not None and isinstance(isPublic, str):
+        isPublic = int(isPublic)
+    if publicSearchable is not None and isinstance(publicSearchable, str):
+        publicSearchable = int(publicSearchable)
+    if isFilterable is not None and isinstance(isFilterable, str):
+        isFilterable = int(isFilterable)
+
     # Inicializar servicio de amenidades
     amenities_service = AmenitiesService(api_client)
 
