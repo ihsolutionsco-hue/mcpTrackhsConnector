@@ -710,7 +710,7 @@ def search_units(
         raise ToolError(f"Error buscando unidades: {str(e)}")
 
 
-@mcp.tool(output_schema=AMENITIES_OUTPUT_SCHEMA)
+@mcp.tool
 def search_amenities(
     # Parámetros de paginación
     page: Annotated[
