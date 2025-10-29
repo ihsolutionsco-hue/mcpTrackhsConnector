@@ -31,6 +31,7 @@ from .utils import build_units_search_params, clean_unit_data
 # Configuración centralizada
 settings = get_settings()
 
+
 # Función de validación para parámetros numéricos flexibles
 def validate_flexible_int(v):
     """Valida y convierte parámetros que pueden ser int o str"""
@@ -44,6 +45,7 @@ def validate_flexible_int(v):
         except ValueError:
             raise ValueError(f"No se puede convertir '{v}' a entero")
     raise ValueError(f"Tipo no soportado: {type(v)}")
+
 
 # Alias para usar en las anotaciones
 FlexibleIntType = Union[int, str, None]
@@ -365,9 +367,7 @@ def search_units(
         Optional[Any], Field(description="Número máximo de baños")
     ] = None,
     # Parámetros de capacidad
-    occupancy: Annotated[
-        Optional[Any], Field(description="Capacidad exacta")
-    ] = None,
+    occupancy: Annotated[Optional[Any], Field(description="Capacidad exacta")] = None,
     min_occupancy: Annotated[
         Optional[Any], Field(description="Capacidad mínima")
     ] = None,
@@ -439,7 +439,8 @@ def search_units(
         Optional[FlexibleIntType], Field(gt=0, description="ID del rol específico")
     ] = None,
     promo_code_id: Annotated[
-        Optional[FlexibleIntType], Field(gt=0, description="ID del código promocional válido")
+        Optional[FlexibleIntType],
+        Field(gt=0, description="ID del código promocional válido"),
     ] = None,
 ) -> Dict[str, Any]:
     """
@@ -501,17 +502,33 @@ def search_units(
     page = validate_flexible_int(page) if page is not None else 1
     size = validate_flexible_int(size) if size is not None else 10
     bedrooms = validate_flexible_int(bedrooms) if bedrooms is not None else None
-    min_bedrooms = validate_flexible_int(min_bedrooms) if min_bedrooms is not None else None
-    max_bedrooms = validate_flexible_int(max_bedrooms) if max_bedrooms is not None else None
+    min_bedrooms = (
+        validate_flexible_int(min_bedrooms) if min_bedrooms is not None else None
+    )
+    max_bedrooms = (
+        validate_flexible_int(max_bedrooms) if max_bedrooms is not None else None
+    )
     bathrooms = validate_flexible_int(bathrooms) if bathrooms is not None else None
-    min_bathrooms = validate_flexible_int(min_bathrooms) if min_bathrooms is not None else None
-    max_bathrooms = validate_flexible_int(max_bathrooms) if max_bathrooms is not None else None
+    min_bathrooms = (
+        validate_flexible_int(min_bathrooms) if min_bathrooms is not None else None
+    )
+    max_bathrooms = (
+        validate_flexible_int(max_bathrooms) if max_bathrooms is not None else None
+    )
     occupancy = validate_flexible_int(occupancy) if occupancy is not None else None
-    min_occupancy = validate_flexible_int(min_occupancy) if min_occupancy is not None else None
-    max_occupancy = validate_flexible_int(max_occupancy) if max_occupancy is not None else None
+    min_occupancy = (
+        validate_flexible_int(min_occupancy) if min_occupancy is not None else None
+    )
+    max_occupancy = (
+        validate_flexible_int(max_occupancy) if max_occupancy is not None else None
+    )
     is_active = validate_flexible_int(is_active) if is_active is not None else None
-    is_bookable = validate_flexible_int(is_bookable) if is_bookable is not None else None
-    pets_friendly = validate_flexible_int(pets_friendly) if pets_friendly is not None else None
+    is_bookable = (
+        validate_flexible_int(is_bookable) if is_bookable is not None else None
+    )
+    pets_friendly = (
+        validate_flexible_int(pets_friendly) if pets_friendly is not None else None
+    )
 
     # Aplicar middleware de coerción de tipos como respaldo adicional
     params_dict = {
@@ -695,25 +712,172 @@ def search_units(
 
 @mcp.tool(output_schema=AMENITIES_OUTPUT_SCHEMA)
 def search_amenities(
-    page: Annotated[int, Field(ge=1, le=1000, description="Número de página")] = 1,
+    # Parámetros de paginación
+    page: Annotated[
+        int, Field(ge=1, le=10000, description="Número de página (1-based)")
+    ] = 1,
     size: Annotated[int, Field(ge=1, le=100, description="Tamaño de página")] = 10,
+    # Parámetros de ordenamiento
+    sort_column: Annotated[
+        Optional[
+            Literal[
+                "id",
+                "order",
+                "isPublic",
+                "publicSearchable",
+                "isFilterable",
+                "createdAt",
+            ]
+        ],
+        Field(description="Columna para ordenar resultados. Default: order"),
+    ] = None,
+    sort_direction: Annotated[
+        Optional[Literal["asc", "desc"]],
+        Field(description="Dirección de ordenamiento. Default: asc"),
+    ] = None,
+    # Parámetros de búsqueda
     search: Annotated[
         Optional[str],
         Field(max_length=200, description="Búsqueda en nombre de amenidad"),
     ] = None,
+    # Parámetros de filtrado
+    group_id: Annotated[
+        Optional[int],
+        Field(description="Filtrar por ID de grupo"),
+    ] = None,
+    is_public: Annotated[
+        Optional[FlexibleIntType],
+        Field(
+            ge=0, le=1, description="Filtrar por amenidades públicas (1) o privadas (0)"
+        ),
+    ] = None,
+    public_searchable: Annotated[
+        Optional[FlexibleIntType],
+        Field(
+            ge=0,
+            le=1,
+            description="Filtrar por amenidades buscables públicamente (1) o no (0)",
+        ),
+    ] = None,
+    is_filterable: Annotated[
+        Optional[FlexibleIntType],
+        Field(ge=0, le=1, description="Filtrar por amenidades filtrables (1) o no (0)"),
+    ] = None,
+    # Parámetros de tipos de plataformas OTA
+    homeaway_type: Annotated[
+        Optional[str],
+        Field(
+            max_length=200,
+            description="Buscar por tipo de HomeAway (soporta % para wildcard)",
+        ),
+    ] = None,
+    airbnb_type: Annotated[
+        Optional[str],
+        Field(
+            max_length=200,
+            description="Buscar por tipo de Airbnb (soporta % para wildcard)",
+        ),
+    ] = None,
+    tripadvisor_type: Annotated[
+        Optional[str],
+        Field(
+            max_length=200,
+            description="Buscar por tipo de TripAdvisor (soporta % para wildcard)",
+        ),
+    ] = None,
+    marriott_type: Annotated[
+        Optional[str],
+        Field(
+            max_length=200,
+            description="Buscar por tipo de Marriott (soporta % para wildcard)",
+        ),
+    ] = None,
 ) -> Dict[str, Any]:
     """
     Buscar amenidades/servicios disponibles en el sistema TrackHS.
+
+    Esta herramienta implementa la API completa de búsqueda de amenidades de TrackHS
+    con todos los parámetros disponibles según la documentación oficial.
+
+    FUNCIONALIDADES PRINCIPALES:
+    - Búsqueda por texto en nombre de amenidad
+    - Filtros por características (público, filtrable, buscable)
+    - Filtros por grupo de amenidades
+    - Búsqueda por tipos de plataformas OTA (Airbnb, HomeAway, Marriott, TripAdvisor)
+    - Ordenamiento personalizable
+    - Paginación flexible
+
+    PARÁMETROS DE BÚSQUEDA:
+    - search: Búsqueda en nombre de amenidad
+    - homeaway_type, airbnb_type, tripadvisor_type, marriott_type: Búsqueda por tipos OTA
+
+    PARÁMETROS DE FILTRADO:
+    - group_id: Filtrar por ID de grupo específico
+    - is_public: Solo amenidades públicas (1) o privadas (0)
+    - public_searchable: Solo amenidades buscables públicamente (1) o no (0)
+    - is_filterable: Solo amenidades filtrables (1) o no (0)
+
+    PARÁMETROS DE ORDENAMIENTO:
+    - sort_column: id, order, isPublic, publicSearchable, isFilterable, createdAt
+    - sort_direction: asc, desc
+
+    EJEMPLOS DE USO:
+    - search_amenities(page=1, size=10) # Primera página, 10 amenidades
+    - search_amenities(search="wifi") # Buscar amenidades con "wifi"
+    - search_amenities(is_public=1, is_filterable=1) # Solo públicas y filtrables
+    - search_amenities(airbnb_type="ac") # Buscar por tipo de Airbnb
+    - search_amenities(sort_column="name", sort_direction="asc") # Ordenadas por nombre
+    - search_amenities(group_id=2) # Solo amenidades del grupo 2
     """
     if api_client is None:
         raise ToolError("Cliente API no disponible. Verifique las credenciales.")
 
+    # Convertir parámetros FlexibleIntType a enteros
+    is_public = validate_flexible_int(is_public) if is_public is not None else None
+    public_searchable = (
+        validate_flexible_int(public_searchable)
+        if public_searchable is not None
+        else None
+    )
+    is_filterable = (
+        validate_flexible_int(is_filterable) if is_filterable is not None else None
+    )
+
     logger.info(f"Buscando amenidades: página {page}, tamaño {size}")
 
     try:
+        # Construir parámetros
         params = {"page": page, "size": size}
+
+        # Parámetros de ordenamiento
+        if sort_column:
+            params["sortColumn"] = sort_column
+        if sort_direction:
+            params["sortDirection"] = sort_direction
+
+        # Parámetros de búsqueda
         if search:
             params["search"] = search
+
+        # Parámetros de filtrado
+        if group_id is not None:
+            params["groupId"] = group_id
+        if is_public is not None:
+            params["isPublic"] = is_public
+        if public_searchable is not None:
+            params["publicSearchable"] = public_searchable
+        if is_filterable is not None:
+            params["isFilterable"] = is_filterable
+
+        # Parámetros de tipos OTA
+        if homeaway_type:
+            params["homeawayType"] = homeaway_type
+        if airbnb_type:
+            params["airbnbType"] = airbnb_type
+        if tripadvisor_type:
+            params["tripadvisorType"] = tripadvisor_type
+        if marriott_type:
+            params["marriottType"] = marriott_type
 
         result = api_client.get("api/pms/units/amenities", params)
         total_items = result.get("total_items", 0)
