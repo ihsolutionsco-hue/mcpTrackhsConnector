@@ -141,28 +141,199 @@ def register_tools_with_mcp(mcp_server) -> None:
         size: int = Field(
             default=10, ge=1, le=100, description="Tamaño de página (1-100)"
         ),
+        # Parámetros de búsqueda de texto
         search: Optional[str] = Field(
-            default=None, max_length=200, description="Búsqueda de texto"
+            default=None,
+            max_length=200,
+            description="Búsqueda de texto en nombre o descripciones",
         ),
+        term: Optional[str] = Field(
+            default=None,
+            max_length=200,
+            description="Búsqueda de texto en término específico",
+        ),
+        unit_code: Optional[str] = Field(
+            default=None,
+            max_length=100,
+            description="Búsqueda en código de unidad (exacta o con % para wildcard)",
+        ),
+        short_name: Optional[str] = Field(
+            default=None,
+            max_length=100,
+            description="Búsqueda en nombre corto (exacta o con % para wildcard)",
+        ),
+        # Parámetros de características físicas
         bedrooms: Optional[int] = Field(
-            default=None, ge=0, description="Número de dormitorios"
+            default=None, ge=0, description="Número exacto de dormitorios"
+        ),
+        min_bedrooms: Optional[int] = Field(
+            default=None, ge=0, description="Número mínimo de dormitorios"
+        ),
+        max_bedrooms: Optional[int] = Field(
+            default=None, ge=0, description="Número máximo de dormitorios"
         ),
         bathrooms: Optional[int] = Field(
-            default=None, ge=0, description="Número de baños"
+            default=None, ge=0, description="Número exacto de baños"
         ),
-        occupancy: Optional[int] = Field(default=None, ge=0, description="Capacidad"),
+        min_bathrooms: Optional[int] = Field(
+            default=None, ge=0, description="Número mínimo de baños"
+        ),
+        max_bathrooms: Optional[int] = Field(
+            default=None, ge=0, description="Número máximo de baños"
+        ),
+        occupancy: Optional[int] = Field(
+            default=None, ge=0, description="Capacidad exacta"
+        ),
+        min_occupancy: Optional[int] = Field(
+            default=None, ge=0, description="Capacidad mínima"
+        ),
+        max_occupancy: Optional[int] = Field(
+            default=None, ge=0, description="Capacidad máxima"
+        ),
+        # Parámetros de estado
         is_active: Optional[bool] = Field(
-            default=None, description="Solo unidades activas"
+            default=None, description="Solo unidades activas (1) o inactivas (0)"
         ),
         is_bookable: Optional[bool] = Field(
-            default=None, description="Solo unidades reservables"
+            default=None, description="Solo unidades reservables (1) o no (0)"
         ),
         pets_friendly: Optional[bool] = Field(
-            default=None, description="Solo unidades pet-friendly"
+            default=None, description="Solo unidades pet-friendly (1) o no (0)"
+        ),
+        unit_status: Optional[str] = Field(
+            default=None,
+            description="Estado de la unidad (clean, dirty, occupied, inspection, inprogress)",
+        ),
+        allow_unit_rates: Optional[bool] = Field(
+            default=None,
+            description="Solo unidades que permiten tarifas por unidad (1) o no (0)",
+        ),
+        # Parámetros de disponibilidad
+        arrival: Optional[str] = Field(
+            default=None,
+            description="Fecha de llegada (YYYY-MM-DD) para verificar disponibilidad",
+        ),
+        departure: Optional[str] = Field(
+            default=None,
+            description="Fecha de salida (YYYY-MM-DD) para verificar disponibilidad",
+        ),
+        # Parámetros de contenido
+        computed: Optional[bool] = Field(
+            default=None,
+            description="Incluir valores computados adicionales (1) o no (0)",
+        ),
+        inherited: Optional[bool] = Field(
+            default=None, description="Incluir atributos heredados (1) o no (0)"
+        ),
+        limited: Optional[bool] = Field(
+            default=None, description="Retornar atributos limitados (1) o completos (0)"
+        ),
+        include_descriptions: Optional[bool] = Field(
+            default=None, description="Incluir descripciones de unidades (1) o no (0)"
+        ),
+        content_updated_since: Optional[str] = Field(
+            default=None,
+            description="Fecha ISO 8601 - unidades con cambios desde esta fecha",
+        ),
+        # Parámetros de IDs
+        amenity_id: Optional[List[int]] = Field(
+            default=None,
+            description="IDs de amenidades - unidades que tienen estas amenidades",
+        ),
+        node_id: Optional[List[int]] = Field(
+            default=None, description="IDs de nodo - unidades descendientes"
+        ),
+        unit_type_id: Optional[List[int]] = Field(
+            default=None, description="IDs de tipo de unidad"
+        ),
+        owner_id: Optional[List[int]] = Field(
+            default=None, description="IDs del propietario"
+        ),
+        company_id: Optional[List[int]] = Field(
+            default=None, description="IDs de la empresa"
+        ),
+        channel_id: Optional[List[int]] = Field(
+            default=None, description="IDs del canal activo"
+        ),
+        lodging_type_id: Optional[List[int]] = Field(
+            default=None, description="IDs del tipo de alojamiento"
+        ),
+        bed_type_id: Optional[List[int]] = Field(
+            default=None, description="IDs del tipo de cama"
+        ),
+        amenity_all: Optional[List[int]] = Field(
+            default=None,
+            description="Filtrar unidades que tengan TODAS estas amenidades",
+        ),
+        unit_ids: Optional[List[int]] = Field(
+            default=None, description="Filtrar por IDs específicos de unidades"
+        ),
+        calendar_id: Optional[int] = Field(
+            default=None, gt=0, description="ID del grupo de calendario"
+        ),
+        role_id: Optional[int] = Field(
+            default=None, gt=0, description="ID del rol específico"
+        ),
+        # Parámetros de ordenamiento
+        sort_column: Optional[str] = Field(
+            default="name",
+            description="Columna para ordenar resultados (id, name, nodeName, unitTypeName)",
+        ),
+        sort_direction: Optional[str] = Field(
+            default="asc", description="Dirección de ordenamiento (asc, desc)"
         ),
     ) -> Dict[str, Any]:
         """
         Buscar unidades de alojamiento disponibles en TrackHS con filtros avanzados.
+
+        Esta herramienta implementa la API completa de búsqueda de unidades de TrackHS
+        con todos los parámetros disponibles según la documentación oficial.
+
+        FUNCIONALIDADES PRINCIPALES:
+        - Búsqueda por características físicas (dormitorios, baños, capacidad)
+        - Filtros por estado (activa, reservable, pet-friendly, estado de limpieza)
+        - Búsqueda de texto (nombre, descripción, código, término)
+        - Filtros por fechas de disponibilidad (arrival/departure)
+        - Filtros por IDs (nodo, amenidad, tipo de unidad, propietario, etc.)
+        - Ordenamiento personalizable
+        - Paginación flexible
+
+        PARÁMETROS DE BÚSQUEDA DE TEXTO:
+        - search: Búsqueda en nombre o descripciones
+        - term: Búsqueda en término específico
+        - unit_code: Búsqueda exacta en código (con % para wildcard)
+        - short_name: Búsqueda exacta en nombre corto (con % para wildcard)
+
+        PARÁMETROS DE CAPACIDAD:
+        - bedrooms/min_bedrooms/max_bedrooms: Filtros de dormitorios
+        - bathrooms/min_bathrooms/max_bathrooms: Filtros de baños
+        - occupancy/min_occupancy/max_occupancy: Filtros de capacidad
+
+        PARÁMETROS DE DISPONIBILIDAD:
+        - arrival/departure: Verificar disponibilidad en fechas específicas
+        - is_bookable: Solo unidades disponibles para reservar
+        - is_active: Solo unidades activas
+
+        PARÁMETROS DE CARACTERÍSTICAS:
+        - pets_friendly: Unidades que permiten mascotas
+        - unit_status: Estado de limpieza (clean, dirty, occupied, etc.)
+        - amenity_id: Unidades con amenidades específicas
+        - amenity_all: Unidades con TODAS las amenidades especificadas
+
+        PARÁMETROS DE ORDENAMIENTO:
+        - sort_column: id, name, nodeName, unitTypeName
+        - sort_direction: asc, desc
+
+        EJEMPLOS DE USO:
+        - search_units(page=1, size=10) # Primera página, 10 unidades
+        - search_units(bedrooms=2, bathrooms=1) # Apartamentos 2D/1B
+        - search_units(is_active=1, is_bookable=1) # Unidades activas y disponibles
+        - search_units(search="penthouse") # Buscar por nombre
+        - search_units(arrival="2024-01-15", departure="2024-01-20") # Disponibles en fechas
+        - search_units(amenity_id=[1,2,3]) # Con amenidades específicas
+        - search_units(pets_friendly=1, min_bedrooms=2) # Pet-friendly con 2+ dormitorios
+        - search_units(unit_status="clean", is_bookable=1) # Limpias y disponibles
+        - search_units(sort_column="name", sort_direction="asc") # Ordenadas por nombre
         """
         if not api_client:
             raise TrackHSAPIError("Cliente API no configurado")
@@ -173,16 +344,48 @@ def register_tools_with_mcp(mcp_server) -> None:
                 page=page,
                 size=size,
                 search=search,
+                term=term,
+                unit_code=unit_code,
+                short_name=short_name,
                 bedrooms=bedrooms,
+                min_bedrooms=min_bedrooms,
+                max_bedrooms=max_bedrooms,
                 bathrooms=bathrooms,
+                min_bathrooms=min_bathrooms,
+                max_bathrooms=max_bathrooms,
                 occupancy=occupancy,
+                min_occupancy=min_occupancy,
+                max_occupancy=max_occupancy,
                 is_active=is_active,
                 is_bookable=is_bookable,
                 pets_friendly=pets_friendly,
+                unit_status=unit_status,
+                allow_unit_rates=allow_unit_rates,
+                arrival=arrival,
+                departure=departure,
+                computed=computed,
+                inherited=inherited,
+                limited=limited,
+                include_descriptions=include_descriptions,
+                content_updated_since=content_updated_since,
+                amenity_id=amenity_id,
+                node_id=node_id,
+                unit_type_id=unit_type_id,
+                owner_id=owner_id,
+                company_id=company_id,
+                channel_id=channel_id,
+                lodging_type_id=lodging_type_id,
+                bed_type_id=bed_type_id,
+                amenity_all=amenity_all,
+                unit_ids=unit_ids,
+                calendar_id=calendar_id,
+                role_id=role_id,
+                sort_column=sort_column,
+                sort_direction=sort_direction,
             )
 
             # Realizar búsqueda
-            response = api_client.search_units(params)
+            response = api_client.search_units(params.model_dump())
 
             logger.info(
                 f"Búsqueda de unidades exitosa: {response.get('total_items', 0)} resultados",

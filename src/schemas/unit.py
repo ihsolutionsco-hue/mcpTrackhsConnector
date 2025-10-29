@@ -2,82 +2,205 @@
 Schemas para unidades de alojamiento
 """
 
+from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from .base import BaseSchema, PaginationParams, PaginationResponse
 
 
-class UnitSearchParams(PaginationParams):
-    """Parámetros de búsqueda de unidades"""
+class UnitStatus(str, Enum):
+    """Estados válidos para unidades"""
 
+    CLEAN = "clean"
+    DIRTY = "dirty"
+    OCCUPIED = "occupied"
+    INSPECTION = "inspection"
+    INPROGRESS = "inprogress"
+
+
+class SortColumn(str, Enum):
+    """Columnas válidas para ordenamiento"""
+
+    ID = "id"
+    NAME = "name"
+    NODE_NAME = "nodeName"
+    UNIT_TYPE_NAME = "unitTypeName"
+
+
+class SortDirection(str, Enum):
+    """Direcciones válidas para ordenamiento"""
+
+    ASC = "asc"
+    DESC = "desc"
+
+
+class UnitSearchParams(PaginationParams):
+    """Parámetros de búsqueda de unidades - Implementación completa de la API TrackHS"""
+
+    # Parámetros de búsqueda de texto
     search: Optional[str] = Field(
-        default=None, max_length=200, description="Búsqueda de texto"
+        default=None,
+        max_length=200,
+        description="Búsqueda de texto en nombre o descripciones",
     )
+    term: Optional[str] = Field(
+        default=None,
+        max_length=200,
+        description="Búsqueda de texto en término específico",
+    )
+    unit_code: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Búsqueda en código de unidad (exacta o con % para wildcard)",
+    )
+    short_name: Optional[str] = Field(
+        default=None,
+        max_length=100,
+        description="Búsqueda en nombre corto (exacta o con % para wildcard)",
+    )
+
+    # Parámetros de características físicas
     bedrooms: Optional[int] = Field(
-        default=None, ge=0, description="Número de dormitorios"
+        default=None, ge=0, description="Número exacto de dormitorios"
     )
-    bathrooms: Optional[int] = Field(default=None, ge=0, description="Número de baños")
+    min_bedrooms: Optional[int] = Field(
+        default=None, ge=0, description="Número mínimo de dormitorios"
+    )
+    max_bedrooms: Optional[int] = Field(
+        default=None, ge=0, description="Número máximo de dormitorios"
+    )
+    bathrooms: Optional[int] = Field(
+        default=None, ge=0, description="Número exacto de baños"
+    )
+    min_bathrooms: Optional[int] = Field(
+        default=None, ge=0, description="Número mínimo de baños"
+    )
+    max_bathrooms: Optional[int] = Field(
+        default=None, ge=0, description="Número máximo de baños"
+    )
+    occupancy: Optional[int] = Field(default=None, ge=0, description="Capacidad exacta")
     min_occupancy: Optional[int] = Field(
         default=None, ge=0, description="Capacidad mínima"
     )
     max_occupancy: Optional[int] = Field(
         default=None, ge=0, description="Capacidad máxima"
     )
-    is_active: Optional[bool] = Field(default=None, description="Solo unidades activas")
+
+    # Parámetros de estado
+    is_active: Optional[bool] = Field(
+        default=None, description="Solo unidades activas (1) o inactivas (0)"
+    )
     is_bookable: Optional[bool] = Field(
-        default=None, description="Solo unidades reservables"
+        default=None, description="Solo unidades reservables (1) o no (0)"
     )
     pets_friendly: Optional[bool] = Field(
-        default=None, description="Solo unidades pet-friendly"
+        default=None, description="Solo unidades pet-friendly (1) o no (0)"
     )
-    unit_status: Optional[str] = Field(default=None, description="Estado de la unidad")
+    unit_status: Optional[UnitStatus] = Field(
+        default=None, description="Estado de la unidad"
+    )
+    allow_unit_rates: Optional[bool] = Field(
+        default=None,
+        description="Solo unidades que permiten tarifas por unidad (1) o no (0)",
+    )
+
+    # Parámetros de disponibilidad
     arrival: Optional[str] = Field(
-        default=None, description="Fecha de llegada para verificar disponibilidad"
+        default=None,
+        description="Fecha de llegada (YYYY-MM-DD) para verificar disponibilidad",
     )
     departure: Optional[str] = Field(
-        default=None, description="Fecha de salida para verificar disponibilidad"
+        default=None,
+        description="Fecha de salida (YYYY-MM-DD) para verificar disponibilidad",
     )
+
+    # Parámetros de contenido
+    computed: Optional[bool] = Field(
+        default=None, description="Incluir valores computados adicionales (1) o no (0)"
+    )
+    inherited: Optional[bool] = Field(
+        default=None, description="Incluir atributos heredados (1) o no (0)"
+    )
+    limited: Optional[bool] = Field(
+        default=None, description="Retornar atributos limitados (1) o completos (0)"
+    )
+    include_descriptions: Optional[bool] = Field(
+        default=None, description="Incluir descripciones de unidades (1) o no (0)"
+    )
+    content_updated_since: Optional[str] = Field(
+        default=None,
+        description="Fecha ISO 8601 - unidades con cambios desde esta fecha",
+    )
+
+    # Parámetros de IDs
     amenity_id: Optional[List[int]] = Field(
-        default=None, description="IDs de amenidades requeridas"
+        default=None,
+        description="IDs de amenidades - unidades que tienen estas amenidades",
     )
-    node_id: Optional[List[int]] = Field(default=None, description="IDs de nodos")
+    node_id: Optional[List[int]] = Field(
+        default=None, description="IDs de nodo - unidades descendientes"
+    )
     unit_type_id: Optional[List[int]] = Field(
-        default=None, description="IDs de tipos de unidad"
+        default=None, description="IDs de tipo de unidad"
     )
     owner_id: Optional[List[int]] = Field(
-        default=None, description="IDs de propietarios"
+        default=None, description="IDs del propietario"
     )
-    company_id: Optional[List[int]] = Field(default=None, description="IDs de empresas")
-    channel_id: Optional[List[int]] = Field(default=None, description="IDs de canales")
+    company_id: Optional[List[int]] = Field(
+        default=None, description="IDs de la empresa"
+    )
+    channel_id: Optional[List[int]] = Field(
+        default=None, description="IDs del canal activo"
+    )
     lodging_type_id: Optional[List[int]] = Field(
-        default=None, description="IDs de tipos de alojamiento"
+        default=None, description="IDs del tipo de alojamiento"
     )
     bed_type_id: Optional[List[int]] = Field(
-        default=None, description="IDs de tipos de cama"
+        default=None, description="IDs del tipo de cama"
     )
     amenity_all: Optional[List[int]] = Field(
-        default=None, description="Amenidades que debe tener TODAS"
+        default=None, description="Filtrar unidades que tengan TODAS estas amenidades"
     )
     unit_ids: Optional[List[int]] = Field(
-        default=None, description="IDs específicos de unidades"
+        default=None, description="Filtrar por IDs específicos de unidades"
     )
-    unit_code: Optional[str] = Field(
-        default=None, max_length=100, description="Código de unidad"
+    calendar_id: Optional[int] = Field(
+        default=None, gt=0, description="ID del grupo de calendario"
     )
-    short_name: Optional[str] = Field(
-        default=None, max_length=100, description="Nombre corto"
+    role_id: Optional[int] = Field(
+        default=None, gt=0, description="ID del rol específico"
     )
-    term: Optional[str] = Field(
-        default=None, max_length=200, description="Término de búsqueda"
+
+    # Parámetros de ordenamiento
+    sort_column: Optional[SortColumn] = Field(
+        default=SortColumn.NAME, description="Columna para ordenar resultados"
     )
-    sort_column: Optional[str] = Field(
-        default="name", description="Columna para ordenar"
+    sort_direction: Optional[SortDirection] = Field(
+        default=SortDirection.ASC, description="Dirección de ordenamiento"
     )
-    sort_direction: Optional[str] = Field(
-        default="asc", description="Dirección de ordenamiento"
-    )
+
+    @validator("arrival", "departure")
+    def validate_date_format(cls, v):
+        """Validar formato de fecha YYYY-MM-DD"""
+        if v is not None:
+            try:
+                datetime.strptime(v, "%Y-%m-%d")
+            except ValueError:
+                raise ValueError("Formato de fecha debe ser YYYY-MM-DD")
+        return v
+
+    @validator("content_updated_since")
+    def validate_iso_datetime(cls, v):
+        """Validar formato ISO 8601"""
+        if v is not None:
+            try:
+                datetime.fromisoformat(v.replace("Z", "+00:00"))
+            except ValueError:
+                raise ValueError("Formato de fecha debe ser ISO 8601")
+        return v
 
 
 class UnitDetailResponse(BaseModel):

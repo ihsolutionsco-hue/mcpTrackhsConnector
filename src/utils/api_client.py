@@ -204,6 +204,132 @@ class TrackHSAPIClient:
             )
             raise TrackHSAPIError(f"Error inesperado: {str(e)}")
 
+    def search_units(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Busca unidades de alojamiento con filtros avanzados
+
+        Args:
+            params: Parámetros de búsqueda de unidades
+
+        Returns:
+            Respuesta de la API con unidades encontradas
+        """
+        # Convertir parámetros booleanos a enteros (1/0) según la API
+        api_params = self._convert_boolean_params(params)
+
+        # Realizar llamada a la API
+        result = self.get("api/pms/units", api_params)
+
+        # Procesar respuesta
+        return self._process_units_response(result)
+
+    def _convert_boolean_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Convierte parámetros booleanos a enteros según la API TrackHS
+
+        Args:
+            params: Parámetros originales
+
+        Returns:
+            Parámetros convertidos
+        """
+        converted = {}
+        boolean_fields = {
+            "is_active",
+            "is_bookable",
+            "pets_friendly",
+            "allow_unit_rates",
+            "computed",
+            "inherited",
+            "limited",
+            "include_descriptions",
+        }
+
+        for key, value in params.items():
+            if key in boolean_fields and value is not None:
+                converted[key] = 1 if value else 0
+            else:
+                converted[key] = value
+
+        return converted
+
+    def _process_units_response(self, api_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Procesa la respuesta de la API de unidades
+
+        Args:
+            api_result: Respuesta cruda de la API
+
+        Returns:
+            Respuesta procesada
+        """
+        # Calcular información de paginación
+        total_items = api_result.get("total_items", 0)
+        current_page = api_result.get("page", 1)
+        page_size = api_result.get("size", 10)
+        total_pages = (
+            (total_items + page_size - 1) // page_size if total_items > 0 else 0
+        )
+
+        # Procesar unidades
+        units = api_result.get("units", [])
+        processed_units = []
+
+        for unit in units:
+            processed_unit = self._process_unit(unit)
+            processed_units.append(processed_unit)
+
+        return {
+            "units": processed_units,
+            "total_items": total_items,
+            "total_pages": total_pages,
+            "current_page": current_page,
+            "page_size": page_size,
+            "has_next": current_page < total_pages,
+            "has_prev": current_page > 1,
+        }
+
+    def _process_unit(self, unit: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Procesa una unidad individual
+
+        Args:
+            unit: Datos de la unidad
+
+        Returns:
+            Unidad procesada
+        """
+        # Mapear campos de la API al schema
+        processed = {
+            "id": unit.get("id"),
+            "name": unit.get("name"),
+            "unit_code": unit.get("unitCode"),
+            "short_name": unit.get("shortName"),
+            "description": unit.get("description"),
+            "bedrooms": unit.get("bedrooms"),
+            "bathrooms": unit.get("bathrooms"),
+            "occupancy": unit.get("occupancy"),
+            "unit_type_id": unit.get("unitTypeId"),
+            "unit_type_name": unit.get("unitTypeName"),
+            "node_id": unit.get("nodeId"),
+            "node_name": unit.get("nodeName"),
+            "is_active": unit.get("isActive"),
+            "is_bookable": unit.get("isBookable"),
+            "pets_friendly": unit.get("petsFriendly"),
+            "unit_status": unit.get("unitStatus"),
+            "amenities": unit.get("amenities"),
+            "base_price": unit.get("basePrice"),
+            "currency": unit.get("currency"),
+            "address": unit.get("address"),
+            "coordinates": unit.get("coordinates"),
+            "created_at": unit.get("createdAt"),
+            "updated_at": unit.get("updatedAt"),
+            "links": unit.get("links"),
+        }
+
+        # Limpiar valores None
+        return {k: v for k, v in processed.items() if v is not None}
+
     def close(self) -> None:
         """Cierra el cliente HTTP"""
         self.client.close()
