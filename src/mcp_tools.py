@@ -540,27 +540,26 @@ def register_tools_with_mcp(mcp_server) -> None:
                                 return u[k]
                         return None
 
-                    # Booleanos
+                    # Booleanos (camelCase según API TrackHS)
                     if is_active_c is not None:
                         applied = True
-                        if gv(["is_active", "isActive"]) is not is_active_c:
+                        if gv(["isActive"]) is not is_active_c:
                             return False
                     if is_bookable_c is not None:
                         applied = True
-                        if gv(["is_bookable", "isBookable"]) is not is_bookable_c:
+                        if gv(["isBookable"]) is not is_bookable_c:
                             return False
                     if pets_friendly_c is not None:
                         applied = True
-                        if (
-                            gv(["pets_friendly", "petFriendly", "petsFriendly"])
-                            is not pets_friendly_c
-                        ):
+                        if gv(["petFriendly"]) is not pets_friendly_c:
                             return False
 
-                    # Numéricos: bedrooms/bathrooms/occupancy
+                    # Numéricos: bedrooms/bathrooms/occupancy (camelCase según API TrackHS)
                     b = gv(["bedrooms"]) or 0
-                    ba = gv(["bathrooms"]) or 0
-                    oc = gv(["max_occupancy", "maxOccupancy", "occupancy"]) or 0
+                    ba = (
+                        gv(["fullBathrooms"]) or 0
+                    )  # API usa fullBathrooms, no bathrooms
+                    oc = gv(["maxOccupancy"]) or 0
                     if bedrooms_c is not None:
                         applied = True
                         if b != bedrooms_c:

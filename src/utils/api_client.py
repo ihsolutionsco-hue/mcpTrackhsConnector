@@ -262,11 +262,8 @@ class TrackHSAPIClient:
             },
         )
 
-        # Convertir parámetros camelCase a snake_case para compatibilidad con API
-        snakecase_params = self._convert_camelcase_to_snakecase(params_dict)
-
         # Convertir parámetros booleanos a enteros (1/0) según la API
-        api_params = self._convert_boolean_params(snakecase_params)
+        api_params = self._convert_boolean_params(params_dict)
 
         # Log de parámetros convertidos
         conversion_changes = {}
@@ -435,6 +432,7 @@ class TrackHSAPIClient:
         """
         converted = {}
         boolean_fields = {
+            # snake_case (legacy)
             "is_active",
             "is_bookable",
             "pets_friendly",
@@ -443,6 +441,11 @@ class TrackHSAPIClient:
             "inherited",
             "limited",
             "include_descriptions",
+            # camelCase (current)
+            "isActive",
+            "isBookable",
+            "petsFriendly",
+            "allowUnitRates",
         }
 
         for key, value in params.items():
@@ -723,11 +726,8 @@ class TrackHSAPIClient:
             },
         )
 
-        # Convertir parámetros camelCase a snake_case para compatibilidad con API
-        snakecase_params = self._convert_camelcase_to_snakecase(params_dict)
-
         # Realizar llamada a la API
-        result = self.get("api/pms/reservations", snakecase_params)
+        result = self.get("api/pms/reservations", params_dict)
 
         # Log de respuesta cruda de la API
         self.logger.info(
