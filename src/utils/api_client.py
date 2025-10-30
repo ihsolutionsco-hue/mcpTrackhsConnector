@@ -37,6 +37,20 @@ class TrackHSAPIClient:
             extra={"base_url": self.base_url, "username": username, "timeout": timeout},
         )
 
+    def _serialize_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Serializa parámetros convirtiendo objetos date a strings ISO"""
+        from datetime import date, datetime
+
+        serialized = {}
+        for key, value in params.items():
+            if isinstance(value, date):
+                serialized[key] = value.isoformat()
+            elif isinstance(value, datetime):
+                serialized[key] = value.isoformat()
+            else:
+                serialized[key] = value
+        return serialized
+
     def get(
         self, endpoint: str, params: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
@@ -759,12 +773,19 @@ class TrackHSAPIClient:
         else:
             params_dict = params
 
+        # Serializar parámetros para convertir objetos date a strings ISO
+        params_dict = self._serialize_params(params_dict)
+
+        # Agregar status por defecto si no existe
+        if "status" not in params_dict:
+            params_dict["status"] = "not-started"
+
         self.logger.info(
             "Creando orden de mantenimiento",
             extra={"unit_id": params_dict.get("unit_id")},
         )
 
-        result = self.post("api/pms/work-orders/maintenance", params_dict)
+        result = self.post("api/pms/maintenance/work-orders", params_dict)
 
         self.logger.info(
             "Orden de mantenimiento creada exitosamente",
@@ -789,12 +810,19 @@ class TrackHSAPIClient:
         else:
             params_dict = params
 
+        # Serializar parámetros para convertir objetos date a strings ISO
+        params_dict = self._serialize_params(params_dict)
+
+        # Agregar status por defecto si no existe
+        if "status" not in params_dict:
+            params_dict["status"] = "pending"
+
         self.logger.info(
             "Creando orden de housekeeping",
             extra={"unit_id": params_dict.get("unit_id")},
         )
 
-        result = self.post("api/pms/work-orders/housekeeping", params_dict)
+        result = self.post("api/pms/housekeeping/work-orders", params_dict)
 
         self.logger.info(
             "Orden de housekeeping creada exitosamente",

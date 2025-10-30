@@ -13,7 +13,7 @@ from .base import BaseSchema
 class MaintenanceWorkOrderParams(BaseModel):
     """Parámetros para crear orden de mantenimiento"""
 
-    unit_id: int = Field(gt=0, description="ID de la unidad que requiere mantenimiento")
+    unitId: int = Field(gt=0, description="ID de la unidad que requiere mantenimiento")
     summary: str = Field(
         min_length=1, max_length=500, description="Resumen breve del problema"
     )
@@ -21,26 +21,24 @@ class MaintenanceWorkOrderParams(BaseModel):
         min_length=1, max_length=5000, description="Descripción detallada"
     )
     priority: int = Field(default=3, description="Prioridad: 1=Baja, 3=Media, 5=Alta")
-    estimated_cost: Optional[float] = Field(
+    estimatedCost: Optional[float] = Field(
         default=None, ge=0, description="Costo estimado"
     )
-    estimated_time: Optional[int] = Field(
+    estimatedTime: Optional[int] = Field(
         default=None, ge=0, description="Tiempo estimado en minutos"
     )
-    date_received: Optional[date] = Field(
-        default=None, description="Fecha de recepción"
-    )
+    dateReceived: Optional[date] = Field(default=None, description="Fecha de recepción")
 
 
 class HousekeepingWorkOrderParams(BaseModel):
     """Parámetros para crear orden de housekeeping"""
 
-    unit_id: int = Field(gt=0, description="ID de la unidad que requiere limpieza")
-    scheduled_at: date = Field(description="Fecha programada")
-    is_inspection: bool = Field(
+    unitId: int = Field(gt=0, description="ID de la unidad que requiere limpieza")
+    scheduledAt: date = Field(description="Fecha programada")
+    isInspection: bool = Field(
         default=False, description="True si es inspección, False si es limpieza"
     )
-    clean_type_id: Optional[int] = Field(
+    cleanTypeId: Optional[int] = Field(
         default=None, gt=0, description="ID del tipo de limpieza"
     )
     comments: Optional[str] = Field(
