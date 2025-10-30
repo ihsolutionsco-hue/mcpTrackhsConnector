@@ -15,7 +15,7 @@ def test_server_creation():
     print("Test: Creacion del servidor")
 
     try:
-        from server import TrackHSServer
+        from _server import TrackHSServer
 
         # Crear servidor (sin credenciales)
         server = TrackHSServer()
@@ -67,7 +67,7 @@ def test_server_structure():
     print("Test: Estructura del servidor")
 
     try:
-        from server import TrackHSServer
+        from _server import TrackHSServer
 
         # Crear servidor
         server = TrackHSServer()

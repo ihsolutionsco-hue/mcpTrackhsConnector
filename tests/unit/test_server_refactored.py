@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 # Agregar src al path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
-from server import TrackHSServer
+from _server import TrackHSServer
 from server_logic import create_api_client, create_mcp_server, register_tools
 
 
@@ -18,11 +18,11 @@ def test_server_initialization():
     """Test que el servidor se inicializa correctamente"""
     print("Test: Inicializacion del servidor")
 
-    # Mock de las dependencias
+    # Mock de las dependencias (actualizado para _server)
     with (
-        patch("server.create_api_client") as mock_api_client,
-        patch("server.create_mcp_server") as mock_mcp_server,
-        patch("server.register_tools") as mock_register_tools,
+        patch("_server.create_api_client") as mock_api_client,
+        patch("_server.create_mcp_server") as mock_mcp_server,
+        patch("_server.register_tools") as mock_register_tools,
     ):
 
         # Configurar mocks
@@ -46,9 +46,9 @@ def test_server_without_credentials():
     print("Test: Servidor sin credenciales")
 
     with (
-        patch("server.create_api_client") as mock_api_client,
-        patch("server.create_mcp_server") as mock_mcp_server,
-        patch("server.register_tools") as mock_register_tools,
+        patch("_server.create_api_client") as mock_api_client,
+        patch("_server.create_mcp_server") as mock_mcp_server,
+        patch("_server.register_tools") as mock_register_tools,
     ):
 
         # Configurar mocks - sin credenciales
@@ -72,9 +72,9 @@ def test_server_run():
     print("Test: Ejecucion del servidor")
 
     with (
-        patch("server.create_api_client") as mock_api_client,
-        patch("server.create_mcp_server") as mock_mcp_server,
-        patch("server.register_tools") as mock_register_tools,
+        patch("_server.create_api_client") as mock_api_client,
+        patch("_server.create_mcp_server") as mock_mcp_server,
+        patch("_server.register_tools") as mock_register_tools,
     ):
 
         # Configurar mocks
@@ -104,9 +104,9 @@ def test_server_close():
     print("Test: Cierre del servidor")
 
     with (
-        patch("server.create_api_client") as mock_api_client,
-        patch("server.create_mcp_server") as mock_mcp_server,
-        patch("server.register_tools") as mock_register_tools,
+        patch("_server.create_api_client") as mock_api_client,
+        patch("_server.create_mcp_server") as mock_mcp_server,
+        patch("_server.register_tools") as mock_register_tools,
     ):
 
         # Configurar mocks
@@ -134,9 +134,9 @@ def test_context_manager():
     print("Test: Context manager")
 
     with (
-        patch("server.create_api_client") as mock_api_client,
-        patch("server.create_mcp_server") as mock_mcp_server,
-        patch("server.register_tools") as mock_register_tools,
+        patch("_server.create_api_client") as mock_api_client,
+        patch("_server.create_mcp_server") as mock_mcp_server,
+        patch("_server.register_tools") as mock_register_tools,
     ):
 
         # Configurar mocks
