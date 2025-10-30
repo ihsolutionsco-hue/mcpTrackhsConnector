@@ -130,7 +130,15 @@ def register_tools(mcp_server: FastMCP, api_client: TrackHSAPIClient) -> Dict[st
     tools = {}
 
     try:
-        for tool_class in TOOLS:
+        # Importar dinámicamente la lista de herramientas para permitir monkeypatching en tests
+        try:
+            import tools as tools_module  # type: ignore
+
+            tool_classes = getattr(tools_module, "TOOLS", TOOLS)
+        except Exception:
+            tool_classes = TOOLS
+
+        for tool_class in tool_classes:
             # Crear instancia de la herramienta
             tool_instance = tool_class(api_client)
 
@@ -140,11 +148,14 @@ def register_tools(mcp_server: FastMCP, api_client: TrackHSAPIClient) -> Dict[st
             # Guardar referencia
             tools[tool_instance.name] = tool_instance
 
+            safe_tool_class_name = getattr(
+                tool_class, "__name__", getattr(tool_class, "name", str(tool_class))
+            )
             logger.info(
                 f"Herramienta registrada: {tool_instance.name}",
                 extra={
                     "tool_name": tool_instance.name,
-                    "tool_class": tool_class.__name__,
+                    "tool_class": safe_tool_class_name,
                 },
             )
 

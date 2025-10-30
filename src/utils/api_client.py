@@ -356,6 +356,286 @@ class TrackHSAPIClient:
         # Procesar respuesta
         processed_result = self._process_units_response(result)
 
+        # Fallback: aplicar filtros/ordenamiento del lado cliente si el API no los respeta
+        try:
+            # Normalizar parámetros solicitados a snake_case para comparar con unidades procesadas
+            requested_params_snake = self._convert_camelcase_to_snakecase(api_params)
+
+            units_list = processed_result.get("units", [])
+            filtered_units = units_list
+            applied_client_filters = False
+
+            # Heurística: aplicar fallback solo si la respuesta parece no respetar filtros
+            should_apply_fallback = False
+            if units_list:
+                # is_active
+                if requested_params_snake.get("is_active") is not None:
+                    want = bool(int(requested_params_snake.get("is_active")))
+                    if any(
+                        u.get("is_active") is not want
+                        for u in units_list
+                        if u.get("is_active") is not None
+                    ):
+                        should_apply_fallback = True
+                # is_bookable
+                if requested_params_snake.get("is_bookable") is not None:
+                    want = bool(int(requested_params_snake.get("is_bookable")))
+                    if any(
+                        u.get("is_bookable") is not want
+                        for u in units_list
+                        if u.get("is_bookable") is not None
+                    ):
+                        should_apply_fallback = True
+                # pets_friendly
+                if requested_params_snake.get("pets_friendly") is not None:
+                    want = bool(int(requested_params_snake.get("pets_friendly")))
+                    if any(
+                        u.get("pets_friendly") is not want
+                        for u in units_list
+                        if u.get("pets_friendly") is not None
+                    ):
+                        should_apply_fallback = True
+
+                # bedrooms range
+                def _num_chk(x: Any) -> Optional[int]:
+                    try:
+                        return int(x) if x is not None else None
+                    except Exception:
+                        return None
+
+                if (
+                    requested_params_snake.get("min_bedrooms") is not None
+                    or requested_params_snake.get("max_bedrooms") is not None
+                ):
+                    mn = _num_chk(requested_params_snake.get("min_bedrooms"))
+                    mx = _num_chk(requested_params_snake.get("max_bedrooms"))
+                    for u in units_list:
+                        b = _num_chk(u.get("bedrooms"))
+                        if b is None:
+                            continue
+                        if (mn is not None and b < mn) or (mx is not None and b > mx):
+                            should_apply_fallback = True
+                            break
+                # bathrooms range
+                if (
+                    requested_params_snake.get("min_bathrooms") is not None
+                    or requested_params_snake.get("max_bathrooms") is not None
+                ):
+                    mn = _num_chk(requested_params_snake.get("min_bathrooms"))
+                    mx = _num_chk(requested_params_snake.get("max_bathrooms"))
+                    for u in units_list:
+                        v = u.get("bathrooms")
+                        if v is None:
+                            v = u.get("full_bathrooms")
+                        ba = _num_chk(v)
+                        if ba is None:
+                            continue
+                        if (mn is not None and ba < mn) or (mx is not None and ba > mx):
+                            should_apply_fallback = True
+                            break
+                # occupancy range
+                if (
+                    requested_params_snake.get("min_occupancy") is not None
+                    or requested_params_snake.get("max_occupancy") is not None
+                ):
+                    mn = _num_chk(requested_params_snake.get("min_occupancy"))
+                    mx = _num_chk(requested_params_snake.get("max_occupancy"))
+                    for u in units_list:
+                        oc = _num_chk(u.get("occupancy"))
+                        if oc is None:
+                            continue
+                        if (mn is not None and oc < mn) or (mx is not None and oc > mx):
+                            should_apply_fallback = True
+                            break
+
+            def _num(x: Any) -> Optional[int]:
+                try:
+                    return int(x) if x is not None else None
+                except Exception:
+                    return None
+
+            # Filtros booleanos
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("is_active") is not None
+            ):
+                applied_client_filters = True
+                want = bool(int(requested_params_snake.get("is_active")))
+                filtered_units = [
+                    u for u in filtered_units if u.get("is_active") is want
+                ]
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("is_bookable") is not None
+            ):
+                applied_client_filters = True
+                want = bool(int(requested_params_snake.get("is_bookable")))
+                filtered_units = [
+                    u for u in filtered_units if u.get("is_bookable") is want
+                ]
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("pets_friendly") is not None
+            ):
+                applied_client_filters = True
+                want = bool(int(requested_params_snake.get("pets_friendly")))
+                filtered_units = [
+                    u for u in filtered_units if u.get("pets_friendly") is want
+                ]
+
+            # Filtros numéricos - bedrooms
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("bedrooms") is not None
+            ):
+                applied_client_filters = True
+                eqv = _num(requested_params_snake.get("bedrooms"))
+                filtered_units = [
+                    u for u in filtered_units if _num(u.get("bedrooms")) == eqv
+                ]
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("min_bedrooms") is not None
+            ):
+                applied_client_filters = True
+                mn = _num(requested_params_snake.get("min_bedrooms"))
+                filtered_units = [
+                    u
+                    for u in filtered_units
+                    if (b := _num(u.get("bedrooms"))) is not None and b >= mn
+                ]
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("max_bedrooms") is not None
+            ):
+                applied_client_filters = True
+                mx = _num(requested_params_snake.get("max_bedrooms"))
+                filtered_units = [
+                    u
+                    for u in filtered_units
+                    if (b := _num(u.get("bedrooms"))) is not None and b <= mx
+                ]
+
+            # Filtros numéricos - bathrooms (considerar full_bathrooms si falta)
+            def _bath(u: Dict[str, Any]) -> Optional[int]:
+                v = u.get("bathrooms")
+                if v is None:
+                    v = u.get("full_bathrooms")
+                return _num(v)
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("bathrooms") is not None
+            ):
+                applied_client_filters = True
+                eqv = _num(requested_params_snake.get("bathrooms"))
+                filtered_units = [u for u in filtered_units if _bath(u) == eqv]
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("min_bathrooms") is not None
+            ):
+                applied_client_filters = True
+                mn = _num(requested_params_snake.get("min_bathrooms"))
+                filtered_units = [
+                    u
+                    for u in filtered_units
+                    if (ba := _bath(u)) is not None and ba >= mn
+                ]
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("max_bathrooms") is not None
+            ):
+                applied_client_filters = True
+                mx = _num(requested_params_snake.get("max_bathrooms"))
+                filtered_units = [
+                    u
+                    for u in filtered_units
+                    if (ba := _bath(u)) is not None and ba <= mx
+                ]
+
+            # Filtros numéricos - occupancy
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("occupancy") is not None
+            ):
+                applied_client_filters = True
+                eqv = _num(requested_params_snake.get("occupancy"))
+                filtered_units = [
+                    u for u in filtered_units if _num(u.get("occupancy")) == eqv
+                ]
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("min_occupancy") is not None
+            ):
+                applied_client_filters = True
+                mn = _num(requested_params_snake.get("min_occupancy"))
+                filtered_units = [
+                    u
+                    for u in filtered_units
+                    if (oc := _num(u.get("occupancy"))) is not None and oc >= mn
+                ]
+
+            if (
+                should_apply_fallback
+                and requested_params_snake.get("max_occupancy") is not None
+            ):
+                applied_client_filters = True
+                mx = _num(requested_params_snake.get("max_occupancy"))
+                filtered_units = [
+                    u
+                    for u in filtered_units
+                    if (oc := _num(u.get("occupancy"))) is not None and oc <= mx
+                ]
+
+            # Filtro por unit_code exacto
+            if should_apply_fallback and requested_params_snake.get("unit_code"):
+                applied_client_filters = True
+                code = str(requested_params_snake.get("unit_code")).strip().lower()
+                filtered_units = [
+                    u
+                    for u in filtered_units
+                    if str(u.get("unit_code", "")).strip().lower() == code
+                ]
+
+            # Ordenamiento del lado cliente
+            sort_key = None
+            sort_column = requested_params_snake.get("sort_column")
+            sort_direction = requested_params_snake.get("sort_direction")
+            if sort_column:
+                mapping = {
+                    "name": "name",
+                    "unitCode": "unit_code",
+                    "unitTypeName": "unit_type_name",
+                    "nodeName": "node_name",
+                    "id": "id",
+                }
+                sort_key = mapping.get(str(sort_column))
+            if sort_key:
+                reverse = str(sort_direction or "asc").lower() == "desc"
+                filtered_units = sorted(
+                    filtered_units,
+                    key=lambda u: (u.get(sort_key) is None, u.get(sort_key)),
+                    reverse=reverse,
+                )
+
+            if (applied_client_filters and should_apply_fallback) or sort_key:
+                processed_result["units"] = filtered_units
+                processed_result["filtersAppliedClientSide"] = True
+                processed_result["total_items_client_page"] = len(filtered_units)
+        except Exception as _e:
+            # No interrumpir flujo si algo falla en filtrado cliente
+            self.logger.warning(
+                "Filtro/ordenamiento cliente no aplicado por error",
+                extra={"error": str(_e)},
+            )
+
         # Log de resultado final
         self.logger.info(
             "Resultado procesado de búsqueda",
