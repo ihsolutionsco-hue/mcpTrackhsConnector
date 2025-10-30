@@ -3,7 +3,9 @@ Herramientas MCP para TrackHS
 Funciones individuales para compatibilidad con FastMCP
 """
 
+import json
 import os
+import re
 import sys
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -45,6 +47,83 @@ def setup_tools(client: TrackHSAPIClient) -> None:
 def register_tools_with_mcp(mcp_server) -> None:
     """Registra las herramientas con la instancia de FastMCP"""
 
+    # Utilidades simples de coerción de tipos para entradas del MCP
+    def _coerce_bool(value: Any) -> Optional[bool]:
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return bool(int(value))
+        if isinstance(value, str):
+            v = value.strip().lower()
+            if v in {"true", "1", "yes", "y", "si", "sí"}:
+                return True
+            if v in {"false", "0", "no", "n"}:
+                return False
+        return None
+
+    def _coerce_int(value: Any) -> Optional[int]:
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return value
+        if isinstance(value, float):
+            return int(value)
+        if isinstance(value, str) and value.strip() != "":
+            try:
+                return int(value.strip())
+            except ValueError:
+                return None
+        return None
+
+    def _coerce_float(value: Any) -> Optional[float]:
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+        if isinstance(value, str) and value.strip() != "":
+            try:
+                return float(value.strip())
+            except ValueError:
+                return None
+        return None
+
+    def _coerce_date_str(value: Any) -> Optional[str]:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            v = value.strip()
+            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
+                return v
+        return None
+
+    def _coerce_list_int(value: Any) -> Optional[List[int]]:
+        if value is None:
+            return None
+        if isinstance(value, list):
+            result: List[int] = []
+            for x in value:
+                i = _coerce_int(x)
+                if i is not None:
+                    result.append(i)
+            return result if result else None
+        if isinstance(value, str):
+            s = value.strip()
+            try:
+                parsed = json.loads(s)
+                if isinstance(parsed, list):
+                    return _coerce_list_int(parsed)
+            except Exception:
+                parts = [p for p in re.split(r"[\s,]+", s.strip("[]")) if p]
+                result = []
+                for p in parts:
+                    i = _coerce_int(p)
+                    if i is not None:
+                        result.append(i)
+                return result if result else None
+        return None
+
     @mcp_server.tool()
     def search_reservations(
         page: int = Field(default=1, ge=1, description="Número de página (1-based)"),
@@ -79,13 +158,19 @@ def register_tools_with_mcp(mcp_server) -> None:
             raise TrackHSAPIError(error_msg)
 
         try:
+            # Coerción simple de tipos de entrada
+            page_c = _coerce_int(page) or 1
+            size_c = _coerce_int(size) or 10
+            arrival_start_c = _coerce_date_str(arrival_start)
+            arrival_end_c = _coerce_date_str(arrival_end)
+
             # Validar parámetros
             params = ReservationSearchParams(
-                page=page,
-                size=size,
+                page=page_c,
+                size=size_c,
                 search=search,
-                arrival_start=arrival_start,
-                arrival_end=arrival_end,
+                arrival_start=arrival_start_c,
+                arrival_end=arrival_end_c,
                 status=status,
             )
 
@@ -355,53 +440,165 @@ def register_tools_with_mcp(mcp_server) -> None:
             raise TrackHSAPIError(error_msg)
 
         try:
+            # Coerción simple de tipos de entrada
+            page_c = _coerce_int(page) or 1
+            size_c = _coerce_int(size) or 10
+            bedrooms_c = _coerce_int(bedrooms)
+            min_bedrooms_c = _coerce_int(min_bedrooms)
+            max_bedrooms_c = _coerce_int(max_bedrooms)
+            bathrooms_c = _coerce_int(bathrooms)
+            min_bathrooms_c = _coerce_int(min_bathrooms)
+            max_bathrooms_c = _coerce_int(max_bathrooms)
+            occupancy_c = _coerce_int(occupancy)
+            min_occupancy_c = _coerce_int(min_occupancy)
+            max_occupancy_c = _coerce_int(max_occupancy)
+            is_active_c = _coerce_bool(is_active)
+            is_bookable_c = _coerce_bool(is_bookable)
+            pets_friendly_c = _coerce_bool(pets_friendly)
+            allow_unit_rates_c = _coerce_bool(allow_unit_rates)
+            computed_c = _coerce_bool(computed)
+            inherited_c = _coerce_bool(inherited)
+            limited_c = _coerce_bool(limited)
+            include_descriptions_c = _coerce_bool(include_descriptions)
+            arrival_c = _coerce_date_str(arrival)
+            departure_c = _coerce_date_str(departure)
+            content_updated_since_c = content_updated_since
+            amenity_id_c = _coerce_list_int(amenity_id)
+            node_id_c = _coerce_list_int(node_id)
+            unit_type_id_c = _coerce_list_int(unit_type_id)
+            owner_id_c = _coerce_list_int(owner_id)
+            company_id_c = _coerce_list_int(company_id)
+            channel_id_c = _coerce_list_int(channel_id)
+            lodging_type_id_c = _coerce_list_int(lodging_type_id)
+            bed_type_id_c = _coerce_list_int(bed_type_id)
+            amenity_all_c = _coerce_list_int(amenity_all)
+            unit_ids_c = _coerce_list_int(unit_ids)
+            calendar_id_c = _coerce_int(calendar_id)
+            role_id_c = _coerce_int(role_id)
+
             # Validar parámetros
             params = UnitSearchParams(
-                page=page,
-                size=size,
+                page=page_c,
+                size=size_c,
                 search=search,
                 term=term,
                 unit_code=unit_code,
                 short_name=short_name,
-                bedrooms=bedrooms,
-                min_bedrooms=min_bedrooms,
-                max_bedrooms=max_bedrooms,
-                bathrooms=bathrooms,
-                min_bathrooms=min_bathrooms,
-                max_bathrooms=max_bathrooms,
-                occupancy=occupancy,
-                min_occupancy=min_occupancy,
-                max_occupancy=max_occupancy,
-                is_active=is_active,
-                is_bookable=is_bookable,
-                pets_friendly=pets_friendly,
+                bedrooms=bedrooms_c,
+                min_bedrooms=min_bedrooms_c,
+                max_bedrooms=max_bedrooms_c,
+                bathrooms=bathrooms_c,
+                min_bathrooms=min_bathrooms_c,
+                max_bathrooms=max_bathrooms_c,
+                occupancy=occupancy_c,
+                min_occupancy=min_occupancy_c,
+                max_occupancy=max_occupancy_c,
+                is_active=is_active_c,
+                is_bookable=is_bookable_c,
+                pets_friendly=pets_friendly_c,
                 unit_status=unit_status,
-                allow_unit_rates=allow_unit_rates,
-                arrival=arrival,
-                departure=departure,
-                computed=computed,
-                inherited=inherited,
-                limited=limited,
-                include_descriptions=include_descriptions,
-                content_updated_since=content_updated_since,
-                amenity_id=amenity_id,
-                node_id=node_id,
-                unit_type_id=unit_type_id,
-                owner_id=owner_id,
-                company_id=company_id,
-                channel_id=channel_id,
-                lodging_type_id=lodging_type_id,
-                bed_type_id=bed_type_id,
-                amenity_all=amenity_all,
-                unit_ids=unit_ids,
-                calendar_id=calendar_id,
-                role_id=role_id,
+                allow_unit_rates=allow_unit_rates_c,
+                arrival=arrival_c,
+                departure=departure_c,
+                computed=computed_c,
+                inherited=inherited_c,
+                limited=limited_c,
+                include_descriptions=include_descriptions_c,
+                content_updated_since=content_updated_since_c,
+                amenity_id=amenity_id_c,
+                node_id=node_id_c,
+                unit_type_id=unit_type_id_c,
+                owner_id=owner_id_c,
+                company_id=company_id_c,
+                channel_id=channel_id_c,
+                lodging_type_id=lodging_type_id_c,
+                bed_type_id=bed_type_id_c,
+                amenity_all=amenity_all_c,
+                unit_ids=unit_ids_c,
+                calendar_id=calendar_id_c,
+                role_id=role_id_c,
                 sort_column=sort_column,
                 sort_direction=sort_direction,
             )
 
             # Realizar búsqueda
             response = api_client.search_units(params.model_dump())
+
+            # Fallback simple de filtrado del lado cliente si el API no respeta filtros
+            units = response.get("units") or response.get("_embedded", {}).get("units")
+            if isinstance(units, list):
+                applied = False
+
+                def _matches(u: Dict[str, Any]) -> bool:
+                    def gv(keys: List[str]) -> Any:
+                        for k in keys:
+                            if k in u:
+                                return u[k]
+                        return None
+
+                    # Booleanos
+                    if is_active_c is not None:
+                        applied = True
+                        if gv(["is_active", "isActive"]) is not is_active_c:
+                            return False
+                    if is_bookable_c is not None:
+                        applied = True
+                        if gv(["is_bookable", "isBookable"]) is not is_bookable_c:
+                            return False
+                    if pets_friendly_c is not None:
+                        applied = True
+                        if (
+                            gv(["pets_friendly", "petFriendly", "petsFriendly"])
+                            is not pets_friendly_c
+                        ):
+                            return False
+
+                    # Numéricos: bedrooms/bathrooms/occupancy
+                    b = gv(["bedrooms"]) or 0
+                    ba = gv(["bathrooms"]) or 0
+                    oc = gv(["max_occupancy", "maxOccupancy", "occupancy"]) or 0
+                    if bedrooms_c is not None:
+                        applied = True
+                        if b != bedrooms_c:
+                            return False
+                    if min_bedrooms_c is not None and b < min_bedrooms_c:
+                        applied = True
+                        return False
+                    if max_bedrooms_c is not None and b > max_bedrooms_c:
+                        applied = True
+                        return False
+                    if bathrooms_c is not None and ba != bathrooms_c:
+                        applied = True
+                        return False
+                    if min_bathrooms_c is not None and ba < min_bathrooms_c:
+                        applied = True
+                        return False
+                    if max_bathrooms_c is not None and ba > max_bathrooms_c:
+                        applied = True
+                        return False
+                    if occupancy_c is not None and oc != occupancy_c:
+                        applied = True
+                        return False
+                    if min_occupancy_c is not None and oc < min_occupancy_c:
+                        applied = True
+                        return False
+                    if max_occupancy_c is not None and oc > max_occupancy_c:
+                        applied = True
+                        return False
+
+                    # unit_ids
+                    if unit_ids_c:
+                        applied = True
+                        if gv(["id"]) not in set(unit_ids_c):
+                            return False
+
+                    return True
+
+                filtered = [u for u in units if _matches(u)]
+                if applied and len(filtered) != len(units):
+                    response["units"] = filtered
+                    response["filtersAppliedClientSide"] = True
+                    response["total_items_client_page"] = len(filtered)
 
             logger.info(
                 f"Búsqueda de unidades exitosa: {response.get('total_items', 0)} resultados",
@@ -453,15 +650,23 @@ def register_tools_with_mcp(mcp_server) -> None:
             raise TrackHSAPIError(error_msg)
 
         try:
+            # Coerción simple
+            page_c = _coerce_int(page) or 1
+            size_c = _coerce_int(size) or 10
+            group_id_c = _coerce_int(group_id)
+            is_public_c = _coerce_bool(is_public)
+            public_searchable_c = _coerce_bool(public_searchable)
+            is_filterable_c = _coerce_bool(is_filterable)
+
             # Validar parámetros
             params = AmenitySearchParams(
-                page=page,
-                size=size,
+                page=page_c,
+                size=size_c,
                 search=search,
-                group_id=group_id,
-                is_public=is_public,
-                public_searchable=public_searchable,
-                is_filterable=is_filterable,
+                group_id=group_id_c,
+                is_public=is_public_c,
+                public_searchable=public_searchable_c,
+                is_filterable=is_filterable_c,
             )
 
             # Realizar búsqueda
