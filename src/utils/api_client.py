@@ -719,26 +719,26 @@ class TrackHSAPIClient:
 
         return result
 
-    def get_folio(self, reservation_id: int) -> Dict[str, Any]:
+    def get_folio(self, folio_id: int) -> Dict[str, Any]:
         """
-        Obtiene el folio financiero de una reserva
+        Obtiene un folio financiero por su ID según documentación oficial de TrackHS
 
         Args:
-            reservation_id: ID de la reserva
+            folio_id: ID del folio (no de la reserva)
 
         Returns:
             Datos del folio financiero
         """
         self.logger.info(
             "Obteniendo folio financiero",
-            extra={"reservation_id": reservation_id},
+            extra={"folio_id": folio_id},
         )
 
-        result = self.get(f"api/pms/reservations/{reservation_id}/folio")
+        result = self.get(f"api/pms/folios/{folio_id}")
 
         self.logger.info(
             "Folio financiero obtenido exitosamente",
-            extra={"reservation_id": reservation_id},
+            extra={"folio_id": folio_id},
         )
 
         return result

@@ -484,12 +484,16 @@ def register_tools_with_mcp(mcp_server) -> None:
 
     @mcp_server.tool()
     def get_folio(
-        reservation_id: int = Field(
-            gt=0, description="ID de la reserva para obtener su folio financiero"
+        folio_id: int = Field(
+            gt=0, description="ID del folio financiero para obtener sus detalles"
         )
     ) -> Dict[str, Any]:
         """
-        Obtener el folio financiero completo de una reserva.
+        Obtener el folio financiero completo por su ID.
+
+        Nota: Este endpoint requiere el ID del folio, no el ID de la reserva.
+        Para obtener el folio de una reserva, primero necesitas obtener el folio_id
+        desde los datos de la reserva.
         """
         if not api_client:
             error_msg = (
@@ -501,25 +505,23 @@ def register_tools_with_mcp(mcp_server) -> None:
 
         try:
             # Validar ID
-            validate_positive_integer(reservation_id, "reservation_id")
+            validate_positive_integer(folio_id, "folio_id")
 
             # Obtener folio
-            response = api_client.get_folio(reservation_id)
+            response = api_client.get_folio(folio_id)
 
             logger.info(
-                f"Folio obtenido exitosamente para reserva: {reservation_id}",
-                extra={"reservation_id": reservation_id},
+                f"Folio obtenido exitosamente: {folio_id}",
+                extra={"folio_id": folio_id},
             )
 
             return response
 
         except TrackHSNotFoundError:
-            logger.warning(f"Folio no encontrado para reserva: {reservation_id}")
+            logger.warning(f"Folio no encontrado: {folio_id}")
             raise
         except Exception as e:
-            logger.error(
-                f"Error obteniendo folio para reserva {reservation_id}: {str(e)}"
-            )
+            logger.error(f"Error obteniendo folio {folio_id}: {str(e)}")
             raise TrackHSAPIError(f"Error obteniendo folio: {str(e)}")
 
     @mcp_server.tool()
