@@ -177,6 +177,16 @@ def test_server_logic_functions():
         mock_tool_instance = Mock()
         mock_tool_instance.name = "test_tool"
         mock_tool_instance.description = "Test tool"
+
+        # Mock input_schema con model_fields (Pydantic v2)
+        mock_input_schema = Mock()
+        mock_input_schema.model_fields = {
+            "param1": Mock(annotation=str, default=None),
+            "param2": Mock(annotation=int, default=1),
+        }
+        mock_tool_instance.input_schema = mock_input_schema
+
+        mock_tool_instance._execute_logic = Mock(return_value={"result": "ok"})
         mock_tool_class.return_value = mock_tool_instance
 
         mock_tools[0] = mock_tool_class

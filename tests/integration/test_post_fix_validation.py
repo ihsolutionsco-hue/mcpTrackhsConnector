@@ -16,6 +16,7 @@ load_dotenv()
 # Agregar src al path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src"))
 
+from tools.search_units import SearchUnitsTool
 from utils.api_client import TrackHSAPIClient
 from utils.logger import get_logger
 
@@ -51,6 +52,11 @@ class TestPostFixValidation:
         session.auth = (username, password)
         session.timeout = 30
         return session
+
+    def _run_search_units_tool(
+        self, api_client: TrackHSAPIClient, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        return SearchUnitsTool(api_client).execute(**params)
 
     def test_baseline_data_available(self, direct_session):
         """Test que verifica que hay datos disponibles en la API"""
@@ -208,7 +214,7 @@ class TestPostFixValidation:
 
         # Llamada a través de api_client
         params_client = {"page": 1, "size": 5}
-        result_client = api_client.search_units(params_client)
+        result_client = self._run_search_units_tool(api_client, params_client)
         units_client = result_client.get("units", [])
 
         logger.info(f"Directa: {len(units_direct)} unidades")
@@ -229,7 +235,7 @@ class TestPostFixValidation:
 
         # Llamada a través de api_client
         params_client = {"page": 1, "size": 5, "is_active": True}
-        result_client = api_client.search_units(params_client)
+        result_client = self._run_search_units_tool(api_client, params_client)
         units_client = result_client.get("units", [])
 
         logger.info(f"Directa con isActive=1: {len(units_direct)} unidades")
@@ -250,7 +256,7 @@ class TestPostFixValidation:
             "pets_friendly": True,
         }
 
-        result = api_client.search_units(params)
+        result = self._run_search_units_tool(api_client, params)
         units = result.get("units", [])
         total_items = result.get("total_items", 0)
 

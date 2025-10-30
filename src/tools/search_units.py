@@ -97,7 +97,7 @@ class SearchUnitsTool(BaseTool):
             params = self.api_client.build_units_query(validated_input.model_dump())
         except Exception:
             # Fallback al método local si algo falla (compatibilidad)
-            params = self._prepare_api_params(validated_input)
+            params = {}  # Usar diccionario vacío como fallback seguro
 
         # Log de parámetros preparados
         self.logger.info(

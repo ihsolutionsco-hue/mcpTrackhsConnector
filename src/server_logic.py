@@ -179,55 +179,31 @@ def register_tools(mcp_server: FastMCP, api_client: TrackHSAPIClient) -> Dict[st
 
 def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
     """
-    Registra una herramienta individual en el servidor MCP
+    Registra una herramienta individual en el servidor MCP.
 
-    FastMCP no acepta funciones con **kwargs, así que creamos un wrapper
-    que llama directamente al método execute de la herramienta.
-
-    El método execute acepta **kwargs pero FastMCP no puede registrar eso,
-    así que usamos una función lambda que llama a execute con los kwargs
-    que FastMCP pasa como argumentos individuales.
+    Extrae parámetros del schema Pydantic y crea función simple.
+    FastMCP infiere automáticamente desde type hints individuales.
 
     Args:
         mcp_server: Servidor MCP donde registrar la herramienta
         tool_instance: Instancia de la herramienta
     """
-    logger = get_logger(__name__)
+    from inspect import Parameter, Signature
 
-    # Obtener el schema de entrada para crear type hints
-    input_schema = tool_instance.input_schema
+    InputSchema = tool_instance.input_schema
 
-    # Crear función wrapper sin **kwargs
-    # FastMCP necesita una función con parámetros específicos
-    # Usamos execute directamente pero necesitamos crear una función
-    # que acepte los parámetros del schema como argumentos individuales
-
-    import inspect
-    from typing import get_type_hints
-
-    # Obtener campos del schema Pydantic
-    if hasattr(input_schema, "model_fields"):
-        # Pydantic v2
-        schema_fields = input_schema.model_fields
-    elif hasattr(input_schema, "__fields__"):
-        # Pydantic v1
-        schema_fields = input_schema.__fields__
+    # Obtener campos según versión de Pydantic
+    if hasattr(InputSchema, "model_fields"):
+        fields = InputSchema.model_fields  # Pydantic v2
+    elif hasattr(InputSchema, "__fields__"):
+        fields = InputSchema.__fields__  # Pydantic v1
     else:
-        schema_fields = {}
+        fields = {}
 
-    # Crear función wrapper dinámica
-    # Necesitamos una función que acepte todos los campos del schema
-    # pero FastMCP necesita la firma explícita
-    # Solución: usar functools para crear un wrapper que FastMCP pueda registrar
-
-    from functools import wraps
-
-    # Obtener los campos del schema con sus tipos
-    type_hints = {}
-    defaults = {}
-
-    for field_name, field_info in schema_fields.items():
-        # Obtener el tipo del campo
+    # Crear parámetros para la función
+    parameters = []
+    for field_name, field_info in fields.items():
+        # Obtener tipo y default
         if hasattr(field_info, "annotation"):
             field_type = field_info.annotation
         elif hasattr(field_info, "type_"):
@@ -235,104 +211,72 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
         else:
             field_type = Any
 
-        # Si es Optional, extraer el tipo interno
+        # Si es Optional, extraer tipo interno
         if hasattr(field_type, "__args__") and len(field_type.__args__) > 0:
-            # Optional[X] o Union[X, None] -> X
-            non_none_args = [
-                arg for arg in field_type.__args__ if arg is not type(None)
-            ]
-            if non_none_args:
-                field_type = non_none_args[0]
+            non_none = [arg for arg in field_type.__args__ if arg is not type(None)]
+            if non_none:
+                field_type = non_none[0]
 
-        type_hints[field_name] = field_type
+        # Obtener default - Pydantic v2 usa is_required()
+        if hasattr(field_info, "is_required"):
+            is_required = field_info.is_required()
+        elif hasattr(field_info, "required"):
+            is_required = field_info.required
+        else:
+            # Fallback: verificar si es Optional
+            is_required = not (
+                hasattr(field_type, "__args__") and type(None) in field_type.__args__
+            )
 
-        # Obtener default si existe
-        if hasattr(field_info, "default"):
-            default = field_info.default
-            if default is not None and not callable(default):
-                defaults[field_name] = default
+        if is_required:
+            default = Parameter.empty
+        else:
+            # Campo es opcional - obtener default si existe
+            if hasattr(field_info, "default"):
+                default_val = field_info.default
+                # PydanticUndefined significa sin default, usar None
+                if callable(default_val) or (
+                    hasattr(default_val, "__class__")
+                    and "Undefined" in str(default_val.__class__)
+                ):
+                    default = None
+                else:
+                    default = default_val  # Puede ser None u otro valor
+            else:
+                default = None  # Campo opcional sin default explícito
 
-    # Crear función wrapper dinámica sin **kwargs
-    # FastMCP necesita una función que acepte cada campo del schema como parámetro individual
-    # Usamos types.FunctionType para crear una función con la firma correcta
-
-    import types
-    from inspect import Parameter, Signature
-
-    # Crear parámetros para la firma de la función
-    parameters = []
-    for field_name, field_info in schema_fields.items():
-        # Obtener tipo y default
-        field_type = type_hints.get(field_name, Any)
-        default_value = defaults.get(field_name, Parameter.empty)
-
-        # Crear parámetro
-        param = Parameter(
-            name=field_name,
-            kind=Parameter.KEYWORD_ONLY,
-            default=default_value,
-            annotation=field_type,
+        parameters.append(
+            Parameter(
+                field_name,
+                Parameter.KEYWORD_ONLY,
+                default=default,
+                annotation=field_type,
+            )
         )
-        parameters.append(param)
 
-    # Crear firma de la función
+    # Crear función wrapper simple
     sig = Signature(parameters, return_annotation=Dict[str, Any])
 
-    # Crear función wrapper que acepta parámetros individuales
-    # Usamos exec para crear una función dinámicamente con los parámetros del schema
+    def tool_wrapper(**kwargs) -> Dict[str, Any]:
+        """Llama a la herramienta con parámetros validados"""
+        try:
+            validated = InputSchema(
+                **{k: v for k, v in kwargs.items() if v is not None}
+            )
+            return tool_instance._execute_logic(validated)
+        except TrackHSError as e:
+            raise ToolError(str(e))
+        except Exception as e:
+            logger = get_logger(__name__)
+            logger.error(f"Error en {tool_instance.name}", extra={"error": str(e)})
+            raise ToolError(f"Error interno: {str(e)}")
 
-    # Construir lista de nombres de parámetros
-    param_names = list(schema_fields.keys())
-
-    # Crear código de la función como string
-    param_list = ", ".join([f"{name}=None" for name in param_names])
-    params_dict = ", ".join([f"'{name}': {name}" for name in param_names])
-
-    # Crear código de la función
-    func_code = f'''def tool_wrapper({param_list}):
-    """Wrapper para ejecutar la herramienta"""
-    params = {{{params_dict}}}
-    # Filtrar None values
-    params = {{k: v for k, v in params.items() if v is not None}}
-    try:
-        return tool_instance.execute(**params)
-    except TrackHSError as trackhs_error:
-        raise ToolError(str(trackhs_error))
-    except Exception as unexpected_error:
-        logger.error(
-            f"Error inesperado en herramienta {{tool_instance.name}}",
-            extra={{
-                "tool_name": tool_instance.name,
-                "error_type": type(unexpected_error).__name__,
-                "error_message": str(unexpected_error),
-            }},
-        )
-        raise ToolError(f"Error interno: {{str(unexpected_error)}}")
-'''
-
-    # Ejecutar el código en un contexto local
-    local_vars = {
-        "tool_instance": tool_instance,
-        "logger": logger,
-        "TrackHSError": TrackHSError,
-        "ToolError": ToolError,
-        "Dict": Dict,
-        "Any": Any,
+    tool_wrapper.__signature__ = sig
+    tool_wrapper.__annotations__ = {
+        param.name: param.annotation for param in parameters
     }
+    tool_wrapper.__annotations__["return"] = Dict[str, Any]
 
-    exec(func_code, globals(), local_vars)
-
-    tool_function = local_vars["tool_wrapper"]
-
-    # Asignar la firma creada dinámicamente
-    tool_function.__signature__ = sig
-    tool_function.__annotations__ = {"return": Dict[str, Any], **type_hints}
-
-    # Asignar nombre y docstring
-    tool_function.__name__ = f"{tool_instance.name}_wrapper"
-    tool_function.__doc__ = tool_instance.description
-
-    # Registrar en FastMCP
     mcp_server.tool(name=tool_instance.name, description=tool_instance.description)(
-        tool_function
+        tool_wrapper
     )
