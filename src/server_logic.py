@@ -260,9 +260,29 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
     def tool_wrapper(**kwargs) -> Dict[str, Any]:
         """Llama a la herramienta con parámetros validados"""
         try:
-            validated = InputSchema(
-                **{k: v for k, v in kwargs.items() if v is not None}
-            )
+            # Coerción de fechas antes de validar (para evitar errores con fechas incompletas)
+            import re
+
+            coerced_kwargs = {}
+            for k, v in kwargs.items():
+                if v is None:
+                    continue
+                # Coerción de fechas: convertir '2024' a None para evitar errores de validación
+                if k in ("arrival", "departure") and isinstance(v, str):
+                    v_stripped = v.strip()
+                    # Solo aceptar fechas completas YYYY-MM-DD
+                    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", v_stripped):
+                        coerced_kwargs[k] = v_stripped
+                    # Si es solo año (2024), omitir para evitar errores
+                    elif re.fullmatch(r"\d{4}", v_stripped):
+                        # No incluir en coerced_kwargs (será None)
+                        continue
+                    else:
+                        coerced_kwargs[k] = v
+                else:
+                    coerced_kwargs[k] = v
+
+            validated = InputSchema(**coerced_kwargs)
             return tool_instance._execute_logic(validated)
         except TrackHSError as e:
             raise ToolError(str(e))

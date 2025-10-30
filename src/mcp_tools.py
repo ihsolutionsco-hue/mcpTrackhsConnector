@@ -8,7 +8,7 @@ import os
 import re
 import sys
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import Field
 
@@ -237,10 +237,10 @@ def register_tools_with_mcp(mcp_server) -> None:
 
     @mcp_server.tool()
     def search_units(
-        page: int = Field(default=1, ge=1, description="Número de página (1-based)"),
-        size: int = Field(
-            default=10, ge=1, le=100, description="Tamaño de página (1-100)"
+        page: Optional[Any] = Field(
+            default=1, description="Número de página (1-based)"
         ),
+        size: Optional[Any] = Field(default=10, description="Tamaño de página (1-100)"),
         # Parámetros de búsqueda de texto
         search: Optional[str] = Field(
             default=None,
@@ -262,51 +262,52 @@ def register_tools_with_mcp(mcp_server) -> None:
             max_length=100,
             description="Búsqueda en nombre corto (exacta o con % para wildcard)",
         ),
-        # Parámetros de características físicas
-        bedrooms: Optional[int] = Field(
-            default=None, ge=0, description="Número exacto de dormitorios"
+        # Parámetros de características físicas (Any para aceptar strings/ints)
+        bedrooms: Optional[Any] = Field(
+            default=None, description="Número exacto de dormitorios"
         ),
-        min_bedrooms: Optional[int] = Field(
-            default=None, ge=0, description="Número mínimo de dormitorios"
+        min_bedrooms: Optional[Any] = Field(
+            default=None, description="Número mínimo de dormitorios"
         ),
-        max_bedrooms: Optional[int] = Field(
-            default=None, ge=0, description="Número máximo de dormitorios"
+        max_bedrooms: Optional[Any] = Field(
+            default=None, description="Número máximo de dormitorios"
         ),
-        bathrooms: Optional[int] = Field(
-            default=None, ge=0, description="Número exacto de baños"
+        bathrooms: Optional[Any] = Field(
+            default=None, description="Número exacto de baños"
         ),
-        min_bathrooms: Optional[int] = Field(
-            default=None, ge=0, description="Número mínimo de baños"
+        min_bathrooms: Optional[Any] = Field(
+            default=None, description="Número mínimo de baños"
         ),
-        max_bathrooms: Optional[int] = Field(
-            default=None, ge=0, description="Número máximo de baños"
+        max_bathrooms: Optional[Any] = Field(
+            default=None, description="Número máximo de baños"
         ),
-        occupancy: Optional[int] = Field(
-            default=None, ge=0, description="Capacidad exacta"
+        occupancy: Optional[Any] = Field(default=None, description="Capacidad exacta"),
+        min_occupancy: Optional[Any] = Field(
+            default=None, description="Capacidad mínima"
         ),
-        min_occupancy: Optional[int] = Field(
-            default=None, ge=0, description="Capacidad mínima"
+        max_occupancy: Optional[Any] = Field(
+            default=None, description="Capacidad máxima"
         ),
-        max_occupancy: Optional[int] = Field(
-            default=None, ge=0, description="Capacidad máxima"
+        # Parámetros de estado (Any para aceptar strings/booleans/ints)
+        is_active: Optional[Any] = Field(
+            default=None,
+            description="Solo unidades activas (1/true) o inactivas (0/false)",
         ),
-        # Parámetros de estado
-        is_active: Optional[bool] = Field(
-            default=None, description="Solo unidades activas (1) o inactivas (0)"
+        is_bookable: Optional[Any] = Field(
+            default=None,
+            description="Solo unidades reservables (1/true) o no (0/false)",
         ),
-        is_bookable: Optional[bool] = Field(
-            default=None, description="Solo unidades reservables (1) o no (0)"
-        ),
-        pets_friendly: Optional[bool] = Field(
-            default=None, description="Solo unidades pet-friendly (1) o no (0)"
+        pets_friendly: Optional[Any] = Field(
+            default=None,
+            description="Solo unidades pet-friendly (1/true) o no (0/false)",
         ),
         unit_status: Optional[str] = Field(
             default=None,
             description="Estado de la unidad (clean, dirty, occupied, inspection, inprogress)",
         ),
-        allow_unit_rates: Optional[bool] = Field(
+        allow_unit_rates: Optional[Any] = Field(
             default=None,
-            description="Solo unidades que permiten tarifas por unidad (1) o no (0)",
+            description="Solo unidades que permiten tarifas por unidad (1/true) o no (0/false)",
         ),
         # Parámetros de disponibilidad
         arrival: Optional[str] = Field(
@@ -317,19 +318,22 @@ def register_tools_with_mcp(mcp_server) -> None:
             default=None,
             description="Fecha de salida (YYYY-MM-DD) para verificar disponibilidad",
         ),
-        # Parámetros de contenido
-        computed: Optional[bool] = Field(
+        # Parámetros de contenido (Any para aceptar strings/booleans/ints)
+        computed: Optional[Any] = Field(
             default=None,
-            description="Incluir valores computados adicionales (1) o no (0)",
+            description="Incluir valores computados adicionales (1/true) o no (0/false)",
         ),
-        inherited: Optional[bool] = Field(
-            default=None, description="Incluir atributos heredados (1) o no (0)"
+        inherited: Optional[Any] = Field(
+            default=None,
+            description="Incluir atributos heredados (1/true) o no (0/false)",
         ),
-        limited: Optional[bool] = Field(
-            default=None, description="Retornar atributos limitados (1) o completos (0)"
+        limited: Optional[Any] = Field(
+            default=None,
+            description="Retornar atributos limitados (1/true) o completos (0/false)",
         ),
-        include_descriptions: Optional[bool] = Field(
-            default=None, description="Incluir descripciones de unidades (1) o no (0)"
+        include_descriptions: Optional[Any] = Field(
+            default=None,
+            description="Incluir descripciones de unidades (1/true) o no (0/false)",
         ),
         content_updated_since: Optional[str] = Field(
             default=None,
@@ -368,11 +372,11 @@ def register_tools_with_mcp(mcp_server) -> None:
         unit_ids: Optional[List[int]] = Field(
             default=None, description="Filtrar por IDs específicos de unidades"
         ),
-        calendar_id: Optional[int] = Field(
-            default=None, gt=0, description="ID del grupo de calendario"
+        calendar_id: Optional[Any] = Field(
+            default=None, description="ID del grupo de calendario"
         ),
-        role_id: Optional[int] = Field(
-            default=None, gt=0, description="ID del rol específico"
+        role_id: Optional[Any] = Field(
+            default=None, description="ID del rol específico"
         ),
         # Parámetros de ordenamiento
         sort_column: Optional[str] = Field(
