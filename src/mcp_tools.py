@@ -525,80 +525,186 @@ def register_tools_with_mcp(mcp_server) -> None:
                 sort_direction=sort_direction,
             )
 
-            # Realizar búsqueda
-            response = api_client.search_units(params.model_dump())
+            # Construir params snake_case base
+            base_params: Dict[str, Any] = params.model_dump()
 
-            # Fallback simple de filtrado del lado cliente si el API no respeta filtros
+            # Mapear a camelCase para TrackHS y convertir booleanos a 1/0
+            def _to_camel_query(p: Dict[str, Any]) -> Dict[str, Any]:
+                mapping = {
+                    "unit_code": "unitCode",
+                    "short_name": "shortName",
+                    "min_bedrooms": "minBedrooms",
+                    "max_bedrooms": "maxBedrooms",
+                    "min_bathrooms": "minBathrooms",
+                    "max_bathrooms": "maxBathrooms",
+                    "min_occupancy": "minOccupancy",
+                    "max_occupancy": "maxOccupancy",
+                    "is_active": "isActive",
+                    "is_bookable": "isBookable",
+                    "pets_friendly": "petsFriendly",
+                    "unit_status": "unitStatus",
+                    "amenity_id": "amenityId",
+                    "node_id": "nodeId",
+                    "unit_type_id": "unitTypeId",
+                    "owner_id": "ownerId",
+                    "company_id": "companyId",
+                    "channel_id": "channelId",
+                    "lodging_type_id": "lodgingTypeId",
+                    "bed_type_id": "bedTypeId",
+                    "amenity_all": "amenityAll",
+                    "unit_ids": "unitIds",
+                    "sort_column": "sortColumn",
+                    "sort_direction": "sortDirection",
+                }
+                out: Dict[str, Any] = {"page": p.get("page"), "size": p.get("size")}
+                for k, v in p.items():
+                    if k in ("page", "size"):
+                        continue
+                    ck = mapping.get(k, k)
+                    if (
+                        k in ("is_active", "is_bookable", "pets_friendly")
+                        and v is not None
+                    ):
+                        out[ck] = 1 if bool(v) else 0
+                    else:
+                        out[ck] = v
+                return out
+
+            camel_query = _to_camel_query(base_params)
+
+            # Realizar búsqueda con camelCase
+            response = api_client.search_units(camel_query)
+
+            # Fallback: filtrado/ordenamiento del lado cliente si el API no respeta filtros
             units = response.get("units") or response.get("_embedded", {}).get("units")
             if isinstance(units, list):
-                applied = False
+                # Determinar si hay filtros/orden cliente solicitados
+                applied_inputs = any(
+                    v is not None
+                    for v in [
+                        is_active_c,
+                        is_bookable_c,
+                        pets_friendly_c,
+                        bedrooms_c,
+                        min_bedrooms_c,
+                        max_bedrooms_c,
+                        bathrooms_c,
+                        min_bathrooms_c,
+                        max_bathrooms_c,
+                        occupancy_c,
+                        min_occupancy_c,
+                        max_occupancy_c,
+                        unit_code,
+                        sort_column,
+                    ]
+                )
 
-                def _matches(u: Dict[str, Any]) -> bool:
-                    def gv(keys: List[str]) -> Any:
-                        for k in keys:
-                            if k in u:
-                                return u[k]
+                filtered = units
+
+                # Booleanos (usar campos procesados snake_case)
+                if is_active_c is not None:
+                    want = bool(is_active_c)
+                    filtered = [u for u in filtered if u.get("is_active") is want]
+                if is_bookable_c is not None:
+                    want = bool(is_bookable_c)
+                    filtered = [u for u in filtered if u.get("is_bookable") is want]
+                if pets_friendly_c is not None:
+                    want = bool(pets_friendly_c)
+                    filtered = [u for u in filtered if u.get("pets_friendly") is want]
+
+                def _num(x: Any) -> Optional[int]:
+                    try:
+                        return int(x) if x is not None else None
+                    except Exception:
                         return None
 
-                    # Booleanos (camelCase según API TrackHS)
-                    if is_active_c is not None:
-                        applied = True
-                        if gv(["isActive"]) is not is_active_c:
-                            return False
-                    if is_bookable_c is not None:
-                        applied = True
-                        if gv(["isBookable"]) is not is_bookable_c:
-                            return False
-                    if pets_friendly_c is not None:
-                        applied = True
-                        if gv(["petFriendly"]) is not pets_friendly_c:
-                            return False
+                # Numéricos (procesados asumen snake_case)
+                if bedrooms_c is not None:
+                    eqv = _num(bedrooms_c)
+                    filtered = [u for u in filtered if _num(u.get("bedrooms")) == eqv]
+                if min_bedrooms_c is not None:
+                    mn = _num(min_bedrooms_c)
+                    filtered = [
+                        u
+                        for u in filtered
+                        if (b := _num(u.get("bedrooms"))) is not None and b >= mn
+                    ]
+                if max_bedrooms_c is not None:
+                    mx = _num(max_bedrooms_c)
+                    filtered = [
+                        u
+                        for u in filtered
+                        if (b := _num(u.get("bedrooms"))) is not None and b <= mx
+                    ]
 
-                    # Numéricos: bedrooms/bathrooms/occupancy (camelCase según API TrackHS)
-                    b = gv(["bedrooms"]) or 0
-                    ba = (
-                        gv(["fullBathrooms"]) or 0
-                    )  # API usa fullBathrooms, no bathrooms
-                    oc = gv(["maxOccupancy"]) or 0
-                    if bedrooms_c is not None:
-                        applied = True
-                        if b != bedrooms_c:
-                            return False
-                    if min_bedrooms_c is not None and b < min_bedrooms_c:
-                        applied = True
-                        return False
-                    if max_bedrooms_c is not None and b > max_bedrooms_c:
-                        applied = True
-                        return False
-                    if bathrooms_c is not None and ba != bathrooms_c:
-                        applied = True
-                        return False
-                    if min_bathrooms_c is not None and ba < min_bathrooms_c:
-                        applied = True
-                        return False
-                    if max_bathrooms_c is not None and ba > max_bathrooms_c:
-                        applied = True
-                        return False
-                    if occupancy_c is not None and oc != occupancy_c:
-                        applied = True
-                        return False
-                    if min_occupancy_c is not None and oc < min_occupancy_c:
-                        applied = True
-                        return False
-                    if max_occupancy_c is not None and oc > max_occupancy_c:
-                        applied = True
-                        return False
+                # bathrooms: usar "bathrooms" procesado; si viene vacío, intentar "full_bathrooms"
+                def _bath(u: Dict[str, Any]) -> Optional[int]:
+                    v = u.get("bathrooms")
+                    if v is None:
+                        v = u.get("full_bathrooms")
+                    return _num(v)
 
-                    # unit_ids
-                    if unit_ids_c:
-                        applied = True
-                        if gv(["id"]) not in set(unit_ids_c):
-                            return False
+                if bathrooms_c is not None:
+                    eqv = _num(bathrooms_c)
+                    filtered = [u for u in filtered if _bath(u) == eqv]
+                if min_bathrooms_c is not None:
+                    mn = _num(min_bathrooms_c)
+                    filtered = [
+                        u for u in filtered if (ba := _bath(u)) is not None and ba >= mn
+                    ]
+                if max_bathrooms_c is not None:
+                    mx = _num(max_bathrooms_c)
+                    filtered = [
+                        u for u in filtered if (ba := _bath(u)) is not None and ba <= mx
+                    ]
 
-                    return True
+                if occupancy_c is not None:
+                    eqv = _num(occupancy_c)
+                    filtered = [u for u in filtered if _num(u.get("occupancy")) == eqv]
+                if min_occupancy_c is not None:
+                    mn = _num(min_occupancy_c)
+                    filtered = [
+                        u
+                        for u in filtered
+                        if (oc := _num(u.get("occupancy"))) is not None and oc >= mn
+                    ]
+                if max_occupancy_c is not None:
+                    mx = _num(max_occupancy_c)
+                    filtered = [
+                        u
+                        for u in filtered
+                        if (oc := _num(u.get("occupancy"))) is not None and oc <= mx
+                    ]
 
-                filtered = [u for u in units if _matches(u)]
-                if applied and len(filtered) != len(units):
+                # unit_code exacto (processed usa unit_code)
+                if unit_code:
+                    code = str(unit_code).strip().lower()
+                    filtered = [
+                        u
+                        for u in filtered
+                        if str(u.get("unit_code", "")).strip().lower() == code
+                    ]
+
+                # Ordenamiento cliente
+                sort_key = None
+                if sort_column:
+                    mapping = {
+                        "name": "name",
+                        "unitCode": "unit_code",
+                        "unitTypeName": "unit_type_name",
+                        "nodeName": "node_name",
+                        "id": "id",
+                    }
+                    sort_key = mapping.get(str(sort_column))
+                if sort_key:
+                    reverse = str(sort_direction or "asc").lower() == "desc"
+                    filtered = sorted(
+                        filtered,
+                        key=lambda u: (u.get(sort_key) is None, u.get(sort_key)),
+                        reverse=reverse,
+                    )
+
+                if applied_inputs:
                     response["units"] = filtered
                     response["filtersAppliedClientSide"] = True
                     response["total_items_client_page"] = len(filtered)
