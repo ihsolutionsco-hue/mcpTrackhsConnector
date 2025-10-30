@@ -5,6 +5,7 @@ Funciones individuales para compatibilidad con FastMCP
 
 import os
 import sys
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from pydantic import Field
@@ -485,15 +486,46 @@ def register_tools_with_mcp(mcp_server) -> None:
     @mcp_server.tool()
     def get_folio(
         folio_id: int = Field(
-            gt=0, description="ID del folio financiero para obtener sus detalles"
+            gt=0,
+            description="ID único del folio financiero en TrackHS. Este es el ID del folio, NO el ID de la reserva.",
         )
     ) -> Dict[str, Any]:
         """
-        Obtener el folio financiero completo por su ID.
+        Obtener información completa de un folio financiero por su ID.
 
-        Nota: Este endpoint requiere el ID del folio, no el ID de la reserva.
-        Para obtener el folio de una reserva, primero necesitas obtener el folio_id
-        desde los datos de la reserva.
+        Un folio financiero es un documento que registra todas las transacciones financieras
+        asociadas a una reserva o cuenta de huésped, incluyendo cargos, pagos, comisiones
+        y balances.
+
+        PARÁMETROS:
+        - folio_id: ID único del folio en el sistema TrackHS (requerido)
+
+        INFORMACIÓN DEVUELTA:
+        - Datos básicos: ID, estado (open/closed), tipo (guest/master)
+        - Balances: balance actual, balance realizado
+        - Fechas: inicio, fin, cierre, check-in, check-out
+        - Información de contacto y empresa asociada
+        - Comisiones de agente y propietario
+        - Datos embebidos: contacto, empresa, agente de viajes
+        - Enlaces relacionados
+
+        NOTA IMPORTANTE:
+        Este endpoint requiere el ID del folio, NO el ID de la reserva.
+        Para obtener el folio de una reserva específica, primero debes:
+        1. Buscar la reserva usando search_reservations
+        2. Extraer el folio_id de los datos de la reserva
+        3. Usar ese folio_id con esta herramienta
+
+        EJEMPLO DE USO:
+        - Si tienes una reserva con ID 123, primero busca la reserva
+        - En los datos de la reserva encontrarás el folio_id (ej: 456)
+        - Usa get_folio(folio_id=456) para obtener los detalles financieros
+
+        CÓDIGOS DE ERROR:
+        - 404: Folio no encontrado (folio_id no existe)
+        - 401: Credenciales inválidas
+        - 403: Sin permisos para acceder al folio
+        - 500: Error interno del servidor
         """
         if not api_client:
             error_msg = (
@@ -510,19 +542,60 @@ def register_tools_with_mcp(mcp_server) -> None:
             # Obtener folio
             response = api_client.get_folio(folio_id)
 
+            # Validar que la respuesta tiene la estructura esperada
+            if not isinstance(response, dict):
+                raise TrackHSAPIError("Respuesta del API no es un diccionario válido")
+
+            # Verificar campos básicos requeridos
+            if "id" not in response:
+                raise TrackHSAPIError("Respuesta del API no contiene ID del folio")
+
+            if "status" not in response:
+                raise TrackHSAPIError("Respuesta del API no contiene estado del folio")
+
+            # Log de información útil para debugging
             logger.info(
                 f"Folio obtenido exitosamente: {folio_id}",
-                extra={"folio_id": folio_id},
+                extra={
+                    "folio_id": folio_id,
+                    "folio_status": response.get("status"),
+                    "folio_type": response.get("type"),
+                    "has_embedded_data": "_embedded" in response,
+                    "has_links": "_links" in response,
+                },
             )
+
+            # Agregar metadatos útiles a la respuesta
+            response["_metadata"] = {
+                "retrieved_at": datetime.now().isoformat(),
+                "folio_id": folio_id,
+                "api_version": "1.0",
+                "source": "TrackHS API",
+            }
 
             return response
 
         except TrackHSNotFoundError:
             logger.warning(f"Folio no encontrado: {folio_id}")
+            raise TrackHSNotFoundError(
+                f"Folio con ID {folio_id} no encontrado en el sistema TrackHS"
+            )
+        except TrackHSAuthenticationError as e:
+            logger.error(
+                f"Error de autenticación obteniendo folio {folio_id}: {str(e)}"
+            )
+            raise TrackHSAuthenticationError(f"Error de autenticación: {str(e)}")
+        except TrackHSAuthorizationError as e:
+            logger.error(f"Error de autorización obteniendo folio {folio_id}: {str(e)}")
+            raise TrackHSAuthorizationError(
+                f"No tienes permisos para acceder al folio {folio_id}"
+            )
+        except TrackHSAPIError as e:
+            logger.error(f"Error de API obteniendo folio {folio_id}: {str(e)}")
             raise
         except Exception as e:
-            logger.error(f"Error obteniendo folio {folio_id}: {str(e)}")
-            raise TrackHSAPIError(f"Error obteniendo folio: {str(e)}")
+            logger.error(f"Error inesperado obteniendo folio {folio_id}: {str(e)}")
+            raise TrackHSAPIError(f"Error inesperado obteniendo folio: {str(e)}")
 
     @mcp_server.tool()
     def create_maintenance_work_order(
