@@ -92,8 +92,12 @@ class SearchUnitsTool(BaseTool):
             },
         )
 
-        # Preparar parámetros para la API
-        params = self._prepare_api_params(validated_input)
+        # Preparar parámetros para la API usando el cliente centralizado
+        try:
+            params = self.api_client.build_units_query(validated_input.model_dump())
+        except Exception:
+            # Fallback al método local si algo falla (compatibilidad)
+            params = self._prepare_api_params(validated_input)
 
         # Log de parámetros preparados
         self.logger.info(

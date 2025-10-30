@@ -262,8 +262,8 @@ class TrackHSAPIClient:
             },
         )
 
-        # Convertir parámetros booleanos a enteros (1/0) según la API
-        api_params = self._convert_boolean_params(params_dict)
+        # Construir query final en camelCase con booleanos convertidos
+        api_params = self.build_units_query(params_dict)
 
         # Log de parámetros convertidos
         conversion_changes = {}
@@ -650,6 +650,105 @@ class TrackHSAPIClient:
         )
 
         return processed_result
+
+    def build_units_query(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Construye los parámetros de consulta (camelCase) para /api/pms/units
+
+        Acepta snake_case o camelCase y devuelve camelCase con booleanos 1/0.
+        """
+        if params is None:
+            return {}
+
+        # Asegurar base
+        page = params.get("page", 1)
+        size = params.get("size", 10)
+        out: Dict[str, Any] = {"page": page, "size": size}
+
+        mapping = {
+            # texto
+            "unit_code": "unitCode",
+            "short_name": "shortName",
+            # rangos
+            "min_bedrooms": "minBedrooms",
+            "max_bedrooms": "maxBedrooms",
+            "min_bathrooms": "minBathrooms",
+            "max_bathrooms": "maxBathrooms",
+            "min_occupancy": "minOccupancy",
+            "max_occupancy": "maxOccupancy",
+            # booleanos/estado
+            "is_active": "isActive",
+            "is_bookable": "isBookable",
+            "pets_friendly": "petsFriendly",
+            "unit_status": "unitStatus",
+            "allow_unit_rates": "allowUnitRates",
+            # ids/listas
+            "amenity_id": "amenityId",
+            "node_id": "nodeId",
+            "unit_type_id": "unitTypeId",
+            "owner_id": "ownerId",
+            "company_id": "companyId",
+            "channel_id": "channelId",
+            "lodging_type_id": "lodgingTypeId",
+            "bed_type_id": "bedTypeId",
+            "amenity_all": "amenityAll",
+            "unit_ids": "unitIds",
+            # ordenamiento
+            "sort_column": "sortColumn",
+            "sort_direction": "sortDirection",
+        }
+
+        # Campos que ya están en camelCase y se copian tal cual si existen
+        passthrough = {
+            "search",
+            "term",
+            "unitCode",
+            "shortName",
+            "bedrooms",
+            "bathrooms",
+            "occupancy",
+            "arrival",
+            "departure",
+            "content_updated_since",
+            "sortColumn",
+            "sortDirection",
+        }
+
+        # Incluir primero los passthrough
+        for k in passthrough:
+            if k in params and params[k] is not None:
+                out[k] = params[k]
+
+        # Mapear snake_case -> camelCase
+        for k, v in params.items():
+            if k in ("page", "size"):
+                continue
+            ck = mapping.get(k)
+            if ck:
+                # convertir booleanos (1/0) donde aplique
+                if (
+                    k
+                    in {"is_active", "is_bookable", "pets_friendly", "allow_unit_rates"}
+                    and v is not None
+                ):
+                    out[ck] = 1 if bool(v) else 0
+                else:
+                    out[ck] = v
+                continue
+            # Si no hay mapping y es snake_case no controlado, ignorar; si es camelCase válido, se agregó arriba
+
+        # Si el caller pasó campos camelCase booleanos, respetarlos y convertirlos
+        for ck in ("isActive", "isBookable", "petsFriendly", "allowUnitRates"):
+            if ck in params and params[ck] is not None:
+                out[ck] = 1 if bool(params[ck]) else 0
+
+        # Asegurar que search y term desde snake_case también pasen
+        if "search" not in out and params.get("search") is not None:
+            out["search"] = params.get("search")
+        if "term" not in out and params.get("term") is not None:
+            out["term"] = params.get("term")
+
+        return out
 
     def _convert_camelcase_to_snakecase(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """
