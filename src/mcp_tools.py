@@ -94,8 +94,12 @@ def register_tools_with_mcp(mcp_server) -> None:
             return None
         if isinstance(value, str):
             v = value.strip()
+            # Solo aceptar fechas completas YYYY-MM-DD
             if re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
                 return v
+            # Si es solo año (2024), devolver None para evitar errores
+            if re.fullmatch(r"\d{4}", v):
+                return None
         return None
 
     def _coerce_list_int(value: Any) -> Optional[List[int]]:
@@ -692,7 +696,7 @@ def register_tools_with_mcp(mcp_server) -> None:
     def get_folio(
         folio_id: int = Field(
             gt=0,
-            description="ID único del folio financiero en TrackHS. Este es el ID del folio, NO el ID de la reserva.",
+            description="ID único del folio financiero en TrackHS. IMPORTANTE: Este es el ID del folio, NO el ID de la reserva. Para obtener el folio de una reserva, primero usa get_reservation para obtener el folio_id.",
         )
     ) -> Dict[str, Any]:
         """
@@ -701,6 +705,13 @@ def register_tools_with_mcp(mcp_server) -> None:
         Un folio financiero es un documento que registra todas las transacciones financieras
         asociadas a una reserva o cuenta de huésped, incluyendo cargos, pagos, comisiones
         y balances.
+
+        ⚠️  IMPORTANTE: Este endpoint requiere el ID del folio, NO el ID de la reserva.
+
+        CÓMO OBTENER EL FOLIO_ID:
+        1. Usa get_reservation(reservation_id=123) para obtener detalles de la reserva
+        2. En la respuesta, busca el campo 'folio_id'
+        3. Usa ese folio_id con esta herramienta: get_folio(folio_id=456)
 
         PARÁMETROS:
         - folio_id: ID único del folio en el sistema TrackHS (requerido)
@@ -714,17 +725,9 @@ def register_tools_with_mcp(mcp_server) -> None:
         - Datos embebidos: contacto, empresa, agente de viajes
         - Enlaces relacionados
 
-        NOTA IMPORTANTE:
-        Este endpoint requiere el ID del folio, NO el ID de la reserva.
-        Para obtener el folio de una reserva específica, primero debes:
-        1. Buscar la reserva usando search_reservations
-        2. Extraer el folio_id de los datos de la reserva
-        3. Usar ese folio_id con esta herramienta
-
         EJEMPLO DE USO:
-        - Si tienes una reserva con ID 123, primero busca la reserva
-        - En los datos de la reserva encontrarás el folio_id (ej: 456)
-        - Usa get_folio(folio_id=456) para obtener los detalles financieros
+        1. get_reservation(reservation_id=123) → obtiene folio_id: 456
+        2. get_folio(folio_id=456) → obtiene detalles financieros
 
         CÓDIGOS DE ERROR:
         - 404: Folio no encontrado (folio_id no existe)
@@ -741,6 +744,21 @@ def register_tools_with_mcp(mcp_server) -> None:
             raise TrackHSAPIError(error_msg)
 
         try:
+            # Validar que no se pase reservation_id por error
+            import inspect
+
+            frame = inspect.currentframe()
+            if frame and frame.f_back:
+                local_vars = frame.f_back.f_locals
+                if "reservation_id" in local_vars:
+                    raise ValueError(
+                        "❌ ERROR: Usaste 'reservation_id' pero esta herramienta requiere 'folio_id'. "
+                        "Para obtener el folio de una reserva:\n"
+                        "1. Usa get_reservation(reservation_id=123) para obtener detalles de la reserva\n"
+                        "2. En la respuesta, busca el campo 'folio_id'\n"
+                        "3. Usa get_folio(folio_id=456) con ese ID"
+                    )
+
             # Validar ID
             validate_positive_integer(folio_id, "folio_id")
 
