@@ -93,10 +93,10 @@ class SearchReservationsTool(BaseTool):
             params["search"] = validated_input.search
 
         if validated_input.arrival_start:
-            params["arrival_start"] = validated_input.arrival_start.strftime("%Y-%m-%d")
+            params["arrivalStart"] = validated_input.arrival_start.strftime("%Y-%m-%d")
 
         if validated_input.arrival_end:
-            params["arrival_end"] = validated_input.arrival_end.strftime("%Y-%m-%d")
+            params["arrivalEnd"] = validated_input.arrival_end.strftime("%Y-%m-%d")
 
         if validated_input.status:
             params["status"] = validated_input.status

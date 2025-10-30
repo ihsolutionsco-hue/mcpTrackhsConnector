@@ -372,9 +372,9 @@ class SearchUnitsTool(BaseTool):
         if validated_input.term:
             params["term"] = validated_input.term
         if validated_input.unit_code:
-            params["unit_code"] = validated_input.unit_code
+            params["unitCode"] = validated_input.unit_code
         if validated_input.short_name:
-            params["short_name"] = validated_input.short_name
+            params["shortName"] = validated_input.short_name
 
         # Parámetros de características físicas (camelCase según documentación oficial)
         if validated_input.bedrooms is not None:
@@ -414,33 +414,33 @@ class SearchUnitsTool(BaseTool):
         if validated_input.departure:
             params["departure"] = validated_input.departure
 
-        # Parámetros de IDs
+        # Parámetros de IDs (camelCase según documentación oficial)
         if validated_input.amenity_id:
-            params["amenity_id"] = validated_input.amenity_id
+            params["amenityId"] = validated_input.amenity_id
         if validated_input.node_id:
-            params["node_id"] = validated_input.node_id
+            params["nodeId"] = validated_input.node_id
         if validated_input.unit_type_id:
-            params["unit_type_id"] = validated_input.unit_type_id
+            params["unitTypeId"] = validated_input.unit_type_id
         if validated_input.owner_id:
-            params["owner_id"] = validated_input.owner_id
+            params["ownerId"] = validated_input.owner_id
         if validated_input.company_id:
-            params["company_id"] = validated_input.company_id
+            params["companyId"] = validated_input.company_id
         if validated_input.channel_id:
-            params["channel_id"] = validated_input.channel_id
+            params["channelId"] = validated_input.channel_id
         if validated_input.lodging_type_id:
-            params["lodging_type_id"] = validated_input.lodging_type_id
+            params["lodgingTypeId"] = validated_input.lodging_type_id
         if validated_input.bed_type_id:
-            params["bed_type_id"] = validated_input.bed_type_id
+            params["bedTypeId"] = validated_input.bed_type_id
         if validated_input.amenity_all:
-            params["amenity_all"] = validated_input.amenity_all
+            params["amenityAll"] = validated_input.amenity_all
         if validated_input.unit_ids:
-            params["unit_ids"] = validated_input.unit_ids
+            params["unitIds"] = validated_input.unit_ids
 
-        # Parámetros de ordenamiento
+        # Parámetros de ordenamiento (camelCase según documentación oficial)
         if validated_input.sort_column:
-            params["sort_column"] = validated_input.sort_column
+            params["sortColumn"] = validated_input.sort_column
         if validated_input.sort_direction:
-            params["sort_direction"] = validated_input.sort_direction
+            params["sortDirection"] = validated_input.sort_direction
 
         return params
 

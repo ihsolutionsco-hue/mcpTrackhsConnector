@@ -262,8 +262,11 @@ class TrackHSAPIClient:
             },
         )
 
+        # Convertir parámetros camelCase a snake_case para compatibilidad con API
+        snakecase_params = self._convert_camelcase_to_snakecase(params_dict)
+
         # Convertir parámetros booleanos a enteros (1/0) según la API
-        api_params = self._convert_boolean_params(params_dict)
+        api_params = self._convert_boolean_params(snakecase_params)
 
         # Log de parámetros convertidos
         conversion_changes = {}
@@ -370,6 +373,55 @@ class TrackHSAPIClient:
         )
 
         return processed_result
+
+    def _convert_camelcase_to_snakecase(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Convierte parámetros camelCase a snake_case para compatibilidad con API TrackHS
+
+        Args:
+            params: Parámetros en camelCase
+
+        Returns:
+            Parámetros convertidos a snake_case
+        """
+        converted = {}
+        camelcase_to_snakecase = {
+            "unitCode": "unit_code",
+            "shortName": "short_name",
+            "minBedrooms": "min_bedrooms",
+            "maxBedrooms": "max_bedrooms",
+            "minBathrooms": "min_bathrooms",
+            "maxBathrooms": "max_bathrooms",
+            "minOccupancy": "min_occupancy",
+            "maxOccupancy": "max_occupancy",
+            "isActive": "is_active",
+            "isBookable": "is_bookable",
+            "petsFriendly": "pets_friendly",
+            "unitStatus": "unit_status",
+            "allowUnitRates": "allow_unit_rates",
+            "amenityId": "amenity_id",
+            "nodeId": "node_id",
+            "unitTypeId": "unit_type_id",
+            "ownerId": "owner_id",
+            "companyId": "company_id",
+            "channelId": "channel_id",
+            "lodgingTypeId": "lodging_type_id",
+            "bedTypeId": "bed_type_id",
+            "amenityAll": "amenity_all",
+            "unitIds": "unit_ids",
+            "sortColumn": "sort_column",
+            "sortDirection": "sort_direction",
+            "arrivalStart": "arrival_start",
+            "arrivalEnd": "arrival_end",
+        }
+
+        for key, value in params.items():
+            if key in camelcase_to_snakecase:
+                converted[camelcase_to_snakecase[key]] = value
+            else:
+                converted[key] = value
+
+        return converted
 
     def _convert_boolean_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -671,8 +723,11 @@ class TrackHSAPIClient:
             },
         )
 
+        # Convertir parámetros camelCase a snake_case para compatibilidad con API
+        snakecase_params = self._convert_camelcase_to_snakecase(params_dict)
+
         # Realizar llamada a la API
-        result = self.get("api/pms/reservations", params_dict)
+        result = self.get("api/pms/reservations", snakecase_params)
 
         # Log de respuesta cruda de la API
         self.logger.info(
