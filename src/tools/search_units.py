@@ -135,6 +135,162 @@ class SearchUnitsTool(BaseTool):
             # Procesar resultado
             processed_result = self._process_api_response(result)
 
+            # Filtrado/ordenamiento del lado cliente cuando la API no aplica filtros
+            try:
+                original_units: List[Dict[str, Any]] = processed_result.get("units", [])
+                filtered_units: List[Dict[str, Any]] = original_units
+                applied_client_filters = False
+
+                # Filtros booleanos
+                if validated_input.is_active is not None:
+                    applied_client_filters = True
+                    want = bool(validated_input.is_active)
+                    filtered_units = [
+                        u for u in filtered_units if u.get("is_active") is want
+                    ]
+
+                if validated_input.is_bookable is not None:
+                    applied_client_filters = True
+                    want = bool(validated_input.is_bookable)
+                    filtered_units = [
+                        u for u in filtered_units if u.get("is_bookable") is want
+                    ]
+
+                if validated_input.pets_friendly is not None:
+                    applied_client_filters = True
+                    want = bool(validated_input.pets_friendly)
+                    filtered_units = [
+                        u for u in filtered_units if u.get("pets_friendly") is want
+                    ]
+
+                # Filtros numéricos
+                def _num(value: Any) -> Optional[int]:
+                    try:
+                        return int(value) if value is not None else None
+                    except Exception:
+                        return None
+
+                if validated_input.bedrooms is not None:
+                    applied_client_filters = True
+                    eqv = _num(validated_input.bedrooms)
+                    filtered_units = [
+                        u for u in filtered_units if _num(u.get("bedrooms")) == eqv
+                    ]
+
+                if validated_input.min_bedrooms is not None:
+                    applied_client_filters = True
+                    mn = _num(validated_input.min_bedrooms)
+                    filtered_units = [
+                        u
+                        for u in filtered_units
+                        if (b := _num(u.get("bedrooms"))) is not None and b >= mn
+                    ]
+
+                if validated_input.max_bedrooms is not None:
+                    applied_client_filters = True
+                    mx = _num(validated_input.max_bedrooms)
+                    filtered_units = [
+                        u
+                        for u in filtered_units
+                        if (b := _num(u.get("bedrooms"))) is not None and b <= mx
+                    ]
+
+                if validated_input.bathrooms is not None:
+                    applied_client_filters = True
+                    eqv = _num(validated_input.bathrooms)
+                    filtered_units = [
+                        u for u in filtered_units if _num(u.get("bathrooms")) == eqv
+                    ]
+
+                if validated_input.min_bathrooms is not None:
+                    applied_client_filters = True
+                    mn = _num(validated_input.min_bathrooms)
+                    filtered_units = [
+                        u
+                        for u in filtered_units
+                        if (ba := _num(u.get("bathrooms"))) is not None and ba >= mn
+                    ]
+
+                if validated_input.max_bathrooms is not None:
+                    applied_client_filters = True
+                    mx = _num(validated_input.max_bathrooms)
+                    filtered_units = [
+                        u
+                        for u in filtered_units
+                        if (ba := _num(u.get("bathrooms"))) is not None and ba <= mx
+                    ]
+
+                if validated_input.occupancy is not None:
+                    applied_client_filters = True
+                    eqv = _num(validated_input.occupancy)
+                    filtered_units = [
+                        u for u in filtered_units if _num(u.get("occupancy")) == eqv
+                    ]
+
+                if validated_input.min_occupancy is not None:
+                    applied_client_filters = True
+                    mn = _num(validated_input.min_occupancy)
+                    filtered_units = [
+                        u
+                        for u in filtered_units
+                        if (oc := _num(u.get("occupancy"))) is not None and oc >= mn
+                    ]
+
+                if validated_input.max_occupancy is not None:
+                    applied_client_filters = True
+                    mx = _num(validated_input.max_occupancy)
+                    filtered_units = [
+                        u
+                        for u in filtered_units
+                        if (oc := _num(u.get("occupancy"))) is not None and oc <= mx
+                    ]
+
+                # Filtro por código de unidad exacto
+                if validated_input.unit_code:
+                    applied_client_filters = True
+                    code = str(validated_input.unit_code).strip().lower()
+                    filtered_units = [
+                        u
+                        for u in filtered_units
+                        if str(u.get("unit_code", "")).strip().lower() == code
+                    ]
+
+                # Ordenamiento cliente
+                applied_client_sort = False
+                sort_key = None
+                if validated_input.sort_column:
+                    col = str(validated_input.sort_column)
+                    # Mapear a campos procesados
+                    mapping = {
+                        "name": "name",
+                        "unitCode": "unit_code",
+                        "unitTypeName": "unit_type_name",
+                        "nodeName": "node_name",
+                        "id": "id",
+                    }
+                    sort_key = mapping.get(col, None)
+                if sort_key:
+                    applied_client_sort = True
+                    reverse = (
+                        str(validated_input.sort_direction or "asc").lower() == "desc"
+                    )
+                    filtered_units = sorted(
+                        filtered_units,
+                        key=lambda u: (u.get(sort_key) is None, u.get(sort_key)),
+                        reverse=reverse,
+                    )
+
+                if applied_client_filters or applied_client_sort:
+                    processed_result["units"] = filtered_units
+                    processed_result["filtersAppliedClientSide"] = True
+                    processed_result["total_items_client_page"] = len(filtered_units)
+            except Exception as _e:
+                # No interrumpir flujo si algo falla en filtrado cliente
+                self.logger.warning(
+                    "Filtro/ordenamiento cliente no aplicado por error",
+                    extra={"error": str(_e)},
+                )
+
             # Validar respuesta contra filtros aplicados
             validation_report = self._validate_response_against_filters(
                 processed_result.get("units", []), params
