@@ -170,33 +170,79 @@ class TrackHSAPIClient:
 
             response_time = (time.time() - start_time) * 1000
 
-            # Log de la llamada API
-            self.logger.info(
-                f"API Call: {method} {endpoint}",
-                extra={
-                    "method": method,
-                    "endpoint": endpoint,
-                    "url": url,
-                    "status_code": response.status_code,
-                    "response_time_ms": response_time,
-                    "params": params,
-                    "has_json_data": json is not None,
-                },
-            )
-
-            # Manejar errores HTTP
+            # Manejar errores HTTP primero para logging apropiado
             if response.status_code == 401:
+                self.logger.error(
+                    f"Error de autenticación: {method} {endpoint}",
+                    extra={
+                        "method": method,
+                        "endpoint": endpoint,
+                        "url": url,
+                        "status_code": response.status_code,
+                        "response_time_ms": response_time,
+                        "error_type": "authentication_error",
+                    },
+                )
                 raise TrackHSAuthenticationError("Credenciales inválidas")
             elif response.status_code == 403:
+                self.logger.warning(
+                    f"Error de autorización: {method} {endpoint}",
+                    extra={
+                        "method": method,
+                        "endpoint": endpoint,
+                        "url": url,
+                        "status_code": response.status_code,
+                        "response_time_ms": response_time,
+                        "error_type": "authorization_error",
+                    },
+                )
                 raise TrackHSAuthorizationError("Sin permisos para acceder al recurso")
             elif response.status_code == 404:
+                self.logger.debug(
+                    f"Recurso no encontrado: {method} {endpoint}",
+                    extra={
+                        "method": method,
+                        "endpoint": endpoint,
+                        "url": url,
+                        "status_code": response.status_code,
+                        "response_time_ms": response_time,
+                        "error_type": "not_found",
+                    },
+                )
                 raise TrackHSNotFoundError("Recurso", endpoint)
             elif not response.is_success:
+                self.logger.error(
+                    f"Error HTTP: {method} {endpoint} - {response.status_code}",
+                    extra={
+                        "method": method,
+                        "endpoint": endpoint,
+                        "url": url,
+                        "status_code": response.status_code,
+                        "response_time_ms": response_time,
+                        "response_text": response.text[:500],  # Limitar tamaño
+                        "error_type": "http_error",
+                    },
+                )
                 raise TrackHSAPIError(
                     f"Error HTTP {response.status_code}: {response.text}",
                     status_code=response.status_code,
                     response_data={"text": response.text},
                 )
+
+            # Log de éxito
+            self.logger.info(
+                f"API Call exitoso: {method} {endpoint}",
+                extra={
+                    "method": method,
+                    "endpoint": endpoint,
+                    "url": url,
+                    "status_code": response.status_code,
+                    "response_time_ms": round(response_time, 2),
+                    "params_count": len(params) if params else 0,
+                    "has_json_data": json is not None,
+                    "response_size": len(response.content) if response.content else 0,
+                },
+            )
 
             # Parsear respuesta JSON
             try:

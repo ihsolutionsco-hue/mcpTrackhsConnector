@@ -12,6 +12,7 @@ from fastmcp import FastMCP
 # Cargar variables de entorno desde .env
 load_dotenv()
 from fastmcp.exceptions import ToolError
+from fastmcp.server.middleware.logging import LoggingMiddleware
 from fastmcp.server.middleware.timing import TimingMiddleware
 
 from tools import TOOLS
@@ -98,10 +99,24 @@ def create_mcp_server() -> FastMCP:
             mask_error_details=True,
         )
 
+        # Agregar logging middleware para requests/responses
+        mcp_server.add_middleware(
+            LoggingMiddleware(
+                include_payloads=True,
+                max_payload_length=1000,  # Limitar tamaño de payloads en logs
+            )
+        )
+
         # Agregar timing middleware para monitoreo de rendimiento
         mcp_server.add_middleware(TimingMiddleware())
 
-        logger.info("Servidor MCP configurado")
+        logger.info(
+            "Servidor MCP configurado",
+            extra={
+                "middlewares": ["LoggingMiddleware", "TimingMiddleware"],
+                "strict_input_validation": False,
+            },
+        )
         return mcp_server
 
     except Exception as mcp_error:
@@ -253,16 +268,63 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
 
     def tool_wrapper(**kwargs) -> Dict[str, Any]:
         """Llama a la herramienta con parámetros validados"""
+        logger = get_logger(__name__)
+
         try:
+            # Log de entrada
+            logger.debug(
+                f"Ejecutando herramienta: {tool_instance.name}",
+                extra={
+                    "tool_name": tool_instance.name,
+                    "params_received": {
+                        k: str(v)[:100] for k, v in kwargs.items() if v is not None
+                    },
+                    "param_count": len([v for v in kwargs.values() if v is not None]),
+                },
+            )
+
             # Pasar parámetros directamente a Pydantic
-            # FastMCP ya hizo coerción inicial, Pydantic validará y convertirá con field_validators
+            # FastMCP ya hizo coerción inicial, Pydantic validará y convertirá
             validated = InputSchema(**kwargs)
-            return tool_instance._execute_logic(validated)
+
+            # Ejecutar lógica de la herramienta
+            result = tool_instance._execute_logic(validated)
+
+            # Log de éxito
+            logger.info(
+                f"Herramienta ejecutada exitosamente: {tool_instance.name}",
+                extra={
+                    "tool_name": tool_instance.name,
+                    "result_type": type(result).__name__,
+                    "has_result": bool(result),
+                },
+            )
+
+            return result
+
         except TrackHSError as e:
+            logger.error(
+                f"Error TrackHS en herramienta: {tool_instance.name}",
+                extra={
+                    "tool_name": tool_instance.name,
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                },
+            )
             raise ToolError(str(e))
         except Exception as e:
-            logger = get_logger(__name__)
-            logger.error(f"Error en {tool_instance.name}", extra={"error": str(e)})
+            logger.error(
+                f"Error interno en herramienta: {tool_instance.name}",
+                extra={
+                    "tool_name": tool_instance.name,
+                    "error_type": type(e).__name__,
+                    "error_message": str(e),
+                    "params_received": {
+                        k: str(v)[:100] for k, v in kwargs.items() if v is not None
+                    },
+                },
+                exc_info=True,  # Incluir traceback completo
+            )
             raise ToolError(f"Error interno: {str(e)}")
 
     tool_wrapper.__signature__ = sig

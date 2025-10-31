@@ -1,36 +1,49 @@
 """
 Logger estructurado para TrackHS MCP Server
+Usa FastMCP logging utilities siguiendo mejores prácticas
 """
 
 import logging
 import sys
-from pathlib import Path
 from typing import Any, Dict, Optional
 
-# Configurar el logger raíz
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
-)
+# Intentar usar FastMCP logging utilities, fallback a logging estándar
+try:
+    from fastmcp.utilities.logging import get_logger as fastmcp_get_logger
 
+    def get_logger(name: str) -> logging.Logger:
+        """
+        Obtiene un logger configurado usando FastMCP utilities
 
-def get_logger(name: str) -> logging.Logger:
-    """
-    Obtiene un logger configurado con logging estructurado
+        Args:
+            name: Nombre del logger (usualmente __name__)
 
-    Args:
-        name: Nombre del logger (usualmente __name__)
+        Returns:
+            Logger configurado con FastMCP
+        """
+        return fastmcp_get_logger(name)
 
-    Returns:
-        Logger configurado
-    """
-    logger = logging.getLogger(name)
+except ImportError:
+    # Fallback si FastMCP no está disponible
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler(sys.stdout)],
+    )
 
-    # Configurar nivel de logging
-    logger.setLevel(logging.INFO)
+    def get_logger(name: str) -> logging.Logger:
+        """
+        Obtiene un logger configurado con logging estándar (fallback)
 
-    return logger
+        Args:
+            name: Nombre del logger (usualmente __name__)
+
+        Returns:
+            Logger configurado
+        """
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.INFO)
+        return logger
 
 
 def log_tool_execution(
