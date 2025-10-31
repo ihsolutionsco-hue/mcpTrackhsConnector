@@ -4,7 +4,7 @@ Schemas para unidades de alojamiento
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -63,46 +63,50 @@ class UnitSearchParams(PaginationParams):
     )
 
     # Parámetros de características físicas
-    bedrooms: Optional[int] = Field(
+    # Union[str, int] permite strings desde MCP, field_validator convierte a int
+    bedrooms: Optional[Union[str, int]] = Field(
         default=None, ge=0, description="Número exacto de dormitorios"
     )
-    min_bedrooms: Optional[int] = Field(
+    min_bedrooms: Optional[Union[str, int]] = Field(
         default=None, ge=0, description="Número mínimo de dormitorios"
     )
-    max_bedrooms: Optional[int] = Field(
+    max_bedrooms: Optional[Union[str, int]] = Field(
         default=None, ge=0, description="Número máximo de dormitorios"
     )
-    bathrooms: Optional[int] = Field(
+    bathrooms: Optional[Union[str, int]] = Field(
         default=None, ge=0, description="Número exacto de baños"
     )
-    min_bathrooms: Optional[int] = Field(
+    min_bathrooms: Optional[Union[str, int]] = Field(
         default=None, ge=0, description="Número mínimo de baños"
     )
-    max_bathrooms: Optional[int] = Field(
+    max_bathrooms: Optional[Union[str, int]] = Field(
         default=None, ge=0, description="Número máximo de baños"
     )
-    occupancy: Optional[int] = Field(default=None, ge=0, description="Capacidad exacta")
-    min_occupancy: Optional[int] = Field(
+    occupancy: Optional[Union[str, int]] = Field(
+        default=None, ge=0, description="Capacidad exacta"
+    )
+    min_occupancy: Optional[Union[str, int]] = Field(
         default=None, ge=0, description="Capacidad mínima"
     )
-    max_occupancy: Optional[int] = Field(
+    max_occupancy: Optional[Union[str, int]] = Field(
         default=None, ge=0, description="Capacidad máxima"
     )
 
     # Parámetros de estado
-    is_active: Optional[bool] = Field(
+    # Union[str, bool] permite strings desde MCP, field_validator convierte a bool
+    is_active: Optional[Union[str, bool]] = Field(
         default=None, description="Solo unidades activas (1) o inactivas (0)"
     )
-    is_bookable: Optional[bool] = Field(
+    is_bookable: Optional[Union[str, bool]] = Field(
         default=None, description="Solo unidades reservables (1) o no (0)"
     )
-    pets_friendly: Optional[bool] = Field(
+    pets_friendly: Optional[Union[str, bool]] = Field(
         default=None, description="Solo unidades pet-friendly (1) o no (0)"
     )
     unit_status: Optional[UnitStatus] = Field(
         default=None, description="Estado de la unidad"
     )
-    allow_unit_rates: Optional[bool] = Field(
+    allow_unit_rates: Optional[Union[str, bool]] = Field(
         default=None,
         description="Solo unidades que permiten tarifas por unidad (1) o no (0)",
     )
@@ -118,16 +122,16 @@ class UnitSearchParams(PaginationParams):
     )
 
     # Parámetros de contenido
-    computed: Optional[bool] = Field(
+    computed: Optional[Union[str, bool]] = Field(
         default=None, description="Incluir valores computados adicionales (1) o no (0)"
     )
-    inherited: Optional[bool] = Field(
+    inherited: Optional[Union[str, bool]] = Field(
         default=None, description="Incluir atributos heredados (1) o no (0)"
     )
-    limited: Optional[bool] = Field(
+    limited: Optional[Union[str, bool]] = Field(
         default=None, description="Retornar atributos limitados (1) o completos (0)"
     )
-    include_descriptions: Optional[bool] = Field(
+    include_descriptions: Optional[Union[str, bool]] = Field(
         default=None, description="Incluir descripciones de unidades (1) o no (0)"
     )
     content_updated_since: Optional[str] = Field(
@@ -136,41 +140,42 @@ class UnitSearchParams(PaginationParams):
     )
 
     # Parámetros de IDs
-    amenity_id: Optional[List[int]] = Field(
+    # Union[str, List[int]] permite strings desde MCP, field_validator convierte a List[int]
+    amenity_id: Optional[Union[str, List[int]]] = Field(
         default=None,
         description="IDs de amenidades - unidades que tienen estas amenidades",
     )
-    node_id: Optional[List[int]] = Field(
+    node_id: Optional[Union[str, List[int]]] = Field(
         default=None, description="IDs de nodo - unidades descendientes"
     )
-    unit_type_id: Optional[List[int]] = Field(
+    unit_type_id: Optional[Union[str, List[int]]] = Field(
         default=None, description="IDs de tipo de unidad"
     )
-    owner_id: Optional[List[int]] = Field(
+    owner_id: Optional[Union[str, List[int]]] = Field(
         default=None, description="IDs del propietario"
     )
-    company_id: Optional[List[int]] = Field(
+    company_id: Optional[Union[str, List[int]]] = Field(
         default=None, description="IDs de la empresa"
     )
-    channel_id: Optional[List[int]] = Field(
+    channel_id: Optional[Union[str, List[int]]] = Field(
         default=None, description="IDs del canal activo"
     )
-    lodging_type_id: Optional[List[int]] = Field(
+    lodging_type_id: Optional[Union[str, List[int]]] = Field(
         default=None, description="IDs del tipo de alojamiento"
     )
-    bed_type_id: Optional[List[int]] = Field(
+    bed_type_id: Optional[Union[str, List[int]]] = Field(
         default=None, description="IDs del tipo de cama"
     )
-    amenity_all: Optional[List[int]] = Field(
+    amenity_all: Optional[Union[str, List[int]]] = Field(
         default=None, description="Filtrar unidades que tengan TODAS estas amenidades"
     )
-    unit_ids: Optional[List[int]] = Field(
+    unit_ids: Optional[Union[str, List[int]]] = Field(
         default=None, description="Filtrar por IDs específicos de unidades"
     )
-    calendar_id: Optional[int] = Field(
+    calendar_id: Optional[Union[str, int]] = Field(
         default=None, gt=0, description="ID del grupo de calendario"
     )
-    role_id: Optional[int] = Field(
+    role_id: Optional[Union[str, int]] = Field(
         default=None, gt=0, description="ID del rol específico"
     )
 
