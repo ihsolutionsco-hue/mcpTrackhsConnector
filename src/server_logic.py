@@ -201,21 +201,21 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
         fields = {}
 
     # Crear parámetros para la función
+    # IMPORTANTE: Usar Any en las anotaciones para permitir strings desde MCP
+    # La conversión se hace en tool_wrapper antes de validar con Pydantic
     parameters = []
     for field_name, field_info in fields.items():
-        # Obtener tipo y default
+        # Obtener tipo real del schema para uso interno
         if hasattr(field_info, "annotation"):
-            field_type = field_info.annotation
+            field_type_real = field_info.annotation
         elif hasattr(field_info, "type_"):
-            field_type = field_info.type_
+            field_type_real = field_info.type_
         else:
-            field_type = Any
+            field_type_real = Any
 
-        # Si es Optional, extraer tipo interno
-        if hasattr(field_type, "__args__") and len(field_type.__args__) > 0:
-            non_none = [arg for arg in field_type.__args__ if arg is not type(None)]
-            if non_none:
-                field_type = non_none[0]
+        # Para FastMCP, usar Any para permitir strings/otros tipos
+        # La conversión se hace en tool_wrapper
+        field_type = Any  # FastMCP aceptará cualquier tipo
 
         # Obtener default - Pydantic v2 usa is_required()
         if hasattr(field_info, "is_required"):
@@ -311,13 +311,14 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
         return None
 
     def _get_expected_type(field_name: str) -> type:
-        """Obtiene el tipo esperado de un campo del schema"""
+        """Obtiene el tipo esperado REAL del schema (no Any de FastMCP)"""
         from typing import get_args, get_origin
 
         if field_name not in fields:
             return Any
 
         field_info = fields[field_name]
+        # Obtener tipo REAL del schema, no el Any que usamos para FastMCP
         field_type = (
             field_info.annotation
             if hasattr(field_info, "annotation")
@@ -427,9 +428,9 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
             raise ToolError(f"Error interno: {str(e)}")
 
     tool_wrapper.__signature__ = sig
-    tool_wrapper.__annotations__ = {
-        param.name: param.annotation for param in parameters
-    }
+    # Anotaciones como Any para permitir strings desde MCP
+    # FastMCP validará tipos, pero Any acepta cualquier tipo
+    tool_wrapper.__annotations__ = {param.name: Any for param in parameters}
     tool_wrapper.__annotations__["return"] = Dict[str, Any]
 
     mcp_server.tool(name=tool_instance.name, description=tool_instance.description)(
