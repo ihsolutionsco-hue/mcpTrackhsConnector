@@ -216,9 +216,10 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
         fields = {}
 
     # Crear parámetros para la función
-    # SOLUCIÓN 1: Usar Union explícito según el tipo esperado
-    # Esto permite que FastMCP genere schema MCP que acepte strings Y tipos nativos
-    # El schema Pydantic acepta strings, pero el schema MCP debe ser explícito
+    # SOLUCIÓN 2: Usar solo str en anotaciones FastMCP
+    # FastMCP generará schema MCP que acepta strings (type: "string")
+    # Pydantic acepta strings y los convierte a tipos correctos usando build_units_query
+    # Esto resuelve el problema: MCP SDK valida strings → Pydantic → conversión
     parameters = []
     for field_name, field_info in fields.items():
         # Obtener anotación del campo Pydantic
@@ -226,77 +227,10 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
             field_info.annotation if hasattr(field_info, "annotation") else None
         )
 
-        # Determinar tipo para schema MCP basándose en el campo
-        # Estrategia: si es Optional[str] en Pydantic pero representa otro tipo lógico,
-        # usar Union para permitir ambos tipos en el schema MCP
-
-        field_type = None  # Inicializar como None
-
-        # PRIMERO: Manejar enums y tipos específicos
-        # Para enums (como sort_column, sort_direction, unit_status), aceptar string o el enum
-        if field_annotation:
-            annotation_str = str(field_annotation)
-            # Detectar si es un enum
-            if "Enum" in annotation_str or (
-                hasattr(field_annotation, "__origin__")
-                and field_annotation.__origin__ is not None
-                and "Enum" in str(field_annotation.__origin__)
-            ):
-                # Para enums, aceptar string (valores del enum) o el tipo enum original
-                field_type = Union[str, field_annotation, None]
-
-        # SEGUNDO: Si no es enum, determinar tipo por nombre de campo
-        if field_type is None:
-            # Campos booleanos (pueden venir como string "true"/"1" o bool)
-            if field_name in [
-                "is_active",
-                "is_bookable",
-                "pets_friendly",
-                "allow_unit_rates",
-                "computed",
-                "inherited",
-                "limited",
-                "include_descriptions",
-            ]:
-                field_type = Union[str, bool, None]  # Acepta string, bool o null
-
-            # Campos de lista/array (pueden venir como string "[1,2,3]" o List[int])
-            # Estos son campos que representan múltiples IDs (arrays)
-            elif field_name in [
-                "amenity_id",
-                "node_id",
-                "unit_type_id",
-                "owner_id",
-                "company_id",
-                "channel_id",
-                "lodging_type_id",
-                "bed_type_id",
-                "amenity_all",
-                "unit_ids",
-            ]:
-                field_type = Union[str, List[int], None]  # Acepta string, lista o null
-
-            # Campos numéricos (pueden venir como string "2" o int)
-            elif field_name in [
-                "bedrooms",
-                "min_bedrooms",
-                "max_bedrooms",
-                "bathrooms",
-                "min_bathrooms",
-                "max_bathrooms",
-                "occupancy",
-                "min_occupancy",
-                "max_occupancy",
-                "page",
-                "size",
-                "calendar_id",  # ID único, no array
-                "role_id",  # ID único, no array
-            ]:
-                field_type = Union[str, int, None]  # Acepta string, int o null
-
-            # Campos string normales (fechas, texto, etc.)
-            else:
-                field_type = Optional[str]  # Solo acepta string o null
+        # SOLUCIÓN 2: Usar Optional[str] para todos los campos
+        # Esto genera schema MCP con type: "string", que el MCP SDK acepta
+        # Pydantic validará y build_units_query convertirá strings a tipos correctos
+        field_type = Optional[str]
 
         # Obtener default - Pydantic v2 usa is_required()
         if hasattr(field_info, "is_required"):
@@ -402,8 +336,8 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
             raise ToolError(f"Error interno: {str(e)}")
 
     tool_wrapper.__signature__ = sig
-    # SOLUCIÓN 1: Usar tipos Union en anotaciones para que FastMCP genere schema MCP correcto
-    # Las anotaciones deben coincidir con los tipos usados en los parámetros
+    # SOLUCIÓN 2: Usar Optional[str] en todas las anotaciones
+    # Esto genera schema MCP que acepta strings, resolviendo el problema de validación temprana
     tool_wrapper.__annotations__ = {
         param.name: param.annotation for param in parameters
     }
