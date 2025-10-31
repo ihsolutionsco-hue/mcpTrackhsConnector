@@ -3,6 +3,7 @@ Cliente API para TrackHS con logging estructurado
 """
 
 import time
+from enum import Enum
 from typing import Any, Dict, Optional
 
 import httpx
@@ -37,8 +38,24 @@ class TrackHSAPIClient:
             extra={"base_url": self.base_url, "username": username, "timeout": timeout},
         )
 
+    def _is_empty_value(self, value: Any) -> bool:
+        """Verifica si un valor debe considerarse vacío y no incluirse en la query"""
+        if value is None:
+            return True
+        if isinstance(value, str) and value.strip() == "":
+            return True
+        if isinstance(value, (list, tuple, dict)) and len(value) == 0:
+            return True
+        return False
+
+    def _get_enum_value(self, value: Any) -> Any:
+        """Convierte un enum a su valor, o retorna el valor si no es enum"""
+        if isinstance(value, Enum):
+            return value.value
+        return value
+
     def _serialize_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Serializa parámetros convirtiendo objetos date a strings ISO"""
+        """Serializa parámetros convirtiendo objetos date a strings ISO y enums a valores"""
         from datetime import date, datetime
 
         serialized = {}
@@ -48,7 +65,8 @@ class TrackHSAPIClient:
             elif isinstance(value, datetime):
                 serialized[key] = value.isoformat()
             else:
-                serialized[key] = value
+                # Convertir enums a valores si es necesario
+                serialized[key] = self._get_enum_value(value)
         return serialized
 
     def get(
@@ -296,15 +314,19 @@ class TrackHSAPIClient:
 
         # Incluir primero los passthrough
         for k in passthrough:
-            if k in params and params[k] is not None:
-                out[k] = params[k]
+            if k in params and not self._is_empty_value(params[k]):
+                out[k] = self._get_enum_value(params[k])
 
         # Mapear snake_case -> camelCase
         for k, v in params.items():
             if k in ("page", "size"):
                 continue
+            if self._is_empty_value(v):
+                continue
             ck = mapping.get(k)
             if ck:
+                # Convertir enums a valores
+                v = self._get_enum_value(v)
                 # convertir booleanos (1/0) donde aplique
                 if (
                     k
@@ -319,13 +341,13 @@ class TrackHSAPIClient:
 
         # Si el caller pasó campos camelCase booleanos, respetarlos y convertirlos
         for ck in ("isActive", "isBookable", "petsFriendly", "allowUnitRates"):
-            if ck in params and params[ck] is not None:
+            if ck in params and not self._is_empty_value(params[ck]):
                 out[ck] = 1 if bool(params[ck]) else 0
 
         # Asegurar que search y term desde snake_case también pasen
-        if "search" not in out and params.get("search") is not None:
+        if "search" not in out and not self._is_empty_value(params.get("search")):
             out["search"] = params.get("search")
-        if "term" not in out and params.get("term") is not None:
+        if "term" not in out and not self._is_empty_value(params.get("term")):
             out["term"] = params.get("term")
 
         return out

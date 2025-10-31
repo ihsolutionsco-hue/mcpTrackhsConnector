@@ -2,6 +2,7 @@
 Herramienta para buscar unidades de alojamiento
 """
 
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from schemas.unit import UnitSearchParams, UnitSearchResponse
@@ -18,6 +19,22 @@ class SearchUnitsTool(BaseTool):
         super().__init__(*args, **kwargs)
         self.validator = ResponseValidator()
         self.validator.set_logger(self.logger)
+
+    def _should_include_param(self, value: Any) -> bool:
+        """Verifica si un parámetro debe incluirse en la query"""
+        if value is None:
+            return False
+        if isinstance(value, str) and value.strip() == "":
+            return False
+        if isinstance(value, (list, tuple, dict)) and len(value) == 0:
+            return False
+        return True
+
+    def _get_enum_value(self, value: Any) -> Any:
+        """Convierte un enum a su valor, o retorna el valor si no es enum"""
+        if isinstance(value, Enum):
+            return value.value
+        return value
 
     @property
     def name(self) -> str:
@@ -527,13 +544,13 @@ class SearchUnitsTool(BaseTool):
         params = {"page": validated_input.page, "size": validated_input.size}
 
         # Parámetros de búsqueda de texto
-        if validated_input.search:
+        if self._should_include_param(validated_input.search):
             params["search"] = validated_input.search
-        if validated_input.term:
+        if self._should_include_param(validated_input.term):
             params["term"] = validated_input.term
-        if validated_input.unit_code:
+        if self._should_include_param(validated_input.unit_code):
             params["unitCode"] = validated_input.unit_code
-        if validated_input.short_name:
+        if self._should_include_param(validated_input.short_name):
             params["shortName"] = validated_input.short_name
 
         # Parámetros de características físicas (camelCase según documentación oficial)
@@ -566,41 +583,45 @@ class SearchUnitsTool(BaseTool):
                 1 if validated_input.pets_friendly else 0
             )  # camelCase
         if validated_input.unit_status:
-            params["unitStatus"] = validated_input.unit_status  # camelCase
+            params["unitStatus"] = self._get_enum_value(
+                validated_input.unit_status
+            )  # camelCase
 
         # Parámetros de fechas
-        if validated_input.arrival:
+        if self._should_include_param(validated_input.arrival):
             params["arrival"] = validated_input.arrival
-        if validated_input.departure:
+        if self._should_include_param(validated_input.departure):
             params["departure"] = validated_input.departure
 
         # Parámetros de IDs (camelCase según documentación oficial)
-        if validated_input.amenity_id:
+        if self._should_include_param(validated_input.amenity_id):
             params["amenityId"] = validated_input.amenity_id
-        if validated_input.node_id:
+        if self._should_include_param(validated_input.node_id):
             params["nodeId"] = validated_input.node_id
-        if validated_input.unit_type_id:
+        if self._should_include_param(validated_input.unit_type_id):
             params["unitTypeId"] = validated_input.unit_type_id
-        if validated_input.owner_id:
+        if self._should_include_param(validated_input.owner_id):
             params["ownerId"] = validated_input.owner_id
-        if validated_input.company_id:
+        if self._should_include_param(validated_input.company_id):
             params["companyId"] = validated_input.company_id
-        if validated_input.channel_id:
+        if self._should_include_param(validated_input.channel_id):
             params["channelId"] = validated_input.channel_id
-        if validated_input.lodging_type_id:
+        if self._should_include_param(validated_input.lodging_type_id):
             params["lodgingTypeId"] = validated_input.lodging_type_id
-        if validated_input.bed_type_id:
+        if self._should_include_param(validated_input.bed_type_id):
             params["bedTypeId"] = validated_input.bed_type_id
-        if validated_input.amenity_all:
+        if self._should_include_param(validated_input.amenity_all):
             params["amenityAll"] = validated_input.amenity_all
-        if validated_input.unit_ids:
+        if self._should_include_param(validated_input.unit_ids):
             params["unitIds"] = validated_input.unit_ids
 
         # Parámetros de ordenamiento (camelCase según documentación oficial)
         if validated_input.sort_column:
-            params["sortColumn"] = validated_input.sort_column
+            params["sortColumn"] = self._get_enum_value(validated_input.sort_column)
         if validated_input.sort_direction:
-            params["sortDirection"] = validated_input.sort_direction
+            params["sortDirection"] = self._get_enum_value(
+                validated_input.sort_direction
+            )
 
         return params
 
