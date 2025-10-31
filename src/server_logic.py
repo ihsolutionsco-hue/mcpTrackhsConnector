@@ -201,21 +201,18 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
         fields = {}
 
     # Crear parámetros para la función
-    # IMPORTANTE: Usar Any en las anotaciones para permitir strings desde MCP
-    # La conversión se hace en tool_wrapper antes de validar con Pydantic
+    # IMPORTANTE: Usar los tipos REALES del schema (Union[str, int], etc.)
+    # FastMCP con strict_input_validation=False hará coerción automática
+    # Pydantic con field_validator(mode='before') convertirá strings a tipos correctos
     parameters = []
     for field_name, field_info in fields.items():
-        # Obtener tipo real del schema para uso interno
+        # Obtener tipo REAL del schema para FastMCP
         if hasattr(field_info, "annotation"):
-            field_type_real = field_info.annotation
+            field_type = field_info.annotation
         elif hasattr(field_info, "type_"):
-            field_type_real = field_info.type_
+            field_type = field_info.type_
         else:
-            field_type_real = Any
-
-        # Para FastMCP, usar Any para permitir strings/otros tipos
-        # La conversión se hace en tool_wrapper
-        field_type = Any  # FastMCP aceptará cualquier tipo
+            field_type = Any
 
         # Obtener default - Pydantic v2 usa is_required()
         if hasattr(field_info, "is_required"):
@@ -254,171 +251,17 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
             )
         )
 
-    # Funciones helper para coerción de tipos (simple y directo)
-    def _coerce_bool(value: Any) -> Optional[bool]:
-        """Convierte string/int a bool según MCP"""
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, (int, float)):
-            return bool(int(value))
-        if isinstance(value, str):
-            v = value.strip().lower()
-            if v in {"true", "1", "yes", "y", "si", "sí"}:
-                return True
-            if v in {"false", "0", "no", "n"}:
-                return False
-        return None
-
-    def _coerce_int(value: Any) -> Optional[int]:
-        """Convierte string/float a int según MCP"""
-        if isinstance(value, int):
-            return value
-        if isinstance(value, float):
-            return int(value)
-        if isinstance(value, str) and value.strip():
-            try:
-                return int(value.strip())
-            except ValueError:
-                return None
-        return None
-
-    def _coerce_list(value: Any, item_type: type) -> Optional[list]:
-        """Convierte string a lista según MCP"""
-        import json
-
-        if isinstance(value, list):
-            return value
-        if isinstance(value, str):
-            v = value.strip()
-            # JSON array: "[1,2,3]"
-            if v.startswith("[") and v.endswith("]"):
-                try:
-                    parsed = json.loads(v)
-                    if isinstance(parsed, list):
-                        return parsed
-                except json.JSONDecodeError:
-                    pass
-            # Separado por comas: "1,2,3"
-            if "," in v:
-                items = [item.strip() for item in v.split(",")]
-                if item_type is int:
-                    coerced = []
-                    for item in items:
-                        coerced_item = _coerce_int(item)
-                        if coerced_item is not None:
-                            coerced.append(coerced_item)
-                    return coerced if coerced else None
-        return None
-
-    def _get_expected_type(field_name: str) -> type:
-        """Obtiene el tipo esperado REAL del schema (no Any de FastMCP)"""
-        from typing import get_args, get_origin
-
-        if field_name not in fields:
-            return Any
-
-        field_info = fields[field_name]
-        # Obtener tipo REAL del schema, no el Any que usamos para FastMCP
-        field_type = (
-            field_info.annotation
-            if hasattr(field_info, "annotation")
-            else getattr(field_info, "type_", Any)
-        )
-
-        # Extraer tipo base si es Optional[Type] o Union[Type, None]
-        origin = get_origin(field_type)
-        if origin is not None:
-            # Si es List[int], retornar list como marcador
-            if origin is list:
-                return list
-            args = get_args(field_type)
-            non_none_args = [arg for arg in args if arg is not type(None)]
-            if non_none_args:
-                field_type = non_none_args[0]
-
-        return field_type
-
     # Crear función wrapper simple
+    # FastMCP con strict_input_validation=False hará coerción automática
+    # Pydantic con field_validator(mode='before') convertirá strings a tipos correctos
     sig = Signature(parameters, return_annotation=Dict[str, Any])
 
     def tool_wrapper(**kwargs) -> Dict[str, Any]:
         """Llama a la herramienta con parámetros validados"""
         try:
-            import re
-            from typing import get_args, get_origin
-
-            coerced_kwargs = {}
-            for k, v in kwargs.items():
-                if v is None:
-                    continue
-
-                # Obtener tipo esperado del schema
-                expected_type = _get_expected_type(k)
-
-                # Coerción de fechas (ya existente)
-                if k in ("arrival", "departure") and isinstance(v, str):
-                    v_stripped = v.strip()
-                    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", v_stripped):
-                        coerced_kwargs[k] = v_stripped
-                    elif re.fullmatch(r"\d{4}", v_stripped):
-                        continue
-                    else:
-                        coerced_kwargs[k] = v
-                # Coerción de tipos según MCP/FastMCP
-                elif isinstance(v, str):
-                    # Verificar si es lista primero (usando el tipo original del schema)
-                    field_info = fields.get(k)
-                    is_list_field = False
-                    item_type = int
-
-                    if field_info:
-                        field_type_orig = (
-                            field_info.annotation
-                            if hasattr(field_info, "annotation")
-                            else getattr(field_info, "type_", Any)
-                        )
-                        origin = get_origin(field_type_orig)
-                        # Manejar Optional[List[int]] que es Union[List[int], None]
-                        if origin is list:
-                            is_list_field = True
-                            args = get_args(field_type_orig)
-                            item_type = args[0] if args else int
-                        elif origin is not None:
-                            # Puede ser Union[List[int], None]
-                            args = get_args(field_type_orig)
-                            for arg in args:
-                                arg_origin = get_origin(arg)
-                                if arg_origin is list:
-                                    is_list_field = True
-                                    item_args = get_args(arg)
-                                    item_type = item_args[0] if item_args else int
-                                    break
-
-                    if is_list_field:
-                        # Es List[int], convertir string a lista
-                        coerced = _coerce_list(v, item_type)
-                        if coerced is not None:
-                            coerced_kwargs[k] = coerced
-                        # Si no se pudo convertir, omitir (será None)
-                        continue
-                    elif expected_type is bool:
-                        coerced = _coerce_bool(v)
-                        if coerced is not None:
-                            coerced_kwargs[k] = coerced
-                        continue
-                    elif expected_type is int:
-                        coerced = _coerce_int(v)
-                        if coerced is not None:
-                            coerced_kwargs[k] = coerced
-                        continue
-
-                    # Si no es lista/bool/int o no se pudo convertir, pasar como string
-                    coerced_kwargs[k] = v
-                else:
-                    # Valor ya es del tipo correcto
-                    coerced_kwargs[k] = v
-
-            validated = InputSchema(**coerced_kwargs)
+            # Pasar parámetros directamente a Pydantic
+            # FastMCP ya hizo coerción inicial, Pydantic validará y convertirá con field_validators
+            validated = InputSchema(**kwargs)
             return tool_instance._execute_logic(validated)
         except TrackHSError as e:
             raise ToolError(str(e))
@@ -428,9 +271,11 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
             raise ToolError(f"Error interno: {str(e)}")
 
     tool_wrapper.__signature__ = sig
-    # Anotaciones como Any para permitir strings desde MCP
-    # FastMCP validará tipos, pero Any acepta cualquier tipo
-    tool_wrapper.__annotations__ = {param.name: Any for param in parameters}
+    # Usar tipos REALES del schema para FastMCP
+    # FastMCP con strict_input_validation=False hará coerción automática
+    tool_wrapper.__annotations__ = {
+        param.name: param.annotation for param in parameters
+    }
     tool_wrapper.__annotations__["return"] = Dict[str, Any]
 
     mcp_server.tool(name=tool_instance.name, description=tool_instance.description)(
