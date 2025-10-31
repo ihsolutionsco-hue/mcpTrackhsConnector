@@ -317,6 +317,58 @@ class TrackHSAPIClient:
             if k in params and not self._is_empty_value(params[k]):
                 out[k] = self._get_enum_value(params[k])
 
+        # Función simple para convertir string a bool
+        def _str_to_bool(s):
+            if isinstance(s, bool):
+                return s
+            if isinstance(s, (int, float)):
+                return bool(int(s))
+            if isinstance(s, str):
+                s_lower = s.strip().lower()
+                return s_lower in {"true", "1", "yes", "y", "si", "sí"}
+            return False
+
+        # Función simple para convertir string a int
+        def _str_to_int(s):
+            if isinstance(s, int):
+                return s
+            if isinstance(s, float):
+                return int(s)
+            if isinstance(s, str) and s.strip():
+                try:
+                    return int(s.strip())
+                except ValueError:
+                    return None
+            return None
+
+        # Función simple para convertir string a lista de ints
+        def _str_to_list_int(s):
+            import json
+
+            if isinstance(s, list):
+                return s
+            if isinstance(s, str):
+                s_stripped = s.strip()
+                # JSON array: "[1,2,3]"
+                if s_stripped.startswith("[") and s_stripped.endswith("]"):
+                    try:
+                        parsed = json.loads(s_stripped)
+                        if isinstance(parsed, list):
+                            return parsed
+                    except json.JSONDecodeError:
+                        pass
+                # Separado por comas: "1,2,3"
+                if "," in s_stripped:
+                    items = [item.strip() for item in s_stripped.split(",")]
+                    coerced = []
+                    for item in items:
+                        try:
+                            coerced.append(int(item))
+                        except ValueError:
+                            pass
+                    return coerced if coerced else None
+            return None
+
         # Mapear snake_case -> camelCase
         for k, v in params.items():
             if k in ("page", "size"):
@@ -328,21 +380,54 @@ class TrackHSAPIClient:
                 # Convertir enums a valores
                 v = self._get_enum_value(v)
                 # convertir booleanos (1/0) donde aplique
-                if (
-                    k
-                    in {"is_active", "is_bookable", "pets_friendly", "allow_unit_rates"}
-                    and v is not None
-                ):
-                    out[ck] = 1 if bool(v) else 0
+                if k in {
+                    "is_active",
+                    "is_bookable",
+                    "pets_friendly",
+                    "allow_unit_rates",
+                }:
+                    out[ck] = 1 if _str_to_bool(v) else 0
+                # convertir strings a ints para campos numéricos
+                elif k in {
+                    "bedrooms",
+                    "min_bedrooms",
+                    "max_bedrooms",
+                    "bathrooms",
+                    "min_bathrooms",
+                    "max_bathrooms",
+                    "occupancy",
+                    "min_occupancy",
+                    "max_occupancy",
+                    "calendar_id",
+                    "role_id",
+                }:
+                    coerced = _str_to_int(v)
+                    if coerced is not None:
+                        out[ck] = coerced
+                # convertir strings a listas para campos de lista
+                elif k in {
+                    "amenity_id",
+                    "node_id",
+                    "unit_type_id",
+                    "owner_id",
+                    "company_id",
+                    "channel_id",
+                    "lodging_type_id",
+                    "bed_type_id",
+                    "amenity_all",
+                    "unit_ids",
+                }:
+                    coerced = _str_to_list_int(v)
+                    if coerced is not None:
+                        out[ck] = coerced
                 else:
                     out[ck] = v
                 continue
-            # Si no hay mapping y es snake_case no controlado, ignorar; si es camelCase válido, se agregó arriba
 
         # Si el caller pasó campos camelCase booleanos, respetarlos y convertirlos
         for ck in ("isActive", "isBookable", "petsFriendly", "allowUnitRates"):
             if ck in params and not self._is_empty_value(params[ck]):
-                out[ck] = 1 if bool(params[ck]) else 0
+                out[ck] = 1 if _str_to_bool(params[ck]) else 0
 
         # Asegurar que search y term desde snake_case también pasen
         if "search" not in out and not self._is_empty_value(params.get("search")):
