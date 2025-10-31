@@ -201,18 +201,13 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
         fields = {}
 
     # Crear parámetros para la función
-    # IMPORTANTE: Usar los tipos REALES del schema (Union[str, int], etc.)
-    # FastMCP con strict_input_validation=False hará coerción automática
+    # IMPORTANTE: Usar Any en anotaciones FastMCP para que schema MCP acepte cualquier tipo
+    # El MCP SDK valida ANTES de FastMCP, por lo que necesitamos Any para aceptar strings
     # Pydantic con field_validator(mode='before') convertirá strings a tipos correctos
     parameters = []
     for field_name, field_info in fields.items():
-        # Obtener tipo REAL del schema para FastMCP
-        if hasattr(field_info, "annotation"):
-            field_type = field_info.annotation
-        elif hasattr(field_info, "type_"):
-            field_type = field_info.type_
-        else:
-            field_type = Any
+        # Usar Any para FastMCP - Pydantic hará la validación y conversión
+        field_type = Any
 
         # Obtener default - Pydantic v2 usa is_required()
         if hasattr(field_info, "is_required"):
@@ -271,11 +266,9 @@ def register_single_tool(mcp_server: FastMCP, tool_instance: Any) -> None:
             raise ToolError(f"Error interno: {str(e)}")
 
     tool_wrapper.__signature__ = sig
-    # Usar tipos REALES del schema para FastMCP
-    # FastMCP con strict_input_validation=False hará coerción automática
-    tool_wrapper.__annotations__ = {
-        param.name: param.annotation for param in parameters
-    }
+    # Usar Any en anotaciones para que schema MCP acepte cualquier tipo
+    # Pydantic con field_validator(mode='before') hará la conversión
+    tool_wrapper.__annotations__ = {param.name: Any for param in parameters}
     tool_wrapper.__annotations__["return"] = Dict[str, Any]
 
     mcp_server.tool(name=tool_instance.name, description=tool_instance.description)(
